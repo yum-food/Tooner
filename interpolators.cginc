@@ -38,8 +38,6 @@ struct v2f
   float4 tangent : TEXCOORD2;
   float3 worldPos : TEXCOORD3;
 
-	SHADOW_COORDS(4)
-
   #if defined(VERTEXLIGHT_ON)
   float3 vertexLightColor : TEXCOORD5;
   #endif

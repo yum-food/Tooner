@@ -360,7 +360,6 @@ float4 effect(inout v2f i)
   }
 #endif  // _PBR_OVERLAY_NORMAL_MAP
 
-
   float3 binormal = CreateBinormal(i.normal, i.tangent.xyz, i.tangent.w);
 	float3 normal = normalize(
 		raw_normal.x * i.tangent +
@@ -400,18 +399,17 @@ float4 effect(inout v2f i)
 
   {
 #if defined(_MATCAP0)
-    // theorem: (a, b, c) and (c, c, -(a +b)) are perpendicular to each other
-    // proof:
-    //  dot((a,b,c), (c,c,-(a+b))) =
-    //    ca + cb - (ca + cb) =
-    //    0
-    // recall that dot(x,y) = ||x|| ||y|| cos(theta), so for two non-vanishing
-    // vectors, dot(x,y) = 0 iff cos(theta) = 0.
     float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
-    float3 up = float3(0, 1, 0);
-    float3 ortho_1 = normalize(float3(view_dir.z, view_dir.z, -(view_dir.y + view_dir.x)));
-    float3 ortho_2 = cross(view_dir, ortho_1);
-    float2 matcap_uv = (float2(dot(normal, ortho_1), dot(normal, ortho_2)) + 1) * .50;
+    float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+    float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
+    float3 refl = -reflect(cam_view_dir, cam_normal);
+
+    float m = 2.0 * sqrt(
+        refl.x * refl.x +
+        refl.y * refl.y +
+        (refl.z + 1) * (refl.z + 1));
+    float2 matcap_uv = refl.xy / m + 0.5;
+
     float iddx = ddx(i.uv.x);
     float iddy = ddy(i.uv.y);
     float3 matcap = _Matcap0.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap0Str;
@@ -452,9 +450,16 @@ float4 effect(inout v2f i)
   {
 #if defined(_MATCAP1)
     float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
-    float3 ortho_1 = normalize(float3(view_dir.z, view_dir.z, -(view_dir.y + view_dir.x)));
-    float3 ortho_2 = cross(view_dir, ortho_1);
-    float2 matcap_uv = (float2(dot(normal, ortho_1), dot(normal, ortho_2)) + 1) * .50;
+    float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+    float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
+    float3 refl = -reflect(cam_view_dir, cam_normal);
+
+    float m = 2.0 * sqrt(
+        refl.x * refl.x +
+        refl.y * refl.y +
+        (refl.z + 1) * (refl.z + 1));
+    float2 matcap_uv = refl.xy / m + 0.5;
+
     float iddx = ddx(i.uv.x);
     float iddy = ddy(i.uv.y);
     float3 matcap = _Matcap1.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap1Str;
