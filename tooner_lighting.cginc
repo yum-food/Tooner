@@ -14,12 +14,42 @@
 #include "tooner_scroll.cginc"
 #include "oklab.cginc"
 
+#if defined(_LTCGI)
+#include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI_structs.cginc"
+
+struct ltcgi_acc {
+  float3 diffuse;
+  float3 specular;
+};
+
+void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output);
+void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output);
+
+#define LTCGI_V2_CUSTOM_INPUT ltcgi_acc
+#define LTCGI_V2_DIFFUSE_CALLBACK ltcgi_cb_diffuse
+#define LTCGI_V2_SPECULAR_CALLBACK ltcgi_cb_specular
+
+#include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI.cginc"
+void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output) {
+	// you can do whatever here! check out the ltcgi_output struct in
+	// "LTCGI_structs.cginc" to see what data you have available
+	acc.diffuse += output.intensity * output.color * _LTCGI_DiffuseColor;
+}
+void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output) {
+	// same here, this example one is pretty boring though.
+	// you could accumulate intensity separately for example,
+	// to emulate total{Specular,Diffuse}Intensity from APIv1
+	acc.specular += output.intensity * output.color * _LTCGI_SpecularColor;
+}
+#endif
+
 struct tess_data
 {
   float4 position : INTERNALTESSPOS;
   float2 uv : TEXCOORD0;
-  float3 normal : TEXCOORD1;
-  float4 tangent : TEXCOORD2;
+  float2 lmuv : TEXCOORD1;
+  float3 normal : TEXCOORD2;
+  float4 tangent : TEXCOORD3;
 
   #if defined(VERTEXLIGHT_ON)
   float3 vertexLightColor : TEXCOORD4;
@@ -34,7 +64,7 @@ struct tess_factors {
 void getVertexLightColor(inout v2f i)
 {
   #if defined(VERTEXLIGHT_ON)
-  float3 view_dir = normalize(_WorldSpaceCameraPos - worldPos);
+  float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
   bool flat = round(_Flatten_Mesh_Normals) == 1.0;
   i.vertexLightColor = Shade4PointLights(
     unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
@@ -51,12 +81,20 @@ v2f vert(appdata v)
 {
   v2f o;
 
+  UNITY_INITIALIZE_OUTPUT(v2f, o);
+  UNITY_SETUP_INSTANCE_ID(v);
+  UNITY_TRANSFER_INSTANCE_ID(v, o);
+  UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
   o.clipPos = UnityObjectToClipPos(v.position);
   o.worldPos = mul(unity_ObjectToWorld, v.position);
 
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
-  o.uv = v.uv;
+  o.uv = v.uv0.xy;
+  #if defined(LIGHTMAP_ON)
+  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw
+  #endif
 
   getVertexLightColor(o);
 
@@ -85,7 +123,10 @@ tess_data hull_vertex(appdata v)
 
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
-  o.uv = v.uv;
+  o.uv = v.uv0.xy;
+  #if defined(LIGHTMAP_ON)
+  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw
+  #endif
 
   getVertexLightColorTess(o);
 
@@ -303,6 +344,7 @@ float4 effect(inout v2f i)
 {
   float iddx = ddx(i.uv.x) / 4;
   float iddy = ddx(i.uv.y) / 4;
+  const float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
 
 #if defined(_UVSCROLL)
   float2 orig_uv = i.uv;
@@ -399,7 +441,6 @@ float4 effect(inout v2f i)
 
   {
 #if defined(_MATCAP0)
-    float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
     float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
     float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
     float3 refl = -reflect(cam_view_dir, cam_normal);
@@ -449,7 +490,6 @@ float4 effect(inout v2f i)
   }
   {
 #if defined(_MATCAP1)
-    float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
     float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
     float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
     float3 refl = -reflect(cam_view_dir, cam_normal);
@@ -500,7 +540,6 @@ float4 effect(inout v2f i)
   {
 #if defined(_RIM_LIGHTING)
     // identity: (a, b, c) and (c, c, -(a +b)) are perpendicular to each other
-    float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
     float theta = atan2(length(cross(view_dir, normal)), dot(view_dir, normal));
 #define PI 3.14159265
     float rl = abs(theta) / PI;  // on [0, 1]
@@ -564,13 +603,29 @@ float4 effect(inout v2f i)
       metallic, 1.0 - roughness, i.uv, i);
 
   float4 result = lit;
+#if defined(_LTCGI)
+  float3 ltcgi_emission = 0;
+  if ((bool) round(_LTCGI_Enabled)) {
+    ltcgi_acc acc = (ltcgi_acc) 0;
+    LTCGI_Contribution(
+        acc,
+        i.worldPos,
+        normal,
+        view_dir,
+        roughness,
+        i.lmuv);
+    ltcgi_emission += acc.specular;
+    ltcgi_emission += acc.diffuse * albedo.rgb;
+    result.rgb += ltcgi_emission;
+  }
+#endif
 #if defined(_GLITTER)
   float glitter = get_glitter(i.uv, iddx, iddy, i.worldPos, normal);
-  result.xyz += glitter;
+  result.rgb += glitter;
 #endif
 #if defined(_EMISSION)
   float emission = _EmissionTex.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
-  result.xyz += albedo.xyz * emission * _EmissionStrength;
+  result.rgb += albedo.rgb * emission * _EmissionStrength;
 #endif
 #if defined(_EXPLODE) && defined(_AUDIOLINK)
   if (AudioLinkIsAvailable() && _Explode_Phase > 1E-6) {

@@ -658,9 +658,29 @@ public class ToonerGUI : ShaderGUI {
     }
   }
 
-  void DoMain() {
-    SetKeyword("VERTEXLIGHT_ON", false);
+  void DoLTCGI() {
+#if LTCGI_INCLUDED
+    GUILayout.Label($"Available: yes");
 
+    MaterialProperty bc = FindProperty("_LTCGI_Enabled");
+    bool enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Enable", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_LTCGI", enabled);
+
+    bc = FindProperty("_LTCGI_SpecularColor");
+    editor.ColorProperty(bc, "Specular color (RGB)");
+
+    bc = FindProperty("_LTCGI_DiffuseColor");
+    editor.ColorProperty(bc, "Diffuse color (RGB)");
+#else
+    GUILayout.Label($"Available: no");
+#endif  // LTCGI_INCLUDED
+  }
+
+  void DoMain() {
     GUILayout.Label("PBR", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;
     DoBaseColor();
@@ -738,6 +758,11 @@ public class ToonerGUI : ShaderGUI {
     GUILayout.Label("Rendering", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;
     DoRendering();
+    EditorGUI.indentLevel -= 1;
+
+    GUILayout.Label("LTCGI", EditorStyles.boldLabel);
+    EditorGUI.indentLevel += 1;
+    DoLTCGI();
     EditorGUI.indentLevel -= 1;
   }
 }

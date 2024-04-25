@@ -101,5 +101,9 @@ float _UVScroll_U_Speed;
 float _UVScroll_V_Speed;
 texture2D _UVScroll_Alpha;
 
+float _LTCGI_Enabled;
+float4 _LTCGI_SpecularColor;
+float4 _LTCGI_DiffuseColor;
+
 #endif
 

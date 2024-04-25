@@ -57,7 +57,13 @@ UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, floa
   indirect.specular = 0;
 
 #if defined(FORWARD_BASE_PASS)
+
+#if defined(LIGHTMAP_ON)
+  // Avatars are not static, don't use lightmap.
+  indirect.diffuse = 0;
+#else
   indirect.diffuse += max(0, ShadeSH9(float4(normal, 1)));
+#endif
   float3 reflect_dir = reflect(-view_dir, normal);
   Unity_GlossyEnvironmentData env_data;
   env_data.roughness = GetRoughness(smoothness);

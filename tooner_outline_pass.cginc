@@ -25,7 +25,7 @@ struct tess_factors {
 
 v2f vert(appdata v)
 {
-  float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv, /*lod=*/1);
+  float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/1);
   outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
 
   float4 position = v.vertex;
@@ -63,14 +63,17 @@ v2f vert(appdata v)
   o.worldPos = mul(unity_ObjectToWorld, v.vertex);
   o.clipPos = UnityObjectToClipPos(v.vertex);
   o.normal = normal;
-  o.uv = v.uv;
+  o.uv = v.uv0.xy;
+  #if defined(LIGHTMAP_ON)
+  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw
+  #endif
 
   return o;
 }
 
 tess_data hull_vertex(appdata v)
 {
-  float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv, /*lod=*/3);
+  float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/3);
   outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
 
   float4 position = v.vertex;
@@ -95,7 +98,7 @@ tess_data hull_vertex(appdata v)
   tess_data o;
   o.vertex = v.vertex;
   o.normal = normal;
-  o.uv = v.uv;
+  o.uv = v.uv0.xy;
 
   return o;
 }

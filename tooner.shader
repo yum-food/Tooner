@@ -104,9 +104,12 @@ Shader "yum_food/tooner"
     _UVScroll_Mask("UV scroll mask", 2D) = "white"
     _UVScroll_U_Speed("UV scroll U speed", Float) = 0.0
     _UVScroll_V_Speed("UV scroll V speed", Float) = 1.0
-    _UVScroll_Alpha("UV scroll alpha", 2D) = "white"
+    _UVScroll_Alpha("UV scroll alpha", 2D) = "white" {}
+
+    _LTCGI_Enabled("LTCGI enabled", Float) = 0.0
+    _LTCGI_SpecularColor("LTCGI specular color", Color) = (1, 1, 1, 1)
+    _LTCGI_DiffuseColor("LTCGI diffuse color", Color) = (1, 1, 1, 1)
   }
-  Fallback "Transparent"
   SubShader
   {
     Pass {
@@ -114,6 +117,7 @@ Shader "yum_food/tooner"
         "RenderType"="Opaque"
         "Queue"="Geometry"
         "LightMode" = "ForwardBase"
+        "VRCFallback"="Hidden"
       }
       Blend [_SrcBlend] [_DstBlend]
       ZWrite [_ZWrite]
@@ -129,7 +133,7 @@ Shader "yum_food/tooner"
       CGPROGRAM
       #pragma target 5.0
 
-      #pragma multi_compile _ VERTEXLIGHT_ON
+      #pragma multi_compile _ LIGHTMAP_ON VERTEXLIGHT_ON
       #pragma shader_feature_local _ _BASECOLOR_MAP
       #pragma shader_feature_local _ _NORMAL_MAP
       #pragma shader_feature_local _ _METALLIC_MAP
@@ -157,6 +161,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY_METALLIC_MAP
+      #pragma shader_feature_local _ _LTCGI
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex
@@ -176,6 +181,7 @@ Shader "yum_food/tooner"
         "RenderType" = "Opaque"
         "Queue"="Geometry"
         "LightMode" = "ForwardAdd"
+        "VRCFallback"="Hidden"
       }
       Blend [_SrcBlend] One
       ZWrite Off
@@ -213,6 +219,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY_METALLIC_MAP
+      #pragma shader_feature_local _ _LTCGI
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex
@@ -252,6 +259,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY_METALLIC_MAP
+      #pragma shader_feature_local _ _LTCGI
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex
@@ -265,12 +273,16 @@ Shader "yum_food/tooner"
 			ENDCG
 		}
 		Pass {
-			Tags {"LightMode" = "ShadowCaster"}
+      Tags {
+        "LightMode" = "ShadowCaster"
+        "VRCFallback"="Hidden"
+      }
 			CGPROGRAM
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
   }
+  Fallback "Transparent"
   CustomEditor "ToonerGUI"
 }
 
