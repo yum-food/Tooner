@@ -31,14 +31,9 @@ void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output);
 
 #include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI.cginc"
 void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output) {
-	// you can do whatever here! check out the ltcgi_output struct in
-	// "LTCGI_structs.cginc" to see what data you have available
 	acc.diffuse += output.intensity * output.color * _LTCGI_DiffuseColor;
 }
 void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output) {
-	// same here, this example one is pretty boring though.
-	// you could accumulate intensity separately for example,
-	// to emulate total{Specular,Diffuse}Intensity from APIv1
 	acc.specular += output.intensity * output.color * _LTCGI_SpecularColor;
 }
 #endif
@@ -66,13 +61,16 @@ void getVertexLightColor(inout v2f i)
   #if defined(VERTEXLIGHT_ON)
   float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
   bool flat = round(_Flatten_Mesh_Normals) == 1.0;
+  float3 flat_normal = normalize(
+    (1.0 / _Flatten_Mesh_Normals_Str) * i.normal +
+    _Flatten_Mesh_Normals_Str * view_dir);
   i.vertexLightColor = Shade4PointLights(
     unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
     unity_LightColor[0].rgb,
     unity_LightColor[1].rgb,
     unity_LightColor[2].rgb,
     unity_LightColor[3].rgb,
-    unity_4LightAtten0, i.worldPos, flat ? view_dir : i.normal
+    unity_4LightAtten0, i.worldPos, flat ? flat_normal : i.normal
   );
   #endif
 }
@@ -439,104 +437,94 @@ float4 effect(inout v2f i)
 
 #endif  // _PBR_OVERLAY
 
+#if defined(_MATCAP0) || defined(_MATCAP1)
   {
-#if defined(_MATCAP0)
-    float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
-    float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
-    float3 refl = -reflect(cam_view_dir, cam_normal);
-
+    const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
+    const float3 refl = -reflect(cam_view_dir, cam_normal);
     float m = 2.0 * sqrt(
         refl.x * refl.x +
         refl.y * refl.y +
         (refl.z + 1) * (refl.z + 1));
     float2 matcap_uv = refl.xy / m + 0.5;
-
     float iddx = ddx(i.uv.x);
     float iddy = ddy(i.uv.y);
-    float3 matcap = _Matcap0.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap0Str;
+    {
+#if defined(_MATCAP0)
+      float3 matcap = _Matcap0.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap0Str;
 
 #if defined(_MATCAP0_MASK)
-    float4 matcap_mask_raw = _Matcap0_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
-    matcap_mask_raw.rgb = (bool) round(_Matcap0_Mask_Invert) ? 1 - matcap_mask_raw.rgb : matcap_mask_raw.rgb;
-    float matcap_mask = matcap_mask_raw.r * matcap_mask_raw.a;
+      float4 matcap_mask_raw = _Matcap0_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
+      matcap_mask_raw.rgb = (bool) round(_Matcap0_Mask_Invert) ? 1 - matcap_mask_raw.rgb : matcap_mask_raw.rgb;
+      float matcap_mask = matcap_mask_raw.r * matcap_mask_raw.a;
 #else
-    float matcap_mask = 1;
+      float matcap_mask = 1;
 #endif
 
-    int mode = round(_Matcap0Mode);
-    switch (mode) {
-      case 0:
-        albedo.rgb += lerp(0, matcap, matcap_mask);
-        break;
-      case 1:
-        albedo.rgb *= lerp(1, matcap, matcap_mask);
-        break;
-      case 2:
-        albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
-        break;
-      case 3:
-        albedo.rgb -= lerp(0, matcap, matcap_mask);
-        break;
-      case 4:
-        albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
-        break;
-      case 5:
-        albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
-        break;
-      default:
-        break;
+      int mode = round(_Matcap0Mode);
+      switch (mode) {
+        case 0:
+          albedo.rgb += lerp(0, matcap, matcap_mask);
+          break;
+        case 1:
+          albedo.rgb *= lerp(1, matcap, matcap_mask);
+          break;
+        case 2:
+          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
+          break;
+        case 3:
+          albedo.rgb -= lerp(0, matcap, matcap_mask);
+          break;
+        case 4:
+          albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
+          break;
+        case 5:
+          albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
+          break;
+        default:
+          break;
+      }
+#endif
     }
-#endif
-  }
-  {
+    {
 #if defined(_MATCAP1)
-    float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
-    float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
-    float3 refl = -reflect(cam_view_dir, cam_normal);
-
-    float m = 2.0 * sqrt(
-        refl.x * refl.x +
-        refl.y * refl.y +
-        (refl.z + 1) * (refl.z + 1));
-    float2 matcap_uv = refl.xy / m + 0.5;
-
-    float iddx = ddx(i.uv.x);
-    float iddy = ddy(i.uv.y);
-    float3 matcap = _Matcap1.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap1Str;
+      float3 matcap = _Matcap1.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap1Str;
 
 #if defined(_MATCAP1_MASK)
-    float4 matcap_mask_raw = _Matcap1_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
-    matcap_mask_raw.rgb = (bool) round(_Matcap1_Mask_Invert) ? 1 - matcap_mask_raw.rgb : matcap_mask_raw.rgb;
-    float matcap_mask = matcap_mask_raw.r * matcap_mask_raw.a;
+      float4 matcap_mask_raw = _Matcap1_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
+      matcap_mask_raw.rgb = (bool) round(_Matcap1_Mask_Invert) ? 1 - matcap_mask_raw.rgb : matcap_mask_raw.rgb;
+      float matcap_mask = matcap_mask_raw.r * matcap_mask_raw.a;
 #else
-    float matcap_mask = 1;
+      float matcap_mask = 1;
 #endif
 
-    int mode = round(_Matcap1Mode);
-    switch (mode) {
-      case 0:
-        albedo.rgb += lerp(0, matcap, matcap_mask);
-        break;
-      case 1:
-        albedo.rgb *= lerp(1, matcap, matcap_mask);
-        break;
-      case 2:
-        albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
-        break;
-      case 3:
-        albedo.rgb -= lerp(0, matcap, matcap_mask);
-        break;
-      case 4:
-        albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
-        break;
-      case 5:
-        albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
-        break;
-      default:
-        break;
+      int mode = round(_Matcap1Mode);
+      switch (mode) {
+        case 0:
+          albedo.rgb += lerp(0, matcap, matcap_mask);
+          break;
+        case 1:
+          albedo.rgb *= lerp(1, matcap, matcap_mask);
+          break;
+        case 2:
+          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
+          break;
+        case 3:
+          albedo.rgb -= lerp(0, matcap, matcap_mask);
+          break;
+        case 4:
+          albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
+          break;
+        case 5:
+          albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
+          break;
+        default:
+          break;
+      }
+#endif  // _MATCAP1
     }
-#endif
   }
+#endif  // _MATCAP0 || _MATCAP1
   {
 #if defined(_RIM_LIGHTING)
     // identity: (a, b, c) and (c, c, -(a +b)) are perpendicular to each other
@@ -604,7 +592,6 @@ float4 effect(inout v2f i)
 
   float4 result = lit;
 #if defined(_LTCGI)
-  float3 ltcgi_emission = 0;
   if ((bool) round(_LTCGI_Enabled)) {
     ltcgi_acc acc = (ltcgi_acc) 0;
     LTCGI_Contribution(
@@ -613,9 +600,9 @@ float4 effect(inout v2f i)
         normal,
         view_dir,
         roughness,
-        i.lmuv);
-    ltcgi_emission += acc.specular;
-    ltcgi_emission += acc.diffuse * albedo.rgb;
+        0);
+    float3 ltcgi_emission = 0;
+    ltcgi_emission += clamp(acc.diffuse * albedo.rgb, 0, 2);
     result.rgb += ltcgi_emission;
   }
 #endif

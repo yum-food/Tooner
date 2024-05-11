@@ -82,6 +82,6 @@ const float LUT_BIAS = 0.5/LUT_SIZE;
 #define LTCGI_CYLINDER
 
 // Activate avatar mode, which overrides certain configs from above.
-//#define LTCGI_AVATAR_MODE
+#define LTCGI_AVATAR_MODE
 
 #endif

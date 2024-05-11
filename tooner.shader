@@ -34,6 +34,7 @@ Shader "yum_food/tooner"
 
     _Shading_Mode("Shading mode", Range(0, 1)) = 0
     [MaterialToggle] _Flatten_Mesh_Normals("Flatten mesh normals", Float) = 0.0
+    _Flatten_Mesh_Normals_Str("Flatten mesh normals strength", Float) = 100.0
     [MaterialToggle] _Confabulate_Normals("Confabulate mesh normals", Float) = 0.0
 
     _Alpha_Cutoff("Alpha cutoff", Range(0, 1)) = 0.5

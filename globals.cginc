@@ -35,6 +35,7 @@ float _Max_Brightness;
 float _Alpha_Cutoff;
 
 float _Flatten_Mesh_Normals;
+float _Flatten_Mesh_Normals_Str;
 float _Confabulate_Normals;
 
 float _Outline_Width;

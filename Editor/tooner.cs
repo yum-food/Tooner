@@ -307,6 +307,13 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
+    if (enabled) {
+      bc = FindProperty("_Flatten_Mesh_Normals_Str");
+      editor.FloatProperty(
+          bc,
+          "Flattening strength");
+    }
+
     bc = FindProperty("_Confabulate_Normals");
     enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
