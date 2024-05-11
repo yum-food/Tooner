@@ -17,9 +17,12 @@ struct v2f
 {
   float4 clipPos : POSITION;
   float2 uv : TEXCOORD0;
+  #if defined(LIGHTMAP_ON)
   float2 lmuv : TEXCOORD1;
+  #endif
   float3 worldPos : TEXCOORD2;
   float3 normal : TEXCOORD3;
+  float3 objPos : TEXCOORD4;
 };
 
 #else
@@ -37,13 +40,16 @@ struct v2f
 {
   float4 clipPos : SV_POSITION;
   float2 uv : TEXCOORD0;
+  #if defined(LIGHTMAP_ON)
   float2 lmuv : TEXCOORD1;
+  #endif
   float3 normal : TEXCOORD2;
   float4 tangent : TEXCOORD3;
   float3 worldPos : TEXCOORD4;
+  float3 objPos : TEXCOORD5;
 
   #if defined(VERTEXLIGHT_ON)
-  float3 vertexLightColor : TEXCOORD5;
+  float3 vertexLightColor : TEXCOORD6;
   #endif
 };
 #endif

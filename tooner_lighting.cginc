@@ -42,7 +42,9 @@ struct tess_data
 {
   float4 position : INTERNALTESSPOS;
   float2 uv : TEXCOORD0;
+  #if defined(LIGHTMAP_ON)
   float2 lmuv : TEXCOORD1;
+  #endif
   float3 normal : TEXCOORD2;
   float4 tangent : TEXCOORD3;
 
@@ -52,15 +54,16 @@ struct tess_data
 };
 
 struct tess_factors {
-  float edge[4] : SV_TessFactor;
-  float inside[2] : SV_InsideTessFactor;
+  float edge[3] : SV_TessFactor;
+  float inside : SV_InsideTessFactor;
 };
 
 void getVertexLightColor(inout v2f i)
 {
   #if defined(VERTEXLIGHT_ON)
   float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
-  bool flat = round(_Flatten_Mesh_Normals) == 1.0;
+  uint normals_mode = round(_Mesh_Normals_Mode);
+  bool flat = (normals_mode == 0);
   float3 flat_normal = normalize(
     (1.0 / _Flatten_Mesh_Normals_Str) * i.normal +
     _Flatten_Mesh_Normals_Str * view_dir);
@@ -86,12 +89,13 @@ v2f vert(appdata v)
 
   o.clipPos = UnityObjectToClipPos(v.position);
   o.worldPos = mul(unity_ObjectToWorld, v.position);
+  o.objPos = v.position;
 
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv = v.uv0.xy;
   #if defined(LIGHTMAP_ON)
-  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw
+  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
   #endif
 
   getVertexLightColor(o);
@@ -102,13 +106,20 @@ v2f vert(appdata v)
 void getVertexLightColorTess(inout tess_data i)
 {
   #if defined(VERTEXLIGHT_ON)
+  float3 worldPos = mul(unity_ObjectToWorld, i.position).xyz;
+  float3 view_dir = normalize(_WorldSpaceCameraPos - worldPos);
+  uint normals_mode = round(_Mesh_Normals_Mode);
+  bool flat = (normals_mode == 0);
+  float3 flat_normal = normalize(
+    (1.0 / _Flatten_Mesh_Normals_Str) * i.normal +
+    _Flatten_Mesh_Normals_Str * view_dir);
   i.vertexLightColor = Shade4PointLights(
     unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
     unity_LightColor[0].rgb,
     unity_LightColor[1].rgb,
     unity_LightColor[2].rgb,
     unity_LightColor[3].rgb,
-    unity_4LightAtten0, worldPos, i.normal
+    unity_4LightAtten0, worldPos, flat ? flat_normal : i.normal
   );
   #endif
 }
@@ -117,13 +128,21 @@ tess_data hull_vertex(appdata v)
 {
   tess_data o;
 
+  UNITY_INITIALIZE_OUTPUT(tess_data, o);
+  UNITY_SETUP_INSTANCE_ID(v);
+  UNITY_TRANSFER_INSTANCE_ID(v, o);
+  UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+
   o.position = v.position;
+  //o.position = UnityObjectToClipPos(v.position);
+  //o.worldPos = mul(unity_ObjectToWorld, v.position);
+  //o.objPos = v.position;
 
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv = v.uv0.xy;
   #if defined(LIGHTMAP_ON)
-  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw
+  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
   #endif
 
   getVertexLightColorTess(o);
@@ -131,45 +150,50 @@ tess_data hull_vertex(appdata v)
   return o;
 }
 
-tess_factors patch_constant(InputPatch<tess_data, 4> patch)
+tess_factors patch_constant(InputPatch<tess_data, 3> patch)
 {
   tess_factors f;
-  float factor = _Chain_Tess_Factor;
-  factor = 1;
+
+  float3 worldPos = mul(unity_ObjectToWorld, patch[0].position);
+  float factor = _Tess_Factor;
+  if (_Tess_Dist_Cutoff > 0 && length(_WorldSpaceCameraPos - worldPos) > _Tess_Dist_Cutoff) {
+    factor = 1;
+  }
+
   f.edge[0] = factor;
   f.edge[1] = factor;
   f.edge[2] = factor;
-  f.edge[3] = factor;
-  f.inside[0] = factor;
-  f.inside[1] = factor;
+  f.inside = factor;
   return f;
 }
 
-[UNITY_domain("quad")]
-[UNITY_outputcontrolpoints(4)]
+[UNITY_domain("tri")]
+[UNITY_outputcontrolpoints(3)]
 [UNITY_outputtopology("triangle_cw")]
 [UNITY_partitioning("fractional_odd")]
 [UNITY_patchconstantfunc("patch_constant")]
 tess_data hull(
-    InputPatch<tess_data, 4> patch,
+    InputPatch<tess_data, 3> patch,
     uint id : SV_OutputControlPointID)
 {
   return patch[id];
 }
 
-[UNITY_domain("quad")]
+[UNITY_domain("tri")]
 v2f domain(
     tess_factors factors,
-    OutputPatch<tess_data, 4> patch,
-    float2 uv : SV_DomainLocation)
+    OutputPatch<tess_data, 3> patch,
+    float3 baryc : SV_DomainLocation)
 {
   v2f data;
 #define DOMAIN_INTERP(fieldName) data.fieldName = \
-  lerp(\
-    lerp(patch[0].fieldName, patch[1].fieldName, uv.x), \
-    lerp(patch[2].fieldName, patch[3].fieldName, uv.x), \
-    uv.y)
+  patch[0].fieldName * baryc.x + \
+  patch[1].fieldName * baryc.y + \
+  patch[2].fieldName * baryc.z;
   DOMAIN_INTERP(uv);
+  #if defined(LIGHTMAP_ON)
+  DOMAIN_INTERP(lmuv);
+  #endif
   DOMAIN_INTERP(normal);
   DOMAIN_INTERP(tangent);
 
@@ -177,11 +201,12 @@ v2f domain(
   DOMAIN_INTERP(vertexLightColor);
   #endif
 
-  float4 pos = lerp(
-      lerp(patch[0].position, patch[1].position, uv.x),
-      lerp(patch[2].position, patch[3].position, uv.x),
-      uv.y);
+  float4 pos =
+    patch[0].position * baryc.x +
+    patch[1].position * baryc.y +
+    patch[2].position * baryc.z;
   data.clipPos = UnityObjectToClipPos(pos);
+  data.objPos = pos;
   data.worldPos = mul(unity_ObjectToWorld, pos);
 
   return data;
@@ -189,7 +214,7 @@ v2f domain(
 
 // maxvertexcount == the number of vertices we create
 #if defined(_CLONES)
-[maxvertexcount(15)]
+[maxvertexcount(45)]
 #else
 [maxvertexcount(3)]
 #endif
@@ -264,12 +289,6 @@ void geom(triangle v2f tri_in[3],
     v1.normal = n;
     v2.normal = n;
 
-    n = normalize(cross(v1.worldPos - v0.worldPos, v2.worldPos - v0.worldPos));
-    avg_pos = (v0.worldPos + v1.worldPos + v2.worldPos) / 3;
-    v0.worldPos = applyScroll(v0.worldPos, n, avg_pos);
-    v1.worldPos = applyScroll(v1.worldPos, n, avg_pos);
-    v2.worldPos = applyScroll(v2.worldPos, n, avg_pos);
-
     // Omit geometry that's too close when exploded.
     /*
     if (_Explode_Phase > .05 && length(v0.worldPos - _WorldSpaceCameraPos) < .2) {
@@ -289,6 +308,23 @@ void geom(triangle v2f tri_in[3],
     }
   }
 #endif  // __EXPLODE
+#if defined(_SCROLL)
+  {
+    float3 n = normalize(cross(v1.worldPos - v0.worldPos, v2.worldPos - v0.worldPos));
+    float3 avg_pos = (v0.worldPos + v1.worldPos + v2.worldPos) / 3;
+    v0.worldPos = applyScroll(v0.worldPos, n, avg_pos);
+    v1.worldPos = applyScroll(v1.worldPos, n, avg_pos);
+    v2.worldPos = applyScroll(v2.worldPos, n, avg_pos);
+
+    float3 v0_objPos = mul(unity_WorldToObject, float4(v0.worldPos, 1));
+    float3 v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
+    float3 v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
+
+    v0.clipPos = UnityObjectToClipPos(v0_objPos);
+    v1.clipPos = UnityObjectToClipPos(v1_objPos);
+    v2.clipPos = UnityObjectToClipPos(v2_objPos);
+  }
+#endif
 #if defined(_CLONES)
   v2f clone_verts[3] = {v0, v1, v2};
   add_clones(clone_verts, tri_out);
@@ -375,6 +411,15 @@ float4 effect(inout v2f i)
   albedo.a = 1;
 #endif
 
+#if defined(_PBR_OVERLAY)
+#if defined(_PBR_OVERLAY_BASECOLOR_MAP)
+  float4 ov_albedo = _PBR_Overlay_BaseColorTex.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  ov_albedo *= _PBR_Overlay_BaseColor;
+#else
+  float4 ov_albedo = _BaseColor;
+#endif  // _PBR_OVERLAY_BASECOLOR_MAP
+#endif  // _PBR_OVERLAY
+
 #if defined(_NORMAL_MAP)
   // Use UVs to smoothly blend between fully detailed normals when close up and
   // flat normals when far away. If we don't do this, then we see moire effects
@@ -386,19 +431,19 @@ float4 effect(inout v2f i)
       (1/fw) * raw_normal,
       fw * float3(0, 0, 1));
 
-#if defined(_PBR_OVERLAY_NORMAL_MAP)
+#if defined(_PBR_OVERLAY) && defined(_PBR_OVERLAY_NORMAL_MAP)
   {
     // Use UVs to smoothly blend between fully detailed normals when close up and
     // flat normals when far away. If we don't do this, then we see moire effects
     // on e.g. striped normal maps.
     //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay_Tex_NormalStr);
-    float3 raw_normal_2 = UnpackScaleNormal(_PBR_Overlay_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay_Tex_NormalStr);
+    float3 raw_normal_2 = UnpackScaleNormal(_PBR_Overlay_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay_Tex_NormalStr * ov_albedo.a);
 
     raw_normal = BlendNormals(
         raw_normal,
         raw_normal_2);
   }
-#endif  // _PBR_OVERLAY_NORMAL_MAP
+#endif  // _PBR_OVERLAY && _PBR_OVERLAY_NORMAL_MAP
 
   float3 binormal = CreateBinormal(i.normal, i.tangent.xyz, i.tangent.w);
 	float3 normal = normalize(
@@ -427,14 +472,7 @@ float4 effect(inout v2f i)
 #endif
 
 #if defined(_PBR_OVERLAY)
-#if defined(_PBR_OVERLAY_BASECOLOR_MAP)
-  float4 ov_albedo = _PBR_Overlay_BaseColorTex.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
-  ov_albedo *= _PBR_Overlay_BaseColor;
-#else
-  float4 ov_albedo = _BaseColor;
-#endif  // _PBR_OVERLAY_BASECOLOR_MAP
   albedo.rgb = lerp(albedo.rgb, ov_albedo.rgb, ov_albedo.a);
-
 #endif  // _PBR_OVERLAY
 
 #if defined(_MATCAP0) || defined(_MATCAP1)
@@ -455,8 +493,8 @@ float4 effect(inout v2f i)
 
 #if defined(_MATCAP0_MASK)
       float4 matcap_mask_raw = _Matcap0_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
-      matcap_mask_raw.rgb = (bool) round(_Matcap0_Mask_Invert) ? 1 - matcap_mask_raw.rgb : matcap_mask_raw.rgb;
       float matcap_mask = matcap_mask_raw.r * matcap_mask_raw.a;
+      matcap_mask = (bool) round(_Matcap0_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
 #else
       float matcap_mask = 1;
 #endif
@@ -492,8 +530,8 @@ float4 effect(inout v2f i)
 
 #if defined(_MATCAP1_MASK)
       float4 matcap_mask_raw = _Matcap1_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
-      matcap_mask_raw.rgb = (bool) round(_Matcap1_Mask_Invert) ? 1 - matcap_mask_raw.rgb : matcap_mask_raw.rgb;
       float matcap_mask = matcap_mask_raw.r * matcap_mask_raw.a;
+      matcap_mask = (bool) round(_Matcap1_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
 #else
       float matcap_mask = 1;
 #endif
@@ -525,49 +563,88 @@ float4 effect(inout v2f i)
     }
   }
 #endif  // _MATCAP0 || _MATCAP1
+#if defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
   {
-#if defined(_RIM_LIGHTING)
     // identity: (a, b, c) and (c, c, -(a +b)) are perpendicular to each other
     float theta = atan2(length(cross(view_dir, normal)), dot(view_dir, normal));
 #define PI 3.14159265
-    float rl = abs(theta) / PI;  // on [0, 1]
-    rl = pow(2, -_Rim_Lighting_Power * abs(rl - _Rim_Lighting_Center));
 
-    float3 matcap = rl * _Rim_Lighting_Color * _Rim_Lighting_Strength;
-
-#if defined(_RIM_LIGHTING_MASK)
-    float4 matcap_mask_raw = _Rim_Lighting_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
-    matcap_mask_raw.rgb = (bool) round(_Rim_Lighting_Mask_Invert) ? 1 - matcap_mask_raw.rgb : matcap_mask_raw.rgb;
-    float matcap_mask = matcap_mask_raw.r * matcap_mask_raw.a;
+#if defined(_RIM_LIGHTING0)
+    {
+      float rl = abs(theta) / PI;  // on [0, 1]
+      rl = pow(2, -_Rim_Lighting0_Power * abs(rl - _Rim_Lighting0_Center));
+      float3 matcap = rl * _Rim_Lighting0_Color * _Rim_Lighting0_Strength;
+#if defined(_RIM_LIGHTING0_MASK)
+      float4 matcap_mask_raw = _Rim_Lighting0_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
+      float matcap_mask = matcap_mask_raw.r * matcap_mask_raw.a;
+      matcap_mask = (bool) round(_Rim_Lighting0_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
 #else
-    float matcap_mask = 1;
+      float matcap_mask = 1;
 #endif
-
-    int mode = round(_Rim_Lighting_Mode);
-    switch (mode) {
-      case 0:
-        albedo.rgb += lerp(0, matcap, matcap_mask);
-        break;
-      case 1:
-        albedo.rgb *= lerp(1, matcap, matcap_mask);
-        break;
-      case 2:
-        albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
-        break;
-      case 3:
-        albedo.rgb -= lerp(0, matcap, matcap_mask);
-        break;
-      case 4:
-        albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
-        break;
-      case 5:
-        albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
-        break;
-      default:
-        break;
+      int mode = round(_Rim_Lighting0_Mode);
+      switch (mode) {
+        case 0:
+          albedo.rgb += lerp(0, matcap, matcap_mask);
+          break;
+        case 1:
+          albedo.rgb *= lerp(1, matcap, matcap_mask);
+          break;
+        case 2:
+          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
+          break;
+        case 3:
+          albedo.rgb -= lerp(0, matcap, matcap_mask);
+          break;
+        case 4:
+          albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
+          break;
+        case 5:
+          albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
+          break;
+        default:
+          break;
+      }
     }
+#endif  // _RIM_LIGHTING0
+#if defined(_RIM_LIGHTING1)
+    {
+      float rl = abs(theta) / PI;  // on [0, 1]
+      rl = pow(2, -_Rim_Lighting1_Power * abs(rl - _Rim_Lighting1_Center));
+      float3 matcap = rl * _Rim_Lighting1_Color * _Rim_Lighting1_Strength;
+#if defined(_RIM_LIGHTING1_MASK)
+      float4 matcap_mask_raw = _Rim_Lighting1_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
+      float matcap_mask = matcap_mask_raw.r * matcap_mask_raw.a;
+      matcap_mask = (bool) round(_Rim_Lighting1_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
+#else
+      float matcap_mask = 1;
 #endif
+      int mode = round(_Rim_Lighting1_Mode);
+      switch (mode) {
+        case 0:
+          albedo.rgb += lerp(0, matcap, matcap_mask);
+          break;
+        case 1:
+          albedo.rgb *= lerp(1, matcap, matcap_mask);
+          break;
+        case 2:
+          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
+          break;
+        case 3:
+          albedo.rgb -= lerp(0, matcap, matcap_mask);
+          break;
+        case 4:
+          albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
+          break;
+        case 5:
+          albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
+          break;
+        default:
+          break;
+      }
+    }
+#endif  // _RIM_LIGHTING1
   }
+#endif  // _RIM_LIGHTING0 || _RIM_LIGHTING1
 
 #if defined(_OKLAB)
   // Do hue shift in perceptually uniform color space so it doesn't look like

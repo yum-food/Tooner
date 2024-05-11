@@ -224,90 +224,92 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoRimLighting() {
-    GUILayout.Label($"Rim lighting", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
+    for (int i = 0; i < 2; i++) {
+      GUILayout.Label($"Rim lighting {i}", EditorStyles.boldLabel);
+      EditorGUI.indentLevel += 1;
 
-    MaterialProperty bc;
+      MaterialProperty bc;
 
-    bc = FindProperty("_Rim_Lighting_Enabled");
-    bool enabled = bc.floatValue > 1E-6;
-    EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = enabled ? 1.0f : 0.0f;
-    SetKeyword($"_RIM_LIGHTING", enabled);
-
-    if (!enabled) {
-      return;
-    }
-
-    bc = FindProperty("_Rim_Lighting_Color");
-    editor.ColorProperty(bc, "Color (RGB)");
-
-    bc = FindProperty($"_Rim_Lighting_Mask");
-    editor.TexturePropertySingleLine(
-        MakeLabel(bc, "Mask"),
-        bc);
-    SetKeyword($"_RIM_LIGHTING_MASK", bc.textureValue);
-
-    if (bc.textureValue) {
-      bc = FindProperty($"_Rim_Lighting_Mask_Invert");
-      enabled = bc.floatValue > 1E-6;
+      bc = FindProperty($"_Rim_Lighting{i}_Enabled");
+      bool enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+      enabled = EditorGUILayout.Toggle("Enable", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
-    }
+      SetKeyword($"_RIM_LIGHTING{i}", enabled);
 
-    EditorGUI.BeginChangeCheck();
-    bc = FindProperty($"_Rim_Lighting_Mode");
-    MatcapMode mode = (MatcapMode) Math.Round(bc.floatValue);
-    mode = (MatcapMode) EditorGUILayout.EnumPopup(
-        MakeLabel("Rim lighting mode"), mode);
-    if (EditorGUI.EndChangeCheck()) {
-      RecordAction("Rim lighting mode");
-      foreach (Material m in editor.targets) {
-        m.SetFloat($"_Rim_Lighting_Mode", (int) mode);
+      if (!enabled) {
+        return;
       }
+
+      bc = FindProperty($"_Rim_Lighting{i}_Color");
+      editor.ColorProperty(bc, "Color (RGB)");
+
+      bc = FindProperty($"_Rim_Lighting{i}_Mask");
+      editor.TexturePropertySingleLine(
+          MakeLabel(bc, "Mask"),
+          bc);
+      SetKeyword($"_RIM_LIGHTING{i}_MASK", bc.textureValue);
+
+      if (bc.textureValue) {
+        bc = FindProperty($"_Rim_Lighting{i}_Mask_Invert");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+      }
+
+      EditorGUI.BeginChangeCheck();
+      bc = FindProperty($"_Rim_Lighting{i}_Mode");
+      MatcapMode mode = (MatcapMode) Math.Round(bc.floatValue);
+      mode = (MatcapMode) EditorGUILayout.EnumPopup(
+          MakeLabel("Rim lighting mode"), mode);
+      if (EditorGUI.EndChangeCheck()) {
+        RecordAction("Rim lighting mode");
+        foreach (Material m in editor.targets) {
+          m.SetFloat($"_Rim_Lighting{i}_Mode", (int) mode);
+        }
+      }
+
+      bc = FindProperty($"_Rim_Lighting{i}_Center");
+      editor.FloatProperty(
+          bc,
+          "Center");
+
+      bc = FindProperty($"_Rim_Lighting{i}_Power");
+      editor.FloatProperty(
+          bc,
+          "Power");
+
+      bc = FindProperty($"_Rim_Lighting{i}_Strength");
+      editor.FloatProperty(
+          bc,
+          "Strength");
+
+      EditorGUI.indentLevel -= 1;
     }
-
-    bc = FindProperty($"_Rim_Lighting_Center");
-    editor.FloatProperty(
-        bc,
-        "Center");
-
-    bc = FindProperty($"_Rim_Lighting_Power");
-    editor.FloatProperty(
-        bc,
-        "Power");
-
-    bc = FindProperty($"_Rim_Lighting_Strength");
-    editor.FloatProperty(
-        bc,
-        "Strength");
-
-    EditorGUI.indentLevel -= 1;
   }
+
+  enum NormalsMode {
+    Flat,
+    Spherical
+  };
 
   void DoShadingMode() {
     MaterialProperty bc;
 
-    /*
-    bc = FindProperty("_Shading_Mode");
-    editor.RangeProperty(
-        bc,
-        "Shading mode (0=realistic,1=flat)");
-    SetKeyword("_SHADING_MODE_FLAT", ((int) Math.Round(bc.floatValue, 0)) == 1);
-    */
-
-    bc = FindProperty("_Flatten_Mesh_Normals");
-    bool enabled = bc.floatValue > 1E-6;
+    bc = FindProperty($"_Mesh_Normals_Mode");
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Flatten normals", enabled);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = enabled ? 1.0f : 0.0f;
+    NormalsMode mode = (NormalsMode) Math.Round(bc.floatValue, 0);
+    mode = (NormalsMode) EditorGUILayout.EnumPopup(
+        MakeLabel("Normals mode"), mode);
+    if (EditorGUI.EndChangeCheck()) {
+      RecordAction("Rendering Mode");
+    }
+    bc.floatValue = (float) mode;
 
-    if (enabled) {
+    if (mode == NormalsMode.Flat) {
       bc = FindProperty("_Flatten_Mesh_Normals_Str");
       editor.FloatProperty(
           bc,
@@ -315,7 +317,7 @@ public class ToonerGUI : ShaderGUI {
     }
 
     bc = FindProperty("_Confabulate_Normals");
-    enabled = bc.floatValue > 1E-6;
+    bool enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
     enabled = EditorGUILayout.Toggle("Confabulate normals", enabled);
     EditorGUI.EndChangeCheck();
@@ -570,21 +572,26 @@ public class ToonerGUI : ShaderGUI {
     }
   }
 
-  void DoChainTessellation() {
-    MaterialProperty bc = FindProperty("_Enable_Chain_Tessellation");
+  void DoTessellation() {
+    MaterialProperty bc = FindProperty("_Enable_Tessellation");
     bool enabled = bc.floatValue > 1E-6;
 
     EditorGUI.BeginChangeCheck();
     enabled = EditorGUILayout.Toggle("Enable", enabled);
     EditorGUI.EndChangeCheck();
-    SetKeyword("_CHAIN_TESSELLATION", enabled);
+    SetKeyword("_TESSELLATION", enabled);
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     if (enabled) {
-      bc = FindProperty("_Chain_Tess_Factor");
+      bc = FindProperty("_Tess_Factor");
       editor.RangeProperty(
           bc,
           "Tessellation factor");
+
+      bc = FindProperty("_Tess_Dist_Cutoff");
+      editor.FloatProperty(
+          bc,
+          "Activation distance (negative=always on)");
     }
   }
 
@@ -745,12 +752,10 @@ public class ToonerGUI : ShaderGUI {
     DoUVScroll();
     EditorGUI.indentLevel -= 1;
 
-    /*
-    GUILayout.Label("Chain tessellation", EditorStyles.boldLabel);
+    GUILayout.Label("Tessellation", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;
-    DoChainTessellation();
+    DoTessellation();
     EditorGUI.indentLevel -= 1;
-    */
 
     GUILayout.Label("Hue shift", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;

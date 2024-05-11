@@ -33,7 +33,7 @@ Shader "yum_food/tooner"
     _NormalStr("Normal strength", Range(0, 10)) = 1
 
     _Shading_Mode("Shading mode", Range(0, 1)) = 0
-    [MaterialToggle] _Flatten_Mesh_Normals("Flatten mesh normals", Float) = 0.0
+    _Mesh_Normals_Mode("Normals mode", Float) = 0.0
     _Flatten_Mesh_Normals_Str("Flatten mesh normals strength", Float) = 100.0
     [MaterialToggle] _Confabulate_Normals("Confabulate mesh normals", Float) = 0.0
 
@@ -82,14 +82,23 @@ Shader "yum_food/tooner"
     _Matcap1Mode("Matcap mode", Float) = 0
     _Matcap1Str("Matcap strength", Float) = 1
 
-    _Rim_Lighting_Enabled("Enable rim lighting", Float) = 0
-    _Rim_Lighting_Mode("Rim lighting mode", Float) = 0
-    _Rim_Lighting_Mask("Rim lighting mask", 2D) = "white" {}
-    _Rim_Lighting_Mask_Invert("Invert rim lighting mask", Float) = 0.0
-    _Rim_Lighting_Color("Rim lighting color", Color) = (1, 1, 1, 1)
-    _Rim_Lighting_Center("Rim lighting center", Float) = 0.5
-    _Rim_Lighting_Power("Rim lighting power", Float) = 2.0
-    _Rim_Lighting_Strength("Rim lighting power", Float) = 1.0
+    _Rim_Lighting0_Enabled("Enable rim lighting", Float) = 0
+    _Rim_Lighting0_Mode("Rim lighting mode", Float) = 0
+    _Rim_Lighting0_Mask("Rim lighting mask", 2D) = "white" {}
+    _Rim_Lighting0_Mask_Invert("Invert rim lighting mask", Float) = 0.0
+    _Rim_Lighting0_Color("Rim lighting color", Color) = (1, 1, 1, 1)
+    _Rim_Lighting0_Center("Rim lighting center", Float) = 0.5
+    _Rim_Lighting0_Power("Rim lighting power", Float) = 2.0
+    _Rim_Lighting0_Strength("Rim lighting power", Float) = 1.0
+
+    _Rim_Lighting1_Enabled("Enable rim lighting", Float) = 0
+    _Rim_Lighting1_Mode("Rim lighting mode", Float) = 0
+    _Rim_Lighting1_Mask("Rim lighting mask", 2D) = "white" {}
+    _Rim_Lighting1_Mask_Invert("Invert rim lighting mask", Float) = 0.0
+    _Rim_Lighting1_Color("Rim lighting color", Color) = (1, 1, 1, 1)
+    _Rim_Lighting1_Center("Rim lighting center", Float) = 0.5
+    _Rim_Lighting1_Power("Rim lighting power", Float) = 2.0
+    _Rim_Lighting1_Strength("Rim lighting power", Float) = 1.0
 
     _OKLAB_Enabled("Enable OKLAB", Float) = 0.0
     _OKLAB_Mask("Mask", 2D) = "white" {}
@@ -98,7 +107,8 @@ Shader "yum_food/tooner"
     _OKLAB_Hue_Shift("OKLAB hue shift", Range(0, 6.283185307)) = 0.0
 
     _Clones_Enabled("Enable clones", Float) = 0.0
-    _Clones_Count("Clones count", Range(0,4)) = 0.0
+    _Clones_Count("Clones count", Range(0,16)) = 0.0
+    _Clones_Dist_Cutoff("Clones distance cutoff", Float) = -1.0
     _Clones_dx("Clones dx", Range(0, 1)) = 1.0
 
     _UVScroll_Enabled("Enable UV scrolling", Float) = 0.0
@@ -110,6 +120,10 @@ Shader "yum_food/tooner"
     _LTCGI_Enabled("LTCGI enabled", Float) = 0.0
     _LTCGI_SpecularColor("LTCGI specular color", Color) = (1, 1, 1, 1)
     _LTCGI_DiffuseColor("LTCGI diffuse color", Color) = (1, 1, 1, 1)
+
+    _Enable_Tessellation("Enable tessellation", Float) = 0.0
+    _Tess_Factor("Tessellation factor", Range(1, 64)) = 1.0
+    _Tess_Dist_Cutoff("Tessellation distance cutoff", Float) = -1.0
   }
   SubShader
   {
@@ -153,8 +167,10 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _MATCAP0_MASK
       #pragma shader_feature_local _ _MATCAP1
       #pragma shader_feature_local _ _MATCAP1_MASK
-      #pragma shader_feature_local _ _RIM_LIGHTING
-      #pragma shader_feature_local _ _RIM_LIGHTING_MASK
+      #pragma shader_feature_local _ _RIM_LIGHTING0
+      #pragma shader_feature_local _ _RIM_LIGHTING0_MASK
+      #pragma shader_feature_local _ _RIM_LIGHTING1
+      #pragma shader_feature_local _ _RIM_LIGHTING1_MASK
       #pragma shader_feature_local _ _OKLAB
       #pragma shader_feature_local _ _CLONES
       #pragma shader_feature_local _ _PBR_OVERLAY
@@ -163,6 +179,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY_METALLIC_MAP
       #pragma shader_feature_local _ _LTCGI
+      #pragma shader_feature_local _ _TESSELLATION
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex
@@ -211,8 +228,10 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _MATCAP0_MASK
       #pragma shader_feature_local _MATCAP1
       #pragma shader_feature_local _ _MATCAP1_MASK
-      #pragma shader_feature_local _ _RIM_LIGHTING
-      #pragma shader_feature_local _ _RIM_LIGHTING_MASK
+      #pragma shader_feature_local _ _RIM_LIGHTING0
+      #pragma shader_feature_local _ _RIM_LIGHTING0_MASK
+      #pragma shader_feature_local _ _RIM_LIGHTING1
+      #pragma shader_feature_local _ _RIM_LIGHTING1_MASK
       #pragma shader_feature_local _ _OKLAB
       #pragma shader_feature_local _ _CLONES
       #pragma shader_feature_local _ _PBR_OVERLAY
@@ -221,6 +240,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY_METALLIC_MAP
       #pragma shader_feature_local _ _LTCGI
+      #pragma shader_feature_local _ _TESSELLATION
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex
@@ -251,8 +271,10 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _MATCAP0_MASK
       #pragma shader_feature_local _MATCAP1
       #pragma shader_feature_local _ _MATCAP1_MASK
-      #pragma shader_feature_local _ _RIM_LIGHTING
-      #pragma shader_feature_local _ _RIM_LIGHTING_MASK
+      #pragma shader_feature_local _ _RIM_LIGHTING0
+      #pragma shader_feature_local _ _RIM_LIGHTING0_MASK
+      #pragma shader_feature_local _ _RIM_LIGHTING1
+      #pragma shader_feature_local _ _RIM_LIGHTING1_MASK
       #pragma shader_feature_local _ _OKLAB
       #pragma shader_feature_local _ _CLONES
       #pragma shader_feature_local _ _PBR_OVERLAY
@@ -261,6 +283,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY_METALLIC_MAP
       #pragma shader_feature_local _ _LTCGI
+      #pragma shader_feature_local _ _TESSELLATION
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex

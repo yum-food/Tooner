@@ -19,8 +19,8 @@ struct tess_data
 };
 
 struct tess_factors {
-  float edge[4] : SV_TessFactor;
-  float inside[2] : SV_InsideTessFactor;
+  float edge[3] : SV_TessFactor;
+  float inside: SV_InsideTessFactor;
 };
 
 v2f vert(appdata v)
@@ -61,6 +61,7 @@ v2f vert(appdata v)
 
   v2f o;
   o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+  o.objPos = v.vertex;
   o.clipPos = UnityObjectToClipPos(v.vertex);
   o.normal = normal;
   o.uv = v.uv0.xy;
@@ -103,43 +104,46 @@ tess_data hull_vertex(appdata v)
   return o;
 }
 
-tess_factors patch_constant(InputPatch<tess_data, 4> patch)
+tess_factors patch_constant(InputPatch<tess_data, 3> patch)
 {
   tess_factors f;
-  float factor = _Chain_Tess_Factor;
+
+  float3 worldPos = mul(unity_ObjectToWorld, patch[0].vertex);
+  float factor = _Tess_Factor;
+  if (_Tess_Dist_Cutoff > 0 && length(_WorldSpaceCameraPos - worldPos) > _Tess_Dist_Cutoff) {
+    factor = 1;
+  }
+
   f.edge[0] = factor;
   f.edge[1] = factor;
   f.edge[2] = factor;
-  f.edge[3] = factor;
-  f.inside[0] = factor;
-  f.inside[1] = factor;
+  f.inside = factor;
   return f;
 }
 
-[UNITY_domain("quad")]
+[UNITY_domain("tri")]
 [UNITY_outputcontrolpoints(3)]
 [UNITY_outputtopology("triangle_cw")]
 [UNITY_partitioning("fractional_odd")]
 [UNITY_patchconstantfunc("patch_constant")]
 tess_data hull(
-    InputPatch<tess_data, 4> patch,
+    InputPatch<tess_data, 3> patch,
     uint id : SV_OutputControlPointID)
 {
   return patch[id];
 }
 
-[UNITY_domain("quad")]
+[UNITY_domain("tri")]
 v2f domain(
     tess_factors factors,
-    OutputPatch<tess_data, 4> patch,
-    float2 uv : SV_DomainLocation)
+    OutputPatch<tess_data, 3> patch,
+    float3 baryc : SV_DomainLocation)
 {
   v2f data;
 #define DOMAIN_INTERP(fieldName) data.fieldName = \
-  lerp(\
-    lerp(patch[0].fieldName, patch[1].fieldName, uv.x), \
-    lerp(patch[2].fieldName, patch[3].fieldName, uv.x), \
-    uv.y)
+  patch[0].fieldName * baryc.x + \
+  patch[1].fieldName * baryc.y + \
+  patch[2].fieldName * baryc.z;
   DOMAIN_INTERP(uv);
   DOMAIN_INTERP(normal);
   //DOMAIN_INTERP(tangent);
@@ -148,11 +152,12 @@ v2f domain(
   DOMAIN_INTERP(vertexLightColor);
   #endif
 
-  float4 pos = lerp(
-      lerp(patch[0].vertex, patch[1].vertex, uv.x),
-      lerp(patch[2].vertex, patch[3].vertex, uv.x),
-      uv.y);
+  float4 pos =
+    patch[0].vertex * baryc.x +
+    patch[1].vertex * baryc.y +
+    patch[2].vertex * baryc.z;
   data.clipPos = UnityObjectToClipPos(pos);
+  data.objPos = pos;
   data.worldPos = mul(unity_ObjectToWorld, pos);
 
   return data;
@@ -168,6 +173,10 @@ void geom(triangle v2f tri_in[3],
   uint pid: SV_PrimitiveID,
   inout TriangleStream<v2f> tri_out)
 {
+#if !defined(_OUTLINES)
+  return;
+#endif
+
   v2f v0 = tri_in[0];
   v2f v1 = tri_in[1];
   v2f v2 = tri_in[2];
@@ -245,12 +254,6 @@ void geom(triangle v2f tri_in[3],
     v1.normal = nn;
     v2.normal = nn;
 
-    n = normalize(cross(v1.worldPos - v0.worldPos, v2.worldPos - v0.worldPos));
-    avg_pos = (v0.worldPos + v1.worldPos + v2.worldPos) / 3;
-    v0.worldPos = applyScroll(v0.worldPos, n, avg_pos);
-    v1.worldPos = applyScroll(v1.worldPos, n, avg_pos);
-    v2.worldPos = applyScroll(v2.worldPos, n, avg_pos);
-
     // Omit geometry that's too close when exploded.
     /*
     if (_Explode_Phase > .05 && length(v0.worldPos - _WorldSpaceCameraPos) < .2) {
@@ -262,6 +265,23 @@ void geom(triangle v2f tri_in[3],
     v0_objPos = mul(unity_WorldToObject, float4(v0.worldPos, 1));
     v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
+
+    v0.clipPos = UnityObjectToClipPos(v0_objPos);
+    v1.clipPos = UnityObjectToClipPos(v1_objPos);
+    v2.clipPos = UnityObjectToClipPos(v2_objPos);
+  }
+#endif
+#if defined(_SCROLL)
+  {
+    float3 n = normalize(cross(v1.worldPos - v0.worldPos, v2.worldPos - v0.worldPos));
+    float3 avg_pos = (v0.worldPos + v1.worldPos + v2.worldPos) / 3;
+    v0.worldPos = applyScroll(v0.worldPos, n, avg_pos);
+    v1.worldPos = applyScroll(v1.worldPos, n, avg_pos);
+    v2.worldPos = applyScroll(v2.worldPos, n, avg_pos);
+
+    float3 v0_objPos = mul(unity_WorldToObject, float4(v0.worldPos, 1));
+    float3 v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
+    float3 v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
 
     v0.clipPos = UnityObjectToClipPos(v0_objPos);
     v1.clipPos = UnityObjectToClipPos(v1_objPos);

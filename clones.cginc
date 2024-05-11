@@ -12,6 +12,11 @@ void add_clones(in v2f clone_verts[3], inout TriangleStream<v2f> tri_out)
     return;
   }
 
+  float factor = _Tess_Factor;
+  if (_Clones_Dist_Cutoff > 0 && length(_WorldSpaceCameraPos - clone_verts[0].worldPos) > _Clones_Dist_Cutoff) {
+    factor = 1;
+  }
+
   uint n_clones = (uint) round(_Clones_Count);
   for (uint i = 0; i < (uint) n_clones; i++) {
     for (uint j = 0; j < 3; j++) {

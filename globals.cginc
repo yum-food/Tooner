@@ -34,7 +34,7 @@ float _Max_Brightness;
 
 float _Alpha_Cutoff;
 
-float _Flatten_Mesh_Normals;
+float _Mesh_Normals_Mode;
 float _Flatten_Mesh_Normals_Str;
 float _Confabulate_Normals;
 
@@ -61,7 +61,8 @@ float _Scroll_Width;
 float _Scroll_Strength;
 float _Scroll_Speed;
 
-float _Chain_Tess_Factor;
+float _Tess_Factor;
+float _Tess_Dist_Cutoff;
 
 float _Enable_Matcap0;
 texture2D _Matcap0;
@@ -77,14 +78,23 @@ float _Matcap1_Mask_Invert;
 float _Matcap1Str;
 float _Matcap1Mode;
 
-float _Rim_Lighting_Enabled;
-float _Rim_Lighting_Mode;
-float3 _Rim_Lighting_Color;
-texture2D _Rim_Lighting_Mask;
-float _Rim_Lighting_Mask_Invert;
-float _Rim_Lighting_Center;
-float _Rim_Lighting_Power;
-float _Rim_Lighting_Strength;
+float _Rim_Lighting0_Enabled;
+float _Rim_Lighting0_Mode;
+float3 _Rim_Lighting0_Color;
+texture2D _Rim_Lighting0_Mask;
+float _Rim_Lighting0_Mask_Invert;
+float _Rim_Lighting0_Center;
+float _Rim_Lighting0_Power;
+float _Rim_Lighting0_Strength;
+
+float _Rim_Lighting1_Enabled;
+float _Rim_Lighting1_Mode;
+float3 _Rim_Lighting1_Color;
+texture2D _Rim_Lighting1_Mask;
+float _Rim_Lighting1_Mask_Invert;
+float _Rim_Lighting1_Center;
+float _Rim_Lighting1_Power;
+float _Rim_Lighting1_Strength;
 
 float _OKLAB_Enabled;
 texture2D _OKLAB_Mask;
@@ -95,6 +105,7 @@ float _OKLAB_Hue_Shift;
 float _Clones_Enabled;
 float _Clones_Count;
 float _Clones_dx;
+float _Clones_Dist_Cutoff;
 
 float _UVScroll_Enabled;
 texture2D _UVScroll_Mask;
