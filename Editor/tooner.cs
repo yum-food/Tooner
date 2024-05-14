@@ -132,7 +132,7 @@ public class ToonerGUI : ShaderGUI {
   void DoCubemap() {
       MaterialProperty bc = FindProperty("_Cubemap");
       editor.TexturePropertySingleLine(
-          MakeLabel(bc, "Cubemap"),
+          MakeLabel(bc, "Specular override cubemap"),
           bc);
       SetKeyword("_CUBEMAP", bc.textureValue);
   }

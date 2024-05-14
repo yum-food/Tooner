@@ -26,7 +26,7 @@ Shader "yum_food/tooner"
 
     [NoScaleOffset] _Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
 
-		_Cubemap("Cubemap", Cube) = "" {}
+		_Cubemap("Specular override (cubemap)", Cube) = "" {}
     _Min_Brightness("Min brightness", Range(0, 1)) = 0
     _Max_Brightness("Max brightness", Range(0, 1.5)) = 1
     _Mesh_Normal_Strength("Mesh normal strength", Range(0, 10)) = 1
