@@ -374,6 +374,17 @@ float3 CreateBinormal (float3 normal, float3 tangent, float binormalSign) {
 		(binormalSign * unity_WorldTransformParams.w);
 }
 
+float2 matcap_distortion0(float2 matcap_uv) {
+  float3 qvec = float3(matcap_uv * 2 - 1, 0);
+  float t = _Time[0];
+  float e = .4;
+  float3 qaxis = normalize(float3(sin(t * 2.3) * e, sin(t * 2.9) * e * 1.2, 1));
+  float qtheta = t;
+  float4 quat = get_quaternion(qaxis, qtheta);
+  matcap_uv *= ((rotate_vector(qvec, quat) + 1) / 2).xy * 1.3;
+  return matcap_uv;
+}
+
 float4 effect(inout v2f i)
 {
   float iddx = ddx(i.uv.x) / 4;
@@ -475,6 +486,10 @@ float4 effect(inout v2f i)
   albedo.rgb = lerp(albedo.rgb, ov_albedo.rgb, ov_albedo.a);
 #endif  // _PBR_OVERLAY
 
+#if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
+  float3 matcap_emission = 0;
+#endif
+
 #if defined(_MATCAP0) || defined(_MATCAP1)
   {
     const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
@@ -489,6 +504,10 @@ float4 effect(inout v2f i)
     float iddy = ddy(i.uv.y);
     {
 #if defined(_MATCAP0)
+#if defined(_MATCAP0_DISTORTION0)
+      float2 distort_uv = matcap_distortion0(matcap_uv);
+      float2 matcap_uv = distort_uv;
+#endif
       float3 matcap = _Matcap0.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap0Str;
 
 #if defined(_MATCAP0_MASK)
@@ -504,21 +523,27 @@ float4 effect(inout v2f i)
       switch (mode) {
         case 0:
           albedo.rgb += lerp(0, matcap, matcap_mask);
+          matcap_emission += lerp(0, matcap, matcap_mask) * _Matcap0Emission;
           break;
         case 1:
+          matcap_emission = lerp(1, matcap, matcap_mask) * _Matcap0Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
-          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
+          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);
+          matcap_emission = lerp(albedo.rgb, matcap, matcap_mask) * _Matcap0Emission;
           break;
         case 3:
           albedo.rgb -= lerp(0, matcap, matcap_mask);
+          matcap_emission -= lerp(0, matcap, matcap_mask) * _Matcap0Emission;
           break;
         case 4:
           albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask) * _Matcap0Emission;
           break;
         case 5:
           albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask) * _Matcap0Emission;
           break;
         default:
           break;
@@ -527,6 +552,10 @@ float4 effect(inout v2f i)
     }
     {
 #if defined(_MATCAP1)
+#if defined(_MATCAP1_DISTORTION0)
+      float2 distort_uv = matcap_distortion0(matcap_uv);
+      float2 matcap_uv = distort_uv;
+#endif
       float3 matcap = _Matcap1.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap1Str;
 
 #if defined(_MATCAP1_MASK)
@@ -542,21 +571,27 @@ float4 effect(inout v2f i)
       switch (mode) {
         case 0:
           albedo.rgb += lerp(0, matcap, matcap_mask);
+          matcap_emission += lerp(0, matcap, matcap_mask) * _Matcap1Emission;
           break;
         case 1:
+          matcap_emission = lerp(1, matcap, matcap_mask) * _Matcap1Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
-          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
+          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);
+          matcap_emission = lerp(albedo.rgb, matcap, matcap_mask) * _Matcap1Emission;
           break;
         case 3:
           albedo.rgb -= lerp(0, matcap, matcap_mask);
+          matcap_emission -= lerp(0, matcap, matcap_mask) * _Matcap1Emission;
           break;
         case 4:
           albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask) * _Matcap1Emission;
           break;
         case 5:
           albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask) * _Matcap1Emission;
           break;
         default:
           break;
@@ -588,21 +623,27 @@ float4 effect(inout v2f i)
       switch (mode) {
         case 0:
           albedo.rgb += lerp(0, matcap, matcap_mask);
+          matcap_emission += lerp(0, matcap, matcap_mask) * _Rim_Lighting0_Emission;
           break;
         case 1:
+          matcap_emission = albedo.rgb * lerp(1, matcap, matcap_mask) * _Rim_Lighting0_Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
-          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
+          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);
+          matcap_emission = lerp(albedo.rgb, matcap, matcap_mask) * _Rim_Lighting0_Emission;
           break;
         case 3:
           albedo.rgb -= lerp(0, matcap, matcap_mask);
+          matcap_emission -= lerp(0, matcap, matcap_mask) * _Rim_Lighting0_Emission;
           break;
         case 4:
           albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask) * _Rim_Lighting0_Emission;
           break;
         case 5:
           albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask) * _Rim_Lighting0_Emission;
           break;
         default:
           break;
@@ -626,21 +667,27 @@ float4 effect(inout v2f i)
       switch (mode) {
         case 0:
           albedo.rgb += lerp(0, matcap, matcap_mask);
+          matcap_emission += lerp(0, matcap, matcap_mask) * _Rim_Lighting1_Emission;
           break;
         case 1:
+          matcap_emission = albedo.rgb * lerp(1, matcap, matcap_mask) * _Rim_Lighting1_Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
-          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);;
+          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);
+          matcap_emission = lerp(albedo.rgb, matcap, matcap_mask) * _Rim_Lighting1_Emission;
           break;
         case 3:
           albedo.rgb -= lerp(0, matcap, matcap_mask);
+          matcap_emission -= lerp(0, matcap, matcap_mask) * _Rim_Lighting1_Emission;
           break;
         case 4:
           albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask) * _Rim_Lighting1_Emission;
           break;
         case 5:
           albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask) * _Rim_Lighting1_Emission;
           break;
         default:
           break;
@@ -672,6 +719,9 @@ float4 effect(inout v2f i)
       metallic, 1.0 - roughness, i.uv, i);
 
   float4 result = lit;
+#if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
+  result.rgb += matcap_emission;
+#endif
 #if defined(_LTCGI)
   if ((bool) round(_LTCGI_Enabled)) {
     ltcgi_acc acc = (ltcgi_acc) 0;

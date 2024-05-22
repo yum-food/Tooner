@@ -132,7 +132,7 @@ public class ToonerGUI : ShaderGUI {
   void DoCubemap() {
       MaterialProperty bc = FindProperty("_Cubemap");
       editor.TexturePropertySingleLine(
-          MakeLabel(bc, "Specular override cubemap"),
+          MakeLabel(bc, "Cubemap"),
           bc);
       SetKeyword("_CUBEMAP", bc.textureValue);
   }
@@ -194,9 +194,10 @@ public class ToonerGUI : ShaderGUI {
           bc);
       SetKeyword($"_MATCAP{i}_MASK", bc.textureValue);
 
+      bool enabled;  // c# is a shitty language
       if (bc.textureValue) {
         bc = FindProperty($"_Matcap{i}_Mask_Invert");
-        bool enabled = bc.floatValue > 1E-6;
+        enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
         enabled = EditorGUILayout.Toggle("Invert mask", enabled);
         EditorGUI.EndChangeCheck();
@@ -219,7 +220,20 @@ public class ToonerGUI : ShaderGUI {
       editor.FloatProperty(
           bc,
           "Matcap strength");
+
+      bc = FindProperty($"_Matcap{i}Emission");
+      editor.FloatProperty(
+          bc,
+          "Emission strength");
       EditorGUI.indentLevel -= 1;
+
+      bc = FindProperty($"_Matcap{i}Distortion0");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Enable distortion 0", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      SetKeyword($"_MATCAP{i}_DISTORTION0", enabled);
     }
   }
 
@@ -286,6 +300,11 @@ public class ToonerGUI : ShaderGUI {
       editor.FloatProperty(
           bc,
           "Strength");
+
+      bc = FindProperty($"_Rim_Lighting{i}_Emission");
+      editor.FloatProperty(
+          bc,
+          "Rim lighting emission");
 
       EditorGUI.indentLevel -= 1;
     }

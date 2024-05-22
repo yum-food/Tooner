@@ -26,7 +26,7 @@ Shader "yum_food/tooner"
 
     [NoScaleOffset] _Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
 
-		_Cubemap("Specular override (cubemap)", Cube) = "" {}
+		_Cubemap("Cubemap", Cube) = "" {}
     _Min_Brightness("Min brightness", Range(0, 1)) = 0
     _Max_Brightness("Max brightness", Range(0, 1.5)) = 1
     _Mesh_Normal_Strength("Mesh normal strength", Range(0, 10)) = 1
@@ -75,12 +75,16 @@ Shader "yum_food/tooner"
     _Matcap0_Mask_Invert("Invert mask", Float) = 0.0
     _Matcap0Mode("Matcap mode", Float) = 0
     _Matcap0Str("Matcap strength", Float) = 1
+    _Matcap0Emission("Matcap emission", Float) = 0
+    _Matcap0Distortion0("Matcap distortion0", Float) = 0
 
     _Matcap1("Matcap", 2D) = "black" {}
     _Matcap1_Mask("Matcap mask", 2D) = "white" {}
     _Matcap1_Mask_Invert("Invert mask", Float) = 0.0
     _Matcap1Mode("Matcap mode", Float) = 0
     _Matcap1Str("Matcap strength", Float) = 1
+    _Matcap1Emission("Matcap emission", Float) = 0
+    _Matcap1Distortion0("Matcap distortion0", Float) = 0
 
     _Rim_Lighting0_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting0_Mode("Rim lighting mode", Float) = 0
@@ -89,7 +93,8 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting0_Center("Rim lighting center", Float) = 0.5
     _Rim_Lighting0_Power("Rim lighting power", Float) = 2.0
-    _Rim_Lighting0_Strength("Rim lighting power", Float) = 1.0
+    _Rim_Lighting0_Strength("Rim lighting strength", Float) = 1.0
+    _Rim_Lighting0_Emission("Rim lighting emission", Float) = 0
 
     _Rim_Lighting1_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting1_Mode("Rim lighting mode", Float) = 0
@@ -98,7 +103,8 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting1_Center("Rim lighting center", Float) = 0.5
     _Rim_Lighting1_Power("Rim lighting power", Float) = 2.0
-    _Rim_Lighting1_Strength("Rim lighting power", Float) = 1.0
+    _Rim_Lighting1_Strength("Rim lighting strength", Float) = 1.0
+    _Rim_Lighting1_Emission("Rim lighting emission", Float) = 0
 
     _OKLAB_Enabled("Enable OKLAB", Float) = 0.0
     _OKLAB_Mask("Mask", 2D) = "white" {}
@@ -180,6 +186,8 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY_METALLIC_MAP
       #pragma shader_feature_local _ _LTCGI
       #pragma shader_feature_local _ _TESSELLATION
+      #pragma shader_feature_local _ _MATCAP0_DISTORTION0
+      #pragma shader_feature_local _ _MATCAP1_DISTORTION0
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex
@@ -241,6 +249,8 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY_METALLIC_MAP
       #pragma shader_feature_local _ _LTCGI
       #pragma shader_feature_local _ _TESSELLATION
+      #pragma shader_feature_local _ _MATCAP0_DISTORTION0
+      #pragma shader_feature_local _ _MATCAP1_DISTORTION0
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex

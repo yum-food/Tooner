@@ -70,6 +70,7 @@ texture2D _Matcap0_Mask;
 float _Matcap0_Mask_Invert;
 float _Matcap0Str;
 float _Matcap0Mode;
+float _Matcap0Emission;
 
 float _Enable_Matcap1;
 texture2D _Matcap1;
@@ -77,6 +78,7 @@ texture2D _Matcap1_Mask;
 float _Matcap1_Mask_Invert;
 float _Matcap1Str;
 float _Matcap1Mode;
+float _Matcap1Emission;
 
 float _Rim_Lighting0_Enabled;
 float _Rim_Lighting0_Mode;
@@ -86,6 +88,7 @@ float _Rim_Lighting0_Mask_Invert;
 float _Rim_Lighting0_Center;
 float _Rim_Lighting0_Power;
 float _Rim_Lighting0_Strength;
+float _Rim_Lighting0_Emission;
 
 float _Rim_Lighting1_Enabled;
 float _Rim_Lighting1_Mode;
@@ -95,6 +98,7 @@ float _Rim_Lighting1_Mask_Invert;
 float _Rim_Lighting1_Center;
 float _Rim_Lighting1_Power;
 float _Rim_Lighting1_Strength;
+float _Rim_Lighting1_Emission;
 
 float _OKLAB_Enabled;
 texture2D _OKLAB_Mask;
