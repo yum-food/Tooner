@@ -412,10 +412,9 @@ float4 effect(inout v2f i)
 #endif
 
 #if defined(_RENDERING_CUTOUT)
-#if 0
-  if (albedo.a < _Alpha_Cutoff) {
-    discard;
-  }
+#if defined(_RENDERING_CUTOUT_STOCHASTIC)
+  float ar = rand2(i.uv);
+  clip(albedo.a - ar);
 #else
   clip(albedo.a - _Alpha_Cutoff);
 #endif

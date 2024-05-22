@@ -130,6 +130,8 @@ Shader "yum_food/tooner"
     _Enable_Tessellation("Enable tessellation", Float) = 0.0
     _Tess_Factor("Tessellation factor", Range(1, 64)) = 1.0
     _Tess_Dist_Cutoff("Tessellation distance cutoff", Float) = -1.0
+
+    _Cutout_Mode("Cutout rendering mode", Float) = 0.0
   }
   SubShader
   {
@@ -163,6 +165,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _EMISSION
       //#pragma shader_feature_local _ _SHADING_MODE_FLAT
       #pragma shader_feature_local _ _RENDERING_CUTOUT
+      #pragma shader_feature_local _ _RENDERING_CUTOUT_STOCHASTIC
       #pragma shader_feature_local _ _RENDERING_FADE
       #pragma shader_feature_local _ _OUTLINES
       #pragma shader_feature_local _ _GLITTER
@@ -226,6 +229,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _EMISSION
       //#pragma shader_feature_local _SHADING_MODE_FLAT
       #pragma shader_feature_local _RENDERING_CUTOUT
+      #pragma shader_feature_local _RENDERING_CUTOUT_STOCHASTIC
       #pragma shader_feature_local _RENDERING_FADE
       #pragma shader_feature_local _OUTLINES
       #pragma shader_feature_local _GLITTER
@@ -273,6 +277,7 @@ Shader "yum_food/tooner"
       #pragma target 5.0
 			#pragma shader_feature_local _BASECOLOR_MAP
 			#pragma shader_feature_local _RENDERING_CUTOUT
+      #pragma shader_feature_local _RENDERING_CUTOUT_STOCHASTIC
 			#pragma shader_feature_local _OUTLINES
       #pragma shader_feature_local _EXPLODE
       #pragma shader_feature_local _ _SCROLL

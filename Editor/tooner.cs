@@ -324,7 +324,7 @@ public class ToonerGUI : ShaderGUI {
     mode = (NormalsMode) EditorGUILayout.EnumPopup(
         MakeLabel("Normals mode"), mode);
     if (EditorGUI.EndChangeCheck()) {
-      RecordAction("Rendering Mode");
+      RecordAction("Rendering mode");
     }
     bc.floatValue = (float) mode;
 
@@ -620,6 +620,11 @@ public class ToonerGUI : ShaderGUI {
     Fade
   }
 
+  enum CutoutMode {
+    Cutoff,
+    Stochastic
+  }
+
   void DoRendering() {
     RenderingMode mode = RenderingMode.Opaque;
     if (target.IsKeywordEnabled("_RENDERING_CUTOUT")) {
@@ -630,13 +635,13 @@ public class ToonerGUI : ShaderGUI {
 
     EditorGUI.BeginChangeCheck();
     mode = (RenderingMode) EditorGUILayout.EnumPopup(
-        MakeLabel("Rendering Mode"), mode);
+        MakeLabel("Rendering mode"), mode);
     BlendMode src_blend = BlendMode.One;
     BlendMode dst_blend = BlendMode.Zero;
     bool zwrite = false;
 
     if (EditorGUI.EndChangeCheck()) {
-      RecordAction("Rendering Mode");
+      RecordAction("Rendering mode");
       SetKeyword("_RENDERING_CUTOUT", mode == RenderingMode.Cutout);
       SetKeyword("_RENDERING_FADE", mode == RenderingMode.Fade);
 
@@ -676,8 +681,19 @@ public class ToonerGUI : ShaderGUI {
 
     MaterialProperty bc;
     if (mode == RenderingMode.Cutout) {
-      bc = FindProperty("_Alpha_Cutoff");
-      editor.ShaderProperty(bc, MakeLabel(bc));
+      EditorGUI.BeginChangeCheck();
+      bc = FindProperty("_Cutout_Mode");
+      CutoutMode cmode = (CutoutMode) Math.Round(bc.floatValue);
+      cmode = (CutoutMode) EditorGUILayout.EnumPopup(
+          MakeLabel("Cutout mode"), cmode);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = (float) cmode;
+      SetKeyword("_RENDERING_CUTOUT_STOCHASTIC", cmode == CutoutMode.Stochastic);
+
+      if (cmode == CutoutMode.Cutoff) {
+        bc = FindProperty("_Alpha_Cutoff");
+        editor.ShaderProperty(bc, MakeLabel(bc));
+      }
     }
 
     bc = FindProperty("_Cull");
