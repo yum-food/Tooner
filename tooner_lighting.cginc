@@ -360,7 +360,7 @@ float get_glitter(float2 uv, float iddx, float iddy, float3 worldPos, float3 nor
     float ndotl = abs(dot(normal, normalize(_WorldSpaceCameraPos.xyz - worldPos)));
     float cutoff = cos((_Glitter_Angle / 180) * 3.14159);
 
-    glitter *= saturate(pow(ndotl / cutoff, 30));
+    glitter *= saturate(pow(ndotl / cutoff, _Glitter_Power));
 
     //glitter = ndotl > cutoff ? glitter : 0;
   }
@@ -385,6 +385,8 @@ float2 matcap_distortion0(float2 matcap_uv) {
   return matcap_uv;
 }
 
+#define UV_SCOFF(uv, tex_st) (uv) * (tex_st).xy + (tex_st).zw
+
 float4 effect(inout v2f i)
 {
   float iddx = ddx(i.uv.x) / 4;
@@ -398,7 +400,7 @@ float4 effect(inout v2f i)
 #endif
 
 #if defined(_BASECOLOR_MAP)
-  float4 albedo = _BaseColorTex.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  float4 albedo = _BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _BaseColorTex_ST), iddx, iddy);
   albedo *= _BaseColor;
 #else
   float4 albedo = _BaseColor;
@@ -423,11 +425,19 @@ float4 effect(inout v2f i)
 
 #if defined(_PBR_OVERLAY)
 #if defined(_PBR_OVERLAY_BASECOLOR_MAP)
-  float4 ov_albedo = _PBR_Overlay_BaseColorTex.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  float4 ov_albedo = _PBR_Overlay_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay_BaseColorTex_ST), iddx, iddy);
   ov_albedo *= _PBR_Overlay_BaseColor;
 #else
   float4 ov_albedo = _BaseColor;
 #endif  // _PBR_OVERLAY_BASECOLOR_MAP
+
+#if defined(_PBR_OVERLAY_MASK)
+  float ov_mask = _PBR_Overlay_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+#else
+  float ov_mask = 1;
+#endif
+  ov_albedo.a *= ov_mask;
+
 #endif  // _PBR_OVERLAY
 
 #if defined(_NORMAL_MAP)
@@ -435,7 +445,8 @@ float4 effect(inout v2f i)
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
   float fw = clamp(fwidth(i.uv), .001, 1) * 1200;
-  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _Tex_NormalStr);
+  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _NormalTex_ST), iddx/2, iddy/2), _Tex_NormalStr);
+  raw_normal = normalize(raw_normal);
 
   raw_normal = BlendNormals(
       (1/fw) * raw_normal,
@@ -447,7 +458,7 @@ float4 effect(inout v2f i)
     // flat normals when far away. If we don't do this, then we see moire effects
     // on e.g. striped normal maps.
     //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay_Tex_NormalStr);
-    float3 raw_normal_2 = UnpackScaleNormal(_PBR_Overlay_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay_Tex_NormalStr * ov_albedo.a);
+    float3 raw_normal_2 = UnpackScaleNormal(_PBR_Overlay_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay_Tex_NormalStr * ov_albedo.a);
 
     raw_normal = BlendNormals(
         raw_normal,
@@ -466,12 +477,12 @@ float4 effect(inout v2f i)
 #endif  // _NORMAL_MAP
 
 #if defined(_METALLIC_MAP)
-  float metallic = _MetallicTex.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  float metallic = _MetallicTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _MetallicTex_ST), iddx, iddy);
 #else
   float metallic = _Metallic;
 #endif
 #if defined(_ROUGHNESS_MAP)
-  float roughness = _RoughnessTex.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  float roughness = _RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _RoughnessTex_ST), iddx, iddy);
 #else
   float roughness = _Roughness;
 #endif

@@ -54,6 +54,9 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bct, "Base color (RGBA)"),
           bct,
           bc);
+      if (bct.textureValue) {
+        editor.TextureScaleOffsetProperty(bct);
+      }
       SetKeyword("_BASECOLOR_MAP", bct.textureValue);
   }
 
@@ -63,6 +66,9 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bct, "Normal"),
           bct,
           FindProperty("_Tex_NormalStr"));
+      if (bct.textureValue) {
+        editor.TextureScaleOffsetProperty(bct);
+      }
       SetKeyword("_NORMAL_MAP", bct.textureValue);
   }
 
@@ -73,6 +79,9 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bct, "Metallic (RGBA)"),
           bct,
           bc);
+      if (bct.textureValue) {
+        editor.TextureScaleOffsetProperty(bct);
+      }
       SetKeyword("_METALLIC_MAP", bct.textureValue);
   }
 
@@ -83,6 +92,9 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bct, "Roughness (RGBA)"),
           bct,
           bc);
+      if (bct.textureValue) {
+        editor.TextureScaleOffsetProperty(bct);
+      }
       SetKeyword("_ROUGHNESS_MAP", bct.textureValue);
   }
 
@@ -102,6 +114,9 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bct, "Base color (RGBA)"),
           bct,
           bc);
+      if (bct.textureValue) {
+        editor.TextureScaleOffsetProperty(bct);
+      }
       SetKeyword("_PBR_OVERLAY_BASECOLOR_MAP", bct.textureValue);
 
       bct = FindProperty("_PBR_Overlay_NormalTex");
@@ -109,6 +124,9 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bct, "Normal"),
           bct,
           FindProperty("_PBR_Overlay_Tex_NormalStr"));
+      if (bct.textureValue) {
+        editor.TextureScaleOffsetProperty(bct);
+      }
       SetKeyword("_PBR_OVERLAY_NORMAL_MAP", bct.textureValue);
 
       bc = FindProperty("_PBR_Overlay_Metallic");
@@ -117,6 +135,9 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bct, "Metallic (RGBA)"),
           bct,
           bc);
+      if (bct.textureValue) {
+        editor.TextureScaleOffsetProperty(bct);
+      }
       SetKeyword("_PBR_OVERLAY_METALLIC_MAP", bct.textureValue);
 
        bc = FindProperty("_PBR_Overlay_Roughness");
@@ -125,7 +146,16 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bct, "Roughness (RGBA)"),
           bct,
           bc);
+      if (bct.textureValue) {
+        editor.TextureScaleOffsetProperty(bct);
+      }
       SetKeyword("_PBR_OVERLAY_ROUGHNESS_MAP", bct.textureValue);
+
+       bct = FindProperty("_PBR_Overlay_Mask");
+      editor.TexturePropertySingleLine(
+          MakeLabel(bct, "Mask"),
+          bct);
+      SetKeyword("_PBR_OVERLAY_MASK", bct.textureValue);
     }
   }
 
@@ -474,6 +504,11 @@ public class ToonerGUI : ShaderGUI {
       editor.FloatProperty(
           bc,
           "Glitter angle");
+
+      bc = FindProperty("_Glitter_Power");
+      editor.FloatProperty(
+          bc,
+          "Glitter power");
     }
   }
 

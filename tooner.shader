@@ -20,6 +20,7 @@ Shader "yum_food/tooner"
     [NoScaleOffset] _PBR_Overlay_MetallicTex("Metallic", 2D) = "white" {}
     [NoScaleOffset] _PBR_Overlay_RoughnessTex("Roughness", 2D) = "black" {}
     [NoScaleOffset] _PBR_Overlay_Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
+    [NoScaleOffset] _PBR_Overlay_Mask("Mask", 2D) = "white" {}
 
     [NoScaleOffset] _EmissionTex("Emission map", 2D) = "black" {}
     _EmissionStrength("Emission strength", Range(0, 2)) = 0
@@ -53,6 +54,7 @@ Shader "yum_food/tooner"
     _Glitter_Seed("Glitter seed", float) = 1
     _Glitter_Brightness("Glitter brightness", float) = 1
     _Glitter_Angle("Glitter angle", Range(0, 90)) = 90
+    _Glitter_Power("Glitter power", float) = 30
 
 		[MaterialToggle] _Explode_Toggle("Explode toggle", Float) = 0
 		_Explode_Phase("Explode phase", Range(0, 1)) = 0

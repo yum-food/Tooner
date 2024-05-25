@@ -8,18 +8,27 @@ float _Metallic;
 float _Roughness;
 
 texture2D _BaseColorTex;
+float4 _BaseColorTex_ST;
 texture2D _NormalTex;
+float4 _NormalTex_ST;
 texture2D _MetallicTex;
+float4 _MetallicTex_ST;
 texture2D _RoughnessTex;
+float4 _RoughnessTex_ST;
 
 float4 _PBR_Overlay_BaseColor;
 float _PBR_Overlay_Metallic;
 float _PBR_Overlay_Roughness;
 texture2D _PBR_Overlay_BaseColorTex;
+float4 _PBR_Overlay_BaseColorTex_ST;
 texture2D _PBR_Overlay_NormalTex;
+float4 _PBR_Overlay_NormalTex_ST;
 texture2D _PBR_Overlay_MetallicTex;
+float4 _PBR_Overlay_MetallicTex_ST;
 texture2D _PBR_Overlay_RoughnessTex;
+float4 _PBR_Overlay_RoughnessTex_ST;
 float _PBR_Overlay_Tex_NormalStr;
+texture2D _PBR_Overlay_Mask;
 
 texture2D _EmissionTex;
 float _EmissionStrength;
@@ -51,6 +60,7 @@ float _Glitter_Speed;
 float _Glitter_Seed;
 float _Glitter_Brightness;
 float _Glitter_Angle;
+float _Glitter_Power;
 
 float _Explode_Phase;
 
