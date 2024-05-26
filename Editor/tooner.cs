@@ -99,63 +99,78 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoPBROverlay() {
-    MaterialProperty bc = FindProperty("_PBR_Overlay_Enable");
-    bool enabled = bc.floatValue > 1E-6;
-    EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = enabled ? 1.0f : 0.0f;
-    SetKeyword("_PBR_OVERLAY", enabled);
+    for (int i = 0; i < 2; i++) {
+      GUILayout.Label($"PBR overlay {i}", EditorStyles.boldLabel);
+      EditorGUI.indentLevel += 1;
 
-    if (enabled) {
-      bc = FindProperty("_PBR_Overlay_BaseColor");
-      MaterialProperty bct = FindProperty("_PBR_Overlay_BaseColorTex");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bct, "Base color (RGBA)"),
-          bct,
-          bc);
-      if (bct.textureValue) {
-        editor.TextureScaleOffsetProperty(bct);
+      MaterialProperty bc = FindProperty($"_PBR_Overlay{i}_Enable");
+      bool enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Enable", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      SetKeyword($"_PBR_OVERLAY{i}", enabled);
+
+      if (enabled) {
+        bc = FindProperty($"_PBR_Overlay{i}_BaseColor");
+        MaterialProperty bct = FindProperty($"_PBR_Overlay{i}_BaseColorTex");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bct, "Base color (RGBA)"),
+            bct,
+            bc);
+        if (bct.textureValue) {
+          editor.TextureScaleOffsetProperty(bct);
+        }
+        SetKeyword($"_PBR_OVERLAY{i}_BASECOLOR_MAP", bct.textureValue);
+
+        bct = FindProperty($"_PBR_Overlay{i}_NormalTex");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bct, "Normal"),
+            bct,
+            FindProperty($"_PBR_Overlay{i}_Tex_NormalStr"));
+        if (bct.textureValue) {
+          editor.TextureScaleOffsetProperty(bct);
+        }
+        SetKeyword($"_PBR_OVERLAY{i}_NORMAL_MAP", bct.textureValue);
+
+        bc = FindProperty($"_PBR_Overlay{i}_Metallic");
+        bct = FindProperty($"_PBR_Overlay{i}_MetallicTex");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bct, "Metallic (RGBA)"),
+            bct,
+            bc);
+        if (bct.textureValue) {
+          editor.TextureScaleOffsetProperty(bct);
+        }
+        SetKeyword($"_PBR_OVERLAY{i}_METALLIC_MAP", bct.textureValue);
+
+        bc = FindProperty($"_PBR_Overlay{i}_Roughness");
+        bct = FindProperty($"_PBR_Overlay{i}_RoughnessTex");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bct, "Roughness (RGBA)"),
+            bct,
+            bc);
+        if (bct.textureValue) {
+          editor.TextureScaleOffsetProperty(bct);
+        }
+        SetKeyword($"_PBR_OVERLAY{i}_ROUGHNESS_MAP", bct.textureValue);
+
+        bct = FindProperty($"_PBR_Overlay{i}_Mask");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bct, "Mask"),
+            bct);
+        SetKeyword($"_PBR_OVERLAY{i}_MASK", bct.textureValue);
+
+        if (bct.textureValue) {
+          bc = FindProperty($"_PBR_Overlay{i}_Mask_Invert");
+          enabled = bc.floatValue > 1E-6;
+          EditorGUI.BeginChangeCheck();
+          enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+          EditorGUI.EndChangeCheck();
+          bc.floatValue = enabled ? 1.0f : 0.0f;
+        }
       }
-      SetKeyword("_PBR_OVERLAY_BASECOLOR_MAP", bct.textureValue);
-
-      bct = FindProperty("_PBR_Overlay_NormalTex");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bct, "Normal"),
-          bct,
-          FindProperty("_PBR_Overlay_Tex_NormalStr"));
-      if (bct.textureValue) {
-        editor.TextureScaleOffsetProperty(bct);
-      }
-      SetKeyword("_PBR_OVERLAY_NORMAL_MAP", bct.textureValue);
-
-      bc = FindProperty("_PBR_Overlay_Metallic");
-      bct = FindProperty("_PBR_Overlay_MetallicTex");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bct, "Metallic (RGBA)"),
-          bct,
-          bc);
-      if (bct.textureValue) {
-        editor.TextureScaleOffsetProperty(bct);
-      }
-      SetKeyword("_PBR_OVERLAY_METALLIC_MAP", bct.textureValue);
-
-       bc = FindProperty("_PBR_Overlay_Roughness");
-       bct = FindProperty("_PBR_Overlay_RoughnessTex");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bct, "Roughness (RGBA)"),
-          bct,
-          bc);
-      if (bct.textureValue) {
-        editor.TextureScaleOffsetProperty(bct);
-      }
-      SetKeyword("_PBR_OVERLAY_ROUGHNESS_MAP", bct.textureValue);
-
-       bct = FindProperty("_PBR_Overlay_Mask");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bct, "Mask"),
-          bct);
-      SetKeyword("_PBR_OVERLAY_MASK", bct.textureValue);
+      EditorGUI.indentLevel -= 1;
     }
   }
 
@@ -179,6 +194,17 @@ public class ToonerGUI : ShaderGUI {
       editor.RangeProperty(
           bc,
           "Max brightness");
+
+      bc = FindProperty("_Ambient_Occlusion");
+      editor.TexturePropertySingleLine(
+          MakeLabel(bc, "Ambient occlusion"),
+          bc);
+      SetKeyword("_AMBIENT_OCCLUSION", bc.textureValue);
+
+      if (bc.textureValue) {
+        bc = FindProperty("_Ambient_Occlusion_Strength");
+        editor.RangeProperty(bc, "Ambient occlusion strength");
+      }
   }
 
   void DoEmission() {
@@ -773,10 +799,7 @@ public class ToonerGUI : ShaderGUI {
     DoRoughness();
     EditorGUI.indentLevel -= 1;
 
-    GUILayout.Label("PBR overlay", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
     DoPBROverlay();
-    EditorGUI.indentLevel -= 1;
 
     GUILayout.Label("Lighting", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;

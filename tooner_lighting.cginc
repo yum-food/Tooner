@@ -154,11 +154,15 @@ tess_factors patch_constant(InputPatch<tess_data, 3> patch)
 {
   tess_factors f;
 
+#if defined(_TESSELLATION)
   float3 worldPos = mul(unity_ObjectToWorld, patch[0].position);
   float factor = _Tess_Factor;
   if (_Tess_Dist_Cutoff > 0 && length(_WorldSpaceCameraPos - worldPos) > _Tess_Dist_Cutoff) {
     factor = 1;
   }
+#else
+  float factor = 1;
+#endif
 
   f.edge[0] = factor;
   f.edge[1] = factor;
@@ -387,6 +391,43 @@ float2 matcap_distortion0(float2 matcap_uv) {
 
 #define UV_SCOFF(uv, tex_st) (uv) * (tex_st).xy + (tex_st).zw
 
+void getOverlayAlbedo(inout float4 ov_albedo,
+    inout float ov_mask,
+    v2f i, float iddx, float iddy)
+{
+#if defined(_PBR_OVERLAY0)
+#if defined(_PBR_OVERLAY0_BASECOLOR_MAP)
+  ov_albedo = _PBR_Overlay0_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay0_BaseColorTex_ST), iddx, iddy);
+  ov_albedo *= _PBR_Overlay0_BaseColor;
+#else
+  ov_albedo = _PBR_Overlay0_BaseColor;
+#endif  // _PBR_OVERLAY0_BASECOLOR_MAP
+
+#if defined(_PBR_OVERLAY0_MASK)
+  ov_mask = _PBR_Overlay0_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  ov_mask = ((bool) round(_PBR_Overlay0_Mask_Invert)) ? 1.0 - ov_mask : ov_mask;
+#else
+  ov_mask = 1;
+#endif
+  ov_albedo.a *= ov_mask;
+#endif  // _PBR_OVERLAY0
+}
+
+void applyOverlayNormal(inout float3 raw_normal, float ov_mask, v2f i, float iddx, float iddy)
+{
+#if defined(_PBR_OVERLAY0) && defined(_PBR_OVERLAY0_NORMAL_MAP)
+  // Use UVs to smoothly blend between fully detailed normals when close up and
+  // flat normals when far away. If we don't do this, then we see moire effects
+  // on e.g. striped normal maps.
+  //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay0_Tex_NormalStr);
+  float3 raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay0_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay0_Tex_NormalStr * ov_mask);
+
+  raw_normal = BlendNormals(
+      raw_normal,
+      raw_normal_2);
+#endif  // _PBR_OVERLAY0 && _PBR_OVERLAY0_NORMAL_MAP
+}
+
 float4 effect(inout v2f i)
 {
   float iddx = ddx(i.uv.x) / 4;
@@ -423,22 +464,9 @@ float4 effect(inout v2f i)
   albedo.a = 1;
 #endif
 
-#if defined(_PBR_OVERLAY)
-#if defined(_PBR_OVERLAY_BASECOLOR_MAP)
-  float4 ov_albedo = _PBR_Overlay_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay_BaseColorTex_ST), iddx, iddy);
-  ov_albedo *= _PBR_Overlay_BaseColor;
-#else
-  float4 ov_albedo = _BaseColor;
-#endif  // _PBR_OVERLAY_BASECOLOR_MAP
-
-#if defined(_PBR_OVERLAY_MASK)
-  float ov_mask = _PBR_Overlay_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
-#else
-  float ov_mask = 1;
-#endif
-  ov_albedo.a *= ov_mask;
-
-#endif  // _PBR_OVERLAY
+  float4 ov_albedo = 0;
+  float ov_mask = 0;
+  getOverlayAlbedo(ov_albedo, ov_mask, i, iddx, iddy);
 
 #if defined(_NORMAL_MAP)
   // Use UVs to smoothly blend between fully detailed normals when close up and
@@ -446,25 +474,15 @@ float4 effect(inout v2f i)
   // on e.g. striped normal maps.
   float fw = clamp(fwidth(i.uv), .001, 1) * 1200;
   float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _NormalTex_ST), iddx/2, iddy/2), _Tex_NormalStr);
-  raw_normal = normalize(raw_normal);
 
   raw_normal = BlendNormals(
       (1/fw) * raw_normal,
       fw * float3(0, 0, 1));
+#else
+  float3 raw_normal = UnpackNormal(float4(0.5, 0.5, 1, 1));
+#endif  // _NORMAL_MAP
 
-#if defined(_PBR_OVERLAY) && defined(_PBR_OVERLAY_NORMAL_MAP)
-  {
-    // Use UVs to smoothly blend between fully detailed normals when close up and
-    // flat normals when far away. If we don't do this, then we see moire effects
-    // on e.g. striped normal maps.
-    //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay_Tex_NormalStr);
-    float3 raw_normal_2 = UnpackScaleNormal(_PBR_Overlay_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay_Tex_NormalStr * ov_albedo.a);
-
-    raw_normal = BlendNormals(
-        raw_normal,
-        raw_normal_2);
-  }
-#endif  // _PBR_OVERLAY && _PBR_OVERLAY_NORMAL_MAP
+  applyOverlayNormal(raw_normal, ov_mask, i, iddx, iddy);
 
   float3 binormal = CreateBinormal(i.normal, i.tangent.xyz, i.tangent.w);
 	float3 normal = normalize(
@@ -472,9 +490,6 @@ float4 effect(inout v2f i)
 		raw_normal.y * binormal +
 		raw_normal.z * i.normal
 	);
-#else  // !_NORMAL_MAP
-  float3 normal = i.normal;
-#endif  // _NORMAL_MAP
 
 #if defined(_METALLIC_MAP)
   float metallic = _MetallicTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _MetallicTex_ST), iddx, iddy);
@@ -492,9 +507,9 @@ float4 effect(inout v2f i)
   float4 vertex_light_color = 0;
 #endif
 
-#if defined(_PBR_OVERLAY)
+#if defined(_PBR_OVERLAY0)
   albedo.rgb = lerp(albedo.rgb, ov_albedo.rgb, ov_albedo.a);
-#endif  // _PBR_OVERLAY
+#endif  // _PBR_OVERLAY0
 
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
   float3 matcap_emission = 0;
@@ -725,8 +740,15 @@ float4 effect(inout v2f i)
  }
 #endif
 
+#if defined(_AMBIENT_OCCLUSION)
+  float ao = _Ambient_Occlusion.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  ao = 1 - (1 - ao) * _Ambient_Occlusion_Strength;
+#else
+  float ao = 1;
+#endif
+
   float4 lit = getLitColor(vertex_light_color, albedo, i.worldPos, normal,
-      metallic, 1.0 - roughness, i.uv, i);
+      metallic, 1.0 - roughness, i.uv, ao, i);
 
   float4 result = lit;
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)

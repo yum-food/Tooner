@@ -10,11 +10,11 @@
 
 UNITY_DECLARE_TEXCUBE(_Cubemap);
 
-UnityLight CreateDirectLight(float3 normal, v2f i)
+UnityLight CreateDirectLight(float3 normal, float ao, v2f i)
 {
   UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
   UnityLight light;
-  light.color = _LightColor0.rgb * attenuation;
+  light.color = _LightColor0.rgb * attenuation * ao;
 #if defined(POINT) || defined(POINT_COOKIE) || defined(SPOT)
   light.dir = normalize((_WorldSpaceLightPos0 - i.worldPos).xyz);
 #else
@@ -51,7 +51,7 @@ float3 BoxProjection (
 }
 
 UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, float3 normal,
-    float smoothness, float3 worldPos, float2 uv) {
+    float smoothness, float3 worldPos, float ao, float2 uv) {
   UnityIndirect indirect;
   indirect.diffuse = vertexLightColor;
   indirect.specular = 0;
@@ -109,6 +109,8 @@ UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, floa
   indirect.specular = probe0;
 #endif  // FORWARD_BASE_PASS
 
+  indirect.diffuse *= ao;
+
   return indirect;
 }
 
@@ -117,7 +119,8 @@ float4 getLitColor(
     float4 albedo,
     float3 worldPos,
     float3 normal,
-    float metallic, float smoothness, float2 uv, v2f i)
+    float metallic, float smoothness, float2 uv, float ao,
+    v2f i)
 {
   float3 specular_tint;
   float one_minus_reflectivity;
@@ -135,9 +138,9 @@ float4 getLitColor(
   normal = lerp(spherical_normal, flat_normal, flat);
 
 	UnityIndirect indirect_light = CreateIndirectLight(vertexLightColor,
-			view_dir, normal, smoothness, worldPos, uv);
+			view_dir, normal, smoothness, worldPos, ao, uv);
 
-  UnityLight direct_light = CreateDirectLight(normal, i);
+  UnityLight direct_light = CreateDirectLight(normal, ao, i);
   if (flat) {
     float e = 0.8;
     indirect_light.diffuse += direct_light.color * e;

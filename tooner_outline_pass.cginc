@@ -25,6 +25,7 @@ struct tess_factors {
 
 v2f vert(appdata v)
 {
+#if defined(_OUTLINES)
   float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/1);
   outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
 
@@ -70,10 +71,23 @@ v2f vert(appdata v)
   #endif
 
   return o;
+#else
+  v2f o;
+  o.worldPos = 0;
+  o.objPos = 0;
+  o.clipPos = 0;
+  o.normal = 0;
+  o.uv = 0;
+#if defined(LIGHTMAP_ON)
+  o.lmuv = 0;
+#endif
+  return o;
+#endif  // _OUTLINES
 }
 
 tess_data hull_vertex(appdata v)
 {
+#if defined(_OUTLINES)
   float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/3);
   outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
 
@@ -102,17 +116,22 @@ tess_data hull_vertex(appdata v)
   o.uv = v.uv0.xy;
 
   return o;
+#endif  // _OUTLINES
 }
 
 tess_factors patch_constant(InputPatch<tess_data, 3> patch)
 {
   tess_factors f;
 
+#if defined(_TESSELLATION)
   float3 worldPos = mul(unity_ObjectToWorld, patch[0].vertex);
   float factor = _Tess_Factor;
   if (_Tess_Dist_Cutoff > 0 && length(_WorldSpaceCameraPos - worldPos) > _Tess_Dist_Cutoff) {
     factor = 1;
   }
+#else
+  float factor = 1;
+#endif
 
   f.edge[0] = factor;
   f.edge[1] = factor;
@@ -302,6 +321,7 @@ void geom(triangle v2f tri_in[3],
 
 fixed4 frag (v2f i) : SV_Target
 {
+#if defined(_OUTLINES)
   float iddx = ddx(i.uv.x) / 4;
   float iddy = ddx(i.uv.y) / 4;
 #if defined(_BASECOLOR_MAP)
@@ -321,9 +341,10 @@ fixed4 frag (v2f i) : SV_Target
   //float3 flat_normal = normalize(UnpackNormal(float4(128, 128, 255, 255)/255));
   float3 flat_normal = normalize(_WorldSpaceCameraPos - i.worldPos);
   float4 vertex_light_color = 0;
+  float ao = 1;
   float4 result = getLitColor(
       vertex_light_color,
-      _Outline_Color, i.worldPos, flat_normal, 0, 0, i.uv, i);
+      _Outline_Color, i.worldPos, flat_normal, 0, 0, i.uv, ao, i);
 
   result += _Outline_Color * _Outline_Emission_Strength;
 
@@ -338,6 +359,10 @@ fixed4 frag (v2f i) : SV_Target
 #endif
 
   return result;
+#else
+  discard;
+  return 0;
+#endif  // _OUTLINES
 }
 
 #endif  // __TOONER_OUTLINE_PASS
