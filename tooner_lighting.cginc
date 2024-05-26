@@ -391,41 +391,144 @@ float2 matcap_distortion0(float2 matcap_uv) {
 
 #define UV_SCOFF(uv, tex_st) (uv) * (tex_st).xy + (tex_st).zw
 
-void getOverlayAlbedo(inout float4 ov_albedo,
-    inout float ov_mask,
+struct PbrOverlay {
+#if defined(_PBR_OVERLAY0)
+  float4 ov0_albedo;
+  float ov0_mask;
+#endif
+#if defined(_PBR_OVERLAY1)
+  float4 ov1_albedo;
+  float ov1_mask;
+#endif
+#if defined(_PBR_OVERLAY2)
+  float4 ov2_albedo;
+  float ov2_mask;
+#endif
+#if defined(_PBR_OVERLAY3)
+  float4 ov3_albedo;
+  float ov3_mask;
+#endif
+};
+
+void getOverlayAlbedo(inout PbrOverlay ov,
     v2f i, float iddx, float iddy)
 {
 #if defined(_PBR_OVERLAY0)
 #if defined(_PBR_OVERLAY0_BASECOLOR_MAP)
-  ov_albedo = _PBR_Overlay0_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay0_BaseColorTex_ST), iddx, iddy);
-  ov_albedo *= _PBR_Overlay0_BaseColor;
+  ov.ov0_albedo = _PBR_Overlay0_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay0_BaseColorTex_ST), iddx, iddy);
+  ov.ov0_albedo *= _PBR_Overlay0_BaseColor;
 #else
-  ov_albedo = _PBR_Overlay0_BaseColor;
+  ov.ov0_albedo = _PBR_Overlay0_BaseColor;
 #endif  // _PBR_OVERLAY0_BASECOLOR_MAP
 
 #if defined(_PBR_OVERLAY0_MASK)
-  ov_mask = _PBR_Overlay0_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
-  ov_mask = ((bool) round(_PBR_Overlay0_Mask_Invert)) ? 1.0 - ov_mask : ov_mask;
+  ov.ov0_mask = _PBR_Overlay0_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  ov.ov0_mask = ((bool) round(_PBR_Overlay0_Mask_Invert)) ? 1.0 - ov.ov0_mask : ov.ov0_mask;
 #else
-  ov_mask = 1;
+  ov.ov0_mask = 1;
 #endif
-  ov_albedo.a *= ov_mask;
+  ov.ov0_albedo.a *= ov.ov0_mask;
 #endif  // _PBR_OVERLAY0
+
+#if defined(_PBR_OVERLAY1)
+#if defined(_PBR_OVERLAY1_BASECOLOR_MAP)
+  ov.ov1_albedo = _PBR_Overlay1_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay1_BaseColorTex_ST), iddx, iddy);
+  ov.ov1_albedo *= _PBR_Overlay1_BaseColor;
+#else
+  ov.ov1_albedo = _PBR_Overlay1_BaseColor;
+#endif  // _PBR_OVERLAY1_BASECOLOR_MAP
+
+#if defined(_PBR_OVERLAY1_MASK)
+  ov.ov1_mask = _PBR_Overlay1_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  ov.ov1_mask = ((bool) round(_PBR_Overlay1_Mask_Invert)) ? 1.0 - ov.ov1_mask : ov.ov1_mask;
+#else
+  ov.ov1_mask = 1;
+#endif
+  ov.ov1_albedo.a *= ov.ov1_mask;
+#endif  // _PBR_OVERLAY1
+
+#if defined(_PBR_OVERLAY2)
+#if defined(_PBR_OVERLAY2_BASECOLOR_MAP)
+  ov.ov2_albedo = _PBR_Overlay2_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay2_BaseColorTex_ST), iddx, iddy);
+  ov.ov2_albedo *= _PBR_Overlay2_BaseColor;
+#else
+  ov.ov2_albedo = _PBR_Overlay2_BaseColor;
+#endif  // _PBR_OVERLAY2_BASECOLOR_MAP
+
+#if defined(_PBR_OVERLAY2_MASK)
+  ov.ov2_mask = _PBR_Overlay2_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  ov.ov2_mask = ((bool) round(_PBR_Overlay2_Mask_Invert)) ? 1.0 - ov.ov2_mask : ov.ov2_mask;
+#else
+  ov.ov2_mask = 1;
+#endif
+  ov.ov2_albedo.a *= ov.ov2_mask;
+#endif  // _PBR_OVERLAY2
+
+#if defined(_PBR_OVERLAY3)
+#if defined(_PBR_OVERLAY3_BASECOLOR_MAP)
+  ov.ov3_albedo = _PBR_Overlay3_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay3_BaseColorTex_ST), iddx, iddy);
+  ov.ov3_albedo *= _PBR_Overlay3_BaseColor;
+#else
+  ov.ov3_albedo = _PBR_Overlay3_BaseColor;
+#endif  // _PBR_OVERLAY3_BASECOLOR_MAP
+
+#if defined(_PBR_OVERLAY3_MASK)
+  ov.ov3_mask = _PBR_Overlay3_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  ov.ov3_mask = ((bool) round(_PBR_Overlay3_Mask_Invert)) ? 1.0 - ov.ov3_mask : ov.ov3_mask;
+#else
+  ov.ov3_mask = 1;
+#endif
+  ov.ov3_albedo.a *= ov.ov3_mask;
+#endif  // _PBR_OVERLAY3
 }
 
-void applyOverlayNormal(inout float3 raw_normal, float ov_mask, v2f i, float iddx, float iddy)
+void applyOverlayNormal(inout float3 raw_normal, PbrOverlay ov, v2f i, float iddx, float iddy)
 {
+  float3 raw_normal_2;
 #if defined(_PBR_OVERLAY0) && defined(_PBR_OVERLAY0_NORMAL_MAP)
   // Use UVs to smoothly blend between fully detailed normals when close up and
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
   //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay0_Tex_NormalStr);
-  float3 raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay0_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay0_Tex_NormalStr * ov_mask);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay0_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay0_Tex_NormalStr * ov.ov0_mask);
 
   raw_normal = BlendNormals(
       raw_normal,
       raw_normal_2);
 #endif  // _PBR_OVERLAY0 && _PBR_OVERLAY0_NORMAL_MAP
+#if defined(_PBR_OVERLAY1) && defined(_PBR_OVERLAY1_NORMAL_MAP)
+  // Use UVs to smoothly blend between fully detailed normals when close up and
+  // flat normals when far away. If we don't do this, then we see moire effects
+  // on e.g. striped normal maps.
+  //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay1_Tex_NormalStr);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay1_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay1_Tex_NormalStr * ov.ov1_mask);
+
+  raw_normal = BlendNormals(
+      raw_normal,
+      raw_normal_2);
+#endif  // _PBR_OVERLAY1 && _PBR_OVERLAY1_NORMAL_MAP
+#if defined(_PBR_OVERLAY2) && defined(_PBR_OVERLAY2_NORMAL_MAP)
+  // Use UVs to smoothly blend between fully detailed normals when close up and
+  // flat normals when far away. If we don't do this, then we see moire effects
+  // on e.g. striped normal maps.
+  //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay2_Tex_NormalStr);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay2_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay2_Tex_NormalStr * ov.ov2_mask);
+
+  raw_normal = BlendNormals(
+      raw_normal,
+      raw_normal_2);
+#endif  // _PBR_OVERLAY2 && _PBR_OVERLAY2_NORMAL_MAP
+#if defined(_PBR_OVERLAY3) && defined(_PBR_OVERLAY3_NORMAL_MAP)
+  // Use UVs to smoothly blend between fully detailed normals when close up and
+  // flat normals when far away. If we don't do this, then we see moire effects
+  // on e.g. striped normal maps.
+  //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay3_Tex_NormalStr);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay3_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay3_Tex_NormalStr * ov.ov3_mask);
+
+  raw_normal = BlendNormals(
+      raw_normal,
+      raw_normal_2);
+#endif  // _PBR_OVERLAY3 && _PBR_OVERLAY3_NORMAL_MAP
 }
 
 float4 effect(inout v2f i)
@@ -464,9 +567,8 @@ float4 effect(inout v2f i)
   albedo.a = 1;
 #endif
 
-  float4 ov_albedo = 0;
-  float ov_mask = 0;
-  getOverlayAlbedo(ov_albedo, ov_mask, i, iddx, iddy);
+  PbrOverlay ov;
+  getOverlayAlbedo(ov, i, iddx, iddy);
 
 #if defined(_NORMAL_MAP)
   // Use UVs to smoothly blend between fully detailed normals when close up and
@@ -482,7 +584,7 @@ float4 effect(inout v2f i)
   float3 raw_normal = UnpackNormal(float4(0.5, 0.5, 1, 1));
 #endif  // _NORMAL_MAP
 
-  applyOverlayNormal(raw_normal, ov_mask, i, iddx, iddy);
+  applyOverlayNormal(raw_normal, ov, i, iddx, iddy);
 
   float3 binormal = CreateBinormal(i.normal, i.tangent.xyz, i.tangent.w);
 	float3 normal = normalize(
@@ -508,8 +610,17 @@ float4 effect(inout v2f i)
 #endif
 
 #if defined(_PBR_OVERLAY0)
-  albedo.rgb = lerp(albedo.rgb, ov_albedo.rgb, ov_albedo.a);
-#endif  // _PBR_OVERLAY0
+  albedo.rgb = lerp(albedo.rgb, ov.ov0_albedo.rgb, ov.ov0_albedo.a);
+#endif
+#if defined(_PBR_OVERLAY1)
+  albedo.rgb = lerp(albedo.rgb, ov.ov1_albedo.rgb, ov.ov1_albedo.a);
+#endif
+#if defined(_PBR_OVERLAY2)
+  albedo.rgb = lerp(albedo.rgb, ov.ov2_albedo.rgb, ov.ov2_albedo.a);
+#endif
+#if defined(_PBR_OVERLAY3)
+  albedo.rgb = lerp(albedo.rgb, ov.ov3_albedo.rgb, ov.ov3_albedo.a);
+#endif
 
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
   float3 matcap_emission = 0;
