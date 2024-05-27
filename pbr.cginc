@@ -1,8 +1,8 @@
 #ifndef __PBR_INC
 #define __PBR_INC
 
-#include "AutoLight.cginc"
 #include "UnityPBSLighting.cginc"
+#include "AutoLight.cginc"
 
 #include "globals.cginc"
 #include "interpolators.cginc"

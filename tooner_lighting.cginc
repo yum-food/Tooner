@@ -1,6 +1,8 @@
 #ifndef TOONER_LIGHTING
 #define TOONER_LIGHTING
 
+#include "pbr.cginc"
+
 #include "audiolink.cginc"
 #include "clones.cginc"
 #include "globals.cginc"
@@ -8,7 +10,6 @@
 #include "iq_sdf.cginc"
 #include "math.cginc"
 #include "motion.cginc"
-#include "pbr.cginc"
 #include "poi.cginc"
 #include "shadertoy.cginc"
 #include "tooner_scroll.cginc"
