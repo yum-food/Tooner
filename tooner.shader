@@ -201,7 +201,7 @@ Shader "yum_food/tooner"
       CGPROGRAM
       #pragma target 5.0
 
-      #pragma multi_compile _ LIGHTMAP_ON VERTEXLIGHT_ON
+      #pragma multi_compile _ VERTEXLIGHT_ON SHADOWS_SCREEN
       #pragma shader_feature_local _ _BASECOLOR_MAP
       #pragma shader_feature_local _ _NORMAL_MAP
       #pragma shader_feature_local _ _METALLIC_MAP
@@ -302,7 +302,7 @@ Shader "yum_food/tooner"
       CGPROGRAM
       #pragma target 5.0
 
-      #pragma multi_compile_fwdadd
+      #pragma multi_compile_fwdadd_fullshadows
       #pragma multi_compile DIRECTIONAL DIRECTIONAL_COOKIE POINT SPOT
       #pragma shader_feature_local _BASECOLOR_MAP
       #pragma shader_feature_local _NORMAL_MAP

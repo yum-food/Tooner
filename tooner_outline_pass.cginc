@@ -63,7 +63,7 @@ v2f vert(appdata v)
   v2f o;
   o.worldPos = mul(unity_ObjectToWorld, v.vertex);
   o.objPos = v.vertex;
-  o.clipPos = UnityObjectToClipPos(v.vertex);
+  o.pos = UnityObjectToClipPos(v.vertex);
   o.normal = normal;
   o.uv = v.uv0.xy;
   #if defined(LIGHTMAP_ON)
@@ -75,7 +75,7 @@ v2f vert(appdata v)
   v2f o;
   o.worldPos = 0;
   o.objPos = 0;
-  o.clipPos = 0;
+  o.pos = 0;
   o.normal = 0;
   o.uv = 0;
 #if defined(LIGHTMAP_ON)
@@ -175,7 +175,7 @@ v2f domain(
     patch[0].vertex * baryc.x +
     patch[1].vertex * baryc.y +
     patch[2].vertex * baryc.z;
-  data.clipPos = UnityObjectToClipPos(pos);
+  data.pos = UnityObjectToClipPos(pos);
   data.objPos = pos;
   data.worldPos = mul(unity_ObjectToWorld, pos);
 
@@ -285,9 +285,9 @@ void geom(triangle v2f tri_in[3],
     v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
 
-    v0.clipPos = UnityObjectToClipPos(v0_objPos);
-    v1.clipPos = UnityObjectToClipPos(v1_objPos);
-    v2.clipPos = UnityObjectToClipPos(v2_objPos);
+    v0.pos = UnityObjectToClipPos(v0_objPos);
+    v1.pos = UnityObjectToClipPos(v1_objPos);
+    v2.pos = UnityObjectToClipPos(v2_objPos);
   }
 #endif
 #if defined(_SCROLL)
@@ -302,9 +302,9 @@ void geom(triangle v2f tri_in[3],
     float3 v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     float3 v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
 
-    v0.clipPos = UnityObjectToClipPos(v0_objPos);
-    v1.clipPos = UnityObjectToClipPos(v1_objPos);
-    v2.clipPos = UnityObjectToClipPos(v2_objPos);
+    v0.pos = UnityObjectToClipPos(v0_objPos);
+    v1.pos = UnityObjectToClipPos(v1_objPos);
+    v2.pos = UnityObjectToClipPos(v2_objPos);
   }
 #endif
 #if defined(_CLONES)

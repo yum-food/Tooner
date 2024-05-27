@@ -15,7 +15,7 @@ struct appdata
 
 struct v2f
 {
-  float4 clipPos : POSITION;
+  float4 pos : POSITION;
   float2 uv : TEXCOORD0;
   #if defined(LIGHTMAP_ON)
   float2 lmuv : TEXCOORD1;
@@ -38,7 +38,7 @@ struct appdata
 
 struct v2f
 {
-  float4 clipPos : SV_POSITION;
+  float4 pos : SV_POSITION;
   float2 uv : TEXCOORD0;
   #if defined(LIGHTMAP_ON)
   float2 lmuv : TEXCOORD1;
@@ -48,8 +48,9 @@ struct v2f
   float3 worldPos : TEXCOORD4;
   float3 objPos : TEXCOORD5;
 
+  SHADOW_COORDS(6)
   #if defined(VERTEXLIGHT_ON)
-  float3 vertexLightColor : TEXCOORD6;
+  float3 vertexLightColor : TEXCOORD7;
   #endif
 };
 #endif

@@ -87,16 +87,19 @@ v2f vert(appdata v)
   UNITY_TRANSFER_INSTANCE_ID(v, o);
   UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-  o.clipPos = UnityObjectToClipPos(v.position);
+  o.pos = UnityObjectToClipPos(v.position);
   o.worldPos = mul(unity_ObjectToWorld, v.position);
   o.objPos = v.position;
 
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv = v.uv0.xy;
-  #if defined(LIGHTMAP_ON)
+#if defined(LIGHTMAP_ON)
   o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
-  #endif
+#endif
+#if defined(SHADOWS_SCREEN)
+  TRANSFER_SHADOW(o);
+#endif
 
   getVertexLightColor(o);
 
@@ -209,7 +212,7 @@ v2f domain(
     patch[0].position * baryc.x +
     patch[1].position * baryc.y +
     patch[2].position * baryc.z;
-  data.clipPos = UnityObjectToClipPos(pos);
+  data.pos = UnityObjectToClipPos(pos);
   data.objPos = pos;
   data.worldPos = mul(unity_ObjectToWorld, pos);
 
@@ -306,9 +309,9 @@ void geom(triangle v2f tri_in[3],
 
     // Apply transformed worldPos to other coordinate systems.
     if (_Explode_Phase > 1E-6) {
-      v0.clipPos = UnityObjectToClipPos(v0_objPos);
-      v1.clipPos = UnityObjectToClipPos(v1_objPos);
-      v2.clipPos = UnityObjectToClipPos(v2_objPos);
+      v0.pos = UnityObjectToClipPos(v0_objPos);
+      v1.pos = UnityObjectToClipPos(v1_objPos);
+      v2.pos = UnityObjectToClipPos(v2_objPos);
     }
   }
 #endif  // __EXPLODE
@@ -324,9 +327,9 @@ void geom(triangle v2f tri_in[3],
     float3 v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     float3 v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
 
-    v0.clipPos = UnityObjectToClipPos(v0_objPos);
-    v1.clipPos = UnityObjectToClipPos(v1_objPos);
-    v2.clipPos = UnityObjectToClipPos(v2_objPos);
+    v0.pos = UnityObjectToClipPos(v0_objPos);
+    v1.pos = UnityObjectToClipPos(v1_objPos);
+    v2.pos = UnityObjectToClipPos(v2_objPos);
   }
 #endif
 #if defined(_CLONES)

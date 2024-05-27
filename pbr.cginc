@@ -13,6 +13,7 @@ UNITY_DECLARE_TEXCUBE(_Cubemap);
 UnityLight CreateDirectLight(float3 normal, float ao, v2f i)
 {
   UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
+
   UnityLight light;
   light.color = _LightColor0.rgb * attenuation * ao;
 #if defined(POINT) || defined(POINT_COOKIE) || defined(SPOT)
@@ -20,6 +21,8 @@ UnityLight CreateDirectLight(float3 normal, float ao, v2f i)
 #else
   light.dir = _WorldSpaceLightPos0;
 #endif
+
+
   if (round(_Confabulate_Normals)) {
     light.dir = normal;
   }
