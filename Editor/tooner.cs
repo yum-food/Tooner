@@ -98,6 +98,13 @@ public class ToonerGUI : ShaderGUI {
       SetKeyword("_ROUGHNESS_MAP", bct.textureValue);
   }
 
+  enum PbrAlbedoMixMode {
+    AlphaBlend,
+    Add,
+    Min,
+    Max
+  };
+
   void DoPBROverlay() {
     for (int i = 0; i < 4; i++) {
       GUILayout.Label($"PBR overlay {i}", EditorStyles.boldLabel);
@@ -122,6 +129,22 @@ public class ToonerGUI : ShaderGUI {
           editor.TextureScaleOffsetProperty(bct);
         }
         SetKeyword($"_PBR_OVERLAY{i}_BASECOLOR_MAP", bct.textureValue);
+
+        EditorGUI.BeginChangeCheck();
+        bc = FindProperty($"_PBR_Overlay{i}_Mix");
+        PbrAlbedoMixMode mode = (PbrAlbedoMixMode) Math.Round(bc.floatValue);
+        mode = (PbrAlbedoMixMode) EditorGUILayout.EnumPopup(
+            MakeLabel("Mix mode"), mode);
+        if (EditorGUI.EndChangeCheck()) {
+          RecordAction($"PBR overlay mix mode {i}");
+          foreach (Material m in editor.targets) {
+            m.SetFloat($"_PBR_Overlay{i}_Mix", (int) mode);
+          }
+        }
+        SetKeyword($"_PBR_OVERLAY{i}_MIX_ALPHA_BLEND", mode == PbrAlbedoMixMode.AlphaBlend);
+        SetKeyword($"_PBR_OVERLAY{i}_MIX_ADD", mode == PbrAlbedoMixMode.Add);
+        SetKeyword($"_PBR_OVERLAY{i}_MIX_MIN", mode == PbrAlbedoMixMode.Min);
+        SetKeyword($"_PBR_OVERLAY{i}_MIX_MAX", mode == PbrAlbedoMixMode.Max);
 
         bct = FindProperty($"_PBR_Overlay{i}_NormalTex");
         editor.TexturePropertySingleLine(

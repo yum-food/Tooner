@@ -482,6 +482,56 @@ void getOverlayAlbedo(inout PbrOverlay ov,
 #endif  // _PBR_OVERLAY3
 }
 
+void mixOverlayAlbedo(inout float3 albedo, PbrOverlay ov) {
+#if defined(_PBR_OVERLAY0)
+#if defined(_PBR_OVERLAY0_MIX_ALPHA_BLEND)
+  albedo.rgb = lerp(albedo.rgb, ov.ov0_albedo.rgb, ov.ov0_albedo.a);
+#elif defined(_PBR_OVERLAY0_MIX_ADD)
+  albedo.rgb += ov.ov0_albedo;
+#elif defined(_PBR_OVERLAY0_MIX_MIN)
+  albedo.rgb = min(albedo.rgb, ov.ov0_albedo);
+#elif defined(_PBR_OVERLAY0_MIX_MAX)
+  albedo.rgb = max(albedo.rgb, ov.ov0_albedo);
+#endif
+#endif
+
+#if defined(_PBR_OVERLAY1)
+#if defined(_PBR_OVERLAY1_MIX_ALPHA_BLEND)
+  albedo.rgb = lerp(albedo.rgb, ov.ov1_albedo.rgb, ov.ov1_albedo.a);
+#elif defined(_PBR_OVERLAY1_MIX_ADD)
+  albedo.rgb += ov.ov1_albedo;
+#elif defined(_PBR_OVERLAY1_MIX_MIN)
+  albedo.rgb = min(albedo.rgb, ov.ov1_albedo);
+#elif defined(_PBR_OVERLAY1_MIX_MAX)
+  albedo.rgb = max(albedo.rgb, ov.ov1_albedo);
+#endif
+#endif
+
+#if defined(_PBR_OVERLAY2)
+#if defined(_PBR_OVERLAY2_MIX_ALPHA_BLEND)
+  albedo.rgb = lerp(albedo.rgb, ov.ov2_albedo.rgb, ov.ov2_albedo.a);
+#elif defined(_PBR_OVERLAY2_MIX_ADD)
+  albedo.rgb += ov.ov2_albedo;
+#elif defined(_PBR_OVERLAY2_MIX_MIN)
+  albedo.rgb = min(albedo.rgb, ov.ov2_albedo);
+#elif defined(_PBR_OVERLAY2_MIX_MAX)
+  albedo.rgb = max(albedo.rgb, ov.ov2_albedo);
+#endif
+#endif
+
+#if defined(_PBR_OVERLAY3)
+#if defined(_PBR_OVERLAY3_MIX_ALPHA_BLEND)
+  albedo.rgb = lerp(albedo.rgb, ov.ov3_albedo.rgb, ov.ov3_albedo.a);
+#elif defined(_PBR_OVERLAY3_MIX_ADD)
+  albedo.rgb += ov.ov3_albedo;
+#elif defined(_PBR_OVERLAY3_MIX_MIN)
+  albedo.rgb = min(albedo.rgb, ov.ov3_albedo);
+#elif defined(_PBR_OVERLAY3_MIX_MAX)
+  albedo.rgb = max(albedo.rgb, ov.ov3_albedo);
+#endif
+#endif
+}
+
 void applyOverlayNormal(inout float3 raw_normal, PbrOverlay ov, v2f i, float iddx, float iddy)
 {
   float3 raw_normal_2;
@@ -609,18 +659,7 @@ float4 effect(inout v2f i)
   float4 vertex_light_color = 0;
 #endif
 
-#if defined(_PBR_OVERLAY0)
-  albedo.rgb = lerp(albedo.rgb, ov.ov0_albedo.rgb, ov.ov0_albedo.a);
-#endif
-#if defined(_PBR_OVERLAY1)
-  albedo.rgb = lerp(albedo.rgb, ov.ov1_albedo.rgb, ov.ov1_albedo.a);
-#endif
-#if defined(_PBR_OVERLAY2)
-  albedo.rgb = lerp(albedo.rgb, ov.ov2_albedo.rgb, ov.ov2_albedo.a);
-#endif
-#if defined(_PBR_OVERLAY3)
-  albedo.rgb = lerp(albedo.rgb, ov.ov3_albedo.rgb, ov.ov3_albedo.a);
-#endif
+  mixOverlayAlbedo(albedo.rgb, ov);
 
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
   float3 matcap_emission = 0;

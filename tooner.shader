@@ -22,6 +22,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay0_Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
     _PBR_Overlay0_Mask("Mask", 2D) = "white" {}
     _PBR_Overlay0_Mask_Invert("Mask invert", Float) = 0.0
+    _PBR_Overlay0_Mix("Mix mode", Float) = 0.0
 
     _PBR_Overlay1_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay1_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -34,6 +35,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay1_Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
     _PBR_Overlay1_Mask("Mask", 2D) = "white" {}
     _PBR_Overlay1_Mask_Invert("Mask invert", Float) = 0.0
+    _PBR_Overlay1_Mix("Mix mode", Float) = 0.0
 
     _PBR_Overlay2_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay2_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -46,6 +48,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay2_Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
     _PBR_Overlay2_Mask("Mask", 2D) = "white" {}
     _PBR_Overlay2_Mask_Invert("Mask invert", Float) = 0.0
+    _PBR_Overlay2_Mix("Mix mode", Float) = 0.0
 
     _PBR_Overlay3_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay3_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -58,6 +61,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay3_Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
     _PBR_Overlay3_Mask("Mask", 2D) = "white" {}
     _PBR_Overlay3_Mask_Invert("Mask invert", Float) = 0.0
+    _PBR_Overlay3_Mix("Mix mode", Float) = 0.0
 
     [NoScaleOffset] _EmissionTex("Emission map", 2D) = "black" {}
     _EmissionStrength("Emission strength", Range(0, 2)) = 0
@@ -231,24 +235,40 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY0_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_METALLIC_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_MASK
+      #pragma shader_feature_local _ _PBR_OVERLAY0_MIX_ALPHA_BLEND
+      #pragma shader_feature_local _ _PBR_OVERLAY0_MIX_ADD
+      #pragma shader_feature_local _ _PBR_OVERLAY0_MIX_MIN
+      #pragma shader_feature_local _ _PBR_OVERLAY0_MIX_MAX
       #pragma shader_feature_local _ _PBR_OVERLAY1
       #pragma shader_feature_local _ _PBR_OVERLAY1_BASECOLOR_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_METALLIC_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_MASK
+      #pragma shader_feature_local _ _PBR_OVERLAY1_MIX_ALPHA_BLEND
+      #pragma shader_feature_local _ _PBR_OVERLAY1_MIX_ADD
+      #pragma shader_feature_local _ _PBR_OVERLAY1_MIX_MIN
+      #pragma shader_feature_local _ _PBR_OVERLAY1_MIX_MAX
       #pragma shader_feature_local _ _PBR_OVERLAY2
       #pragma shader_feature_local _ _PBR_OVERLAY2_BASECOLOR_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_METALLIC_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_MASK
+      #pragma shader_feature_local _ _PBR_OVERLAY2_MIX_ALPHA_BLEND
+      #pragma shader_feature_local _ _PBR_OVERLAY2_MIX_ADD
+      #pragma shader_feature_local _ _PBR_OVERLAY2_MIX_MIN
+      #pragma shader_feature_local _ _PBR_OVERLAY2_MIX_MAX
       #pragma shader_feature_local _ _PBR_OVERLAY3
       #pragma shader_feature_local _ _PBR_OVERLAY3_BASECOLOR_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_METALLIC_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_MASK
+      #pragma shader_feature_local _ _PBR_OVERLAY3_MIX_ALPHA_BLEND
+      #pragma shader_feature_local _ _PBR_OVERLAY3_MIX_ADD
+      #pragma shader_feature_local _ _PBR_OVERLAY3_MIX_MIN
+      #pragma shader_feature_local _ _PBR_OVERLAY3_MIX_MAX
       #pragma shader_feature_local _ _LTCGI
       #pragma shader_feature_local _ _TESSELLATION
       #pragma shader_feature_local _ _MATCAP0_DISTORTION0
