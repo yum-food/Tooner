@@ -208,6 +208,8 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _RENDERING_CUTOUT
       #pragma shader_feature_local _ _RENDERING_CUTOUT_STOCHASTIC
       #pragma shader_feature_local _ _RENDERING_FADE
+      #pragma shader_feature_local _ _RENDERING_TRANSPARENT
+      #pragma shader_feature_local _ _RENDERING_TRANSCLIPPING
       #pragma shader_feature_local _ _OUTLINES
       #pragma shader_feature_local _ _GLITTER
       #pragma shader_feature_local _ _EXPLODE
@@ -292,6 +294,8 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _RENDERING_CUTOUT
       #pragma shader_feature_local _RENDERING_CUTOUT_STOCHASTIC
       #pragma shader_feature_local _RENDERING_FADE
+      #pragma shader_feature_local _RENDERING_TRANSPARENT
+      #pragma shader_feature_local _RENDERING_TRANSCLIPPING
       #pragma shader_feature_local _OUTLINES
       #pragma shader_feature_local _GLITTER
       #pragma shader_feature_local _EXPLODE

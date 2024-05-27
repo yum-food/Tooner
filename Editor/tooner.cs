@@ -678,7 +678,9 @@ public class ToonerGUI : ShaderGUI {
   enum RenderingMode {
     Opaque,
     Cutout,
-    Fade
+    Fade,
+    Transparent,
+    TransClipping,
   }
 
   enum CutoutMode {
@@ -692,6 +694,10 @@ public class ToonerGUI : ShaderGUI {
       mode = RenderingMode.Cutout;
     } else if (target.IsKeywordEnabled("_RENDERING_FADE")) {
       mode = RenderingMode.Fade;
+    } else if (target.IsKeywordEnabled("_RENDERING_TRANSPARENT")) {
+      mode = RenderingMode.Transparent;
+    } else if (target.IsKeywordEnabled("_RENDERING_TRANSCLIPPING")) {
+      mode = RenderingMode.TransClipping;
     }
 
     EditorGUI.BeginChangeCheck();
@@ -705,6 +711,8 @@ public class ToonerGUI : ShaderGUI {
       RecordAction("Rendering mode");
       SetKeyword("_RENDERING_CUTOUT", mode == RenderingMode.Cutout);
       SetKeyword("_RENDERING_FADE", mode == RenderingMode.Fade);
+      SetKeyword("_RENDERING_TRANSPARENT", mode == RenderingMode.Transparent);
+      SetKeyword("_RENDERING_TRANSCLIPPING", mode == RenderingMode.TransClipping);
 
       RenderQueue queue = RenderQueue.Geometry;
       string render_type = "";
@@ -729,6 +737,20 @@ public class ToonerGUI : ShaderGUI {
           src_blend = BlendMode.SrcAlpha;
           dst_blend = BlendMode.OneMinusSrcAlpha;
           zwrite = false;
+          break;
+        case RenderingMode.Transparent:
+          queue = RenderQueue.Transparent;
+          render_type = "Transparent";
+          src_blend = BlendMode.One;
+          dst_blend = BlendMode.OneMinusSrcAlpha;
+          zwrite = false;
+          break;
+        case RenderingMode.TransClipping:
+          queue = RenderQueue.AlphaTest;
+          render_type = "Transparent";
+          src_blend = BlendMode.One;
+          dst_blend = BlendMode.OneMinusSrcAlpha;
+          zwrite = true;
           break;
       }
       foreach (Material m in editor.targets) {

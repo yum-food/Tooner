@@ -897,6 +897,9 @@ float4 effect(inout v2f i)
     result = lerp(result, al_color, _Explode_Phase * _Explode_Phase);
   }
 #endif
+#if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)
+  result.rgb *= result.a;
+#endif
 
   return result;
 }
