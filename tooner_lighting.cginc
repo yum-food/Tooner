@@ -574,8 +574,8 @@ void applyOverlayNormal(inout float3 raw_normal, PbrOverlay ov, v2f i, float idd
 
 float4 effect(inout v2f i)
 {
-  float iddx = ddx(i.uv.x);
-  float iddy = ddx(i.uv.y);
+  float iddx = ddx(i.uv.x) * _Mip_Multiplier;
+  float iddy = ddx(i.uv.y) * _Mip_Multiplier;
   const float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
 
 #if defined(_UVSCROLL)

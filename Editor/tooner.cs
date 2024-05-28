@@ -198,36 +198,11 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoCubemap() {
-      MaterialProperty bc = FindProperty("_Cubemap");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bc, "Cubemap"),
-          bc);
-      SetKeyword("_CUBEMAP", bc.textureValue);
   }
 
   void DoBrightness() {
       MaterialProperty bc;
 
-      bc = FindProperty("_Min_Brightness");
-      editor.RangeProperty(
-          bc,
-          "Min brightness");
-
-      bc = FindProperty("_Max_Brightness");
-      editor.RangeProperty(
-          bc,
-          "Max brightness");
-
-      bc = FindProperty("_Ambient_Occlusion");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bc, "Ambient occlusion"),
-          bc);
-      SetKeyword("_AMBIENT_OCCLUSION", bc.textureValue);
-
-      if (bc.textureValue) {
-        bc = FindProperty("_Ambient_Occlusion_Strength");
-        editor.RangeProperty(bc, "Ambient occlusion strength");
-      }
   }
 
   void DoEmission() {
@@ -813,26 +788,68 @@ public class ToonerGUI : ShaderGUI {
     }
   }
 
-  void DoLTCGI() {
-#if LTCGI_INCLUDED
-    GUILayout.Label($"Available: yes");
+  void DoLighting() {
+    MaterialProperty bc;
+    bc = FindProperty("_Min_Brightness");
+    editor.RangeProperty(
+        bc,
+        "Min brightness");
 
-    MaterialProperty bc = FindProperty("_LTCGI_Enabled");
+    bc = FindProperty("_Max_Brightness");
+    editor.RangeProperty(
+        bc,
+        "Max brightness");
+
+    bc = FindProperty("_Ambient_Occlusion");
+    editor.TexturePropertySingleLine(
+        MakeLabel(bc, "Ambient occlusion"),
+        bc);
+    SetKeyword("_AMBIENT_OCCLUSION", bc.textureValue);
+
+    if (bc.textureValue) {
+      bc = FindProperty("_Ambient_Occlusion_Strength");
+      editor.RangeProperty(bc, "Ambient occlusion strength");
+    }
+
+    bc = FindProperty("_Cubemap");
+    editor.TexturePropertySingleLine(
+        MakeLabel(bc, "Cubemap"),
+        bc);
+    SetKeyword("_CUBEMAP", bc.textureValue);
+
+    bc = FindProperty("_Shadow_Strength");
+    editor.RangeProperty(
+        bc,
+        "Shadows strength");
+
+    bc = FindProperty("_Mip_Multiplier");
+    editor.FloatProperty(
+        bc,
+        "Mipmap multiplier");
+    bc.floatValue = (float) Math.Max(1E-6, bc.floatValue);
+
+#if LTCGI_INCLUDED
+    bc = FindProperty("_LTCGI_Enabled");
     bool enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
+    enabled = EditorGUILayout.Toggle("Enable LTCGI", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_LTCGI", enabled);
 
-    bc = FindProperty("_LTCGI_SpecularColor");
-    editor.ColorProperty(bc, "Specular color (RGB)");
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_LTCGI_SpecularColor");
+      editor.ColorProperty(bc, "Specular color (RGB)");
 
-    bc = FindProperty("_LTCGI_DiffuseColor");
-    editor.ColorProperty(bc, "Diffuse color (RGB)");
-#else
-    GUILayout.Label($"Available: no");
-#endif  // LTCGI_INCLUDED
+      bc = FindProperty("_LTCGI_DiffuseColor");
+      editor.ColorProperty(bc, "Diffuse color (RGB)");
+      EditorGUI.indentLevel -= 1;
+    }
+#endif
+  }
+
+  void DoLTCGI() {
   }
 
   void DoMain() {
@@ -848,8 +865,7 @@ public class ToonerGUI : ShaderGUI {
 
     GUILayout.Label("Lighting", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;
-    DoCubemap();
-    DoBrightness();
+    DoLighting();
     EditorGUI.indentLevel -= 1;
 
     GUILayout.Label("Emission", EditorStyles.boldLabel);
@@ -908,11 +924,6 @@ public class ToonerGUI : ShaderGUI {
     GUILayout.Label("Rendering", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;
     DoRendering();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("LTCGI", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
-    DoLTCGI();
     EditorGUI.indentLevel -= 1;
   }
 }

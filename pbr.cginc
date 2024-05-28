@@ -12,7 +12,37 @@ UNITY_DECLARE_TEXCUBE(_Cubemap);
 
 UnityLight CreateDirectLight(float3 normal, float ao, v2f i)
 {
+#if 1
+  // This whole block is yoinked from AutoLight.cginc. I needed a way to
+  // control shadow strength so I had to duplicate the code.
+#if defined(DIRECTIONAL_COOKIE)
+  DECLARE_LIGHT_COORD(i, i.worldPos);
+  float shadow = UNITY_SHADOW_ATTENUATION(i, i.worldPos);
+  float attenuation = tex2D(_LightTexture0, lightCoord).w;
+#elif defined(POINT_COOKIE)
+  DECLARE_LIGHT_COORD(i, i.worldPos);
+  float shadow = UNITY_SHADOW_ATTENUATION(i, i.worldPos);
+  float attenuation = tex2D(_LightTextureB0, dot(lightCoord, lightCoord).rr).r *
+    texCUBE(_LightTexture0, lightCoord).w;
+#elif defined(DIRECTIONAL)
+  float shadow = UNITY_SHADOW_ATTENUATION(i, i.worldPos);
+  float attenuation = 1;
+#elif defined(SPOT)
+  DECLARE_LIGHT_COORD(i, i.worldPos);
+  float shadow = UNITY_SHADOW_ATTENUATION(i, i.worldPos);
+  float attenuation = (lightCoord.z > 0) * UnitySpotCookie(lightCoord) * UnitySpotAttenuate(lightCoord.xyz);
+#elif defined(POINT)
+  unityShadowCoord3 lightCoord = mul(unity_WorldToLight, unityShadowCoord4(i.worldPos, 1)).xyz;
+  float shadow = UNITY_SHADOW_ATTENUATION(i, i.worldPos);
+  float attenuation = tex2D(_LightTexture0, dot(lightCoord, lightCoord).rr).r;
+#else
+  float shadow = 1;
+  float attenuation = 1;
+#endif
+  attenuation *= lerp(1, shadow, _Shadow_Strength);
+#else
   UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
+#endif
 
   UnityLight light;
   light.color = _LightColor0.rgb * attenuation * ao;
@@ -21,7 +51,6 @@ UnityLight CreateDirectLight(float3 normal, float ao, v2f i)
 #else
   light.dir = _WorldSpaceLightPos0;
 #endif
-
 
   if (round(_Confabulate_Normals)) {
     light.dir = normal;

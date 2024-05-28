@@ -18,6 +18,8 @@ float _Mesh_Normals_Mode;
 float _Flatten_Mesh_Normals_Str;
 float _Confabulate_Normals;
 
+float _Shadow_Strength;
+float _Mip_Multiplier;
 
 #if defined(_BASECOLOR_MAP)
 texture2D _MainTex;

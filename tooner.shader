@@ -177,6 +177,9 @@ Shader "yum_food/tooner"
     _Tess_Dist_Cutoff("Tessellation distance cutoff", Float) = -1.0
 
     _Cutout_Mode("Cutout rendering mode", Float) = 0.0
+
+    _Shadow_Strength("Shadows strength", Range(0, 1)) = 1.0
+    _Mip_Multiplier("Mipmap multiplier", Float) = 1.0
   }
   SubShader
   {
