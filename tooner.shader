@@ -2,11 +2,11 @@ Shader "yum_food/tooner"
 {
   Properties
   {
-    _BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
+    _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
     _Metallic("Metallic", Range(0, 1)) = 0
     _Roughness("Roughness", Range(0, 1)) = 1
 
-    [NoScaleOffset] _BaseColorTex("Base color", 2D) = "white" {}
+    [NoScaleOffset] _MainTex("Base color", 2D) = "white" {}
     [NoScaleOffset] _NormalTex("Normal", 2D) = "bump" {}
     [NoScaleOffset] _MetallicTex("Metallic", 2D) = "white" {}
     [NoScaleOffset] _RoughnessTex("Roughness", 2D) = "black" {}
@@ -180,12 +180,14 @@ Shader "yum_food/tooner"
   }
   SubShader
   {
+    Tags {
+      "VRCFallback"="ToonCutout"
+    }
     Pass {
       Tags {
         "RenderType"="Opaque"
         "Queue"="Geometry"
-        "LightMode" = "ForwardBase"
-        "VRCFallback"="Hidden"
+        "LightMode"="ForwardBase"
       }
       Blend [_SrcBlend] [_DstBlend]
       ZWrite [_ZWrite]
@@ -293,7 +295,6 @@ Shader "yum_food/tooner"
         "RenderType" = "Opaque"
         "Queue"="Geometry"
         "LightMode" = "ForwardAdd"
-        "VRCFallback"="Hidden"
       }
       Blend [_SrcBlend] One
       ZWrite Off
@@ -439,14 +440,12 @@ Shader "yum_food/tooner"
 		Pass {
       Tags {
         "LightMode" = "ShadowCaster"
-        "VRCFallback"="Hidden"
       }
 			CGPROGRAM
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
   }
-  Fallback "Transparent"
   CustomEditor "ToonerGUI"
 }
 

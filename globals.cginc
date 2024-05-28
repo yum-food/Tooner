@@ -5,7 +5,7 @@
 
 SamplerState linear_repeat_s;
 
-float4 _BaseColor;
+float4 _Color;
 float _Metallic;
 float _Roughness;
 float _Tex_NormalStr;
@@ -20,8 +20,8 @@ float _Confabulate_Normals;
 
 
 #if defined(_BASECOLOR_MAP)
-texture2D _BaseColorTex;
-float4 _BaseColorTex_ST;
+texture2D _MainTex;
+float4 _MainTex_ST;
 #endif
 texture2D _NormalTex;
 float4 _NormalTex_ST;

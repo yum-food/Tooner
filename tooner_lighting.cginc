@@ -543,41 +543,28 @@ void applyOverlayNormal(inout float3 raw_normal, PbrOverlay ov, v2f i, float idd
   // Use UVs to smoothly blend between fully detailed normals when close up and
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
-  //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay0_Tex_NormalStr);
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay0_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay0_Tex_NormalStr * ov.ov0_mask);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay0_NormalTex_ST), iddx, iddy), _PBR_Overlay0_Tex_NormalStr * ov.ov0_mask);
 
   raw_normal = BlendNormals(
       raw_normal,
       raw_normal_2);
 #endif  // _PBR_OVERLAY0 && _PBR_OVERLAY0_NORMAL_MAP
 #if defined(_PBR_OVERLAY1) && defined(_PBR_OVERLAY1_NORMAL_MAP)
-  // Use UVs to smoothly blend between fully detailed normals when close up and
-  // flat normals when far away. If we don't do this, then we see moire effects
-  // on e.g. striped normal maps.
-  //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay1_Tex_NormalStr);
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay1_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay1_Tex_NormalStr * ov.ov1_mask);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay1_NormalTex_ST), iddx, iddy), _PBR_Overlay1_Tex_NormalStr * ov.ov1_mask);
 
   raw_normal = BlendNormals(
       raw_normal,
       raw_normal_2);
 #endif  // _PBR_OVERLAY1 && _PBR_OVERLAY1_NORMAL_MAP
 #if defined(_PBR_OVERLAY2) && defined(_PBR_OVERLAY2_NORMAL_MAP)
-  // Use UVs to smoothly blend between fully detailed normals when close up and
-  // flat normals when far away. If we don't do this, then we see moire effects
-  // on e.g. striped normal maps.
-  //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay2_Tex_NormalStr);
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay2_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay2_Tex_NormalStr * ov.ov2_mask);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay2_NormalTex_ST), iddx, iddy), _PBR_Overlay2_Tex_NormalStr * ov.ov2_mask);
 
   raw_normal = BlendNormals(
       raw_normal,
       raw_normal_2);
 #endif  // _PBR_OVERLAY2 && _PBR_OVERLAY2_NORMAL_MAP
 #if defined(_PBR_OVERLAY3) && defined(_PBR_OVERLAY3_NORMAL_MAP)
-  // Use UVs to smoothly blend between fully detailed normals when close up and
-  // flat normals when far away. If we don't do this, then we see moire effects
-  // on e.g. striped normal maps.
-  //float3 raw_normal = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleGrad(linear_repeat_s, i.uv, iddx/2, iddy/2), _PBR_Overlay3_Tex_NormalStr);
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay3_NormalTex_ST), iddx/2, iddy/2), _PBR_Overlay3_Tex_NormalStr * ov.ov3_mask);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay3_NormalTex_ST), iddx, iddy), _PBR_Overlay3_Tex_NormalStr * ov.ov3_mask);
 
   raw_normal = BlendNormals(
       raw_normal,
@@ -587,8 +574,8 @@ void applyOverlayNormal(inout float3 raw_normal, PbrOverlay ov, v2f i, float idd
 
 float4 effect(inout v2f i)
 {
-  float iddx = ddx(i.uv.x) / 4;
-  float iddy = ddx(i.uv.y) / 4;
+  float iddx = ddx(i.uv.x);
+  float iddy = ddx(i.uv.y);
   const float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
 
 #if defined(_UVSCROLL)
@@ -598,10 +585,10 @@ float4 effect(inout v2f i)
 #endif
 
 #if defined(_BASECOLOR_MAP)
-  float4 albedo = _BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _BaseColorTex_ST), iddx, iddy);
-  albedo *= _BaseColor;
+  float4 albedo = _MainTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _MainTex_ST), iddx, iddy);
+  albedo *= _Color;
 #else
-  float4 albedo = _BaseColor;
+  float4 albedo = _Color;
 #endif  // _BASECOLOR_MAP
 
 #if defined(_UVSCROLL)
@@ -629,7 +616,7 @@ float4 effect(inout v2f i)
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
   float fw = clamp(fwidth(i.uv), .001, 1) * 1200;
-  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _NormalTex_ST), iddx/2, iddy/2), _Tex_NormalStr);
+  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _NormalTex_ST), iddx, iddy), _Tex_NormalStr);
 
   raw_normal = BlendNormals(
       (1/fw) * raw_normal,
@@ -681,8 +668,8 @@ float4 effect(inout v2f i)
     float2 matcap_uv = refl.xy / m + 0.5;
     float iddx = ddx(i.uv.x);
     float iddy = ddy(i.uv.y);
-    {
 #if defined(_MATCAP0)
+    {
 #if defined(_MATCAP0_DISTORTION0)
       float2 distort_uv = matcap_distortion0(matcap_uv);
       float2 matcap_uv = distort_uv;
@@ -727,10 +714,10 @@ float4 effect(inout v2f i)
         default:
           break;
       }
-#endif
     }
-    {
+#endif  // _MATCAP0
 #if defined(_MATCAP1)
+    {
 #if defined(_MATCAP1_DISTORTION0)
       float2 distort_uv = matcap_distortion0(matcap_uv);
       float2 matcap_uv = distort_uv;
@@ -775,8 +762,8 @@ float4 effect(inout v2f i)
         default:
           break;
       }
-#endif  // _MATCAP1
     }
+#endif  // _MATCAP1
   }
 #endif  // _MATCAP0 || _MATCAP1
 #if defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)

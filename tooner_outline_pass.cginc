@@ -325,10 +325,10 @@ fixed4 frag (v2f i) : SV_Target
   float iddx = ddx(i.uv.x) / 4;
   float iddy = ddx(i.uv.y) / 4;
 #if defined(_BASECOLOR_MAP)
-  float4 albedo = _BaseColorTex.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
-  albedo *= _BaseColor;
+  float4 albedo = _MainTex.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  albedo *= _Color;
 #else
-  float4 albedo = _BaseColor;
+  float4 albedo = _Color;
 #endif  // _BASECOLOR_MAP
 
 #if defined(_RENDERING_CUTOUT)

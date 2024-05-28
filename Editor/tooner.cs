@@ -48,8 +48,8 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoBaseColor() {
-      MaterialProperty bc = FindProperty("_BaseColor");
-      MaterialProperty bct = FindProperty("_BaseColorTex");
+      MaterialProperty bc = FindProperty("_Color");
+      MaterialProperty bct = FindProperty("_MainTex");
       editor.TexturePropertySingleLine(
           MakeLabel(bct, "Base color (RGBA)"),
           bct,
@@ -916,5 +916,4 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 }
-
 
