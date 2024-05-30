@@ -146,6 +146,17 @@ public class ToonerGUI : ShaderGUI {
         SetKeyword($"_PBR_OVERLAY{i}_MIX_MIN", mode == PbrAlbedoMixMode.Min);
         SetKeyword($"_PBR_OVERLAY{i}_MIX_MAX", mode == PbrAlbedoMixMode.Max);
 
+        bc = FindProperty($"_PBR_Overlay{i}_Emission");
+        bct = FindProperty($"_PBR_Overlay{i}_EmissionTex");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bct, "Emission (RGB)"),
+            bct,
+            bc);
+        if (bct.textureValue) {
+          editor.TextureScaleOffsetProperty(bct);
+        }
+        SetKeyword($"_PBR_OVERLAY{i}_EMISSION_MAP", bct.textureValue);
+
         bct = FindProperty($"_PBR_Overlay{i}_NormalTex");
         editor.TexturePropertySingleLine(
             MakeLabel(bct, "Normal"),

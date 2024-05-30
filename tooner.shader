@@ -16,6 +16,8 @@ Shader "yum_food/tooner"
     _PBR_Overlay0_Metallic("Metallic", Range(0, 1)) = 0
     _PBR_Overlay0_Roughness("Roughness", Range(0, 1)) = 1
     _PBR_Overlay0_BaseColorTex("Base color", 2D) = "white" {}
+    _PBR_Overlay0_Emission("Emission", Color) = (1, 1, 1, 1)
+    _PBR_Overlay0_EmissionTex("Emission", 2D) = "black" {}
     _PBR_Overlay0_NormalTex("Normal", 2D) = "bump" {}
     _PBR_Overlay0_MetallicTex("Metallic", 2D) = "white" {}
     _PBR_Overlay0_RoughnessTex("Roughness", 2D) = "black" {}
@@ -29,6 +31,8 @@ Shader "yum_food/tooner"
     _PBR_Overlay1_Metallic("Metallic", Range(0, 1)) = 0
     _PBR_Overlay1_Roughness("Roughness", Range(0, 1)) = 1
     _PBR_Overlay1_BaseColorTex("Base color", 2D) = "white" {}
+    _PBR_Overlay1_Emission("Emission", Color) = (1, 1, 1, 1)
+    _PBR_Overlay1_EmissionTex("Emission", 2D) = "black" {}
     _PBR_Overlay1_NormalTex("Normal", 2D) = "bump" {}
     _PBR_Overlay1_MetallicTex("Metallic", 2D) = "white" {}
     _PBR_Overlay1_RoughnessTex("Roughness", 2D) = "black" {}
@@ -42,6 +46,8 @@ Shader "yum_food/tooner"
     _PBR_Overlay2_Metallic("Metallic", Range(0, 1)) = 0
     _PBR_Overlay2_Roughness("Roughness", Range(0, 1)) = 1
     _PBR_Overlay2_BaseColorTex("Base color", 2D) = "white" {}
+    _PBR_Overlay2_Emission("Emission", Color) = (1, 1, 1, 1)
+    _PBR_Overlay2_EmissionTex("Emission", 2D) = "black" {}
     _PBR_Overlay2_NormalTex("Normal", 2D) = "bump" {}
     _PBR_Overlay2_MetallicTex("Metallic", 2D) = "white" {}
     _PBR_Overlay2_RoughnessTex("Roughness", 2D) = "black" {}
@@ -55,6 +61,8 @@ Shader "yum_food/tooner"
     _PBR_Overlay3_Metallic("Metallic", Range(0, 1)) = 0
     _PBR_Overlay3_Roughness("Roughness", Range(0, 1)) = 1
     _PBR_Overlay3_BaseColorTex("Base color", 2D) = "white" {}
+    _PBR_Overlay3_Emission("Emission", Color) = (1, 1, 1, 1)
+    _PBR_Overlay3_EmissionTex("Emission", 2D) = "black" {}
     _PBR_Overlay3_NormalTex("Normal", 2D) = "bump" {}
     _PBR_Overlay3_MetallicTex("Metallic", 2D) = "white" {}
     _PBR_Overlay3_RoughnessTex("Roughness", 2D) = "black" {}
@@ -236,6 +244,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _CLONES
       #pragma shader_feature_local _ _PBR_OVERLAY0
       #pragma shader_feature_local _ _PBR_OVERLAY0_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY0_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_METALLIC_MAP
@@ -246,6 +255,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY0_MIX_MAX
       #pragma shader_feature_local _ _PBR_OVERLAY1
       #pragma shader_feature_local _ _PBR_OVERLAY1_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY1_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_METALLIC_MAP
@@ -256,6 +266,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY1_MIX_MAX
       #pragma shader_feature_local _ _PBR_OVERLAY2
       #pragma shader_feature_local _ _PBR_OVERLAY2_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY2_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_METALLIC_MAP
@@ -266,6 +277,7 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _PBR_OVERLAY2_MIX_MAX
       #pragma shader_feature_local _ _PBR_OVERLAY3
       #pragma shader_feature_local _ _PBR_OVERLAY3_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY3_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_METALLIC_MAP
@@ -337,24 +349,28 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _CLONES
       #pragma shader_feature_local _ _PBR_OVERLAY0
       #pragma shader_feature_local _ _PBR_OVERLAY0_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY0_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_METALLIC_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_MASK
       #pragma shader_feature_local _ _PBR_OVERLAY1
       #pragma shader_feature_local _ _PBR_OVERLAY1_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY1_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_METALLIC_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_MASK
       #pragma shader_feature_local _ _PBR_OVERLAY2
       #pragma shader_feature_local _ _PBR_OVERLAY2_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY2_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_METALLIC_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_MASK
       #pragma shader_feature_local _ _PBR_OVERLAY3
       #pragma shader_feature_local _ _PBR_OVERLAY3_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY3_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_METALLIC_MAP
@@ -403,24 +419,28 @@ Shader "yum_food/tooner"
       #pragma shader_feature_local _ _CLONES
       #pragma shader_feature_local _ _PBR_OVERLAY0
       #pragma shader_feature_local _ _PBR_OVERLAY0_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY0_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_METALLIC_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY0_MASK
       #pragma shader_feature_local _ _PBR_OVERLAY1
       #pragma shader_feature_local _ _PBR_OVERLAY1_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY1_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_METALLIC_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY1_MASK
       #pragma shader_feature_local _ _PBR_OVERLAY2
       #pragma shader_feature_local _ _PBR_OVERLAY2_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY2_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_METALLIC_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY2_MASK
       #pragma shader_feature_local _ _PBR_OVERLAY3
       #pragma shader_feature_local _ _PBR_OVERLAY3_BASECOLOR_MAP
+      #pragma shader_feature_local _ _PBR_OVERLAY3_EMISSION_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_NORMAL_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_ROUGHNESS_MAP
       #pragma shader_feature_local _ _PBR_OVERLAY3_METALLIC_MAP
