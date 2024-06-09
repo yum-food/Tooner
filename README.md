@@ -4,24 +4,24 @@ A toon shader for VRChat.
 
 Features:
 * PBR
-* Decals
-* Reflection probe override
-* Min/max brightness
 * Emissions
-* Flat/realistic normals
-* Matcaps
-* Rim lighting
 * Outlines
 * Glitter
 * Explosion
+* PBR detail maps x4
+* Matcaps x2
+* Rim lighting x2
+* Rendering modes: opaque, cutout, fade, transparent, transclipping
+* Culling modes: front, back, none
+* OKLCH color adjustment
+* Reflection probe override
+* Min/max brightness limits
+* Flat/realistic normals
 * Geometry scroll (similar to Poiyomi's shatterwave)
 * UV scroll
-* OKLCH color adjustment
 * Clones
-* Opaque, cutout, fade rendering modes
-* Back/front/no culling modes
 * LTCGI
-* Shadow caster pass
+* Shadows (both casting and receiving)
 * Extensive use of variants to minimize performance cost
 
 Disclaimers:
