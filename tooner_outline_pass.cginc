@@ -67,7 +67,7 @@ v2f vert(appdata v)
   o.normal = normal;
   o.uv = v.uv0.xy;
   #if defined(LIGHTMAP_ON)
-  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw
+  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
   #endif
 
   return o;
