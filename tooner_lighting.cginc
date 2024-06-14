@@ -927,8 +927,8 @@ float4 effect(inout v2f i)
         roughness,
         0);
     float3 ltcgi_emission = 0;
-    ltcgi_emission += acc.diffuse;
-    ltcgi_emission += acc.specular;
+    ltcgi_emission += acc.diffuse * albedo.a;
+    ltcgi_emission += acc.specular * albedo.a;
     result.rgb += ltcgi_emission;
   }
 #endif

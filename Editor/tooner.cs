@@ -709,6 +709,13 @@ public class ToonerGUI : ShaderGUI {
       mode = RenderingMode.TransClipping;
     }
 
+    MaterialProperty bc;
+    bc = FindProperty("_Render_Queue_Offset");
+    editor.IntegerProperty(
+        bc,
+        "Render queue offset");
+    int queue_offset = bc.intValue;
+
     EditorGUI.BeginChangeCheck();
     mode = (RenderingMode) EditorGUILayout.EnumPopup(
         MakeLabel("Rendering mode"), mode);
@@ -763,7 +770,7 @@ public class ToonerGUI : ShaderGUI {
           break;
       }
       foreach (Material m in editor.targets) {
-        m.renderQueue = (int) queue;
+        m.renderQueue = ((int) queue) + queue_offset;
         m.SetOverrideTag("RenderType", render_type);
         m.SetInt("_SrcBlend", (int) src_blend);
         m.SetInt("_DstBlend", (int) dst_blend);
@@ -771,7 +778,6 @@ public class ToonerGUI : ShaderGUI {
       }
     }
 
-    MaterialProperty bc;
     if (mode == RenderingMode.Cutout) {
       EditorGUI.BeginChangeCheck();
       bc = FindProperty("_Cutout_Mode");
