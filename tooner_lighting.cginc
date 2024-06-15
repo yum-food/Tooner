@@ -15,30 +15,6 @@
 #include "tooner_scroll.cginc"
 #include "oklab.cginc"
 
-#if defined(_LTCGI)
-#include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI_structs.cginc"
-
-struct ltcgi_acc {
-  float3 diffuse;
-  float3 specular;
-};
-
-void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output);
-void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output);
-
-#define LTCGI_V2_CUSTOM_INPUT ltcgi_acc
-#define LTCGI_V2_DIFFUSE_CALLBACK ltcgi_cb_diffuse
-#define LTCGI_V2_SPECULAR_CALLBACK ltcgi_cb_specular
-
-#include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI.cginc"
-void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output) {
-	acc.diffuse += output.intensity * output.color * _LTCGI_DiffuseColor;
-}
-void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output) {
-	acc.specular += output.intensity * output.color * _LTCGI_SpecularColor;
-}
-#endif
-
 struct tess_data
 {
   float4 position : INTERNALTESSPOS;
@@ -915,22 +891,6 @@ float4 effect(inout v2f i)
   float4 result = lit;
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
   result.rgb += matcap_emission;
-#endif
-#if defined(_LTCGI)
-  if ((bool) round(_LTCGI_Enabled)) {
-    ltcgi_acc acc = (ltcgi_acc) 0;
-    LTCGI_Contribution(
-        acc,
-        i.worldPos,
-        normal,
-        view_dir,
-        roughness,
-        0);
-    float3 ltcgi_emission = 0;
-    ltcgi_emission += acc.diffuse * albedo.a;
-    ltcgi_emission += acc.specular * albedo.a;
-    result.rgb += ltcgi_emission;
-  }
 #endif
 #if defined(_GLITTER)
   float glitter = get_glitter(i.uv, iddx, iddy, i.worldPos, normal);

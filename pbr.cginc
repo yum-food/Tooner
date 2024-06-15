@@ -8,6 +8,30 @@
 #include "interpolators.cginc"
 #include "poi.cginc"
 
+#if defined(_LTCGI)
+#include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI_structs.cginc"
+
+struct ltcgi_acc {
+  float3 diffuse;
+  float3 specular;
+};
+
+void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output);
+void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output);
+
+#define LTCGI_V2_CUSTOM_INPUT ltcgi_acc
+#define LTCGI_V2_DIFFUSE_CALLBACK ltcgi_cb_diffuse
+#define LTCGI_V2_SPECULAR_CALLBACK ltcgi_cb_specular
+
+#include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI.cginc"
+void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output) {
+	acc.diffuse += output.intensity * output.color * _LTCGI_DiffuseColor;
+}
+void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output) {
+	acc.specular += output.intensity * output.color * _LTCGI_SpecularColor;
+}
+#endif  // __LTCGI
+
 UNITY_DECLARE_TEXCUBE(_Cubemap);
 
 UnityLight CreateDirectLight(float3 normal, float ao, v2f i)
@@ -178,6 +202,21 @@ float4 getLitColor(
     indirect_light.diffuse += direct_light.color * e;
     direct_light.color *= (1 - e);
   }
+
+#if defined(_LTCGI)
+  if ((bool) round(_LTCGI_Enabled)) {
+    ltcgi_acc acc = (ltcgi_acc) 0;
+    LTCGI_Contribution(
+        acc,
+        i.worldPos,
+        normal,
+        view_dir,
+        1.0 - smoothness,
+        0);
+    indirect_light.diffuse += acc.diffuse;
+    indirect_light.specular += acc.specular;
+  }
+#endif
 
   direct_light.color = clamp(direct_light.color, _Min_Brightness, _Max_Brightness*.5);
   indirect_light.diffuse = clamp(indirect_light.diffuse, _Min_Brightness, _Max_Brightness);
