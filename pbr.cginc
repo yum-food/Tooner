@@ -204,8 +204,8 @@ float4 getLitColor(
   }
 
 #if defined(_LTCGI)
+  ltcgi_acc acc = (ltcgi_acc) 0;
   if ((bool) round(_LTCGI_Enabled)) {
-    ltcgi_acc acc = (ltcgi_acc) 0;
     LTCGI_Contribution(
         acc,
         i.worldPos,
@@ -213,6 +213,8 @@ float4 getLitColor(
         view_dir,
         1.0 - smoothness,
         0);
+    direct_light.color += acc.diffuse;
+    direct_light.color += acc.specular;
     indirect_light.diffuse += acc.diffuse;
     indirect_light.specular += acc.specular;
   }
@@ -244,6 +246,10 @@ float4 getLitColor(
         direct_light,
         indirect_light).xyz;
   }
+
+#if defined(_LTCGI)
+  pbr.rgb += (acc.specular + acc.diffuse) * metallic;
+#endif
 
   return float4(pbr, albedo.a);
 }
