@@ -399,6 +399,11 @@ Shader "yum_food/tooner"
       ZWrite [_ZWrite]
       ZTest LEqual
 
+      Stencil {
+        Ref 1
+        Comp Greater
+      }
+
 			CGPROGRAM
       #pragma target 5.0
 			#pragma shader_feature_local _BASECOLOR_MAP

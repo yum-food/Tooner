@@ -25,64 +25,33 @@ struct tess_factors {
 
 v2f vert(appdata v)
 {
+  float3 objPos = v.vertex;
+  float4 clipPos = UnityObjectToClipPos(v.vertex);
+  float3 clipNormal = mul((float3x3) UNITY_MATRIX_MVP, v.normal);
+  float3 worldPos = mul(unity_ObjectToWorld, objPos);
+  float3 worldNormal = UnityObjectToWorldNormal(v.normal);
+
 #if defined(_OUTLINES)
   float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/1);
   outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
 
-  float4 position = v.vertex;
-#if !defined(_WORLD_SPACE_SCALING)
-#if defined(_EXPLODE)
-  if (_Explode_Phase <= 1E-6) {
-    position.xyz += v.normal * _Outline_Width * .1 * outline_mask;
-  }
-#else
-  position.xyz += v.normal * _Outline_Width * .1 * outline_mask;
-#endif
-#endif
+  worldPos += worldNormal * _Outline_Width * outline_mask;
 
-  position = mul(unity_ObjectToWorld, position);
-  const float3 normal = UnityObjectToWorldNormal(v.normal);
-
-#if defined(_WORLD_SPACE_SCALING)
-  // Perform scaling operation in world space so that object scale doesn't
-  // affect outline width. This is handy on avatars with a bunch of different
-  // gameobjects that have different scale.
-#if defined(_EXPLODE)
-  if (_Explode_Phase <= 1E-6) {
-    position.xyz += normal * _Outline_Width * .1 * outline_mask;
-  }
-#else
-  position.xyz += normal * _Outline_Width * .1 * outline_mask;
+  objPos = mul(unity_WorldToObject, worldPos);
+  clipPos = UnityObjectToClipPos(objPos);
 #endif
-#endif
-
-  // Transform back to object, then clip.
-  position = mul(unity_WorldToObject, position);
-  v.vertex.xyz = position.xyz;
 
   v2f o;
-  o.worldPos = mul(unity_ObjectToWorld, v.vertex);
-  o.objPos = v.vertex;
-  o.pos = UnityObjectToClipPos(v.vertex);
-  o.normal = normal;
+  o.worldPos = worldPos;
+  o.objPos = objPos;
+  o.pos = clipPos;
+  o.normal = UnityObjectToWorldNormal(v.normal);
   o.uv = v.uv0.xy;
-  #if defined(LIGHTMAP_ON)
+#if defined(LIGHTMAP_ON)
   o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
-  #endif
+#endif
 
   return o;
-#else
-  v2f o;
-  o.worldPos = 0;
-  o.objPos = 0;
-  o.pos = 0;
-  o.normal = 0;
-  o.uv = 0;
-#if defined(LIGHTMAP_ON)
-  o.lmuv = 0;
-#endif
-  return o;
-#endif  // _OUTLINES
 }
 
 tess_data hull_vertex(appdata v)
