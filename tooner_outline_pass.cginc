@@ -35,7 +35,7 @@ v2f vert(appdata v)
   float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/1);
   outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
 
-  worldPos += worldNormal * _Outline_Width * outline_mask;
+  worldPos += worldNormal * _Outline_Width * outline_mask * _Outline_Width_Multiplier;
 
   objPos = mul(unity_WorldToObject, worldPos);
   clipPos = UnityObjectToClipPos(objPos);
