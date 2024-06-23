@@ -885,8 +885,31 @@ float4 effect(inout v2f i)
   float ao = 1;
 #endif
 
+#if defined(_GIMMICK_FLAT_COLOR)
+  if (round(_Gimmick_Flat_Color_Enable_Dynamic)) {
+    albedo = _Gimmick_Flat_Color_Color;
+    normal = i.normal;
+  }
+#endif
+
   float4 lit = getLitColor(vertex_light_color, albedo, i.worldPos, normal,
       metallic, 1.0 - roughness, i.uv, ao, i);
+
+#if defined(_GIMMICK_FLAT_COLOR)
+  if (round(_Gimmick_Flat_Color_Enable_Dynamic)) {
+#if defined(_RENDERING_CUTOUT)
+#if defined(_RENDERING_CUTOUT_STOCHASTIC)
+    float ar = rand2(i.uv);
+    clip(albedo.a - ar);
+#else
+    clip(albedo.a - _Alpha_Cutoff);
+#endif
+    albedo.a = 1;
+#endif
+
+    return float4(lit.rgb + _Gimmick_Flat_Color_Emission, albedo.a);
+  }
+#endif
 
   float4 result = lit;
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)

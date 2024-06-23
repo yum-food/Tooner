@@ -684,6 +684,36 @@ public class ToonerGUI : ShaderGUI {
     }
   }
 
+  void DoGimmicks() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Flat_Color_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Flat color", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_FLAT_COLOR", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+    EditorGUI.indentLevel -= 1;
+
+    bc = FindProperty("_Gimmick_Flat_Color_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    bc = FindProperty("_Gimmick_Flat_Color_Color");
+    editor.ColorProperty(bc, "Color");
+    bc = FindProperty("_Gimmick_Flat_Color_Emission");
+    editor.ColorProperty(bc, "Emission");
+  }
+
   enum RenderingMode {
     Opaque,
     Cutout,
@@ -936,6 +966,11 @@ public class ToonerGUI : ShaderGUI {
     GUILayout.Label("Clones", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;
     DoClones();
+    EditorGUI.indentLevel -= 1;
+
+    GUILayout.Label("Gimmicks", EditorStyles.boldLabel);
+    EditorGUI.indentLevel += 1;
+    DoGimmicks();
     EditorGUI.indentLevel -= 1;
 
     GUILayout.Label("Rendering", EditorStyles.boldLabel);

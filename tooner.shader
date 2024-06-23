@@ -189,6 +189,11 @@ Shader "yum_food/tooner"
 
     _Shadow_Strength("Shadows strength", Range(0, 1)) = 1.0
     _Mip_Multiplier("Mipmap multiplier", Float) = 1.0
+
+    _Gimmick_Flat_Color_Enable_Static("Enable flat color gimmick", Float) = 0.0
+    _Gimmick_Flat_Color_Enable_Dynamic("Enable flat color gimmick", Float) = 0.0
+    _Gimmick_Flat_Color_Color("Flat color gimmick color", Color) = (0, 0, 0, 1)
+    _Gimmick_Flat_Color_Emission("Flat color gimmick emission", Color) = (0, 0, 0, 1)
   }
   SubShader
   {
@@ -216,82 +221,8 @@ Shader "yum_food/tooner"
       #pragma target 5.0
 
       #pragma multi_compile _ VERTEXLIGHT_ON SHADOWS_SCREEN
-      #pragma shader_feature_local _ _BASECOLOR_MAP
-      #pragma shader_feature_local _ _NORMAL_MAP
-      #pragma shader_feature_local _ _METALLIC_MAP
-      #pragma shader_feature_local _ _ROUGHNESS_MAP
-      #pragma shader_feature_local _ _CUBEMAP
-      #pragma shader_feature_local _ _EMISSION
-      //#pragma shader_feature_local _ _SHADING_MODE_FLAT
-      #pragma shader_feature_local _ _RENDERING_CUTOUT
-      #pragma shader_feature_local _ _RENDERING_CUTOUT_STOCHASTIC
-      #pragma shader_feature_local _ _RENDERING_FADE
-      #pragma shader_feature_local _ _RENDERING_TRANSPARENT
-      #pragma shader_feature_local _ _RENDERING_TRANSCLIPPING
-      #pragma shader_feature_local _ _OUTLINES
-      #pragma shader_feature_local _ _GLITTER
-      #pragma shader_feature_local _ _EXPLODE
-      #pragma shader_feature_local _ _SCROLL
-      #pragma shader_feature_local _ _UVSCROLL
-      #pragma shader_feature_local _ _MATCAP0
-      #pragma shader_feature_local _ _MATCAP0_MASK
-      #pragma shader_feature_local _ _MATCAP1
-      #pragma shader_feature_local _ _MATCAP1_MASK
-      #pragma shader_feature_local _ _RIM_LIGHTING0
-      #pragma shader_feature_local _ _RIM_LIGHTING0_MASK
-      #pragma shader_feature_local _ _RIM_LIGHTING1
-      #pragma shader_feature_local _ _RIM_LIGHTING1_MASK
-      #pragma shader_feature_local _ _OKLAB
-      #pragma shader_feature_local _ _CLONES
-      #pragma shader_feature_local _ _PBR_OVERLAY0
-      #pragma shader_feature_local _ _PBR_OVERLAY0_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_MASK
-      #pragma shader_feature_local _ _PBR_OVERLAY0_MIX_ALPHA_BLEND
-      #pragma shader_feature_local _ _PBR_OVERLAY0_MIX_ADD
-      #pragma shader_feature_local _ _PBR_OVERLAY0_MIX_MIN
-      #pragma shader_feature_local _ _PBR_OVERLAY0_MIX_MAX
-      #pragma shader_feature_local _ _PBR_OVERLAY1
-      #pragma shader_feature_local _ _PBR_OVERLAY1_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_MASK
-      #pragma shader_feature_local _ _PBR_OVERLAY1_MIX_ALPHA_BLEND
-      #pragma shader_feature_local _ _PBR_OVERLAY1_MIX_ADD
-      #pragma shader_feature_local _ _PBR_OVERLAY1_MIX_MIN
-      #pragma shader_feature_local _ _PBR_OVERLAY1_MIX_MAX
-      #pragma shader_feature_local _ _PBR_OVERLAY2
-      #pragma shader_feature_local _ _PBR_OVERLAY2_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_MASK
-      #pragma shader_feature_local _ _PBR_OVERLAY2_MIX_ALPHA_BLEND
-      #pragma shader_feature_local _ _PBR_OVERLAY2_MIX_ADD
-      #pragma shader_feature_local _ _PBR_OVERLAY2_MIX_MIN
-      #pragma shader_feature_local _ _PBR_OVERLAY2_MIX_MAX
-      #pragma shader_feature_local _ _PBR_OVERLAY3
-      #pragma shader_feature_local _ _PBR_OVERLAY3_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_MASK
-      #pragma shader_feature_local _ _PBR_OVERLAY3_MIX_ALPHA_BLEND
-      #pragma shader_feature_local _ _PBR_OVERLAY3_MIX_ADD
-      #pragma shader_feature_local _ _PBR_OVERLAY3_MIX_MIN
-      #pragma shader_feature_local _ _PBR_OVERLAY3_MIX_MAX
-      #pragma shader_feature_local _ _LTCGI
-      #pragma shader_feature_local _ _TESSELLATION
-      #pragma shader_feature_local _ _MATCAP0_DISTORTION0
-      #pragma shader_feature_local _ _MATCAP1_DISTORTION0
-      #pragma shader_feature_local _ _AMBIENT_OCCLUSION
+
+      #include "feature_macros.cginc"
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex
@@ -321,66 +252,7 @@ Shader "yum_food/tooner"
 
       #pragma multi_compile_fwdadd_fullshadows
       #pragma multi_compile DIRECTIONAL DIRECTIONAL_COOKIE POINT SPOT
-      #pragma shader_feature_local _BASECOLOR_MAP
-      #pragma shader_feature_local _NORMAL_MAP
-      #pragma shader_feature_local _METALLIC_MAP
-      #pragma shader_feature_local _ROUGHNESS_MAP
-      #pragma shader_feature_local _CUBEMAP
-      #pragma shader_feature_local _ _EMISSION
-      //#pragma shader_feature_local _SHADING_MODE_FLAT
-      #pragma shader_feature_local _RENDERING_CUTOUT
-      #pragma shader_feature_local _RENDERING_CUTOUT_STOCHASTIC
-      #pragma shader_feature_local _RENDERING_FADE
-      #pragma shader_feature_local _RENDERING_TRANSPARENT
-      #pragma shader_feature_local _RENDERING_TRANSCLIPPING
-      #pragma shader_feature_local _OUTLINES
-      #pragma shader_feature_local _GLITTER
-      #pragma shader_feature_local _EXPLODE
-      #pragma shader_feature_local _SCROLL
-      #pragma shader_feature_local _UVSCROLL
-      #pragma shader_feature_local _MATCAP0
-      #pragma shader_feature_local _ _MATCAP0_MASK
-      #pragma shader_feature_local _MATCAP1
-      #pragma shader_feature_local _ _MATCAP1_MASK
-      #pragma shader_feature_local _ _RIM_LIGHTING0
-      #pragma shader_feature_local _ _RIM_LIGHTING0_MASK
-      #pragma shader_feature_local _ _RIM_LIGHTING1
-      #pragma shader_feature_local _ _RIM_LIGHTING1_MASK
-      #pragma shader_feature_local _ _OKLAB
-      #pragma shader_feature_local _ _CLONES
-      #pragma shader_feature_local _ _PBR_OVERLAY0
-      #pragma shader_feature_local _ _PBR_OVERLAY0_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_MASK
-      #pragma shader_feature_local _ _PBR_OVERLAY1
-      #pragma shader_feature_local _ _PBR_OVERLAY1_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_MASK
-      #pragma shader_feature_local _ _PBR_OVERLAY2
-      #pragma shader_feature_local _ _PBR_OVERLAY2_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_MASK
-      #pragma shader_feature_local _ _PBR_OVERLAY3
-      #pragma shader_feature_local _ _PBR_OVERLAY3_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_MASK
-      #pragma shader_feature_local _ _LTCGI
-      #pragma shader_feature_local _ _TESSELLATION
-      #pragma shader_feature_local _ _MATCAP0_DISTORTION0
-      #pragma shader_feature_local _ _MATCAP1_DISTORTION0
-      #pragma shader_feature_local _ _AMBIENT_OCCLUSION
+      #include "feature_macros.cginc"
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex
@@ -406,54 +278,7 @@ Shader "yum_food/tooner"
 
 			CGPROGRAM
       #pragma target 5.0
-			#pragma shader_feature_local _BASECOLOR_MAP
-			#pragma shader_feature_local _RENDERING_CUTOUT
-      #pragma shader_feature_local _RENDERING_CUTOUT_STOCHASTIC
-			#pragma shader_feature_local _OUTLINES
-      #pragma shader_feature_local _EXPLODE
-      #pragma shader_feature_local _ _SCROLL
-      #pragma shader_feature_local _ _UVSCROLL
-      #pragma shader_feature_local _MATCAP0
-      #pragma shader_feature_local _ _MATCAP0_MASK
-      #pragma shader_feature_local _MATCAP1
-      #pragma shader_feature_local _ _MATCAP1_MASK
-      #pragma shader_feature_local _ _RIM_LIGHTING0
-      #pragma shader_feature_local _ _RIM_LIGHTING0_MASK
-      #pragma shader_feature_local _ _RIM_LIGHTING1
-      #pragma shader_feature_local _ _RIM_LIGHTING1_MASK
-      #pragma shader_feature_local _ _OKLAB
-      #pragma shader_feature_local _ _CLONES
-      #pragma shader_feature_local _ _PBR_OVERLAY0
-      #pragma shader_feature_local _ _PBR_OVERLAY0_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY0_MASK
-      #pragma shader_feature_local _ _PBR_OVERLAY1
-      #pragma shader_feature_local _ _PBR_OVERLAY1_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY1_MASK
-      #pragma shader_feature_local _ _PBR_OVERLAY2
-      #pragma shader_feature_local _ _PBR_OVERLAY2_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY2_MASK
-      #pragma shader_feature_local _ _PBR_OVERLAY3
-      #pragma shader_feature_local _ _PBR_OVERLAY3_BASECOLOR_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_EMISSION_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_NORMAL_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_ROUGHNESS_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_METALLIC_MAP
-      #pragma shader_feature_local _ _PBR_OVERLAY3_MASK
-      #pragma shader_feature_local _ _LTCGI
-      #pragma shader_feature_local _ _TESSELLATION
-      #pragma shader_feature_local _ _AMBIENT_OCCLUSION
+      #include "feature_macros.cginc"
 
 			#pragma vertex vert
 			//#pragma vertex hull_vertex

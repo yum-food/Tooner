@@ -236,5 +236,12 @@ float4 _LTCGI_SpecularColor;
 float4 _LTCGI_DiffuseColor;
 #endif
 
+#if defined(_GIMMICK_FLAT_COLOR)
+float _Gimmick_Flat_Color_Enable_Static;
+float _Gimmick_Flat_Color_Enable_Dynamic;
+float4 _Gimmick_Flat_Color_Color;
+float3 _Gimmick_Flat_Color_Emission;
+#endif
+
 #endif
 
