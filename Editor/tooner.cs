@@ -496,6 +496,18 @@ public class ToonerGUI : ShaderGUI {
         inverted = EditorGUILayout.Toggle("Invert mask", inverted);
         EditorGUI.EndChangeCheck();
         bc.floatValue = inverted ? 1.0f : 0.0f;
+
+        bc = FindProperty("_Outline_Width_Multiplier");
+        editor.FloatProperty(
+            bc,
+            "Outline width multiplier");
+
+        bc = FindProperty("_Outline_Stenciling");
+        bool enabled = (bc.floatValue == 1.0);
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Enable stenciling", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 2.0f;
       }
   }
 

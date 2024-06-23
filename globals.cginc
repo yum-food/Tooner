@@ -132,6 +132,7 @@ float4 _Outline_Color;
 float _Outline_Emission_Strength;
 texture2D _Outline_Mask;
 float _Outline_Mask_Invert;
+float _Outline_Width_Multiplier;
 #endif
 
 #if defined(_GLITTER)

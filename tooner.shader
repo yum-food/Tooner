@@ -96,6 +96,8 @@ Shader "yum_food/tooner"
     _Outline_Emission_Strength("Outline emission strength", Range(0, 2)) = 0.2
     _Outline_Mask("Outline mask", 2D) = "white" {}
     _Outline_Mask_Invert("Invert outline mask", Float) = 0.0
+    _Outline_Width_Multiplier("Outline width multiplier", Float) = 1
+    [MaterialToggle] _Outline_Stenciling("Enable outline stenciling", Float) = 1
 
     _Glitter_Enabled("Glitter enabled", Float) = 0
     _Glitter_Mask("Glitter mask", 2D) = "white" {}
@@ -272,7 +274,7 @@ Shader "yum_food/tooner"
       ZTest LEqual
 
       Stencil {
-        Ref 1
+        Ref [_Outline_Stenciling]
         Comp Greater
       }
 
