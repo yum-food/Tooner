@@ -17,7 +17,7 @@
 
 struct tess_data
 {
-  float4 position : INTERNALTESSPOS;
+  float4 vertex : INTERNALTESSPOS;
   float2 uv : TEXCOORD0;
   #if defined(LIGHTMAP_ON)
   float2 lmuv : TEXCOORD1;
@@ -64,9 +64,9 @@ v2f vert(appdata v)
   UNITY_TRANSFER_INSTANCE_ID(v, o);
   UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-  o.pos = UnityObjectToClipPos(v.position);
-  o.worldPos = mul(unity_ObjectToWorld, v.position);
-  o.objPos = v.position;
+  o.vertex = UnityObjectToClipPos(v.vertex);
+  o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+  o.objPos = v.vertex;
 
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
@@ -86,7 +86,7 @@ v2f vert(appdata v)
 void getVertexLightColorTess(inout tess_data i)
 {
   #if defined(VERTEXLIGHT_ON)
-  float3 worldPos = mul(unity_ObjectToWorld, i.position).xyz;
+  float3 worldPos = mul(unity_ObjectToWorld, i.vertex).xyz;
   float3 view_dir = normalize(_WorldSpaceCameraPos - worldPos);
   uint normals_mode = round(_Mesh_Normals_Mode);
   bool flat = (normals_mode == 0);
@@ -113,10 +113,10 @@ tess_data hull_vertex(appdata v)
   UNITY_TRANSFER_INSTANCE_ID(v, o);
   UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-  o.position = v.position;
-  //o.position = UnityObjectToClipPos(v.position);
-  //o.worldPos = mul(unity_ObjectToWorld, v.position);
-  //o.objPos = v.position;
+  o.vertex = v.vertex;
+  //o.vertex = UnityObjectToClipPos(v.vertex);
+  //o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+  //o.objPos = v.vertex;
 
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
@@ -135,7 +135,7 @@ tess_factors patch_constant(InputPatch<tess_data, 3> patch)
   tess_factors f;
 
 #if defined(_TESSELLATION)
-  float3 worldPos = mul(unity_ObjectToWorld, patch[0].position);
+  float3 worldPos = mul(unity_ObjectToWorld, patch[0].vertex);
   float factor = _Tess_Factor;
   if (_Tess_Dist_Cutoff > 0 && length(_WorldSpaceCameraPos - worldPos) > _Tess_Dist_Cutoff) {
     factor = 1;
@@ -185,13 +185,13 @@ v2f domain(
   DOMAIN_INTERP(vertexLightColor);
   #endif
 
-  float4 pos =
-    patch[0].position * baryc.x +
-    patch[1].position * baryc.y +
-    patch[2].position * baryc.z;
-  data.pos = UnityObjectToClipPos(pos);
-  data.objPos = pos;
-  data.worldPos = mul(unity_ObjectToWorld, pos);
+  float4 vertex =
+    patch[0].vertex * baryc.x +
+    patch[1].vertex * baryc.y +
+    patch[2].vertex * baryc.z;
+  data.vertex = UnityObjectToClipPos(vertex);
+  data.objPos = vertex;
+  data.worldPos = mul(unity_ObjectToWorld, vertex);
 
   return data;
 }
@@ -286,9 +286,9 @@ void geom(triangle v2f tri_in[3],
 
     // Apply transformed worldPos to other coordinate systems.
     if (_Explode_Phase > 1E-6) {
-      v0.pos = UnityObjectToClipPos(v0_objPos);
-      v1.pos = UnityObjectToClipPos(v1_objPos);
-      v2.pos = UnityObjectToClipPos(v2_objPos);
+      v0.vertex = UnityObjectToClipPos(v0_objPos);
+      v1.vertex = UnityObjectToClipPos(v1_objPos);
+      v2.vertex = UnityObjectToClipPos(v2_objPos);
     }
   }
 #endif  // __EXPLODE
@@ -304,9 +304,9 @@ void geom(triangle v2f tri_in[3],
     float3 v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     float3 v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
 
-    v0.pos = UnityObjectToClipPos(v0_objPos);
-    v1.pos = UnityObjectToClipPos(v1_objPos);
-    v2.pos = UnityObjectToClipPos(v2_objPos);
+    v0.vertex = UnityObjectToClipPos(v0_objPos);
+    v1.vertex = UnityObjectToClipPos(v1_objPos);
+    v2.vertex = UnityObjectToClipPos(v2_objPos);
   }
 #endif
 #if defined(_CLONES)

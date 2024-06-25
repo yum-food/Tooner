@@ -29,8 +29,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
 
-#pragma vertex vert
-#pragma fragment frag
 #pragma multi_compile_instancing
 #pragma multi_compile_shadowcaster
 #include "UnityCG.cginc"

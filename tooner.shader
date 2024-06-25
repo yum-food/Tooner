@@ -298,6 +298,8 @@ Shader "yum_food/tooner"
         "LightMode" = "ShadowCaster"
       }
 			CGPROGRAM
+      #pragma vertex vert
+      #pragma fragment frag
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}

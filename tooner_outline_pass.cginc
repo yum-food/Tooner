@@ -44,7 +44,7 @@ v2f vert(appdata v)
   v2f o;
   o.worldPos = worldPos;
   o.objPos = objPos;
-  o.pos = clipPos;
+  o.vertex = clipPos;
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.uv = v.uv0.xy;
 #if defined(LIGHTMAP_ON)
@@ -60,8 +60,8 @@ tess_data hull_vertex(appdata v)
   float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/3);
   outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
 
-  float4 position = v.vertex;
-  position = mul(unity_ObjectToWorld, position);
+  float4 vertex = v.vertex;
+  vertex = mul(unity_ObjectToWorld, vertex);
   const float3 normal = UnityObjectToWorldNormal(v.normal);
 
   // Perform scaling operation in world space so that object scale doesn't
@@ -69,15 +69,15 @@ tess_data hull_vertex(appdata v)
   // gameobjects that have different scale.
 #if defined(_EXPLODE)
   if (_Explode_Phase <= 1E-6) {
-    position.xyz += normal * _Outline_Width * .1 * outline_mask;
+    vertex.xyz += normal * _Outline_Width * .1 * outline_mask;
   }
 #else
-  position.xyz += normal * _Outline_Width * .1 * outline_mask;
+  vertex.xyz += normal * _Outline_Width * .1 * outline_mask;
 #endif
 
   // Transform back to object, then clip.
-  position = mul(unity_WorldToObject, position);
-  v.vertex.xyz = position.xyz;
+  vertex = mul(unity_WorldToObject, vertex);
+  v.vertex.xyz = vertex.xyz;
 
   tess_data o;
   o.vertex = v.vertex;
@@ -140,13 +140,13 @@ v2f domain(
   DOMAIN_INTERP(vertexLightColor);
   #endif
 
-  float4 pos =
+  float4 vertex =
     patch[0].vertex * baryc.x +
     patch[1].vertex * baryc.y +
     patch[2].vertex * baryc.z;
-  data.pos = UnityObjectToClipPos(pos);
-  data.objPos = pos;
-  data.worldPos = mul(unity_ObjectToWorld, pos);
+  data.vertex = UnityObjectToClipPos(vertex);
+  data.objPos = vertex;
+  data.worldPos = mul(unity_ObjectToWorld, vertex);
 
   return data;
 }
@@ -254,9 +254,9 @@ void geom(triangle v2f tri_in[3],
     v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
 
-    v0.pos = UnityObjectToClipPos(v0_objPos);
-    v1.pos = UnityObjectToClipPos(v1_objPos);
-    v2.pos = UnityObjectToClipPos(v2_objPos);
+    v0.vertex = UnityObjectToClipPos(v0_objPos);
+    v1.vertex = UnityObjectToClipPos(v1_objPos);
+    v2.vertex = UnityObjectToClipPos(v2_objPos);
   }
 #endif
 #if defined(_SCROLL)
@@ -271,9 +271,9 @@ void geom(triangle v2f tri_in[3],
     float3 v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     float3 v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
 
-    v0.pos = UnityObjectToClipPos(v0_objPos);
-    v1.pos = UnityObjectToClipPos(v1_objPos);
-    v2.pos = UnityObjectToClipPos(v2_objPos);
+    v0.vertex = UnityObjectToClipPos(v0_objPos);
+    v1.vertex = UnityObjectToClipPos(v1_objPos);
+    v2.vertex = UnityObjectToClipPos(v2_objPos);
   }
 #endif
 #if defined(_CLONES)
