@@ -325,9 +325,8 @@ float get_glitter(float2 uv, float3 worldPos,
     float3 normal, float density, float amount, float speed,
     float mask, float brightness, float angle, float power)
 {
-  uint2 uv_q = (uint2) floor(uv * density);
-  // rand2 is noisy and shitty
-  float glitter = (float) rand((uv_q.x * 997) ^ (uv_q.y * 991));
+  precise float idensity = rcp(density);
+  float glitter = rand2(floor(uv * density) * idensity);
 
   float thresh = 1 - amount / 100;
   glitter = lerp(0, glitter, glitter > thresh);
