@@ -371,6 +371,40 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Rim lighting emission");
 
+      bc = FindProperty($"_Rim_Lighting{i}_Glitter_Enabled");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Glitter", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      SetKeyword($"_RIM_LIGHTING{i}_GLITTER", enabled);
+
+      if (enabled) {
+        EditorGUI.indentLevel += 1;
+
+        bc = FindProperty($"_Rim_Lighting{i}_Glitter_Density");
+        editor.FloatProperty(
+            bc,
+            "Density");
+
+        bc = FindProperty($"_Rim_Lighting{i}_Glitter_Amount");
+        editor.FloatProperty(
+            bc,
+            "Amount");
+
+        bc = FindProperty($"_Rim_Lighting{i}_Glitter_Speed");
+        editor.FloatProperty(
+            bc,
+            "Speed");
+
+        bc = FindProperty($"_Rim_Lighting{i}_Glitter_Quantization");
+        editor.FloatProperty(
+            bc,
+            "Quantization");
+
+        EditorGUI.indentLevel -= 1;
+      }
+
       EditorGUI.indentLevel -= 1;
     }
   }

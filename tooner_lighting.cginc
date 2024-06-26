@@ -1,8 +1,6 @@
 #ifndef TOONER_LIGHTING
 #define TOONER_LIGHTING
 
-#include "pbr.cginc"
-
 #include "audiolink.cginc"
 #include "clones.cginc"
 #include "globals.cginc"
@@ -10,6 +8,7 @@
 #include "iq_sdf.cginc"
 #include "math.cginc"
 #include "motion.cginc"
+#include "pbr.cginc"
 #include "poi.cginc"
 #include "shadertoy.cginc"
 #include "tooner_scroll.cginc"
@@ -70,7 +69,7 @@ v2f vert(appdata v)
 
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
-  o.uv = v.uv0.xy;
+  o.uv = v.uv0;
 #if defined(LIGHTMAP_ON)
   o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif
@@ -321,32 +320,33 @@ void geom(triangle v2f tri_in[3],
   tri_out.RestartStrip();
 }
 
-#if defined(_GLITTER)
-float get_glitter(float2 uv, float iddx, float iddy, float3 worldPos, float3 normal)
+#if defined(_GLITTER) || defined(_RIM_LIGHTING0_GLITTER) || defined(_RIM_LIGHTING1_GLITTER)
+float get_glitter(float2 uv, float3 worldPos,
+    float3 normal, float density, float amount, float speed,
+    float mask, float brightness, float angle, float power)
 {
-  float pixellate = _Glitter_Density;
-  float glitter = rand2(round(uv * pixellate) / pixellate + _Glitter_Seed);
+  uint2 uv_q = (uint2) floor(uv * density);
+  // rand2 is noisy and shitty
+  float glitter = (float) rand((uv_q.x * 997) ^ (uv_q.y * 991));
 
-  float thresh = 1 - _Glitter_Amount / 100;
+  float thresh = 1 - amount / 100;
   glitter = lerp(0, glitter, glitter > thresh);
   glitter = (glitter - thresh) / (1 - thresh);
 
-  float b = sin(_Time[2] * _Glitter_Speed / 2 + glitter*100);
+  float b = sin(_Time[2] * speed / 2 + glitter*100);
+  b = speed > 1E-6 ? b : 1;
   glitter = max(glitter, 0)*max(b, 0);
 
-  float mask = _Glitter_Mask.SampleGrad(linear_repeat_s, uv, iddx, iddy);
   glitter *= mask;
 
   glitter = clamp(glitter, 0, 1);
-  glitter *= _Glitter_Brightness;
+  glitter *= brightness;
 
-  if (_Glitter_Angle < 90) {
+  if (angle < 90) {
     float ndotl = abs(dot(normal, normalize(_WorldSpaceCameraPos.xyz - worldPos)));
-    float cutoff = cos((_Glitter_Angle / 180) * 3.14159);
+    float cutoff = cos((angle / 180) * 3.14159);
 
-    glitter *= saturate(pow(ndotl / cutoff, _Glitter_Power));
-
-    //glitter = ndotl > cutoff ? glitter : 0;
+    glitter *= saturate(pow(ndotl / cutoff, power));
   }
 
   return glitter;
@@ -782,6 +782,14 @@ float4 effect(inout v2f i)
 #else
       float matcap_mask = 1;
 #endif
+#if defined(_RIM_LIGHTING0_GLITTER)
+      float rl_glitter = get_glitter(i.uv.xy, i.worldPos, normal,
+          _Rim_Lighting0_Glitter_Density,
+          _Rim_Lighting0_Glitter_Amount, _Rim_Lighting0_Glitter_Speed,
+          /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
+      rl_glitter = floor(rl_glitter * _Rim_Lighting0_Glitter_Quantization) / _Rim_Lighting0_Glitter_Quantization;
+      matcap_mask *= rl_glitter;
+#endif
       int mode = round(_Rim_Lighting0_Mode);
       switch (mode) {
         case 0:
@@ -825,6 +833,14 @@ float4 effect(inout v2f i)
       matcap_mask *= matcap_mask_raw.a;
 #else
       float matcap_mask = 1;
+#endif
+#if defined(_RIM_LIGHTING1_GLITTER)
+      float rl_glitter = get_glitter(i.uv, i.worldPos, normal,
+          _Rim_Lighting1_Glitter_Density,
+          _Rim_Lighting1_Glitter_Amount, _Rim_Lighting1_Glitter_Speed,
+          /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
+      rl_glitter = floor(rl_glitter * _Rim_Lighting1_Glitter_Quantization) / _Rim_Lighting1_Glitter_Quantization;
+      matcap_mask *= rl_glitter;
 #endif
       int mode = round(_Rim_Lighting1_Mode);
       switch (mode) {
@@ -916,7 +932,10 @@ float4 effect(inout v2f i)
   result.rgb += matcap_emission;
 #endif
 #if defined(_GLITTER)
-  float glitter = get_glitter(i.uv, iddx, iddy, i.worldPos, normal);
+  float glitter_mask = _Glitter_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  float glitter = get_glitter(i.uv, i.worldPos, normal,
+      _Glitter_Density, _Glitter_Amount, _Glitter_Speed,
+      glitter_mask, _Glitter_Brightness, _Glitter_Angle, _Glitter_Power);
   result.rgb += glitter;
 #endif
 #if defined(_EMISSION)

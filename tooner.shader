@@ -150,6 +150,11 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_Power("Rim lighting power", Float) = 2.0
     _Rim_Lighting0_Strength("Rim lighting strength", Float) = 1.0
     _Rim_Lighting0_Emission("Rim lighting emission", Float) = 0
+    _Rim_Lighting0_Glitter_Enabled("Rim lighting glitter", Float) = 0
+    _Rim_Lighting0_Glitter_Density("Rim lighting glitter density", Float) = 100
+    _Rim_Lighting0_Glitter_Amount("Rim lighting glitter amount", Float) = 100
+    _Rim_Lighting0_Glitter_Speed("Rim lighting glitter speed", Float) = 1
+    _Rim_Lighting0_Glitter_Quantization("Rim lighting glitter quantization", Float) = 1000
 
     _Rim_Lighting1_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting1_Mode("Rim lighting mode", Float) = 0
@@ -160,6 +165,11 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_Power("Rim lighting power", Float) = 2.0
     _Rim_Lighting1_Strength("Rim lighting strength", Float) = 1.0
     _Rim_Lighting1_Emission("Rim lighting emission", Float) = 0
+    _Rim_Lighting1_Glitter_Enabled("Rim lighting glitter", Float) = 0
+    _Rim_Lighting1_Glitter_Density("Rim lighting glitter density", Float) = 100
+    _Rim_Lighting1_Glitter_Amount("Rim lighting glitter amount", Float) = 100
+    _Rim_Lighting1_Glitter_Speed("Rim lighting glitter speed", Float) = 1
+    _Rim_Lighting1_Glitter_Quantization("Rim lighting glitter quantization", Float) = 1000
 
     _OKLAB_Enabled("Enable OKLAB", Float) = 0.0
     _OKLAB_Mask("Mask", 2D) = "white" {}

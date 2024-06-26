@@ -51,7 +51,9 @@ float rand(uint seed) {
 // Generate a random number on [0, 1].
 float rand2(float2 p)
 {
-  return glsl_mod(sin(dot(p, float2(561.0, 885.0))) * 776.2, 1.0);
+  return frac(sin(dot(p,
+          float2(12.9898, 78.233)))
+      * 43758.5453123);
 }
 
 // Generate a random number on [0, 1].

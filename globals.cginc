@@ -140,7 +140,6 @@ texture2D _Glitter_Mask;
 float _Glitter_Density;
 float _Glitter_Amount;
 float _Glitter_Speed;
-float _Glitter_Seed;
 float _Glitter_Brightness;
 float _Glitter_Angle;
 float _Glitter_Power;
@@ -194,6 +193,13 @@ float _Rim_Lighting0_Center;
 float _Rim_Lighting0_Power;
 float _Rim_Lighting0_Strength;
 float _Rim_Lighting0_Emission;
+#if defined(_RIM_LIGHTING0_GLITTER)
+float _Rim_Lighting0_Glitter_Enabled;
+float _Rim_Lighting0_Glitter_Density;
+float _Rim_Lighting0_Glitter_Amount;
+float _Rim_Lighting0_Glitter_Speed;
+float _Rim_Lighting0_Glitter_Quantization;
+#endif
 #endif
 
 #if defined(_RIM_LIGHTING1)
@@ -206,6 +212,13 @@ float _Rim_Lighting1_Center;
 float _Rim_Lighting1_Power;
 float _Rim_Lighting1_Strength;
 float _Rim_Lighting1_Emission;
+#if defined(_RIM_LIGHTING1_GLITTER)
+float _Rim_Lighting1_Glitter_Enabled;
+float _Rim_Lighting1_Glitter_Density;
+float _Rim_Lighting1_Glitter_Amount;
+float _Rim_Lighting1_Glitter_Speed;
+float _Rim_Lighting1_Glitter_Quantization;
+#endif
 #endif
 
 #if defined(_OKLAB)
