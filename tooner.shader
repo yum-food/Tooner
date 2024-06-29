@@ -71,6 +71,22 @@ Shader "yum_food/tooner"
     _PBR_Overlay3_Mask_Invert("Mask invert", Float) = 0.0
     _PBR_Overlay3_Mix("Mix mode", Float) = 0.0
 
+    _Decal0_Enable("Enable decal", Float) = 0.0
+    _Decal0_BaseColor("Base color", 2D) = "white" {}
+    _Decal0_Emission_Strength("Emission strength", Float) = 0
+
+    _Decal1_Enable("Enable decal", Float) = 0.0
+    _Decal1_BaseColor("Base color", 2D) = "white" {}
+    _Decal1_Emission_Strength("Emission strength", Float) = 0
+
+    _Decal2_Enable("Enable decal", Float) = 0.0
+    _Decal2_BaseColor("Base color", 2D) = "white" {}
+    _Decal2_Emission_Strength("Emission strength", Float) = 0
+
+    _Decal3_Enable("Enable decal", Float) = 0.0
+    _Decal3_BaseColor("Base color", 2D) = "white" {}
+    _Decal3_Emission_Strength("Emission strength", Float) = 0
+
     [NoScaleOffset] _EmissionTex("Emission map", 2D) = "black" {}
     _EmissionStrength("Emission strength", Range(0, 2)) = 0
 
@@ -156,6 +172,9 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_Glitter_Amount("Rim lighting glitter amount", Float) = 100
     _Rim_Lighting0_Glitter_Speed("Rim lighting glitter speed", Float) = 1
     _Rim_Lighting0_Glitter_Quantization("Rim lighting glitter quantization", Float) = 1000
+    _Rim_Lighting0_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
+    _Rim_Lighting0_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
+    _Rim_Lighting0_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
 
     _Rim_Lighting1_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting1_Mode("Rim lighting mode", Float) = 0
@@ -172,6 +191,9 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_Glitter_Amount("Rim lighting glitter amount", Float) = 100
     _Rim_Lighting1_Glitter_Speed("Rim lighting glitter speed", Float) = 1
     _Rim_Lighting1_Glitter_Quantization("Rim lighting glitter quantization", Float) = 1000
+    _Rim_Lighting1_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
+    _Rim_Lighting1_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
+    _Rim_Lighting1_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
 
     _OKLAB_Enabled("Enable OKLAB", Float) = 0.0
     _OKLAB_Mask("Mask", 2D) = "white" {}

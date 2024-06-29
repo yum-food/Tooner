@@ -208,7 +208,35 @@ public class ToonerGUI : ShaderGUI {
     }
   }
 
-  void DoCubemap() {
+  void DoDecal() {
+    for (int i = 0; i < 4; i++) {
+      GUILayout.Label($"Decal {i}", EditorStyles.boldLabel);
+      EditorGUI.indentLevel += 1;
+
+      MaterialProperty bc = FindProperty($"_Decal{i}_Enable");
+      bool enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Enable", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      SetKeyword($"_DECAL{i}", enabled);
+
+      if (enabled) {
+        bc = FindProperty($"_Decal{i}_BaseColor");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bc, "Base color (RGBA)"),
+            bc);
+        if (bc.textureValue) {
+          editor.TextureScaleOffsetProperty(bc);
+        }
+        bc = FindProperty($"_Decal{i}_Emission_Strength");
+        editor.FloatProperty(
+            bc,
+            "Emission strength");
+      }
+
+      EditorGUI.indentLevel -= 1;
+    }
   }
 
   void DoBrightness() {
@@ -407,6 +435,27 @@ public class ToonerGUI : ShaderGUI {
             bc,
             "Quantization");
 
+        EditorGUI.indentLevel -= 1;
+      }
+
+      bc = FindProperty($"_Rim_Lighting{i}_PolarMask_Enabled");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Polar mask", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      SetKeyword($"_RIM_LIGHTING{i}_POLAR_MASK", enabled);
+
+      if (enabled) {
+        EditorGUI.indentLevel += 1;
+        bc = FindProperty($"_Rim_Lighting{i}_PolarMask_Theta");
+        editor.FloatProperty(
+            bc,
+            "Theta");
+        bc = FindProperty($"_Rim_Lighting{i}_PolarMask_Power");
+        editor.FloatProperty(
+            bc,
+            "Power");
         EditorGUI.indentLevel -= 1;
       }
 
@@ -960,6 +1009,8 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
 
     DoPBROverlay();
+
+    DoDecal();
 
     GUILayout.Label("Lighting", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;

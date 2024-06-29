@@ -112,6 +112,27 @@ texture2D _PBR_Overlay3_Mask;
 float _PBR_Overlay3_Mask_Invert;
 #endif
 
+#if defined(_DECAL0)
+texture2D _Decal0_BaseColor;
+float4 _Decal0_BaseColor_ST;
+float _Decal0_Emission_Strength;
+#endif
+#if defined(_DECAL1)
+texture2D _Decal1_BaseColor;
+float4 _Decal1_BaseColor_ST;
+float _Decal1_Emission_Strength;
+#endif
+#if defined(_DECAL2)
+texture2D _Decal2_BaseColor;
+float4 _Decal2_BaseColor_ST;
+float _Decal2_Emission_Strength;
+#endif
+#if defined(_DECAL3)
+texture2D _Decal3_BaseColor;
+float4 _Decal3_BaseColor_ST;
+float _Decal3_Emission_Strength;
+#endif
+
 #if defined(_EMISSION)
 texture2D _EmissionTex;
 float _EmissionStrength;
@@ -201,6 +222,11 @@ float _Rim_Lighting0_Glitter_Amount;
 float _Rim_Lighting0_Glitter_Speed;
 float _Rim_Lighting0_Glitter_Quantization;
 #endif
+#if defined(_RIM_LIGHTING0_POLAR_MASK)
+float _Rim_Lighting0_PolarMask_Enabled;
+float _Rim_Lighting0_PolarMask_Theta;
+float _Rim_Lighting0_PolarMask_Power;
+#endif
 #endif
 
 #if defined(_RIM_LIGHTING1)
@@ -220,6 +246,11 @@ float _Rim_Lighting1_Glitter_Density;
 float _Rim_Lighting1_Glitter_Amount;
 float _Rim_Lighting1_Glitter_Speed;
 float _Rim_Lighting1_Glitter_Quantization;
+#endif
+#if defined(_RIM_LIGHTING1_POLAR_MASK)
+float _Rim_Lighting1_PolarMask_Enabled;
+float _Rim_Lighting1_PolarMask_Theta;
+float _Rim_Lighting1_PolarMask_Power;
 #endif
 #endif
 

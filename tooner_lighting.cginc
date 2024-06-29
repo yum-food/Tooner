@@ -464,6 +464,20 @@ void getOverlayAlbedo(inout PbrOverlay ov,
 #endif  // _PBR_OVERLAY3
 }
 
+void applyDecalAlbedo(inout float3 albedo,
+    inout float decal_emission,
+    v2f i, float iddx, float iddy)
+{
+#if defined(_DECAL0)
+  float4 d0_c = _Decal0_BaseColor.SampleGrad(linear_repeat_s,
+      saturate((i.uv - _Decal0_BaseColor_ST.zw) * _Decal0_BaseColor_ST.xy),
+      iddx * _Decal0_BaseColor_ST.x,
+      iddy * _Decal0_BaseColor_ST.y);
+  albedo.rgb = lerp(albedo.rgb, d0_c.rgb, d0_c.a);
+  decal_emission += d0_c.rgb * _Decal0_Emission_Strength;
+#endif  // _DECAL0
+}
+
 void mixOverlayAlbedo(inout float3 albedo, PbrOverlay ov) {
 #if defined(_PBR_OVERLAY0)
 #if defined(_PBR_OVERLAY0_MIX_ALPHA_BLEND)
@@ -650,12 +664,16 @@ float4 effect(inout v2f i)
 #endif
 
   mixOverlayAlbedo(albedo.rgb, ov);
+#if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
+  float decal_emission = 0;
+  applyDecalAlbedo(albedo.rgb, decal_emission, i, iddx, iddy);
+#endif
 
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
   float3 matcap_emission = 0;
-#endif
-
-#if defined(_MATCAP0) || defined(_MATCAP1)
+  float2 matcap_uv;
+  float matcap_theta;
+  float matcap_radius;
   {
     const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
     const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
@@ -664,7 +682,13 @@ float4 effect(inout v2f i)
         refl.x * refl.x +
         refl.y * refl.y +
         (refl.z + 1) * (refl.z + 1));
-    float2 matcap_uv = refl.xy / m + 0.5;
+    matcap_uv = refl.xy / m + 0.5;
+    matcap_radius = length(matcap_uv - 0.5);
+    matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
+  }
+#endif
+#if defined(_MATCAP0) || defined(_MATCAP1)
+  {
     float iddx = ddx(i.uv.x);
     float iddy = ddy(i.uv.y);
 #if defined(_MATCAP0)
@@ -780,6 +804,7 @@ float4 effect(inout v2f i)
         rl = floor(rl * q) / q;
       }
       float3 matcap = rl * _Rim_Lighting0_Color * _Rim_Lighting0_Strength;
+
 #if defined(_RIM_LIGHTING0_MASK)
       float4 matcap_mask_raw = _Rim_Lighting0_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
       float matcap_mask = matcap_mask_raw.r;
@@ -787,6 +812,13 @@ float4 effect(inout v2f i)
       matcap_mask *= matcap_mask_raw.a;
 #else
       float matcap_mask = 1;
+#endif
+#if defined(_RIM_LIGHTING0_POLAR_MASK)
+      if (_Rim_Lighting0_PolarMask_Enabled) {
+        float pmask_theta = _Rim_Lighting0_PolarMask_Theta;
+        float pmask_pow = _Rim_Lighting0_PolarMask_Power;
+        matcap_mask *= abs(1.0 / (1.0 + pow(abs(matcap_theta - pmask_theta), pmask_pow)));;
+      }
 #endif
 #if defined(_RIM_LIGHTING0_GLITTER)
       float rl_glitter = get_glitter(i.uv.xy, i.worldPos, normal,
@@ -843,6 +875,17 @@ float4 effect(inout v2f i)
       matcap_mask *= matcap_mask_raw.a;
 #else
       float matcap_mask = 1;
+#endif
+#if defined(_RIM_LIGHTING1_POLAR_MASK)
+      if (_Rim_Lighting1_PolarMask_Enabled) {
+        float pmask_theta = _Rim_Lighting1_PolarMask_Theta;
+        float pmask_pow = _Rim_Lighting1_PolarMask_Power;
+        float filter = abs(1.0 / (1.0 + pow(abs(matcap_theta - pmask_theta), pmask_pow)));;
+        if (q > 0) {
+          filter = floor(filter * q) / q;
+        }
+        matcap_mask *= filter;
+      }
 #endif
 #if defined(_RIM_LIGHTING1_GLITTER)
       float rl_glitter = get_glitter(i.uv, i.worldPos, normal,
@@ -940,6 +983,9 @@ float4 effect(inout v2f i)
   float4 result = lit;
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
   result.rgb += matcap_emission;
+#endif
+#if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
+  result.rgb += decal_emission;
 #endif
 #if defined(_GLITTER)
   float glitter_mask = _Glitter_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
