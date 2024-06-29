@@ -371,6 +371,11 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Rim lighting emission");
 
+      bc = FindProperty($"_Rim_Lighting{i}_Quantization");
+      editor.FloatProperty(
+          bc,
+          "Rim lighting quantization");
+
       bc = FindProperty($"_Rim_Lighting{i}_Glitter_Enabled");
       enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();

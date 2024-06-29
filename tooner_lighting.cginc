@@ -325,7 +325,10 @@ float get_glitter(float2 uv, float3 worldPos,
     float3 normal, float density, float amount, float speed,
     float mask, float brightness, float angle, float power)
 {
-  precise float idensity = rcp(density);
+  // A regular divide here causes flickering. The leading guess is that NVIDIA
+  // hardware implements the divide instruction slightly differently on
+  // different cores.
+  precise float idensity = 1.0 / density;
   float glitter = rand2(floor(uv * density) * idensity);
 
   float thresh = 1 - amount / 100;
@@ -772,6 +775,10 @@ float4 effect(inout v2f i)
     {
       float rl = abs(theta) / PI;  // on [0, 1]
       rl = pow(2, -_Rim_Lighting0_Power * abs(rl - _Rim_Lighting0_Center));
+      float q = _Rim_Lighting0_Quantization;
+      if (q > -1) {
+        rl = floor(rl * q) / q;
+      }
       float3 matcap = rl * _Rim_Lighting0_Color * _Rim_Lighting0_Strength;
 #if defined(_RIM_LIGHTING0_MASK)
       float4 matcap_mask_raw = _Rim_Lighting0_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
@@ -824,6 +831,10 @@ float4 effect(inout v2f i)
     {
       float rl = abs(theta) / PI;  // on [0, 1]
       rl = pow(2, -_Rim_Lighting1_Power * abs(rl - _Rim_Lighting1_Center));
+      float q = _Rim_Lighting1_Quantization;
+      if (q > 0) {
+        rl = floor(rl * q) / q;
+      }
       float3 matcap = rl * _Rim_Lighting1_Color * _Rim_Lighting1_Strength;
 #if defined(_RIM_LIGHTING1_MASK)
       float4 matcap_mask_raw = _Rim_Lighting1_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);

@@ -193,6 +193,7 @@ float _Rim_Lighting0_Center;
 float _Rim_Lighting0_Power;
 float _Rim_Lighting0_Strength;
 float _Rim_Lighting0_Emission;
+float _Rim_Lighting0_Quantization;
 #if defined(_RIM_LIGHTING0_GLITTER)
 float _Rim_Lighting0_Glitter_Enabled;
 float _Rim_Lighting0_Glitter_Density;
@@ -212,6 +213,7 @@ float _Rim_Lighting1_Center;
 float _Rim_Lighting1_Power;
 float _Rim_Lighting1_Strength;
 float _Rim_Lighting1_Emission;
+float _Rim_Lighting1_Quantization;
 #if defined(_RIM_LIGHTING1_GLITTER)
 float _Rim_Lighting1_Glitter_Enabled;
 float _Rim_Lighting1_Glitter_Density;

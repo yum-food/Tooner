@@ -150,6 +150,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_Power("Rim lighting power", Float) = 2.0
     _Rim_Lighting0_Strength("Rim lighting strength", Float) = 1.0
     _Rim_Lighting0_Emission("Rim lighting emission", Float) = 0
+    _Rim_Lighting0_Quantization("Rim lighting quantization", Float) = -1
     _Rim_Lighting0_Glitter_Enabled("Rim lighting glitter", Float) = 0
     _Rim_Lighting0_Glitter_Density("Rim lighting glitter density", Float) = 100
     _Rim_Lighting0_Glitter_Amount("Rim lighting glitter amount", Float) = 100
@@ -165,6 +166,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_Power("Rim lighting power", Float) = 2.0
     _Rim_Lighting1_Strength("Rim lighting strength", Float) = 1.0
     _Rim_Lighting1_Emission("Rim lighting emission", Float) = 0
+    _Rim_Lighting1_Quantization("Rim lighting quantization", Float) = -1
     _Rim_Lighting1_Glitter_Enabled("Rim lighting glitter", Float) = 0
     _Rim_Lighting1_Glitter_Density("Rim lighting glitter density", Float) = 100
     _Rim_Lighting1_Glitter_Amount("Rim lighting glitter amount", Float) = 100
