@@ -4,6 +4,7 @@
 #include "AutoLight.cginc"
 
 SamplerState linear_repeat_s;
+SamplerState linear_clamp_s;
 
 float4 _Color;
 float _Metallic;
@@ -116,21 +117,25 @@ float _PBR_Overlay3_Mask_Invert;
 texture2D _Decal0_BaseColor;
 float4 _Decal0_BaseColor_ST;
 float _Decal0_Emission_Strength;
+float _Decal0_Angle;
 #endif
 #if defined(_DECAL1)
 texture2D _Decal1_BaseColor;
 float4 _Decal1_BaseColor_ST;
 float _Decal1_Emission_Strength;
+float _Decal1_Angle;
 #endif
 #if defined(_DECAL2)
 texture2D _Decal2_BaseColor;
 float4 _Decal2_BaseColor_ST;
 float _Decal2_Emission_Strength;
+float _Decal2_Angle;
 #endif
 #if defined(_DECAL3)
 texture2D _Decal3_BaseColor;
 float4 _Decal3_BaseColor_ST;
 float _Decal3_Emission_Strength;
+float _Decal3_Angle;
 #endif
 
 #if defined(_EMISSION)

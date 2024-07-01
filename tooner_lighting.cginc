@@ -464,18 +464,73 @@ void getOverlayAlbedo(inout PbrOverlay ov,
 #endif  // _PBR_OVERLAY3
 }
 
+void applyDecalAlbedoImpl(
+    inout float3 albedo,
+    inout float decal_emission,
+    v2f i,
+    texture2D tex,
+    float4 tex_st,
+    float emission_strength,
+    float angle)
+{
+  float2 d0_uv = ((i.uv - 0.5) - tex_st.zw) * tex_st.xy + 0.5;
+
+  if (abs(angle) > 1E-6) {
+    float theta = angle * 2.0 * 3.14159265;
+    float2x2 rot = float2x2(
+        cos(theta), -sin(theta),
+        sin(theta), cos(theta));
+    d0_uv = mul(rot, d0_uv - 0.5) + 0.5;
+  }
+
+  float4 d0_c = tex.SampleGrad(linear_clamp_s,
+      saturate(d0_uv),
+      ddx(d0_uv.x) * _Mip_Multiplier,
+      ddy(d0_uv.y) * _Mip_Multiplier);
+
+  float d0_in_range = 1;
+  d0_in_range *= d0_uv.x > 0;
+  d0_in_range *= d0_uv.x < 1;
+  d0_in_range *= d0_uv.y > 0;
+  d0_in_range *= d0_uv.y < 1;
+  d0_c *= d0_in_range;
+
+  albedo.rgb = lerp(albedo.rgb, d0_c.rgb, d0_c.a);
+  decal_emission += d0_c.rgb * emission_strength;
+}
+
 void applyDecalAlbedo(inout float3 albedo,
     inout float decal_emission,
-    v2f i, float iddx, float iddy)
+    v2f i)
 {
 #if defined(_DECAL0)
-  float4 d0_c = _Decal0_BaseColor.SampleGrad(linear_repeat_s,
-      saturate((i.uv - _Decal0_BaseColor_ST.zw) * _Decal0_BaseColor_ST.xy),
-      iddx * _Decal0_BaseColor_ST.x,
-      iddy * _Decal0_BaseColor_ST.y);
-  albedo.rgb = lerp(albedo.rgb, d0_c.rgb, d0_c.a);
-  decal_emission += d0_c.rgb * _Decal0_Emission_Strength;
+  applyDecalAlbedoImpl(albedo, decal_emission, i,
+      _Decal0_BaseColor,
+      _Decal0_BaseColor_ST,
+      _Decal0_Emission_Strength,
+      _Decal0_Angle);
 #endif  // _DECAL0
+#if defined(_DECAL1)
+  applyDecalAlbedoImpl(albedo, decal_emission, i,
+      _Decal1_BaseColor,
+      _Decal1_BaseColor_ST,
+      _Decal1_Emission_Strength,
+      _Decal1_Angle);
+#endif  // _DECAL1
+#if defined(_DECAL2)
+  applyDecalAlbedoImpl(albedo, decal_emission, i,
+      _Decal2_BaseColor,
+      _Decal2_BaseColor_ST,
+      _Decal2_Emission_Strength,
+      _Decal2_Angle);
+#endif  // _DECAL2
+#if defined(_DECAL3)
+  applyDecalAlbedoImpl(albedo, decal_emission, i,
+      _Decal3_BaseColor,
+      _Decal3_BaseColor_ST,
+      _Decal3_Emission_Strength,
+      _Decal3_Angle);
+#endif  // _DECAL3
 }
 
 void mixOverlayAlbedo(inout float3 albedo, PbrOverlay ov) {
@@ -666,7 +721,7 @@ float4 effect(inout v2f i)
   mixOverlayAlbedo(albedo.rgb, ov);
 #if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
   float decal_emission = 0;
-  applyDecalAlbedo(albedo.rgb, decal_emission, i, iddx, iddy);
+  applyDecalAlbedo(albedo.rgb, decal_emission, i);
 #endif
 
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)

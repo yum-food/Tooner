@@ -233,6 +233,10 @@ public class ToonerGUI : ShaderGUI {
         editor.FloatProperty(
             bc,
             "Emission strength");
+        bc = FindProperty($"_Decal{i}_Angle");
+        editor.RangeProperty(
+            bc,
+            "Angle");
       }
 
       EditorGUI.indentLevel -= 1;
