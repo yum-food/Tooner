@@ -238,10 +238,11 @@ Shader "yum_food/tooner"
     _Gimmick_Flat_Color_Emission("Flat color gimmick emission", Color) = (0, 0, 0, 1)
 
     _Gimmick_Quantize_Location_Enable_Static("Enable quantize location gimmick", Float) = 0.0
-    _Gimmick_Quantize_Location_Enable_Dynamic("Enable quantize location gimmick", Float) = 0.0
-    _Gimmick_Quantize_Location_Precision("Enable quantize location precision", Float) = 100.0
-    _Gimmick_Quantize_Location_Direction("Enable quantize location direction", Float) = 1.0
-    _Gimmick_Quantize_Location_Mask("Enable quantize location mask", 2D) = "white" {}
+    _Gimmick_Quantize_Location_Enable_Dynamic("quantize location gimmick", Float) = 0.0
+    _Gimmick_Quantize_Location_Precision("quantize location precision", Float) = 100.0
+    _Gimmick_Quantize_Location_Direction("quantize location direction", Float) = 1.0
+    _Gimmick_Quantize_Location_Multiplier("quantize location multiplier", Range(0.01, 4)) = 1.0
+    _Gimmick_Quantize_Location_Mask("Mask", 2D) = "white" {}
 
     _Gimmick_Vertex_Normal_Slide_Enable_Static("Enable vertex normal slide", Float) = 0.0
     _Gimmick_Vertex_Normal_Slide_Enable_Dynamic("Enable vertex normal slide", Float) = 0.0

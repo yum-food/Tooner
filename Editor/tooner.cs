@@ -853,6 +853,8 @@ public class ToonerGUI : ShaderGUI {
     editor.FloatProperty(bc, "Precision");
     bc = FindProperty("_Gimmick_Quantize_Location_Direction");
     editor.FloatProperty(bc, "Direction");
+    bc = FindProperty("_Gimmick_Quantize_Location_Multiplier");
+    editor.RangeProperty(bc, "Multiplier");
     bc = FindProperty("_Gimmick_Quantize_Location_Mask");
     editor.TexturePropertySingleLine(
         MakeLabel(bc, "Mask"),

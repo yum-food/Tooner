@@ -302,6 +302,7 @@ float _Gimmick_Quantize_Location_Enable_Static;
 float _Gimmick_Quantize_Location_Enable_Dynamic;
 float _Gimmick_Quantize_Location_Precision;
 float _Gimmick_Quantize_Location_Direction;
+float _Gimmick_Quantize_Location_Multiplier;
 texture2D _Gimmick_Quantize_Location_Mask;
 #endif
 

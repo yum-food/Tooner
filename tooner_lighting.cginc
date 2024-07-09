@@ -65,7 +65,7 @@ v2f vert(appdata v)
 
 #if defined(_GIMMICK_QUANTIZE_LOCATION)
   if (_Gimmick_Quantize_Location_Enable_Dynamic) {
-    float q = _Gimmick_Quantize_Location_Precision;
+    float q = _Gimmick_Quantize_Location_Precision / _Gimmick_Quantize_Location_Multiplier;
     float3 v_new0 = floor(v.vertex * q) / q;
     float3 d = v_new0 - v.vertex;
     float3 v_new1 = v.vertex - d;
