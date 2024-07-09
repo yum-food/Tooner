@@ -195,6 +195,7 @@ texture2D _Matcap0;
 texture2D _Matcap0_Mask;
 float _Matcap0_Mask_Invert;
 float _Matcap0Str;
+float _Matcap0Quantization;
 float _Matcap0Mode;
 float _Matcap0Emission;
 #endif
@@ -205,6 +206,7 @@ texture2D _Matcap1;
 texture2D _Matcap1_Mask;
 float _Matcap1_Mask_Invert;
 float _Matcap1Str;
+float _Matcap1Quantization;
 float _Matcap1Mode;
 float _Matcap1Emission;
 #endif
@@ -293,6 +295,20 @@ float _Gimmick_Flat_Color_Enable_Static;
 float _Gimmick_Flat_Color_Enable_Dynamic;
 float4 _Gimmick_Flat_Color_Color;
 float3 _Gimmick_Flat_Color_Emission;
+#endif
+
+#if defined(_GIMMICK_QUANTIZE_LOCATION)
+float _Gimmick_Quantize_Location_Enable_Static;
+float _Gimmick_Quantize_Location_Enable_Dynamic;
+float _Gimmick_Quantize_Location_Precision;
+float _Gimmick_Quantize_Location_Direction;
+texture2D _Gimmick_Quantize_Location_Mask;
+#endif
+
+#if defined(_GIMMICK_VERTEX_NORMAL_SLIDE)
+float _Gimmick_Vertex_Normal_Slide_Enable_Static;
+float _Gimmick_Vertex_Normal_Slide_Enable_Dynamic;
+float _Gimmick_Vertex_Normal_Slide_Distance;
 #endif
 
 #endif

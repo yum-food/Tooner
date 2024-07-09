@@ -151,6 +151,7 @@ Shader "yum_food/tooner"
     _Matcap0Mode("Matcap mode", Float) = 0
     _Matcap0Str("Matcap strength", Float) = 1
     _Matcap0Emission("Matcap emission", Float) = 0
+    _Matcap0Quantization("Matcap quantization", Float) = -1
     _Matcap0Distortion0("Matcap distortion0", Float) = 0
 
     _Matcap1("Matcap", 2D) = "black" {}
@@ -159,6 +160,7 @@ Shader "yum_food/tooner"
     _Matcap1Mode("Matcap mode", Float) = 0
     _Matcap1Str("Matcap strength", Float) = 1
     _Matcap1Emission("Matcap emission", Float) = 0
+    _Matcap1Quantization("Matcap quantization", Float) = -1
     _Matcap1Distortion0("Matcap distortion0", Float) = 0
 
     _Rim_Lighting0_Enabled("Enable rim lighting", Float) = 0
@@ -234,6 +236,16 @@ Shader "yum_food/tooner"
     _Gimmick_Flat_Color_Enable_Dynamic("Enable flat color gimmick", Float) = 0.0
     _Gimmick_Flat_Color_Color("Flat color gimmick color", Color) = (0, 0, 0, 1)
     _Gimmick_Flat_Color_Emission("Flat color gimmick emission", Color) = (0, 0, 0, 1)
+
+    _Gimmick_Quantize_Location_Enable_Static("Enable quantize location gimmick", Float) = 0.0
+    _Gimmick_Quantize_Location_Enable_Dynamic("Enable quantize location gimmick", Float) = 0.0
+    _Gimmick_Quantize_Location_Precision("Enable quantize location precision", Float) = 100.0
+    _Gimmick_Quantize_Location_Direction("Enable quantize location direction", Float) = 1.0
+    _Gimmick_Quantize_Location_Mask("Enable quantize location mask", 2D) = "white" {}
+
+    _Gimmick_Vertex_Normal_Slide_Enable_Static("Enable vertex normal slide", Float) = 0.0
+    _Gimmick_Vertex_Normal_Slide_Enable_Dynamic("Enable vertex normal slide", Float) = 0.0
+    _Gimmick_Vertex_Normal_Slide_Distance("Vertex normal slide distance", Float) = 0.01
   }
   SubShader
   {

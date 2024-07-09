@@ -63,6 +63,19 @@ v2f vert(appdata v)
   UNITY_TRANSFER_INSTANCE_ID(v, o);
   UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
+#if defined(_GIMMICK_QUANTIZE_LOCATION)
+  if (_Gimmick_Quantize_Location_Enable_Dynamic) {
+    float q = _Gimmick_Quantize_Location_Precision;
+    float3 v_new0 = floor(v.vertex * q) / q;
+    float3 d = v_new0 - v.vertex;
+    float3 v_new1 = v.vertex - d;
+    bool flip_dir = (sign(dot(d, v.normal)) != sign(_Gimmick_Quantize_Location_Direction));
+    float3 v_q = lerp(v_new0, v_new1, flip_dir);
+    float mask = _Gimmick_Quantize_Location_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/0);
+    v.vertex.xyz = lerp(v.vertex.xyz, v_q, mask);
+  }
+#endif
+
   o.vertex = UnityObjectToClipPos(v.vertex);
   o.worldPos = mul(unity_ObjectToWorld, v.vertex);
   o.objPos = v.vertex;
@@ -590,28 +603,44 @@ void applyOverlayNormal(inout float3 raw_normal, PbrOverlay ov, v2f i, float idd
   // Use UVs to smoothly blend between fully detailed normals when close up and
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay0_NormalTex_ST), iddx, iddy), _PBR_Overlay0_Tex_NormalStr * ov.ov0_mask);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s,
+        UV_SCOFF(i.uv, _PBR_Overlay0_NormalTex_ST),
+        iddx * _PBR_Overlay0_NormalTex_ST.x,
+        iddy * _PBR_Overlay0_NormalTex_ST.y),
+      _PBR_Overlay0_Tex_NormalStr * ov.ov0_mask);
 
   raw_normal = BlendNormals(
       raw_normal,
       raw_normal_2);
 #endif  // _PBR_OVERLAY0 && _PBR_OVERLAY0_NORMAL_MAP
 #if defined(_PBR_OVERLAY1) && defined(_PBR_OVERLAY1_NORMAL_MAP)
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay1_NormalTex_ST), iddx, iddy), _PBR_Overlay1_Tex_NormalStr * ov.ov1_mask);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleGrad(linear_repeat_s,
+        UV_SCOFF(i.uv, _PBR_Overlay1_NormalTex_ST),
+        iddx * _PBR_Overlay1_NormalTex_ST.x,
+        iddy * _PBR_Overlay1_NormalTex_ST.y),
+      _PBR_Overlay1_Tex_NormalStr * ov.ov0_mask);
 
   raw_normal = BlendNormals(
       raw_normal,
       raw_normal_2);
 #endif  // _PBR_OVERLAY1 && _PBR_OVERLAY1_NORMAL_MAP
 #if defined(_PBR_OVERLAY2) && defined(_PBR_OVERLAY2_NORMAL_MAP)
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay2_NormalTex_ST), iddx, iddy), _PBR_Overlay2_Tex_NormalStr * ov.ov2_mask);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleGrad(linear_repeat_s,
+        UV_SCOFF(i.uv, _PBR_Overlay2_NormalTex_ST),
+        iddx * _PBR_Overlay2_NormalTex_ST.x,
+        iddy * _PBR_Overlay2_NormalTex_ST.y),
+      _PBR_Overlay2_Tex_NormalStr * ov.ov0_mask);
 
   raw_normal = BlendNormals(
       raw_normal,
       raw_normal_2);
 #endif  // _PBR_OVERLAY2 && _PBR_OVERLAY2_NORMAL_MAP
 #if defined(_PBR_OVERLAY3) && defined(_PBR_OVERLAY3_NORMAL_MAP)
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay3_NormalTex_ST), iddx, iddy), _PBR_Overlay3_Tex_NormalStr * ov.ov3_mask);
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleGrad(linear_repeat_s,
+        UV_SCOFF(i.uv, _PBR_Overlay3_NormalTex_ST),
+        iddx * _PBR_Overlay3_NormalTex_ST.x,
+        iddy * _PBR_Overlay3_NormalTex_ST.y),
+      _PBR_Overlay3_Tex_NormalStr * ov.ov0_mask);
 
   raw_normal = BlendNormals(
       raw_normal,
@@ -754,6 +783,11 @@ float4 effect(inout v2f i)
 #endif
       float3 matcap = _Matcap0.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap0Str;
 
+      float q = _Matcap0Quantization;
+      if (q > 0) {
+        matcap = ceil(matcap * q) / q;
+      }
+
 #if defined(_MATCAP0_MASK)
       float4 matcap_mask_raw = _Matcap0_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
       float matcap_mask = matcap_mask_raw.r;
@@ -801,6 +835,11 @@ float4 effect(inout v2f i)
       float2 matcap_uv = distort_uv;
 #endif
       float3 matcap = _Matcap1.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap1Str;
+
+      float q = _Matcap1Quantization;
+      if (q > 0) {
+        matcap = ceil(matcap * q) / q;
+      }
 
 #if defined(_MATCAP1_MASK)
       float4 matcap_mask_raw = _Matcap1_Mask.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);

@@ -322,7 +322,11 @@ public class ToonerGUI : ShaderGUI {
       editor.FloatProperty(
           bc,
           "Emission strength");
-      EditorGUI.indentLevel -= 1;
+
+      bc = FindProperty($"_Matcap{i}Quantization");
+      editor.FloatProperty(
+          bc,
+          "Quantization");
 
       bc = FindProperty($"_Matcap{i}Distortion0");
       enabled = bc.floatValue > 1E-6;
@@ -331,6 +335,8 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
       SetKeyword($"_MATCAP{i}_DISTORTION0", enabled);
+
+      EditorGUI.indentLevel -= 1;
     }
   }
 
@@ -401,12 +407,12 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty($"_Rim_Lighting{i}_Emission");
       editor.FloatProperty(
           bc,
-          "Rim lighting emission");
+          "Emission");
 
       bc = FindProperty($"_Rim_Lighting{i}_Quantization");
       editor.FloatProperty(
           bc,
-          "Rim lighting quantization");
+          "Quantization");
 
       bc = FindProperty($"_Rim_Lighting{i}_Glitter_Enabled");
       enabled = bc.floatValue > 1E-6;
@@ -788,7 +794,8 @@ public class ToonerGUI : ShaderGUI {
     }
   }
 
-  void DoGimmicks() {
+  void DoGimmickFlatColor()
+  {
     MaterialProperty bc;
     bc = FindProperty("_Gimmick_Flat_Color_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
@@ -803,7 +810,6 @@ public class ToonerGUI : ShaderGUI {
     }
 
     EditorGUI.indentLevel += 1;
-    EditorGUI.indentLevel -= 1;
 
     bc = FindProperty("_Gimmick_Flat_Color_Enable_Dynamic");
     enabled = (bc.floatValue != 0.0);
@@ -816,6 +822,48 @@ public class ToonerGUI : ShaderGUI {
     editor.ColorProperty(bc, "Color");
     bc = FindProperty("_Gimmick_Flat_Color_Emission");
     editor.ColorProperty(bc, "Emission");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
+  void DoGimmickQuantizeLocation() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Quantize_Location_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Quantize location", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_QUANTIZE_LOCATION", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Quantize_Location_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    bc = FindProperty("_Gimmick_Quantize_Location_Precision");
+    editor.FloatProperty(bc, "Precision");
+    bc = FindProperty("_Gimmick_Quantize_Location_Direction");
+    editor.FloatProperty(bc, "Direction");
+    bc = FindProperty("_Gimmick_Quantize_Location_Mask");
+    editor.TexturePropertySingleLine(
+        MakeLabel(bc, "Mask"),
+        bc);
+
+    EditorGUI.indentLevel -= 1;
+  }
+
+  void DoGimmicks() {
+    DoGimmickFlatColor();
+    DoGimmickQuantizeLocation();
   }
 
   enum RenderingMode {

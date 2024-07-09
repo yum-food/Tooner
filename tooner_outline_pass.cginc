@@ -25,17 +25,17 @@ struct tess_factors {
 
 v2f vert(appdata v)
 {
-  float3 objPos = v.vertex;
+  float4 objPos = v.vertex;
   float4 clipPos = UnityObjectToClipPos(v.vertex);
   float3 clipNormal = mul((float3x3) UNITY_MATRIX_MVP, v.normal);
-  float3 worldPos = mul(unity_ObjectToWorld, objPos);
+  float4 worldPos = mul(unity_ObjectToWorld, objPos);
   float3 worldNormal = UnityObjectToWorldNormal(v.normal);
 
 #if defined(_OUTLINES)
   float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/1);
   outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
 
-  worldPos += worldNormal * _Outline_Width * outline_mask * _Outline_Width_Multiplier;
+  worldPos.xyz += worldNormal * _Outline_Width * outline_mask * _Outline_Width_Multiplier;
 
   objPos = mul(unity_WorldToObject, worldPos);
   clipPos = UnityObjectToClipPos(objPos);
@@ -161,10 +161,6 @@ void geom(triangle v2f tri_in[3],
   uint pid: SV_PrimitiveID,
   inout TriangleStream<v2f> tri_out)
 {
-#if !defined(_OUTLINES)
-  return;
-#endif
-
   v2f v0 = tri_in[0];
   v2f v1 = tri_in[1];
   v2f v2 = tri_in[2];
@@ -173,9 +169,10 @@ void geom(triangle v2f tri_in[3],
   float3 v1_objPos;
   float3 v2_objPos;
 
+#if defined(_EXPLODE)
   float3 n = normalize(cross(v1.worldPos - v0.worldPos, v2.worldPos - v0.worldPos));
   float3 avg_pos;
-#if defined(_EXPLODE)
+
   float3 n0 = v0.normal;
   float3 n1 = v1.normal;
   float3 n2 = v2.normal;
@@ -184,15 +181,13 @@ void geom(triangle v2f tri_in[3],
   phase = smoothstep(0, 1, phase);
   phase *= phase;
   phase *= 4;
+  const float pid_rand = rand((int) pid);
 
   if (phase > 1E-6) {
-    const float pid_rand = rand((int) pid);
-
     float3 axis = normalize(float3(
           rand((int) ((v0.uv.x + v0.uv.y) * 1E9)) * 2 - 1,
           rand((int) ((v1.uv.x + v1.uv.y) * 1E9)) * 2 - 1,
           rand((int) ((v2.uv.x + v2.uv.y) * 1E9)) * 2 - 1));
-
     float3 np = BlendNormals(n, axis * phase);
 
     v0.worldPos += np * phase * pid_rand;
@@ -218,29 +213,20 @@ void geom(triangle v2f tri_in[3],
     v1.worldPos -= avg_pos;
     v2.worldPos -= avg_pos;
 
-    float r = rand((int) pid);
-    float theta = phase * 3.14159 * 4 + phase * (sin(_Time[1] * (1 + pid_rand) / 2.0 + r) + cos(_Time[1] * (1 + pid_rand) / 6.1 + r) * 2) * pid_rand * 2;
+    float theta = phase * 3.14159 * 4 + phase * (sin(_Time[1] * (1 + pid_rand) / 2.0 + pid_rand) + cos(_Time[1] * (1 + pid_rand) / 6.1 + pid_rand) * 2) * pid_rand * 2;
     float4 quat = get_quaternion(axis, theta);
     v0.worldPos = rotate_vector(v0.worldPos, quat);
     v1.worldPos = rotate_vector(v1.worldPos, quat);
     v2.worldPos = rotate_vector(v2.worldPos, quat);
 
-    //v0.worldPos *= 1.1;
-    //v1.worldPos *= 1.1;
-    //v2.worldPos *= 1.1;
-
     v0.worldPos += avg_pos;
     v1.worldPos += avg_pos;
     v2.worldPos += avg_pos;
 
-    float3 nn = normalize(cross(v1.worldPos - v0.worldPos, v2.worldPos - v0.worldPos));
-    v0.worldPos -= nn * .0005;
-    v1.worldPos -= nn * .0005;
-    v2.worldPos -= nn * .0005;
-
-    v0.normal = nn;
-    v1.normal = nn;
-    v2.normal = nn;
+    n = normalize(cross(v1.worldPos - v0.worldPos, v2.worldPos - v0.worldPos));
+    v0.normal = n;
+    v1.normal = n;
+    v2.normal = n;
 
     // Omit geometry that's too close when exploded.
     /*
@@ -249,16 +235,18 @@ void geom(triangle v2f tri_in[3],
     }
     */
 
-    // Apply transformed worldPos to other coordinate systems.
     v0_objPos = mul(unity_WorldToObject, float4(v0.worldPos, 1));
     v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
 
-    v0.vertex = UnityObjectToClipPos(v0_objPos);
-    v1.vertex = UnityObjectToClipPos(v1_objPos);
-    v2.vertex = UnityObjectToClipPos(v2_objPos);
+    // Apply transformed worldPos to other coordinate systems.
+    if (_Explode_Phase > 1E-6) {
+      v0.vertex = UnityObjectToClipPos(v0_objPos);
+      v1.vertex = UnityObjectToClipPos(v1_objPos);
+      v2.vertex = UnityObjectToClipPos(v2_objPos);
+    }
   }
-#endif
+#endif  // __EXPLODE
 #if defined(_SCROLL)
   {
     float3 n = normalize(cross(v1.worldPos - v0.worldPos, v2.worldPos - v0.worldPos));
