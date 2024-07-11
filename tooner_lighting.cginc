@@ -10,7 +10,6 @@
 #include "motion.cginc"
 #include "pbr.cginc"
 #include "poi.cginc"
-#include "shadertoy.cginc"
 #include "tooner_scroll.cginc"
 #include "oklab.cginc"
 
