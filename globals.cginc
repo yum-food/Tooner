@@ -311,5 +311,16 @@ float _Gimmick_Quantize_Location_Audiolink_Strength;
 #endif
 #endif
 
+#if defined(_GIMMICK_SHEAR_LOCATION)
+float _Gimmick_Shear_Location_Enable_Static;
+float _Gimmick_Shear_Location_Enable_Dynamic;
+float4 _Gimmick_Shear_Location_Strength;
+#endif
+
+#if defined(_GIMMICK_EYES_00)
+float _Gimmick_Eyes00_Enable_Static;
+texture2D _Gimmick_Eyes00_Effect_Mask;
+#endif
+
 #endif
 

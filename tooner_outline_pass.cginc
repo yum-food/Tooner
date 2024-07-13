@@ -25,6 +25,17 @@ struct tess_factors {
 
 v2f vert(appdata v)
 {
+#if defined(_GIMMICK_SHEAR_LOCATION)
+  if (_Gimmick_Shear_Location_Enable_Dynamic) {
+    v.vertex = mul(float4x4(
+        _Gimmick_Shear_Location_Strength.x, 0, 0, 0,
+        0, _Gimmick_Shear_Location_Strength.y, 0, 0,
+        0, 0, _Gimmick_Shear_Location_Strength.z, 0,
+        0, 0, 0, _Gimmick_Shear_Location_Strength.w),
+        v.vertex);
+  }
+#endif
+
   float4 objPos = v.vertex;
   float4 clipPos = UnityObjectToClipPos(v.vertex);
   float3 clipNormal = mul((float3x3) UNITY_MATRIX_MVP, v.normal);

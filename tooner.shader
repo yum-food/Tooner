@@ -247,9 +247,16 @@ Shader "yum_food/tooner"
     _Gimmick_Quantize_Location_Audiolink_Enable_Dynamic("Audiolink dynamic", Float) = 0.0
     _Gimmick_Quantize_Location_Audiolink_Strength("Strength", Float) = 1.0
 
+    _Gimmick_Shear_Location_Enable_Static("Enable shear location gimmick", Float) = 0.0
+    _Gimmick_Shear_Location_Enable_Dynamic("Enable shear location gimmick", Float) = 0.0
+    _Gimmick_Shear_Location_Strength("Strength", Vector) = (1, 1, 1, 1)
+
     _Gimmick_Vertex_Normal_Slide_Enable_Static("Enable vertex normal slide", Float) = 0.0
     _Gimmick_Vertex_Normal_Slide_Enable_Dynamic("Enable vertex normal slide", Float) = 0.0
     _Gimmick_Vertex_Normal_Slide_Distance("Vertex normal slide distance", Float) = 0.01
+
+    _Gimmick_Eyes00_Enable_Static("Enable eyes 00", Float) = 0.0
+    _Gimmick_Eyes00_Effect_Mask("Effect mask", 2D) = "white"
   }
   SubShader
   {
@@ -293,6 +300,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType" = "Opaque"
@@ -357,6 +365,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

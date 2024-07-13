@@ -87,6 +87,8 @@
 #pragma shader_feature_local _ _GIMMICK_FLAT_COLOR
 #pragma shader_feature_local _ _GIMMICK_QUANTIZE_LOCATION
 #pragma shader_feature_local _ _GIMMICK_QUANTIZE_LOCATION_AUDIOLINK
+#pragma shader_feature_local _ _GIMMICK_SHEAR_LOCATION
+#pragma shader_feature_local _ _GIMMICK_EYES_00
 
 #endif  // __FEATURE_MACROS_INC
 

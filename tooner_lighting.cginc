@@ -3,6 +3,7 @@
 
 #include "audiolink.cginc"
 #include "clones.cginc"
+#include "eyes.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "iq_sdf.cginc"
@@ -86,6 +87,17 @@ v2f vert(appdata v)
     float mask = _Gimmick_Quantize_Location_Mask.SampleLevel(linear_repeat_s,
         v.uv0.xy, /*lod=*/0);
     v.vertex.xyz = lerp(v.vertex.xyz, v_q, mask);
+  }
+#endif
+
+#if defined(_GIMMICK_SHEAR_LOCATION)
+  if (_Gimmick_Shear_Location_Enable_Dynamic) {
+    v.vertex = mul(float4x4(
+        _Gimmick_Shear_Location_Strength.x, 0, 0, 0,
+        0, _Gimmick_Shear_Location_Strength.y, 0, 0,
+        0, 0, _Gimmick_Shear_Location_Strength.z, 0,
+        0, 0, 0, _Gimmick_Shear_Location_Strength.w),
+        v.vertex);
   }
 #endif
 
@@ -758,6 +770,19 @@ float4 effect(inout v2f i)
   float4 vertex_light_color = float4(i.vertexLightColor, 1);
 #else
   float4 vertex_light_color = 0;
+#endif
+
+#if defined(_GIMMICK_EYES_00)
+  {
+    float3 eyes00_normal = 0;
+    float3 eyes00_albedo = eyes00_march(i.uv, eyes00_normal).rgb;
+    bool is_ray_hit = (eyes00_albedo.r > 0 || eyes00_albedo.g > 0 || eyes00_albedo.b > 0);
+    if (is_ray_hit) {
+      float mask = _Gimmick_Eyes00_Effect_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+      albedo.rgb = lerp(eyes00_albedo * 1.5, albedo.rgb * 20.0, mask);
+      normal = eyes00_normal;
+    }
+  }
 #endif
 
   mixOverlayAlbedo(albedo.rgb, ov);

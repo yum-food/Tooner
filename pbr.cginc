@@ -186,18 +186,18 @@ float4 getLitColor(
   float3 view_dir = normalize(_WorldSpaceCameraPos - worldPos);
 
   uint normals_mode = round(_Mesh_Normals_Mode);
-  bool flat = (normals_mode == 0);
   float3 flat_normal = normalize(
     (1.0 / _Flatten_Mesh_Normals_Str) * normal +
     _Flatten_Mesh_Normals_Str * view_dir);
   float3 spherical_normal = normalize(UnityObjectToWorldNormal(normalize(i.objPos)));
-  normal = lerp(spherical_normal, flat_normal, flat);
+  normal = lerp(normal, flat_normal, normals_mode == 0);
+  normal = lerp(normal, spherical_normal, normals_mode == 1);
 
 	UnityIndirect indirect_light = CreateIndirectLight(vertexLightColor,
 			view_dir, normal, smoothness, worldPos, ao, uv);
 
   UnityLight direct_light = CreateDirectLight(normal, ao, i);
-  if (flat) {
+  if (normals_mode == 0 || normals_mode == 2) {
     float e = 0.8;
     indirect_light.diffuse += direct_light.color * e;
     direct_light.color *= (1 - e);

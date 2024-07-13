@@ -475,7 +475,8 @@ public class ToonerGUI : ShaderGUI {
 
   enum NormalsMode {
     Flat,
-    Spherical
+    Spherical,
+    Realistic
   };
 
   void DoShadingMode() {
@@ -889,9 +890,65 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickShearLocation() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Shear_Location_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Shear location", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_SHEAR_LOCATION", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Shear_Location_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    bc = FindProperty("_Gimmick_Shear_Location_Strength");
+    editor.VectorProperty(bc, "Strength");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
+  void DoGimmickEyes00() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Eyes00_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Eyes 00", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_EYES_00", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Eyes00_Effect_Mask");
+    editor.TexturePropertySingleLine(
+        MakeLabel(bc, "Effect mask"),
+        bc);
+
+    EditorGUI.indentLevel -= 1;
+  }
+
+
   void DoGimmicks() {
     DoGimmickFlatColor();
     DoGimmickQuantizeLocation();
+    DoGimmickShearLocation();
+    DoGimmickEyes00();
   }
 
   enum RenderingMode {
