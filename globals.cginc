@@ -315,11 +315,28 @@ float _Gimmick_Quantize_Location_Audiolink_Strength;
 float _Gimmick_Shear_Location_Enable_Static;
 float _Gimmick_Shear_Location_Enable_Dynamic;
 float4 _Gimmick_Shear_Location_Strength;
+float _Gimmick_Shear_Location_Mesh_Renderer_Fix;
+float4 _Gimmick_Shear_Location_Mesh_Renderer_Offset;
+float4 _Gimmick_Shear_Location_Mesh_Renderer_Rotation;
+float4 _Gimmick_Shear_Location_Mesh_Renderer_Scale;
 #endif
 
 #if defined(_GIMMICK_EYES_00)
 float _Gimmick_Eyes00_Enable_Static;
 texture2D _Gimmick_Eyes00_Effect_Mask;
+#endif
+
+#if defined(_PIXELLATE)
+float _Gimmick_Pixellate_Enable_Static;
+float _Gimmick_Pixellate_Resolution_U;
+float _Gimmick_Pixellate_Resolution_V;
+texture2D _Gimmick_Pixellate_Effect_Mask;
+#endif
+
+#if defined(_TROCHOID)
+float _Trochoid_R;
+float _Trochoid_r;
+float _Trochoid_d;
 #endif
 
 #endif

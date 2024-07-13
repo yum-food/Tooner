@@ -250,6 +250,10 @@ Shader "yum_food/tooner"
     _Gimmick_Shear_Location_Enable_Static("Enable shear location gimmick", Float) = 0.0
     _Gimmick_Shear_Location_Enable_Dynamic("Enable shear location gimmick", Float) = 0.0
     _Gimmick_Shear_Location_Strength("Strength", Vector) = (1, 1, 1, 1)
+    _Gimmick_Shear_Location_Mesh_Renderer_Fix("Mesh renderer fix", Float) = 0.0
+    _Gimmick_Shear_Location_Mesh_Renderer_Offset("Mesh renderer offset", Vector) = (0, 0, 0, 0)
+    _Gimmick_Shear_Location_Mesh_Renderer_Rotation("Mesh renderer rotation", Vector) = (0, 0, 0, 0)
+    _Gimmick_Shear_Location_Mesh_Renderer_Scale("Mesh renderer scale", Vector) = (0, 0, 0, 0)
 
     _Gimmick_Vertex_Normal_Slide_Enable_Static("Enable vertex normal slide", Float) = 0.0
     _Gimmick_Vertex_Normal_Slide_Enable_Dynamic("Enable vertex normal slide", Float) = 0.0
@@ -257,6 +261,16 @@ Shader "yum_food/tooner"
 
     _Gimmick_Eyes00_Enable_Static("Enable eyes 00", Float) = 0.0
     _Gimmick_Eyes00_Effect_Mask("Effect mask", 2D) = "white"
+
+    _Gimmick_Pixellate_Enable_Static("Enable pixellation", Float) = 0.0
+    _Gimmick_Pixellate_Resolution_U("Resolution (U)", Float) = 64
+    _Gimmick_Pixellate_Resolution_V("Resolution (V)", Float) = 64
+    _Gimmick_Pixellate_Effect_Mask("Effect mask", 2D) = "white"
+
+    _Trochoid_Enable_Static("Enable trochoid", Float) = 0.0
+    _Trochoid_R("R", Float) = 5.0
+    _Trochoid_r("r", Float) = 3.0
+    _Trochoid_d("d", Float) = 5.0
   }
   SubShader
   {

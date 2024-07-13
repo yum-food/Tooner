@@ -916,6 +916,24 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Shear_Location_Strength");
     editor.VectorProperty(bc, "Strength");
 
+    bc = FindProperty("_Gimmick_Shear_Location_Mesh_Renderer_Fix");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Mesh renderer fix", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Gimmick_Shear_Location_Mesh_Renderer_Offset");
+      editor.VectorProperty(bc, "Offset");
+      bc = FindProperty("_Gimmick_Shear_Location_Mesh_Renderer_Rotation");
+      editor.VectorProperty(bc, "Rotation");
+      bc = FindProperty("_Gimmick_Shear_Location_Mesh_Renderer_Scale");
+      editor.VectorProperty(bc, "Scale");
+      EditorGUI.indentLevel -= 1;
+    }
+
     EditorGUI.indentLevel -= 1;
   }
 
@@ -943,12 +961,68 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickPixellate() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Pixellate_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Pixellate", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_PIXELLATE", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Pixellate_Resolution_U");
+    editor.FloatProperty(bc, "Resolution (U)");
+    bc = FindProperty("_Gimmick_Pixellate_Resolution_V");
+    editor.FloatProperty(bc, "Resolution (V)");
+    bc = FindProperty("_Gimmick_Pixellate_Effect_Mask");
+    editor.TexturePropertySingleLine(
+        MakeLabel(bc, "Effect mask"),
+        bc);
+
+    EditorGUI.indentLevel -= 1;
+  }
+
+  void DoGimmickTrochoid() {
+    MaterialProperty bc;
+    bc = FindProperty("_Trochoid_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Trochoid", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_TROCHOID", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Trochoid_R");
+    editor.FloatProperty(bc, "R");
+    bc = FindProperty("_Trochoid_r");
+    editor.FloatProperty(bc, "r");
+    bc = FindProperty("_Trochoid_d");
+    editor.FloatProperty(bc, "d");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
 
   void DoGimmicks() {
     DoGimmickFlatColor();
     DoGimmickQuantizeLocation();
     DoGimmickShearLocation();
     DoGimmickEyes00();
+    DoGimmickPixellate();
+    DoGimmickTrochoid();
   }
 
   enum RenderingMode {

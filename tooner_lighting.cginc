@@ -11,7 +11,9 @@
 #include "motion.cginc"
 #include "pbr.cginc"
 #include "poi.cginc"
+#include "shear_math.cginc"
 #include "tooner_scroll.cginc"
+#include "trochoid_math.cginc"
 #include "oklab.cginc"
 
 struct tess_data
@@ -90,14 +92,39 @@ v2f vert(appdata v)
   }
 #endif
 
-#if defined(_GIMMICK_SHEAR_LOCATION)
+#if defined(_TROCHOID)
+  {
+#define PI 3.14159265
+#define TAU PI * 2.0
+    float theta = v.uv0.x * TAU;
+    float r0 = length(v.vertex.xyz);
+
+    float x = v.vertex.x;
+    float y = v.vertex.y;
+    float z = v.vertex.z;
+
+    v.vertex.xyz = trochoid_map(theta, r0, z);
+  }
+#endif
+
+#if !defined(_SCROLL) && defined(_GIMMICK_SHEAR_LOCATION)
   if (_Gimmick_Shear_Location_Enable_Dynamic) {
-    v.vertex = mul(float4x4(
-        _Gimmick_Shear_Location_Strength.x, 0, 0, 0,
-        0, _Gimmick_Shear_Location_Strength.y, 0, 0,
-        0, 0, _Gimmick_Shear_Location_Strength.z, 0,
-        0, 0, 0, _Gimmick_Shear_Location_Strength.w),
-        v.vertex);
+    float3 p = v.vertex.xyz;
+    float3x3 shear_matrix = float3x3(
+          _Gimmick_Shear_Location_Strength.x, 0, 0,
+          0, _Gimmick_Shear_Location_Strength.y, 0,
+          0, 0, _Gimmick_Shear_Location_Strength.z);
+#if 0
+    float3x3 rot_fix, rot_fixi;
+    float4x4 ts_fix, ts_fixi;
+    getMeshRendererMatrices(/*invert=*/false, rot_fix, ts_fix);
+    getMeshRendererMatrices(/*invert=*/true, rot_fixi, ts_fixi);
+    if (_Gimmick_Shear_Location_Mesh_Renderer_Fix) {
+      p = mul(ts_fixi, float4(p, 1)).xyz;
+    }
+#endif
+    p = mul(shear_matrix, p);
+    v.vertex.xyz = p;
   }
 #endif
 
@@ -340,6 +367,29 @@ void geom(triangle v2f tri_in[3],
     float3 v0_objPos = mul(unity_WorldToObject, float4(v0.worldPos, 1));
     float3 v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     float3 v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
+
+#if defined(_GIMMICK_SHEAR_LOCATION)
+  if (_Gimmick_Shear_Location_Enable_Dynamic) {
+    v0_objPos = mul(float3x3(
+        _Gimmick_Shear_Location_Strength.x, 0, 0,
+        0, _Gimmick_Shear_Location_Strength.y, 0,
+        0, 0, _Gimmick_Shear_Location_Strength.z),
+        v0_objPos);
+    v1_objPos = mul(float3x3(
+        _Gimmick_Shear_Location_Strength.x, 0, 0,
+        0, _Gimmick_Shear_Location_Strength.y, 0,
+        0, 0, _Gimmick_Shear_Location_Strength.z),
+        v1_objPos);
+    v2_objPos = mul(float3x3(
+        _Gimmick_Shear_Location_Strength.x, 0, 0,
+        0, _Gimmick_Shear_Location_Strength.y, 0,
+        0, 0, _Gimmick_Shear_Location_Strength.z),
+        v2_objPos);
+    v0.worldPos.xyz = mul(unity_ObjectToWorld, v0_objPos);
+    v1.worldPos.xyz = mul(unity_ObjectToWorld, v1_objPos);
+    v2.worldPos.xyz = mul(unity_ObjectToWorld, v2_objPos);
+  }
+#endif
 
     v0.vertex = UnityObjectToClipPos(v0_objPos);
     v1.vertex = UnityObjectToClipPos(v1_objPos);
@@ -694,11 +744,51 @@ float3 getOverlayEmission(PbrOverlay ov, v2f i, float iddx, float iddy)
   return em;
 }
 
+#if defined(_PIXELLATE)
+float2 pixellate_uv(int2 px_res, float2 uv)
+{
+  return floor(uv * px_res) / px_res;
+}
+
+float4 pixellate_color(int2 px_res, float2 uv, float4 c)
+{
+  float2 px_intra_uv = fmod(uv * px_res, 1.0);
+  float2 px_extra_uv = floor(uv * px_res) / px_res;
+
+  float2 px_uv = floor(uv * px_res) / px_res;
+  if (px_intra_uv.y > 0.1 && px_intra_uv.y < 0.9) {
+    if (px_intra_uv.x < 0.333) {
+      c.xyz = float3(1, 0, 0);
+    } else if (px_intra_uv.x < 0.666) {
+      c.yxz = float3(1, 0, 0);
+    } else {
+      c.zxy = float3(1, 0, 0);
+    }
+    c *= 3;
+  } else {
+    c = 0;
+  }
+
+  return c;
+}
+#endif
+
 float4 effect(inout v2f i)
 {
   float iddx = ddx(i.uv.x) * _Mip_Multiplier;
   float iddy = ddx(i.uv.y) * _Mip_Multiplier;
   const float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
+
+#if defined(_TROCHOID)
+  {
+    i.normal = trochoid_normal(i.objPos.xyz, i.uv);
+
+    float theta = i.uv.x * TAU;
+    float r0 = length(i.objPos.xyz);
+    float z = i.objPos.z;
+    i.objPos.xyz = trochoid_map(theta, r0, z);
+  }
+#endif
 
 #if defined(_UVSCROLL)
   float2 orig_uv = i.uv;
@@ -719,6 +809,24 @@ float4 effect(inout v2f i)
     albedo.a *= uv_scroll_alpha;
   }
 #endif
+
+#if defined(_PIXELLATE)
+  {
+    const int2 px_res = int2(
+        _Gimmick_Pixellate_Resolution_U,
+        _Gimmick_Pixellate_Resolution_V);
+
+    float2 uv = pixellate_uv(px_res, i.uv);
+    const float2 duv = float2(ddx(i.uv.x), ddy(i.uv.y)) / 16;
+    float4 color = _Gimmick_Pixellate_Effect_Mask.SampleGrad(linear_clamp_s, uv, duv.x, duv.y);
+    float2 fw = float2(fwidth(i.uv.x), fwidth(i.uv.y));
+    float fwm = max(fw.x, fw.y);
+    color.rgb *= albedo;
+    float4 px_color = pixellate_color(px_res, i.uv, color);
+    albedo = lerp(albedo, px_color, pow(0.9, fwm * 100));
+  }
+#endif
+
 
 #if defined(_RENDERING_CUTOUT)
 #if defined(_RENDERING_CUTOUT_STOCHASTIC)

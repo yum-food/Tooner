@@ -8,6 +8,7 @@
 #include "globals.cginc"
 #include "math.cginc"
 #include "pbr.cginc"
+#include "trochoid_math.cginc"
 #include "tooner_scroll.cginc"
 #include "UnityCG.cginc"
 
@@ -25,7 +26,22 @@ struct tess_factors {
 
 v2f vert(appdata v)
 {
-#if defined(_GIMMICK_SHEAR_LOCATION)
+#if defined(_TROCHOID)
+  {
+#define PI 3.14159265
+#define TAU PI * 2.0
+    float theta = v.uv0.x * TAU;
+    float r0 = length(v.vertex.xyz);
+
+    float x = v.vertex.x;
+    float y = v.vertex.y;
+    float z = v.vertex.z;
+
+    v.vertex.xyz = trochoid_map(theta, r0, z);
+  }
+#endif
+
+#if !defined(_SCROLL) && defined(_GIMMICK_SHEAR_LOCATION)
   if (_Gimmick_Shear_Location_Enable_Dynamic) {
     v.vertex = mul(float4x4(
         _Gimmick_Shear_Location_Strength.x, 0, 0, 0,
@@ -269,6 +285,29 @@ void geom(triangle v2f tri_in[3],
     float3 v0_objPos = mul(unity_WorldToObject, float4(v0.worldPos, 1));
     float3 v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     float3 v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
+
+#if defined(_GIMMICK_SHEAR_LOCATION)
+  if (_Gimmick_Shear_Location_Enable_Dynamic) {
+    v0_objPos = mul(float3x3(
+        _Gimmick_Shear_Location_Strength.x, 0, 0,
+        0, _Gimmick_Shear_Location_Strength.y, 0,
+        0, 0, _Gimmick_Shear_Location_Strength.z),
+        v0_objPos);
+    v1_objPos = mul(float3x3(
+        _Gimmick_Shear_Location_Strength.x, 0, 0,
+        0, _Gimmick_Shear_Location_Strength.y, 0,
+        0, 0, _Gimmick_Shear_Location_Strength.z),
+        v1_objPos);
+    v2_objPos = mul(float3x3(
+        _Gimmick_Shear_Location_Strength.x, 0, 0,
+        0, _Gimmick_Shear_Location_Strength.y, 0,
+        0, 0, _Gimmick_Shear_Location_Strength.z),
+        v2_objPos);
+    v0.worldPos.xyz = mul(unity_ObjectToWorld, v0_objPos);
+    v1.worldPos.xyz = mul(unity_ObjectToWorld, v1_objPos);
+    v2.worldPos.xyz = mul(unity_ObjectToWorld, v2_objPos);
+  }
+#endif
 
     v0.vertex = UnityObjectToClipPos(v0_objPos);
     v1.vertex = UnityObjectToClipPos(v1_objPos);
