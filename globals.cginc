@@ -304,12 +304,11 @@ float _Gimmick_Quantize_Location_Precision;
 float _Gimmick_Quantize_Location_Direction;
 float _Gimmick_Quantize_Location_Multiplier;
 texture2D _Gimmick_Quantize_Location_Mask;
+#if defined(_GIMMICK_QUANTIZE_LOCATION)
+float _Gimmick_Quantize_Location_Audiolink_Enable_Static;
+float _Gimmick_Quantize_Location_Audiolink_Enable_Dynamic;
+float _Gimmick_Quantize_Location_Audiolink_Strength;
 #endif
-
-#if defined(_GIMMICK_VERTEX_NORMAL_SLIDE)
-float _Gimmick_Vertex_Normal_Slide_Enable_Static;
-float _Gimmick_Vertex_Normal_Slide_Enable_Dynamic;
-float _Gimmick_Vertex_Normal_Slide_Distance;
 #endif
 
 #endif

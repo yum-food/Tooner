@@ -86,7 +86,7 @@
 #pragma shader_feature_local _ _AMBIENT_OCCLUSION
 #pragma shader_feature_local _ _GIMMICK_FLAT_COLOR
 #pragma shader_feature_local _ _GIMMICK_QUANTIZE_LOCATION
-#pragma shader_feature_local _ _GIMMICK_VERTEX_NORMAL_SLIDE
+#pragma shader_feature_local _ _GIMMICK_QUANTIZE_LOCATION_AUDIOLINK
 
 #endif  // __FEATURE_MACROS_INC
 

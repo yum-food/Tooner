@@ -243,6 +243,9 @@ Shader "yum_food/tooner"
     _Gimmick_Quantize_Location_Direction("quantize location direction", Float) = 1.0
     _Gimmick_Quantize_Location_Multiplier("quantize location multiplier", Range(0.01, 4)) = 1.0
     _Gimmick_Quantize_Location_Mask("Mask", 2D) = "white" {}
+    _Gimmick_Quantize_Location_Audiolink_Enable_Static("Audiolink static", Float) = 0.0
+    _Gimmick_Quantize_Location_Audiolink_Enable_Dynamic("Audiolink dynamic", Float) = 0.0
+    _Gimmick_Quantize_Location_Audiolink_Strength("Strength", Float) = 1.0
 
     _Gimmick_Vertex_Normal_Slide_Enable_Static("Enable vertex normal slide", Float) = 0.0
     _Gimmick_Vertex_Normal_Slide_Enable_Dynamic("Enable vertex normal slide", Float) = 0.0

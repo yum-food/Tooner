@@ -860,6 +860,32 @@ public class ToonerGUI : ShaderGUI {
         MakeLabel(bc, "Mask"),
         bc);
 
+    bc = FindProperty("_Gimmick_Quantize_Location_Audiolink_Enable_Static");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Audiolink", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_QUANTIZE_LOCATION_AUDIOLINK", enabled);
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_Quantize_Location_Audiolink_Enable_Dynamic");
+      enabled = (bc.floatValue != 0.0);
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+
+      bc = FindProperty("_Gimmick_Quantize_Location_Audiolink_Strength");
+      editor.FloatProperty(
+          bc,
+          "Strength");
+
+      EditorGUI.indentLevel -= 1;
+    }
+
     EditorGUI.indentLevel -= 1;
   }
 

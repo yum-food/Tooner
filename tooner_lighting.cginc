@@ -64,13 +64,27 @@ v2f vert(appdata v)
 
 #if defined(_GIMMICK_QUANTIZE_LOCATION)
   if (_Gimmick_Quantize_Location_Enable_Dynamic) {
-    float q = _Gimmick_Quantize_Location_Precision / _Gimmick_Quantize_Location_Multiplier;
+    float q = _Gimmick_Quantize_Location_Precision /
+      _Gimmick_Quantize_Location_Multiplier;
+#if defined(_GIMMICK_QUANTIZE_LOCATION_AUDIOLINK)
+    // christ what a fucking variable name
+    if (_Gimmick_Quantize_Location_Audiolink_Enable_Dynamic &&
+        AudioLinkIsAvailable()) {
+      // x is lowest frequency, w is highest
+      float4 bands = AudioLinkData(ALPASS_AUDIOLINK).xyzw;
+
+      float e = q *= 1 + (bands.x + bands.y * 0.5) *
+        _Gimmick_Quantize_Location_Audiolink_Strength * 0.1;
+    }
+#endif
     float3 v_new0 = floor(v.vertex * q) / q;
     float3 d = v_new0 - v.vertex;
     float3 v_new1 = v.vertex - d;
-    bool flip_dir = (sign(dot(d, v.normal)) != sign(_Gimmick_Quantize_Location_Direction));
+    bool flip_dir = (sign(dot(d, v.normal)) !=
+        sign(_Gimmick_Quantize_Location_Direction));
     float3 v_q = lerp(v_new0, v_new1, flip_dir);
-    float mask = _Gimmick_Quantize_Location_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/0);
+    float mask = _Gimmick_Quantize_Location_Mask.SampleLevel(linear_repeat_s,
+        v.uv0.xy, /*lod=*/0);
     v.vertex.xyz = lerp(v.vertex.xyz, v_q, mask);
   }
 #endif
