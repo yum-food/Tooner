@@ -41,32 +41,30 @@ v2f vert(appdata v)
   }
 #endif
 
-#if !defined(_SCROLL) && defined(_GIMMICK_SHEAR_LOCATION)
-  if (_Gimmick_Shear_Location_Enable_Dynamic) {
-    v.vertex = mul(float4x4(
-        _Gimmick_Shear_Location_Strength.x, 0, 0, 0,
-        0, _Gimmick_Shear_Location_Strength.y, 0, 0,
-        0, 0, _Gimmick_Shear_Location_Strength.z, 0,
-        0, 0, 0, _Gimmick_Shear_Location_Strength.w),
-        v.vertex);
-  }
-#endif
-
   float4 objPos = v.vertex;
-  float4 clipPos = UnityObjectToClipPos(v.vertex);
-  float3 clipNormal = mul((float3x3) UNITY_MATRIX_MVP, v.normal);
-  float4 worldPos = mul(unity_ObjectToWorld, objPos);
-  float3 worldNormal = UnityObjectToWorldNormal(v.normal);
 
 #if defined(_OUTLINES)
   float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/1);
   outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
 
-  worldPos.xyz += worldNormal * _Outline_Width * outline_mask * _Outline_Width_Multiplier;
-
-  objPos = mul(unity_WorldToObject, worldPos);
-  clipPos = UnityObjectToClipPos(objPos);
+  objPos.xyz += v.normal * _Outline_Width * outline_mask * _Outline_Width_Multiplier;
 #endif
+
+#if !defined(_SCROLL) && defined(_GIMMICK_SHEAR_LOCATION)
+  if (_Gimmick_Shear_Location_Enable_Dynamic) {
+     objPos = mul(float4x4(
+        _Gimmick_Shear_Location_Strength.x, 0, 0, 0,
+        0, _Gimmick_Shear_Location_Strength.y, 0, 0,
+        0, 0, _Gimmick_Shear_Location_Strength.z, 0,
+        0, 0, 0, _Gimmick_Shear_Location_Strength.w),
+        objPos);
+  }
+#endif
+
+  float4 worldPos = mul(unity_ObjectToWorld, objPos);
+  float3 worldNormal = UnityObjectToWorldNormal(v.normal);
+  float4 clipPos = UnityObjectToClipPos(objPos);
+  float3 clipNormal = mul((float3x3) UNITY_MATRIX_MVP, v.normal);
 
   v2f o;
   o.worldPos = worldPos;
