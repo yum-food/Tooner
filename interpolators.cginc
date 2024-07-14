@@ -23,6 +23,9 @@ struct v2f
   float3 worldPos : TEXCOORD2;
   float3 normal : TEXCOORD3;
   float3 objPos : TEXCOORD4;
+  #if defined(SSR_ENABLED)
+  float4 screenPos                  : TEXCOORD5;
+  #endif
 };
 
 #else
@@ -51,6 +54,9 @@ struct v2f
   SHADOW_COORDS(6)
   #if defined(VERTEXLIGHT_ON)
   float3 vertexLightColor : TEXCOORD7;
+  #endif
+  #if defined(SSR_ENABLED)
+  float4 screenPos                  : TEXCOORD8;
   #endif
 };
 #endif

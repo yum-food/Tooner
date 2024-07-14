@@ -22,6 +22,34 @@ float _Confabulate_Normals;
 float _Shadow_Strength;
 float _Mip_Multiplier;
 
+float _ScatterDist;
+float _ScatterPow;
+float _ScatterIntensity;
+float _ScatterAmbient;
+float _GSAA;
+float _GSAAStrength;
+float _WrappingFactor;
+float _Subsurface;
+float _SpecularStrength;
+float _FresnelStrength;
+float _UseFresnel;
+float _ReflectionStrength;
+float3 shadowedReflections;
+float3 _ReflShadows;
+float3 _ReflShadowStrength;
+
+#if defined(SSR_ENABLED)
+UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
+sampler2D _GrabTexture; 
+sampler2D _NoiseTexSSR;
+float4 _GrabTexture_TexelSize;
+float4 _NoiseTexSSR_TexelSize;
+float _EdgeFade;
+float _SSRStrength;
+float _SSRHeight;
+#endif
+
+
 #if defined(_BASECOLOR_MAP)
 texture2D _MainTex;
 float4 _MainTex_ST;

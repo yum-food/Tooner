@@ -1025,6 +1025,84 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickTrochoid();
   }
 
+  void DoMochieParams() {
+    MaterialProperty bc;
+    GUILayout.Label("SSS", EditorStyles.boldLabel);
+    {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_ScatterDist");
+      editor.FloatProperty(bc, "Distance");
+      bc = FindProperty("_ScatterPow");
+      editor.FloatProperty(bc, "Power");
+      bc = FindProperty("_ScatterIntensity");
+      editor.FloatProperty(bc, "Intensity");
+      bc = FindProperty("_ScatterAmbient");
+      editor.FloatProperty(bc, "Ambient");
+      EditorGUI.indentLevel -= 1;
+    }
+    GUILayout.Label("SSR", EditorStyles.boldLabel);
+    {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Enable_SSR");
+      bool enabled = (bc.floatValue != 0.0);
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Enable SSR", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      SetKeyword("SSR_ENABLED", enabled);
+
+      if (enabled) {
+        bc = FindProperty("_SSRStrength");
+        editor.FloatProperty(bc, "Strength");
+        bc = FindProperty("_SSRHeight");
+        editor.FloatProperty(bc, "Height");
+        bc = FindProperty("_EdgeFade");
+        editor.FloatProperty(bc, "Edge fade");
+      }
+
+      EditorGUI.indentLevel -= 1;
+    }
+    GUILayout.Label("GSAA", EditorStyles.boldLabel);
+    {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_GSAA");
+      editor.FloatProperty(bc, "Enable");
+      bc = FindProperty("_GSAAStrength");
+      editor.FloatProperty(bc, "Strength");
+      EditorGUI.indentLevel -= 1;
+    }
+    bc = FindProperty("_WrappingFactor");
+    editor.FloatProperty(bc, "Wrapping factor");
+    bc = FindProperty("_Subsurface");
+    editor.FloatProperty(bc, "Subsurface");
+    bc = FindProperty("_SpecularStrength");
+    editor.FloatProperty(bc, "Specular strength");
+    bc = FindProperty("_FresnelStrength");
+    editor.FloatProperty(bc, "Fresnel strength");
+    bc = FindProperty("_UseFresnel");
+    editor.FloatProperty(bc, "Use fresnel");
+    bc = FindProperty("_ReflectionStrength");
+    editor.FloatProperty(bc, "Reflection strength");
+    /*
+float _ScatterDist;
+float _ScatterPow;
+float _ScatterIntensity;
+float _ScatterAmbient;
+float _GSAA;
+float _GSAAStrength;
+float _WrappingFactor;
+float _Subsurface;
+float _SpecularStrength;
+float _FresnelStrength;
+float _UseFresnel;
+float _ReflectionStrength;
+float3 shadowedReflections;
+float3 _ReflShadows;
+float3 _ReflShadowStrength;
+*/
+  }
+
   enum RenderingMode {
     Opaque,
     Cutout,
@@ -1284,6 +1362,11 @@ public class ToonerGUI : ShaderGUI {
     GUILayout.Label("Gimmicks", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;
     DoGimmicks();
+    EditorGUI.indentLevel -= 1;
+
+    GUILayout.Label("Mochie", EditorStyles.boldLabel);
+    EditorGUI.indentLevel += 1;
+    DoMochieParams();
     EditorGUI.indentLevel -= 1;
 
     GUILayout.Label("Rendering", EditorStyles.boldLabel);

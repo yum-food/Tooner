@@ -4,6 +4,8 @@
 #include "UnityPBSLighting.cginc"
 #include "AutoLight.cginc"
 
+#include "MochieStandardBRDF.cginc"
+
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "poi.cginc"
@@ -34,7 +36,7 @@ void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output) {
 
 UNITY_DECLARE_TEXCUBE(_Cubemap);
 
-UnityLight CreateDirectLight(float3 normal, float ao, v2f i)
+UnityLight CreateDirectLight(float3 normal, float ao, v2f i, out float attenuation)
 {
 #if 1
   // This whole block is yoinked from AutoLight.cginc. I needed a way to
@@ -42,26 +44,26 @@ UnityLight CreateDirectLight(float3 normal, float ao, v2f i)
 #if defined(DIRECTIONAL_COOKIE)
   DECLARE_LIGHT_COORD(i, i.worldPos);
   float shadow = UNITY_SHADOW_ATTENUATION(i, i.worldPos);
-  float attenuation = tex2D(_LightTexture0, lightCoord).w;
+  attenuation = tex2D(_LightTexture0, lightCoord).w;
 #elif defined(POINT_COOKIE)
   DECLARE_LIGHT_COORD(i, i.worldPos);
   float shadow = UNITY_SHADOW_ATTENUATION(i, i.worldPos);
-  float attenuation = tex2D(_LightTextureB0, dot(lightCoord, lightCoord).rr).r *
+  attenuation = tex2D(_LightTextureB0, dot(lightCoord, lightCoord).rr).r *
     texCUBE(_LightTexture0, lightCoord).w;
 #elif defined(DIRECTIONAL)
   float shadow = UNITY_SHADOW_ATTENUATION(i, i.worldPos);
-  float attenuation = 1;
+  attenuation = 1;
 #elif defined(SPOT)
   DECLARE_LIGHT_COORD(i, i.worldPos);
   float shadow = UNITY_SHADOW_ATTENUATION(i, i.worldPos);
-  float attenuation = (lightCoord.z > 0) * UnitySpotCookie(lightCoord) * UnitySpotAttenuate(lightCoord.xyz);
+  attenuation = (lightCoord.z > 0) * UnitySpotCookie(lightCoord) * UnitySpotAttenuate(lightCoord.xyz);
 #elif defined(POINT)
   unityShadowCoord3 lightCoord = mul(unity_WorldToLight, unityShadowCoord4(i.worldPos, 1)).xyz;
   float shadow = UNITY_SHADOW_ATTENUATION(i, i.worldPos);
-  float attenuation = tex2D(_LightTexture0, dot(lightCoord, lightCoord).rr).r;
+  attenuation = tex2D(_LightTexture0, dot(lightCoord, lightCoord).rr).r;
 #else
   float shadow = 1;
-  float attenuation = 1;
+  attenuation = 1;
 #endif
   attenuation *= lerp(1, shadow, _Shadow_Strength);
 #else
@@ -196,8 +198,9 @@ float4 getLitColor(
 	UnityIndirect indirect_light = CreateIndirectLight(vertexLightColor,
 			view_dir, normal, smoothness, worldPos, ao, uv);
 
-  UnityLight direct_light = CreateDirectLight(normal, ao, i);
-  if (normals_mode == 0 || normals_mode == 2) {
+  float attenuation;
+  UnityLight direct_light = CreateDirectLight(normal, ao, i, attenuation);
+  if (normals_mode == 0) {
     float e = 0.8;
     indirect_light.diffuse += direct_light.color * e;
     direct_light.color *= (1 - e);
@@ -220,38 +223,40 @@ float4 getLitColor(
   }
 #endif
 
-  direct_light.color = clamp(direct_light.color, _Min_Brightness, _Max_Brightness*.5);
+  direct_light.color = clamp(direct_light.color, _Min_Brightness, _Max_Brightness);
   indirect_light.diffuse = clamp(indirect_light.diffuse, _Min_Brightness, _Max_Brightness);
   indirect_light.specular = clamp(indirect_light.specular, _Min_Brightness, _Max_Brightness);
 
-  float3 pbr;
-  if (round(_Confabulate_Normals)) {
-    pbr = UNITY_BRDF_PBS(
-        albedo,
-        specular_tint,
-        one_minus_reflectivity,
-        smoothness,
-        view_dir,
-        normal,
-        direct_light,
-        indirect_light).xyz;
-  } else {
-    pbr = UNITY_BRDF_PBS(
-        albedo,
-        specular_tint,
-        one_minus_reflectivity,
-        smoothness,
-        normal,
-        view_dir,
-        direct_light,
-        indirect_light).xyz;
-  }
-
-#if defined(_LTCGI)
-  pbr.rgb += (acc.specular + acc.diffuse) * metallic;
+  float2 screenUVs = 0;
+  float4 screenPos = 0;
+#if defined(SSR_ENABLED)
+  screenUVs = i.screenPos.xy / (i.screenPos.w+0.0000000001);
+#if UNITY_SINGLE_PASS_STEREO || defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
+  screenUVs.x *= 2;
+#endif
+  screenPos = i.screenPos;
 #endif
 
-  return float4(pbr, albedo.a);
+  float4 pbr = BRDF1_Mochie_PBS(
+      albedo,
+      specular_tint,
+      one_minus_reflectivity,
+      smoothness,
+      normal,
+      view_dir,
+      i.worldPos,
+      screenUVs,
+      screenPos,
+      metallic,
+      /*thickness=*/1,
+      /*ssColor=*/0,
+      attenuation,
+      /*lightmapUV=*/0,
+      vertexLightColor,
+      direct_light,
+      indirect_light);
+
+  return float4(pbr.rgb, albedo.a);
 }
 
 #endif  // __PBR_INC

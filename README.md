@@ -1,28 +1,40 @@
 ## Tooner
 
-A toon shader for VRChat.
+My toon shader for VRChat. I use this on my personal and commercial models.
+It's semi optimized and a little scuffed.
 
 Features:
 * PBR
 * Emissions
 * Outlines
+  * With/without stenciling
 * Glitter
 * Explosion
 * PBR detail maps x4
+  * Albedo, emission, normal, metallic, roughness, mask
+* Decals x4
+  * Albedo, emission, angle
 * Matcaps x2
+  * Add, mul, replace, sub, min, max
+  * Quantization
 * Rim lighting x2
+  * Add, mul, replace, sub, min, max
+  * Glitter
+  * Quantization
 * Rendering modes: opaque, cutout, fade, transparent, transclipping
 * Culling modes: front, back, none
 * OKLCH color adjustment
-* Reflection probe override
-* Min/max brightness limits
+* Reflection probe (cubemap) override
+* Lighting min/max
 * Flat/realistic normals
 * Geometry scroll (similar to Poiyomi's shatterwave)
 * UV scroll
 * Clones
 * LTCGI
 * Shadows (both casting and receiving)
-* Extensive use of variants to minimize performance cost
+* Gimmicks
+  * Vertex location quantization (object space)
+  * Vertex location scaling (object space)
 
 Disclaimers:
 1. This is a WIP.
@@ -30,7 +42,7 @@ Disclaimers:
 3. Stability is a non-goal. Keywords are likely to change in the interest of
    performance and simplicity.
 
-Strawman FAQ
+### Strawman FAQ
 
 1. Why create another toon shader?
 
@@ -40,16 +52,16 @@ too fucking huge and complicated to fit my needs.
 
 2. Does it work?
 
-Sort of. I haven't implemented shadow receiving yet, so some water effects are
-fucked up.
+I think so?
 
 3. Is it optimized?
 
-Sort of. I haven't benchmarked it. I know it's slower than Poiyomi.
+Sort of.
 
-I use keywords on every feature so it shouldn't be obscenely bad. But I haven't
-gotten to the point of like, deduplicating all computation and shoving as much
-as possible into the vertex shader. So it's like. Sort of optimized.
+I use static keywords on every feature, so you don't pay for anything you don't
+use. I use branchless programming wherever appropriate. Dynamic branches are
+only used where I either know they won't cause thread divergence, or where they
+can't be avoided.
 
 I'd like to strike a balance between performance and readability. Since it's
 mostly for *my* use, I don't feel a need to make it totally optimal.

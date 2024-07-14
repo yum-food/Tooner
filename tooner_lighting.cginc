@@ -132,6 +132,10 @@ v2f vert(appdata v)
   o.worldPos = mul(unity_ObjectToWorld, v.vertex);
   o.objPos = v.vertex;
 
+#if defined(SSR_ENABLED)
+  o.screenPos = ComputeGrabScreenPos(o.vertex);
+#endif
+
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv = v.uv0;

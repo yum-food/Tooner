@@ -271,12 +271,36 @@ Shader "yum_food/tooner"
     _Trochoid_R("R", Float) = 5.0
     _Trochoid_r("r", Float) = 3.0
     _Trochoid_d("d", Float) = 5.0
+
+    _Enable_SSR("Enable SSR", Float) = 0
+    _SSRStrength("SSR Strength", Float) = 1
+    _SSRHeight("SSR Height", Float) = 0.1
+    [HideInInspector]_NoiseTexSSR("SSR Noise Texture", 2D) = "black" {}
+    _EdgeFade("Edge Fade", Range(0,1)) = 0.1
+    [ToggleUI]_EdgeFadeToggle("Edge Fade Toggle", Int) = 1
+
+    _ScatterDist("_ScatterDist", Float) = 0
+    _ScatterPow("_ScatterPow", Float) = 0
+    _ScatterIntensity("_ScatterIntensity", Float) = 0
+    _ScatterAmbient("_ScatterAmbient", Float) = 0
+    _GSAA("_GSAA", Float) = 0
+    _GSAAStrength("_GSAAStrength", Float) = 0
+    _WrappingFactor("_WrappingFactor", Float) = 0
+    _Subsurface("_Subsurface", Float) = 0
+    _SpecularStrength("_SpecularStrength", Float) = 0
+    _FresnelStrength("_FresnelStrength", Float) = 0
+    _UseFresnel("_UseFresnel", Float) = 0
+    _ReflectionStrength("_ReflectionStrength", Float) = 0
+    shadowedReflections("shadowedReflections", Vector) = (0, 0, 0, 0)
+    _ReflShadows("_ReflShadows", Vector) = (0, 0, 0, 0)
+    _ReflShadowStrength("_ReflShadowStrength", Vector) = (0, 0, 0, 0)
   }
   SubShader
   {
     Tags {
       "VRCFallback"="ToonCutout"
     }
+
     Pass {
       Tags {
         "RenderType"="Opaque"
