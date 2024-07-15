@@ -15,7 +15,7 @@ struct appdata
 
 struct v2f
 {
-  float4 vertex : SV_POSITION;
+  float4 pos : SV_POSITION;
   float2 uv : TEXCOORD0;
   #if defined(LIGHTMAP_ON)
   float2 lmuv : TEXCOORD1;
@@ -41,7 +41,7 @@ struct appdata
 
 struct v2f
 {
-  float4 vertex : SV_POSITION;
+  float4 pos : SV_POSITION;
   float2 uv : TEXCOORD0;
   #if defined(LIGHTMAP_ON)
   float2 lmuv : TEXCOORD1;

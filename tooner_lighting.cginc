@@ -18,7 +18,7 @@
 
 struct tess_data
 {
-  float4 vertex : INTERNALTESSPOS;
+  float4 pos : INTERNALTESSPOS;
   float2 uv : TEXCOORD0;
   #if defined(LIGHTMAP_ON)
   float2 lmuv : TEXCOORD1;
@@ -128,12 +128,12 @@ v2f vert(appdata v)
   }
 #endif
 
-  o.vertex = UnityObjectToClipPos(v.vertex);
+  o.pos = UnityObjectToClipPos(v.vertex);
   o.worldPos = mul(unity_ObjectToWorld, v.vertex);
   o.objPos = v.vertex;
 
 #if defined(SSR_ENABLED)
-  o.screenPos = ComputeGrabScreenPos(o.vertex);
+  o.screenPos = ComputeGrabScreenPos(o.pos);
 #endif
 
   o.normal = UnityObjectToWorldNormal(v.normal);
@@ -181,7 +181,7 @@ tess_data hull_vertex(appdata v)
   UNITY_TRANSFER_INSTANCE_ID(v, o);
   UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
-  o.vertex = v.vertex;
+  o.pos = v.vertex;
   //o.vertex = UnityObjectToClipPos(v.vertex);
   //o.worldPos = mul(unity_ObjectToWorld, v.vertex);
   //o.objPos = v.vertex;
@@ -254,10 +254,10 @@ v2f domain(
   #endif
 
   float4 vertex =
-    patch[0].vertex * baryc.x +
-    patch[1].vertex * baryc.y +
-    patch[2].vertex * baryc.z;
-  data.vertex = UnityObjectToClipPos(vertex);
+    patch[0].pos * baryc.x +
+    patch[1].pos * baryc.y +
+    patch[2].pos * baryc.z;
+  data.pos = UnityObjectToClipPos(vertex);
   data.objPos = vertex;
   data.worldPos = mul(unity_ObjectToWorld, vertex);
 
@@ -354,9 +354,9 @@ void geom(triangle v2f tri_in[3],
 
     // Apply transformed worldPos to other coordinate systems.
     if (_Explode_Phase > 1E-6) {
-      v0.vertex = UnityObjectToClipPos(v0_objPos);
-      v1.vertex = UnityObjectToClipPos(v1_objPos);
-      v2.vertex = UnityObjectToClipPos(v2_objPos);
+      v0.pos = UnityObjectToClipPos(v0_objPos);
+      v1.pos = UnityObjectToClipPos(v1_objPos);
+      v2.pos = UnityObjectToClipPos(v2_objPos);
     }
   }
 #endif  // __EXPLODE
@@ -395,9 +395,9 @@ void geom(triangle v2f tri_in[3],
   }
 #endif
 
-    v0.vertex = UnityObjectToClipPos(v0_objPos);
-    v1.vertex = UnityObjectToClipPos(v1_objPos);
-    v2.vertex = UnityObjectToClipPos(v2_objPos);
+    v0.pos = UnityObjectToClipPos(v0_objPos);
+    v1.pos = UnityObjectToClipPos(v1_objPos);
+    v2.pos = UnityObjectToClipPos(v2_objPos);
   }
 #endif
 #if defined(_CLONES)

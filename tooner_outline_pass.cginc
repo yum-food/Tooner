@@ -14,7 +14,7 @@
 
 struct tess_data
 {
-  float4 vertex : INTERNALTESSPOS;
+  float4 pos : INTERNALTESSPOS;
   float2 uv : TEXCOORD0;
   float3 normal : TEXCOORD2;
 };
@@ -69,7 +69,7 @@ v2f vert(appdata v)
   v2f o;
   o.worldPos = worldPos;
   o.objPos = objPos;
-  o.vertex = clipPos;
+  o.pos = clipPos;
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.uv = v.uv0.xy;
 #if defined(LIGHTMAP_ON)
@@ -105,7 +105,7 @@ tess_data hull_vertex(appdata v)
   v.vertex.xyz = vertex.xyz;
 
   tess_data o;
-  o.vertex = v.vertex;
+  o.pos = v.vertex;
   o.normal = normal;
   o.uv = v.uv0.xy;
 
@@ -118,7 +118,7 @@ tess_factors patch_constant(InputPatch<tess_data, 3> patch)
   tess_factors f;
 
 #if defined(_TESSELLATION)
-  float3 worldPos = mul(unity_ObjectToWorld, patch[0].vertex);
+  float3 worldPos = mul(unity_ObjectToWorld, patch[0].pos);
   float factor = _Tess_Factor;
   if (_Tess_Dist_Cutoff > 0 && length(_WorldSpaceCameraPos - worldPos) > _Tess_Dist_Cutoff) {
     factor = 1;
@@ -166,10 +166,10 @@ v2f domain(
   #endif
 
   float4 vertex =
-    patch[0].vertex * baryc.x +
-    patch[1].vertex * baryc.y +
-    patch[2].vertex * baryc.z;
-  data.vertex = UnityObjectToClipPos(vertex);
+    patch[0].pos * baryc.x +
+    patch[1].pos * baryc.y +
+    patch[2].pos * baryc.z;
+  data.pos = UnityObjectToClipPos(vertex);
   data.objPos = vertex;
   data.worldPos = mul(unity_ObjectToWorld, vertex);
 
@@ -266,9 +266,9 @@ void geom(triangle v2f tri_in[3],
 
     // Apply transformed worldPos to other coordinate systems.
     if (_Explode_Phase > 1E-6) {
-      v0.vertex = UnityObjectToClipPos(v0_objPos);
-      v1.vertex = UnityObjectToClipPos(v1_objPos);
-      v2.vertex = UnityObjectToClipPos(v2_objPos);
+      v0.pos = UnityObjectToClipPos(v0_objPos);
+      v1.pos = UnityObjectToClipPos(v1_objPos);
+      v2.pos = UnityObjectToClipPos(v2_objPos);
     }
   }
 #endif  // __EXPLODE
@@ -307,9 +307,9 @@ void geom(triangle v2f tri_in[3],
   }
 #endif
 
-    v0.vertex = UnityObjectToClipPos(v0_objPos);
-    v1.vertex = UnityObjectToClipPos(v1_objPos);
-    v2.vertex = UnityObjectToClipPos(v2_objPos);
+    v0.pos = UnityObjectToClipPos(v0_objPos);
+    v1.pos = UnityObjectToClipPos(v1_objPos);
+    v2.pos = UnityObjectToClipPos(v2_objPos);
   }
 #endif
 #if defined(_CLONES)
