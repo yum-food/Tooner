@@ -216,10 +216,8 @@ float4 getLitColor(
         i.worldPos,
         normal,
         view_dir,
-        1.0 - smoothness,
+        GetRoughness(smoothness),
         0);
-    direct_light.color += acc.diffuse;
-    direct_light.color += acc.specular;
     indirect_light.diffuse += acc.diffuse;
     indirect_light.specular += acc.specular;
   }
@@ -231,14 +229,8 @@ float4 getLitColor(
 
   float2 screenUVs = 0;
   float4 screenPos = 0;
-#if defined(SSR_ENABLED)
-  screenUVs = i.screenPos.xy / (i.screenPos.w+0.0000000001);
-#if UNITY_SINGLE_PASS_STEREO || defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED)
-  screenUVs.x *= 2;
-#endif
-  screenPos = i.screenPos;
-#endif
 
+#if 1
   float4 pbr = BRDF1_Mochie_PBS(
       albedo,
       specular_tint,
@@ -257,6 +249,17 @@ float4 getLitColor(
       vertexLightColor,
       direct_light,
       indirect_light);
+#else
+    float3 pbr = UNITY_BRDF_PBS(
+        albedo,
+        specular_tint,
+        one_minus_reflectivity,
+        smoothness,
+        normal,
+        view_dir,
+        direct_light,
+        indirect_light).xyz;
+#endif
 
   return float4(pbr.rgb, albedo.a);
 }

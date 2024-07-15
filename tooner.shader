@@ -287,10 +287,10 @@ Shader "yum_food/tooner"
     _GSAAStrength("_GSAAStrength", Float) = 0
     _WrappingFactor("_WrappingFactor", Float) = 0
     _Subsurface("_Subsurface", Float) = 0
-    _SpecularStrength("_SpecularStrength", Float) = 0
-    _FresnelStrength("_FresnelStrength", Float) = 0
-    _UseFresnel("_UseFresnel", Float) = 0
-    _ReflectionStrength("_ReflectionStrength", Float) = 0
+    _SpecularStrength("_SpecularStrength", Float) = 1
+    _FresnelStrength("_FresnelStrength", Float) = 1
+    _UseFresnel("_UseFresnel", Float) = 1
+    _ReflectionStrength("_ReflectionStrength", Float) = 1
     shadowedReflections("shadowedReflections", Vector) = (0, 0, 0, 0)
     _ReflShadows("_ReflShadows", Vector) = (0, 0, 0, 0)
     _ReflShadowStrength("_ReflShadowStrength", Vector) = (0, 0, 0, 0)
