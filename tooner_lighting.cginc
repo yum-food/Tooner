@@ -154,7 +154,7 @@ v2f vert(appdata v)
 void getVertexLightColorTess(inout tess_data i)
 {
   #if defined(VERTEXLIGHT_ON)
-  float3 worldPos = mul(unity_ObjectToWorld, i.vertex).xyz;
+  float3 worldPos = mul(unity_ObjectToWorld, i.pos).xyz;
   float3 view_dir = normalize(_WorldSpaceCameraPos - worldPos);
   uint normals_mode = round(_Mesh_Normals_Mode);
   bool flat = (normals_mode == 0);

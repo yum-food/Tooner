@@ -275,6 +275,24 @@ float4 getLitColor(
       half_dir);
   float cc_mask = _Clearcoat_Mask.SampleGrad(linear_repeat_s, i.uv, ddx(i.uv.x), ddy(i.uv.y));
   pbr.rgb += clearcoat * saturate(dot(i.normal, direct_light.dir)) * cc_mask * 10;
+#if defined(VERTEXLIGHT_ON)
+  for (uint ii = 0; ii < 4; ii++) {
+    float3 vpos = float3(unity_4LightPosX0[ii], unity_4LightPosY0[ii], unity_4LightPosZ0[ii]);
+    float3 vl = normalize(vpos - i.worldPos);
+
+    half3 vhalf = Unity_SafeNormalize(half3(vl) + view_dir);
+    half vlh = saturate(dot(vl, vhalf));
+    half cc_vnh = saturate(dot(i.normal, vhalf));
+
+    clearcoat = FilamentClearcoat(
+        _Clearcoat_Roughness,
+        _Clearcoat_Strength,
+        cc_vnh,
+        vlh,
+        vhalf);
+    pbr.rgb += clearcoat * saturate(dot(i.normal, vl)) * cc_mask * 10;
+  }
+#endif
 #endif
 
   return float4(pbr.rgb, albedo.a);
