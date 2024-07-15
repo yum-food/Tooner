@@ -1,6 +1,9 @@
 #ifndef MOCHIE_STANDARD_BRDF_INCLUDED
 #define MOCHIE_STANDARD_BRDF_INCLUDED
 
+#include "filament_math.cginc"
+#include "globals.cginc"
+
 /*
  * MIT License
  *
@@ -54,7 +57,7 @@ float GSAARoughness(float3 normal, float roughness){
 
 half4 BRDF1_Mochie_PBS (
     half3 diffColor, half3 specColor, half oneMinusReflectivity, half smoothness,
-    half3 normal, half3 viewDir, half3 worldPos, half2 screenUVs, half4 screenPos,
+    half3 normal, half3 mesh_normal, half3 viewDir, half3 worldPos, half2 screenUVs, half4 screenPos,
     half metallic, half thickness, half3 ssColor, half atten, float2 lightmapUV, float3 vertexColor,
     UnityLight light, UnityIndirect gi)
 {
@@ -169,6 +172,17 @@ half4 BRDF1_Mochie_PBS (
   // #ifdef FULL_VERSION
   // 	reflCol *= lerp(1, vertexColor, _ReflVertexColor*_ReflVertexColorStrength);
   // #endif
+
+#if defined(_CLEARCOAT)
+  half cc_nh = saturate(dot(mesh_normal, halfDir));
+  float clearcoat = FilamentClearcoat(
+      _Clearcoat_Roughness,
+      _Clearcoat_Strength,
+      cc_nh,
+      lh,
+      halfDir);
+  specCol += clearcoat * saturate(dot(mesh_normal, light.dir)) * 10;
+#endif
 
   return half4(diffCol + specCol + reflCol + subsurfaceCol, 1);
 }

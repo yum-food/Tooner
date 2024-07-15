@@ -91,7 +91,7 @@
 #pragma shader_feature_local _ _GIMMICK_EYES_00
 #pragma shader_feature_local _ _PIXELLATE
 #pragma shader_feature_local _ _TROCHOID
-#pragma shader_feature_local _ SSR_ENABLED
+#pragma shader_feature_local _ _CLEARCOAT
 
 #endif  // __FEATURE_MACROS_INC
 

@@ -6,6 +6,10 @@ Shader "yum_food/tooner"
     _Metallic("Metallic", Range(0, 1)) = 0
     _Roughness("Roughness", Range(0, 1)) = 1
 
+    _Clearcoat_Enabled("Clearcoat enabled", Float) = 0
+    _Clearcoat_Strength("Clearcoat strength", Range(0, 1)) = 0
+    _Clearcoat_Roughness("Clearcoat strength", Range(0, 1)) = 0
+
     [NoScaleOffset] _MainTex("Base color", 2D) = "white" {}
     [NoScaleOffset] _NormalTex("Normal", 2D) = "bump" {}
     [NoScaleOffset] _MetallicTex("Metallic", 2D) = "white" {}

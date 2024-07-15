@@ -38,6 +38,12 @@ float3 shadowedReflections;
 float3 _ReflShadows;
 float3 _ReflShadowStrength;
 
+#if defined(_CLEARCOAT)
+float _Clearcoat_Enabled;
+float _Clearcoat_Strength;
+float _Clearcoat_Roughness;
+#endif
+
 #if defined(SSR_ENABLED)
 UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 sampler2D _GrabTexture; 

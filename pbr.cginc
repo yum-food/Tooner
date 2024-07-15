@@ -237,6 +237,7 @@ float4 getLitColor(
       one_minus_reflectivity,
       smoothness,
       normal,
+      i.normal,
       view_dir,
       i.worldPos,
       screenUVs,
