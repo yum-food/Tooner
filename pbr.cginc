@@ -97,12 +97,11 @@ float3 BoxProjection (
 	float4 cubemapPosition, float3 boxMin, float3 boxMax
 ) {
 	#if UNITY_SPECCUBE_BOX_PROJECTION
-		UNITY_BRANCH
 		if (cubemapPosition.w > 0) {
 			float3 factors =
 				((direction > 0 ? boxMax : boxMin) - position) / direction;
 			float scalar = min(min(factors.x, factors.y), factors.z);
-			direction = direction * scalar + (position - cubemapPosition);
+			direction = direction * scalar + (position - cubemapPosition.xyz);
 		}
 	#endif
 	return direction;
@@ -120,7 +119,11 @@ UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, floa
   // Avatars are not static, don't use lightmap.
   indirect.diffuse = 0;
 #else
-  indirect.diffuse += max(0, ShadeSH9(float4(normal, 1)));
+  if (_Mesh_Normals_Mode == 3) {  // Toon
+    indirect.diffuse += max(0, BetterSH9(float4(0, 0, 0, 1)));
+  } else {
+    indirect.diffuse += max(0, BetterSH9(float4(normal, 1)));
+  }
 #endif
   float3 reflect_dir = reflect(-view_dir, normal);
   Unity_GlossyEnvironmentData env_data;
@@ -133,38 +136,37 @@ UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, floa
   float3 probe0 = Unity_GlossyEnvironment(
       UNITY_PASS_TEXCUBE(unity_SpecCube0), unity_SpecCube0_HDR, env_data
       );
-  env_data.reflUVW = BoxProjection(
-      reflect_dir, worldPos,
-      unity_SpecCube1_ProbePosition,
-      unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax
-      );
+  indirect.specular = probe0;
 #if UNITY_SPECCUBE_BLENDING
-  float interpolator = unity_SpecCube0_BoxMin.w;
-  UNITY_BRANCH
-    if (interpolator < 0.99999) {
-      float3 probe1 = Unity_GlossyEnvironment(
-          UNITY_PASS_TEXCUBE_SAMPLER(unity_SpecCube1, unity_SpecCube0),
-          unity_SpecCube0_HDR, env_data
-          );
-      indirect.specular = lerp(probe1, probe0, interpolator);
-    }
-    else {
-      indirect.specular = probe0;
-    }
+  if (unity_SpecCube0_BoxMin.w < 0.99999) {
+    env_data.reflUVW = BoxProjection(
+        reflect_dir, worldPos,
+        unity_SpecCube1_ProbePosition,
+        unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax
+        );
+    float3 probe1 = Unity_GlossyEnvironment(
+        UNITY_PASS_TEXCUBE_SAMPLER(unity_SpecCube1, unity_SpecCube0),
+        unity_SpecCube0_HDR, env_data
+        );
+    indirect.specular = lerp(probe1, probe0, unity_SpecCube0_BoxMin.w);
+  }
 #else
   indirect.specular = probe0;
 #endif  // UNITY_SPECCUBE_BLENDING
 
+  // Lifted from poi toon shader (MIT).
+  float horizon = min(1 + dot(reflect_dir, normal), 1);
+  indirect.specular *= horizon * horizon;
+
 #if defined(_CUBEMAP)
   float roughness = GetRoughness(smoothness);
-  probe0 =
+  indirect.specular =
     UNITY_SAMPLE_TEXCUBE_LOD(
         _Cubemap,
         reflect_dir,
         roughness * UNITY_SPECCUBE_LOD_STEPS);
 #endif  // _CUBEMAP
 
-  indirect.specular = probe0;
 #endif  // FORWARD_BASE_PASS
 
   indirect.diffuse *= ao;

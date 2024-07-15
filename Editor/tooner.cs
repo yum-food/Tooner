@@ -476,7 +476,8 @@ public class ToonerGUI : ShaderGUI {
   enum NormalsMode {
     Flat,
     Spherical,
-    Realistic
+    Realistic,
+    Toon
   };
 
   void DoShadingMode() {

@@ -57,4 +57,44 @@ float3 HSVtoRGB(in float3 HSV)
   return ((RGB - 1) * HSV.y + 1) * HSV.z;
 }
 
+float shEvaluateDiffuseL1Geomerics_local(float L0, float3 L1, float3 n)
+{
+  // average energy
+  float R0 = max(0, L0);
+
+  // avg direction of incoming light
+  float3 R1 = 0.5f * L1;
+
+  // directional brightness
+  float lenR1 = length(R1);
+
+  // linear angle between normal and direction 0-1
+  //float q = 0.5f * (1.0f + dot(R1 / lenR1, n));
+  //float q = dot(R1 / lenR1, n) * 0.5 + 0.5;
+  float q = dot(normalize(R1), n) * 0.5 + 0.5;
+  q = saturate(q); // Thanks to ScruffyRuffles for the bug identity.
+
+  // power for q
+  // lerps from 1 (linear) to 3 (cubic) based on directionality
+  float p = 1.0f + 2.0f * lenR1 / R0;
+
+  // dynamic range constant
+  // should vary between 4 (highly directional) and 0 (ambient)
+  float a = (1.0f - lenR1 / R0) / (1.0f + lenR1 / R0);
+
+  return R0 * (a + (1.0f - a) * (p + 1.0f) * pow(q, p));
+}
+
+half3 BetterSH9(half4 normal)
+{
+  float3 indirect;
+  float3 L0 = float3(unity_SHAr.w, unity_SHAg.w, unity_SHAb.w) + float3(unity_SHBr.z, unity_SHBg.z, unity_SHBb.z) / 3.0;
+  indirect.r = shEvaluateDiffuseL1Geomerics_local(L0.r, unity_SHAr.xyz, normal.xyz);
+  indirect.g = shEvaluateDiffuseL1Geomerics_local(L0.g, unity_SHAg.xyz, normal.xyz);
+  indirect.b = shEvaluateDiffuseL1Geomerics_local(L0.b, unity_SHAb.xyz, normal.xyz);
+  indirect = max(0, indirect);
+  indirect += SHEvalLinearL2(normal);
+  return indirect;
+}
+
 #endif  // __POI_INC
