@@ -3,6 +3,11 @@
 
 #define PI 3.1415926535897932384626433832795028841971
 
+// THIS SOURCE CODE HAS BEEN MODIFIED!
+// The only modifications are for compatibility with HLSL, for example:
+//   * Replacing normalizeMediump() with normalize()
+//   * Replacing vec3 with float3
+
 /*
                                  Apache License
                            Version 2.0, January 2004
