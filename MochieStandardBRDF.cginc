@@ -1,9 +1,6 @@
 #ifndef MOCHIE_STANDARD_BRDF_INCLUDED
 #define MOCHIE_STANDARD_BRDF_INCLUDED
 
-#include "filament_math.cginc"
-#include "globals.cginc"
-
 /*
  * MIT License
  *
@@ -172,17 +169,6 @@ half4 BRDF1_Mochie_PBS (
   // #ifdef FULL_VERSION
   // 	reflCol *= lerp(1, vertexColor, _ReflVertexColor*_ReflVertexColorStrength);
   // #endif
-
-#if defined(_CLEARCOAT)
-  half cc_nh = saturate(dot(mesh_normal, halfDir));
-  float clearcoat = FilamentClearcoat(
-      _Clearcoat_Roughness,
-      _Clearcoat_Strength,
-      cc_nh,
-      lh,
-      halfDir);
-  specCol += clearcoat * saturate(dot(mesh_normal, light.dir)) * 10;
-#endif
 
   return half4(diffCol + specCol + reflCol + subsurfaceCol, 1);
 }

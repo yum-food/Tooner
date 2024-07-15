@@ -113,6 +113,8 @@ public class ToonerGUI : ShaderGUI {
         editor.RangeProperty(bc, "Strength");
         bc = FindProperty("_Clearcoat_Roughness");
         editor.RangeProperty(bc, "Roughness");
+        bc = FindProperty("_Clearcoat_Mask");
+        editor.TexturePropertySingleLine(MakeLabel(bc, "Mask"), bc);
     }
   }
 

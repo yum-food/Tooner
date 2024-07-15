@@ -4,10 +4,11 @@
 #include "UnityPBSLighting.cginc"
 #include "AutoLight.cginc"
 
-#include "MochieStandardBRDF.cginc"
-
+#include "globals.cginc"
+#include "filament_math.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
+#include "MochieStandardBRDF.cginc"
 #include "poi.cginc"
 
 #if defined(_LTCGI)
@@ -260,6 +261,20 @@ float4 getLitColor(
         view_dir,
         direct_light,
         indirect_light).xyz;
+#endif
+
+#if defined(_CLEARCOAT)
+  half3 half_dir = Unity_SafeNormalize(half3(direct_light.dir) + view_dir);
+  half lh = saturate(dot(direct_light.dir, half_dir));
+  half cc_nh = saturate(dot(i.normal, half_dir));
+  float clearcoat = FilamentClearcoat(
+      _Clearcoat_Roughness,
+      _Clearcoat_Strength,
+      cc_nh,
+      lh,
+      half_dir);
+  float cc_mask = _Clearcoat_Mask.SampleGrad(linear_repeat_s, i.uv, ddx(i.uv.x), ddy(i.uv.y));
+  pbr.rgb += clearcoat * saturate(dot(i.normal, direct_light.dir)) * cc_mask * 10;
 #endif
 
   return float4(pbr.rgb, albedo.a);
