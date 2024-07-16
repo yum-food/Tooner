@@ -1,6 +1,8 @@
 #ifndef TOONER_LIGHTING
 #define TOONER_LIGHTING
 
+#include "UnityCG.cginc"
+
 #include "audiolink.cginc"
 #include "clones.cginc"
 #include "eyes.cginc"
@@ -203,7 +205,7 @@ tess_factors patch_constant(InputPatch<tess_data, 3> patch)
   tess_factors f;
 
 #if defined(_TESSELLATION)
-  float3 worldPos = mul(unity_ObjectToWorld, patch[0].vertex);
+  float3 worldPos = mul(unity_ObjectToWorld, patch[0].pos);
   float factor = _Tess_Factor;
   if (_Tess_Dist_Cutoff > 0 && length(_WorldSpaceCameraPos - worldPos) > _Tess_Dist_Cutoff) {
     factor = 1;
@@ -782,6 +784,8 @@ float4 effect(inout v2f i)
   float iddx = ddx(i.uv.x) * _Mip_Multiplier;
   float iddy = ddx(i.uv.y) * _Mip_Multiplier;
   const float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
+  // Not necessarily normalized after interpolation.
+  i.normal = normalize(i.normal);
 
 #if defined(_TROCHOID)
   {

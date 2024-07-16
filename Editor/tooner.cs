@@ -1211,6 +1211,16 @@ public class ToonerGUI : ShaderGUI {
         bc);
     SetKeyword("_CUBEMAP", bc.textureValue);
 
+    bc = FindProperty("_Lighting_Factor");
+    editor.RangeProperty(
+        bc,
+        "Lighting multiplier");
+
+    bc = FindProperty("_Reflection_Probe_Saturation");
+    editor.RangeProperty(
+        bc,
+        "Reflection probe saturation");
+
     bc = FindProperty("_Shadow_Strength");
     editor.RangeProperty(
         bc,

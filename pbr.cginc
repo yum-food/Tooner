@@ -37,7 +37,7 @@ void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output) {
 
 UNITY_DECLARE_TEXCUBE(_Cubemap);
 
-UnityLight CreateDirectLight(float3 normal, float ao, v2f i, out float attenuation)
+UnityLight CreateDirectLight(float3 normal, v2f i, out float attenuation)
 {
 #if 1
   // This whole block is yoinked from AutoLight.cginc. I needed a way to
@@ -72,7 +72,7 @@ UnityLight CreateDirectLight(float3 normal, float ao, v2f i, out float attenuati
 #endif
 
   UnityLight light;
-  light.color = _LightColor0.rgb * attenuation * ao;
+  light.color = _LightColor0.rgb * attenuation;
 #if defined(POINT) || defined(POINT_COOKIE) || defined(SPOT)
   light.dir = normalize((_WorldSpaceLightPos0 - i.worldPos).xyz);
 #else
@@ -109,7 +109,7 @@ float3 BoxProjection (
 }
 
 UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, float3 normal,
-    float smoothness, float3 worldPos, float ao, float2 uv) {
+    float smoothness, float3 worldPos, float2 uv) {
   UnityIndirect indirect;
   indirect.diffuse = vertexLightColor;
   indirect.specular = 0;
@@ -170,8 +170,6 @@ UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, floa
 
 #endif  // FORWARD_BASE_PASS
 
-  indirect.diffuse *= ao;
-
   return indirect;
 }
 
@@ -199,10 +197,10 @@ float4 getLitColor(
   normal = lerp(normal, spherical_normal, normals_mode == 1);
 
 	UnityIndirect indirect_light = CreateIndirectLight(vertexLightColor,
-			view_dir, normal, smoothness, worldPos, ao, uv);
+			view_dir, normal, smoothness, worldPos, uv);
 
   float attenuation;
-  UnityLight direct_light = CreateDirectLight(normal, ao, i, attenuation);
+  UnityLight direct_light = CreateDirectLight(normal, i, attenuation);
   if (normals_mode == 0) {
     float e = 0.8;
     indirect_light.diffuse += direct_light.color * e;
@@ -224,13 +222,32 @@ float4 getLitColor(
   }
 #endif
 
+  direct_light.color *= _Lighting_Factor;
+  indirect_light.specular *= _Lighting_Factor;
+  indirect_light.diffuse *= _Lighting_Factor;
+
+  if (_Reflection_Probe_Saturation < 1.0) {
+    indirect_light.specular = RGBtoHSV(indirect_light.specular);
+    indirect_light.specular[1] *= _Reflection_Probe_Saturation;
+    indirect_light.specular = HSVtoRGB(indirect_light.specular);
+    indirect_light.diffuse = RGBtoHSV(indirect_light.diffuse);
+    indirect_light.diffuse[1] *= _Reflection_Probe_Saturation;
+    indirect_light.diffuse = HSVtoRGB(indirect_light.diffuse);
+  }
+
   direct_light.color = clamp(direct_light.color, _Min_Brightness, _Max_Brightness);
-  indirect_light.diffuse = clamp(indirect_light.diffuse, _Min_Brightness, _Max_Brightness);
+  // Diffuse is set low as a hack. Most maps rely on skybox lighting and set
+  // diffuse way too high.
+  indirect_light.diffuse = clamp(indirect_light.diffuse, _Min_Brightness, _Max_Brightness * 0.5);
   indirect_light.specular = clamp(indirect_light.specular, _Min_Brightness, _Max_Brightness);
+
+  // Apply AO
+  indirect_light.diffuse *= ao;
+  float3 direct_color = direct_light.color;
+  direct_light.color *= ao;
 
   float2 screenUVs = 0;
   float4 screenPos = 0;
-
 #if 1
   float4 pbr = BRDF1_Mochie_PBS(
       albedo,
@@ -264,34 +281,61 @@ float4 getLitColor(
 #endif
 
 #if defined(_CLEARCOAT)
-  half3 half_dir = Unity_SafeNormalize(half3(direct_light.dir) + view_dir);
-  half lh = saturate(dot(direct_light.dir, half_dir));
-  half cc_nh = saturate(dot(i.normal, half_dir));
-  float clearcoat = FilamentClearcoat(
-      _Clearcoat_Roughness,
-      _Clearcoat_Strength,
-      cc_nh,
-      lh,
-      half_dir);
-  float cc_mask = _Clearcoat_Mask.SampleGrad(linear_repeat_s, i.uv, ddx(i.uv.x), ddy(i.uv.y));
-  pbr.rgb += clearcoat * saturate(dot(i.normal, direct_light.dir)) * cc_mask * 10;
+    // Direct lighting
+    float cc_mask = _Clearcoat_Mask.SampleGrad(linear_repeat_s, i.uv, ddx(i.uv.x), ddy(i.uv.y));
+    {
+      float3 cc_L = direct_light.dir;
+      half3 cc_H = Unity_SafeNormalize(cc_L + view_dir);
+      half cc_LoH = saturate(dot(direct_light.dir, cc_H));
+      float3 cc_N = normalize(i.normal);
+      half cc_NoH = saturate(dot(i.normal, cc_H));
+      float clearcoat = FilamentClearcoat(
+          _Clearcoat_Roughness,
+          _Clearcoat_Strength,
+          cc_NoH,
+          cc_LoH,
+          cc_H);
+      pbr.rgb += clearcoat * saturate(dot(i.normal, cc_L)) *
+        cc_mask * direct_color * 10;
+    }
+    // Indirect specular lighting
+#if 1
+    {
+      float3 in_L = normalize(reflect(-view_dir, i.normal));
+      half3 in_H = i.normal;
+      half in_LoH = saturate(dot(in_L, in_H));
+      half in_NoH = 1;
+      float clearcoat = FilamentClearcoat(
+          _Clearcoat_Roughness,
+          _Clearcoat_Strength,
+          in_NoH,
+          in_LoH,
+          in_H);
+      pbr.rgb += clearcoat * saturate(dot(i.normal, in_L)) *
+        cc_mask * indirect_light.specular * 1;
+    }
+#endif
 #if defined(VERTEXLIGHT_ON)
-  for (uint ii = 0; ii < 4; ii++) {
-    float3 vpos = float3(unity_4LightPosX0[ii], unity_4LightPosY0[ii], unity_4LightPosZ0[ii]);
-    float3 vl = normalize(vpos - i.worldPos);
+    // Vertex lights
+    for (uint ii = 0; ii < 4; ii++) {
+      float3 vpos = float3(unity_4LightPosX0[ii], unity_4LightPosY0[ii],
+          unity_4LightPosZ0[ii]);
+      float3 vl = normalize(vpos - i.worldPos);
+      float3 c = unity_LightColor[0].rgb;
 
-    half3 vhalf = Unity_SafeNormalize(half3(vl) + view_dir);
-    half vlh = saturate(dot(vl, vhalf));
-    half cc_vnh = saturate(dot(i.normal, vhalf));
+      half3 vhalf = Unity_SafeNormalize(half3(vl) + view_dir);
+      half vlh = saturate(dot(vl, vhalf));
+      half cc_vnh = saturate(dot(i.normal, vhalf));
 
-    clearcoat = FilamentClearcoat(
-        _Clearcoat_Roughness,
-        _Clearcoat_Strength,
-        cc_vnh,
-        vlh,
-        vhalf);
-    pbr.rgb += clearcoat * saturate(dot(i.normal, vl)) * cc_mask * 10;
-  }
+      float clearcoat = FilamentClearcoat(
+          _Clearcoat_Roughness,
+          _Clearcoat_Strength,
+          cc_vnh,
+          vlh,
+          vhalf);
+      pbr.rgb += clearcoat * saturate(dot(i.normal, vl)) *
+        cc_mask * c * 10;
+    }
 #endif
 #endif
 

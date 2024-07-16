@@ -102,6 +102,8 @@ Shader "yum_food/tooner"
     [NoScaleOffset] _Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
 
 		_Cubemap("Cubemap", Cube) = "" {}
+    _Lighting_Factor("Lighting factor", Range(0, 5)) = 1
+    _Reflection_Probe_Saturation("Reflection probe saturation", Range(0, 1)) = 1
     _Min_Brightness("Min brightness", Range(0, 1)) = 0
     _Max_Brightness("Max brightness", Range(0, 1.5)) = 1
     _Mesh_Normal_Strength("Mesh normal strength", Range(0, 10)) = 1
@@ -402,8 +404,12 @@ Shader "yum_food/tooner"
         "LightMode" = "ShadowCaster"
       }
 			CGPROGRAM
+      #pragma target 5.0
+      #include "feature_macros.cginc"
+
       #pragma vertex vert
       #pragma fragment frag
+
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}

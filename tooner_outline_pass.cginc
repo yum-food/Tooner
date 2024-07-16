@@ -8,6 +8,7 @@
 #include "globals.cginc"
 #include "math.cginc"
 #include "pbr.cginc"
+#include "oklab.cginc"
 #include "trochoid_math.cginc"
 #include "tooner_scroll.cginc"
 #include "UnityCG.cginc"
@@ -343,15 +344,34 @@ fixed4 frag (v2f i) : SV_Target
   // TODO FIXME the normals are fucked in pbr pass, causing flickering
   //return _Outline_Color;
 
+  albedo = _Outline_Color;
+#if defined(_OKLAB)
+  // Do hue shift in perceptually uniform color space so it doesn't look like
+  // shit.
+ float oklab_mask = _OKLAB_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+ if (oklab_mask > 0.01 &&
+     (_OKLAB_Hue_Shift > 1E-6 ||
+      abs(_OKLAB_Chroma_Shift) > 1E-6 ||
+      abs(_OKLAB_Lightness_Shift) > 1E-6)) {
+   float3 c = albedo.rgb;
+   c = LRGBtoOKLCH(c);
+   c.x += _OKLAB_Lightness_Shift;
+   c.y += _OKLAB_Chroma_Shift;
+   c.z += _OKLAB_Hue_Shift;
+   c = OKLCHtoLRGB(c);
+   albedo.rgb = c;
+ }
+#endif
+
   //float3 flat_normal = normalize(UnpackNormal(float4(128, 128, 255, 255)/255));
   float3 flat_normal = normalize(_WorldSpaceCameraPos - i.worldPos);
   float4 vertex_light_color = 0;
   float ao = 1;
   float4 result = getLitColor(
       vertex_light_color,
-      _Outline_Color, i.worldPos, flat_normal, 0, 0, i.uv, ao, i);
+      albedo, i.worldPos, flat_normal, 0, 0, i.uv, ao, i);
 
-  result += _Outline_Color * _Outline_Emission_Strength;
+  result += albedo * _Outline_Emission_Strength;
 
 #if defined(_EXPLODE) && defined(_AUDIOLINK)
   if (AudioLinkIsAvailable() && _Explode_Phase > 1E-6) {

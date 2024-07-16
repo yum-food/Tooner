@@ -12,6 +12,8 @@ float _Roughness;
 float _Tex_NormalStr;
 float _NormalStr;
 
+float _Lighting_Factor;
+float _Reflection_Probe_Saturation;
 float _Min_Brightness;
 float _Max_Brightness;
 
