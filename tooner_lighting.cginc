@@ -438,7 +438,7 @@ float get_glitter(float2 uv, float3 worldPos,
   // A regular divide here causes flickering. The leading guess is that NVIDIA
   // hardware implements the divide instruction slightly differently on
   // different cores.
-  precise float idensity = 1.0 / density;
+  precise float idensity = rcp(density);
   float glitter = rand2(floor(uv * density) * idensity);
 
   float thresh = 1 - amount / 100;
