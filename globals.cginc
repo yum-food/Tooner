@@ -361,6 +361,13 @@ float4 _Gimmick_Shear_Location_Mesh_Renderer_Rotation;
 float4 _Gimmick_Shear_Location_Mesh_Renderer_Scale;
 #endif
 
+#if defined(_GIMMICK_SPHERIZE_LOCATION)
+float _Gimmick_Spherize_Location_Enable_Static;
+float _Gimmick_Spherize_Location_Enable_Dynamic;
+float _Gimmick_Spherize_Location_Strength;
+float _Gimmick_Spherize_Location_Radius;
+#endif
+
 #if defined(_GIMMICK_EYES_00)
 float _Gimmick_Eyes00_Enable_Static;
 texture2D _Gimmick_Eyes00_Effect_Mask;

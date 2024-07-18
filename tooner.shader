@@ -265,6 +265,11 @@ Shader "yum_food/tooner"
     _Gimmick_Shear_Location_Mesh_Renderer_Rotation("Mesh renderer rotation", Vector) = (0, 0, 0, 0)
     _Gimmick_Shear_Location_Mesh_Renderer_Scale("Mesh renderer scale", Vector) = (0, 0, 0, 0)
 
+    _Gimmick_Spherize_Location_Enable_Static("Enable spherize location gimmick", Float) = 0.0
+    _Gimmick_Spherize_Location_Enable_Dynamic("Enable spherize location gimmick", Float) = 0.0
+    _Gimmick_Spherize_Location_Strength("Strength", Range(0, 1)) = 0
+    _Gimmick_Spherize_Location_Radius("Strength", Float) = 1
+
     _Gimmick_Vertex_Normal_Slide_Enable_Static("Enable vertex normal slide", Float) = 0.0
     _Gimmick_Vertex_Normal_Slide_Enable_Dynamic("Enable vertex normal slide", Float) = 0.0
     _Gimmick_Vertex_Normal_Slide_Distance("Vertex normal slide distance", Float) = 0.01

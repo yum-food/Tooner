@@ -958,6 +958,37 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickSpherizeLocation() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Spherize_Location_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Spherize location", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_SPHERIZE_LOCATION", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Spherize_Location_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    bc = FindProperty("_Gimmick_Spherize_Location_Strength");
+    editor.RangeProperty(bc, "Strength");
+    bc = FindProperty("_Gimmick_Spherize_Location_Radius");
+    editor.FloatProperty(bc, "Radius");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmickEyes00() {
     MaterialProperty bc;
     bc = FindProperty("_Gimmick_Eyes00_Enable_Static");
@@ -1041,6 +1072,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickFlatColor();
     DoGimmickQuantizeLocation();
     DoGimmickShearLocation();
+    DoGimmickSpherizeLocation();
     DoGimmickEyes00();
     DoGimmickPixellate();
     DoGimmickTrochoid();

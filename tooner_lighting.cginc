@@ -109,16 +109,20 @@ v2f vert(appdata v)
   }
 #endif
 
+#if !defined(_SCROLL) && defined(_GIMMICK_SPHERIZE_LOCATION)
+  if (_Gimmick_Spherize_Location_Enable_Dynamic) {
+    float3 p = v.vertex.xyz;
+    float r = _Gimmick_Spherize_Location_Radius;
+    float s = _Gimmick_Spherize_Location_Strength;
+    float l = length(p);
+    p *= lerp(1, (r / l), s);
+    v.vertex.xyz = p;
+  }
+#endif
 #if !defined(_SCROLL) && defined(_GIMMICK_SHEAR_LOCATION)
   if (_Gimmick_Shear_Location_Enable_Dynamic) {
     float3 p = v.vertex.xyz;
-
-    float r = 0.0;
-    float3 sc = lerp(
-      _Gimmick_Shear_Location_Strength.xyz,
-      1,
-      abs(p) < r);
-
+    float3 sc = _Gimmick_Shear_Location_Strength.xyz;
     float3x3 shear_matrix = float3x3(
           sc.x, 0, 0,
           0, sc.y, 0,
@@ -372,6 +376,18 @@ void geom(triangle v2f tri_in[3],
     float3 v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
     float3 v2_objPos = mul(unity_WorldToObject, float4(v2.worldPos, 1));
 
+#if defined(_GIMMICK_SPHERIZE_LOCATION)
+  if (_Gimmick_Spherize_Location_Enable_Dynamic) {
+    float r = _Gimmick_Spherize_Location_Radius;
+    float s = _Gimmick_Spherize_Location_Strength;
+    float l0 = length(v0_objPos);
+    float l1 = length(v1_objPos);
+    float l2 = length(v2_objPos);
+    v0_objPos *= lerp(1, (r / l0), s);
+    v1_objPos *= lerp(1, (r / l1), s);
+    v2_objPos *= lerp(1, (r / l2), s);
+  }
+#endif
 #if defined(_GIMMICK_SHEAR_LOCATION)
   if (_Gimmick_Shear_Location_Enable_Dynamic) {
     v0_objPos = mul(float3x3(
@@ -389,10 +405,12 @@ void geom(triangle v2f tri_in[3],
         0, _Gimmick_Shear_Location_Strength.y, 0,
         0, 0, _Gimmick_Shear_Location_Strength.z),
         v2_objPos);
+  }
+#endif
+#if defined(_GIMMICK_SHEAR_LOCATION) || defined(_GIMMICK_SPHERIZE_LOCATION)
     v0.worldPos.xyz = mul(unity_ObjectToWorld, v0_objPos);
     v1.worldPos.xyz = mul(unity_ObjectToWorld, v1_objPos);
     v2.worldPos.xyz = mul(unity_ObjectToWorld, v2_objPos);
-  }
 #endif
 
     v0.pos = UnityObjectToClipPos(v0_objPos);

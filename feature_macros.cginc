@@ -88,6 +88,7 @@
 #pragma shader_feature_local _ _GIMMICK_QUANTIZE_LOCATION
 #pragma shader_feature_local _ _GIMMICK_QUANTIZE_LOCATION_AUDIOLINK
 #pragma shader_feature_local _ _GIMMICK_SHEAR_LOCATION
+#pragma shader_feature_local _ _GIMMICK_SPHERIZE_LOCATION
 #pragma shader_feature_local _ _GIMMICK_EYES_00
 #pragma shader_feature_local _ _PIXELLATE
 #pragma shader_feature_local _ _TROCHOID
