@@ -39,7 +39,6 @@ UNITY_DECLARE_TEXCUBE(_Cubemap);
 
 UnityLight CreateDirectLight(float3 normal, v2f i, out float attenuation)
 {
-#if 1
   // This whole block is yoinked from AutoLight.cginc. I needed a way to
   // control shadow strength so I had to duplicate the code.
 #if defined(DIRECTIONAL_COOKIE)
@@ -67,9 +66,6 @@ UnityLight CreateDirectLight(float3 normal, v2f i, out float attenuation)
   attenuation = 1;
 #endif
   attenuation *= lerp(1, shadow, _Shadow_Strength);
-#else
-  UNITY_LIGHT_ATTENUATION(attenuation, i, i.worldPos);
-#endif
 
   UnityLight light;
   light.color = _LightColor0.rgb * attenuation;
@@ -222,9 +218,9 @@ float4 getLitColor(
   }
 #endif
 
-  direct_light.color *= _Lighting_Factor;
-  indirect_light.specular *= _Lighting_Factor;
-  indirect_light.diffuse *= _Lighting_Factor;
+  direct_light.color *= _Lighting_Factor * _Direct_Lighting_Factor;
+  indirect_light.specular *= _Lighting_Factor * _Indirect_Specular_Lighting_Factor;
+  indirect_light.diffuse *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
 
   if (_Reflection_Probe_Saturation < 1.0) {
     indirect_light.specular = RGBtoHSV(indirect_light.specular);
@@ -236,9 +232,7 @@ float4 getLitColor(
   }
 
   direct_light.color = clamp(direct_light.color, _Min_Brightness, _Max_Brightness);
-  // Diffuse is set low as a hack. Most maps rely on skybox lighting and set
-  // diffuse way too high.
-  indirect_light.diffuse = clamp(indirect_light.diffuse, _Min_Brightness, _Max_Brightness * 0.5);
+  indirect_light.diffuse = clamp(indirect_light.diffuse, _Min_Brightness, _Max_Brightness);
   indirect_light.specular = clamp(indirect_light.specular, _Min_Brightness, _Max_Brightness);
 
   // Apply AO
@@ -255,7 +249,6 @@ float4 getLitColor(
       one_minus_reflectivity,
       smoothness,
       normal,
-      i.normal,
       view_dir,
       i.worldPos,
       screenUVs,

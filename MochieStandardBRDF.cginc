@@ -54,7 +54,7 @@ float GSAARoughness(float3 normal, float roughness){
 
 half4 BRDF1_Mochie_PBS (
     half3 diffColor, half3 specColor, half oneMinusReflectivity, half smoothness,
-    half3 normal, half3 mesh_normal, half3 viewDir, half3 worldPos, half2 screenUVs, half4 screenPos,
+    half3 normal, half3 viewDir, half3 worldPos, half2 screenUVs, half4 screenPos,
     half metallic, half thickness, half3 ssColor, half atten, float2 lightmapUV, float3 vertexColor,
     UnityLight light, UnityIndirect gi)
 {

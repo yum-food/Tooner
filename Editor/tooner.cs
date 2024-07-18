@@ -1087,11 +1087,6 @@ public class ToonerGUI : ShaderGUI {
     }
 
     MaterialProperty bc;
-    bc = FindProperty("_Render_Queue_Offset");
-    editor.IntegerProperty(
-        bc,
-        "Render queue offset");
-    int queue_offset = bc.intValue;
 
     EditorGUI.BeginChangeCheck();
     mode = (RenderingMode) EditorGUILayout.EnumPopup(
@@ -1099,9 +1094,16 @@ public class ToonerGUI : ShaderGUI {
     BlendMode src_blend = BlendMode.One;
     BlendMode dst_blend = BlendMode.Zero;
     bool zwrite = false;
+    EditorGUI.EndChangeCheck();
+    RecordAction("Rendering mode");
 
-    if (EditorGUI.EndChangeCheck()) {
-      RecordAction("Rendering mode");
+    bc = FindProperty("_Render_Queue_Offset");
+    editor.IntegerProperty(
+        bc,
+        "Render queue offset");
+    int queue_offset = bc.intValue;
+
+    {
       SetKeyword("_RENDERING_CUTOUT", mode == RenderingMode.Cutout);
       SetKeyword("_RENDERING_FADE", mode == RenderingMode.Fade);
       SetKeyword("_RENDERING_TRANSPARENT", mode == RenderingMode.Transparent);
@@ -1146,6 +1148,7 @@ public class ToonerGUI : ShaderGUI {
           zwrite = true;
           break;
       }
+
       foreach (Material m in editor.targets) {
         m.renderQueue = ((int) queue) + queue_offset;
         m.SetOverrideTag("RenderType", render_type);
@@ -1215,6 +1218,25 @@ public class ToonerGUI : ShaderGUI {
     editor.RangeProperty(
         bc,
         "Lighting multiplier");
+
+    {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Direct_Lighting_Factor");
+      editor.RangeProperty(
+          bc,
+          "Direct multiplier");
+
+      bc = FindProperty("_Indirect_Specular_Lighting_Factor");
+      editor.RangeProperty(
+          bc,
+          "Indirect specular multiplier");
+
+      bc = FindProperty("_Indirect_Diffuse_Lighting_Factor");
+      editor.RangeProperty(
+          bc,
+          "Indirect diffuse multiplier");
+      EditorGUI.indentLevel -= 1;
+    }
 
     bc = FindProperty("_Reflection_Probe_Saturation");
     editor.RangeProperty(

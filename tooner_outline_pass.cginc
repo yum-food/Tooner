@@ -62,15 +62,10 @@ v2f vert(appdata v)
   }
 #endif
 
-  float4 worldPos = mul(unity_ObjectToWorld, objPos);
-  float3 worldNormal = UnityObjectToWorldNormal(v.normal);
-  float4 clipPos = UnityObjectToClipPos(objPos);
-  float3 clipNormal = mul((float3x3) UNITY_MATRIX_MVP, v.normal);
-
   v2f o;
-  o.worldPos = worldPos;
+  o.worldPos = mul(unity_ObjectToWorld, objPos);
   o.objPos = objPos;
-  o.pos = clipPos;
+  o.pos = UnityObjectToClipPos(objPos);
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.uv = v.uv0.xy;
 #if defined(LIGHTMAP_ON)
@@ -161,10 +156,6 @@ v2f domain(
   DOMAIN_INTERP(uv);
   DOMAIN_INTERP(normal);
   //DOMAIN_INTERP(tangent);
-
-  #if defined(VERTEXLIGHT_ON)
-  DOMAIN_INTERP(vertexLightColor);
-  #endif
 
   float4 vertex =
     patch[0].pos * baryc.x +
@@ -363,13 +354,13 @@ fixed4 frag (v2f i) : SV_Target
  }
 #endif
 
-  //float3 flat_normal = normalize(UnpackNormal(float4(128, 128, 255, 255)/255));
-  float3 flat_normal = normalize(_WorldSpaceCameraPos - i.worldPos);
   float4 vertex_light_color = 0;
   float ao = 1;
   float4 result = getLitColor(
       vertex_light_color,
-      albedo, i.worldPos, flat_normal, 0, 0, i.uv, ao, i);
+      albedo, i.worldPos, -i.normal,
+      /*metallic=*/0, /*smoothness=*/0,
+      i.uv, ao, i);
 
   result += albedo * _Outline_Emission_Strength;
 

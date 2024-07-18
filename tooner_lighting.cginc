@@ -112,19 +112,17 @@ v2f vert(appdata v)
 #if !defined(_SCROLL) && defined(_GIMMICK_SHEAR_LOCATION)
   if (_Gimmick_Shear_Location_Enable_Dynamic) {
     float3 p = v.vertex.xyz;
+
+    float r = 0.0;
+    float3 sc = lerp(
+      _Gimmick_Shear_Location_Strength.xyz,
+      1,
+      abs(p) < r);
+
     float3x3 shear_matrix = float3x3(
-          _Gimmick_Shear_Location_Strength.x, 0, 0,
-          0, _Gimmick_Shear_Location_Strength.y, 0,
-          0, 0, _Gimmick_Shear_Location_Strength.z);
-#if 0
-    float3x3 rot_fix, rot_fixi;
-    float4x4 ts_fix, ts_fixi;
-    getMeshRendererMatrices(/*invert=*/false, rot_fix, ts_fix);
-    getMeshRendererMatrices(/*invert=*/true, rot_fixi, ts_fixi);
-    if (_Gimmick_Shear_Location_Mesh_Renderer_Fix) {
-      p = mul(ts_fixi, float4(p, 1)).xyz;
-    }
-#endif
+          sc.x, 0, 0,
+          0, sc.y, 0,
+          0, 0, sc.z);
     p = mul(shear_matrix, p);
     v.vertex.xyz = p;
   }

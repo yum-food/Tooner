@@ -103,6 +103,9 @@ Shader "yum_food/tooner"
 
 		_Cubemap("Cubemap", Cube) = "" {}
     _Lighting_Factor("Lighting factor", Range(0, 5)) = 1
+    _Direct_Lighting_Factor("Direct lighting factor", Range(0, 5)) = 1
+    _Indirect_Specular_Lighting_Factor("Indirect specular lighting factor", Range(0, 5)) = 1
+    _Indirect_Diffuse_Lighting_Factor("Indirect diffuse lighting factor", Range(0, 5)) = 1
     _Reflection_Probe_Saturation("Reflection probe saturation", Range(0, 1)) = 1
     _Min_Brightness("Min brightness", Range(0, 1)) = 0
     _Max_Brightness("Max brightness", Range(0, 1.5)) = 1
@@ -307,7 +310,6 @@ Shader "yum_food/tooner"
     Tags {
       "VRCFallback"="ToonCutout"
     }
-
     Pass {
       Tags {
         "RenderType"="Opaque"
