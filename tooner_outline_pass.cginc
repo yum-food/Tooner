@@ -71,7 +71,7 @@ v2f vert(appdata v)
 #endif
 
   v2f o;
-  o.worldPos = mul(unity_ObjectToWorld, objPos);
+  o.worldPos = mul(unity_ObjectToWorld, float4(objPos.xyz, 1));
   o.objPos = objPos;
   o.pos = UnityObjectToClipPos(objPos);
   o.normal = UnityObjectToWorldNormal(v.normal);
@@ -340,6 +340,8 @@ void geom(triangle v2f tri_in[3],
 
 fixed4 frag (v2f i) : SV_Target
 {
+  i.normal = -normalize(i.normal);
+
 #if defined(_OUTLINES)
   float iddx = ddx(i.uv.x) / 4;
   float iddy = ddx(i.uv.y) / 4;
@@ -380,9 +382,9 @@ fixed4 frag (v2f i) : SV_Target
   float ao = 1;
   float4 result = getLitColor(
       vertex_light_color,
-      albedo, i.worldPos, -i.normal,
+      albedo, i.worldPos, i.normal,
       /*metallic=*/0, /*smoothness=*/0,
-      i.uv, ao, i);
+      i.uv, ao, /*enable_direct=*/false, i);
 
   result += albedo * _Outline_Emission_Strength;
 

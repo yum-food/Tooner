@@ -1226,7 +1226,7 @@ float4 effect(inout v2f i)
 #endif
 
   float4 lit = getLitColor(vertex_light_color, albedo, i.worldPos, normal,
-      metallic, 1.0 - roughness, i.uv, ao, i);
+      metallic, 1.0 - roughness, i.uv, ao, /*enable_direct=*/true, i);
 
 #if defined(_GIMMICK_FLAT_COLOR)
   if (round(_Gimmick_Flat_Color_Enable_Dynamic)) {
