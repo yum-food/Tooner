@@ -802,6 +802,7 @@ float4 effect(inout v2f i)
   const float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
   // Not necessarily normalized after interpolation.
   i.normal = normalize(i.normal);
+  i.tangent.xyz = normalize(i.tangent.xyz);
 
 #if defined(_TROCHOID)
   {
@@ -882,7 +883,8 @@ float4 effect(inout v2f i)
   applyOverlayNormal(raw_normal, ov, i, iddx, iddy);
 
   float3 binormal = CreateBinormal(i.normal, i.tangent.xyz, i.tangent.w);
-	float3 normal = normalize(
+  // normalize is not necessary; result is already normalized
+	float3 normal = float3(
 		raw_normal.x * i.tangent +
 		raw_normal.y * binormal +
 		raw_normal.z * i.normal
