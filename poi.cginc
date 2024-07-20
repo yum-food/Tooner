@@ -4,7 +4,7 @@
 /*
 MIT License
 
-Copyright (c) 2018 King Arthur
+Copyright (c) 2023 Poiyomi Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -95,6 +95,32 @@ half3 BetterSH9(half4 normal)
   indirect = max(0, indirect);
   indirect += SHEvalLinearL2(normal);
   return indirect;
+}
+
+float calculateluminance(float3 color)
+{
+  return color.r * 0.299 + color.g * 0.587 + color.b * 0.114;
+}
+
+float3 getPoiLightingDirect(float3 normal) {
+  float3 magic = max(BetterSH9(normalize(unity_SHAr + unity_SHAg + unity_SHAb)), 0);
+  float3 normalLight = _LightColor0.rgb + BetterSH9(float4(0, 0, 0, 1));
+
+  float magiLumi = calculateluminance(magic);
+  float normaLumi = calculateluminance(normalLight);
+  float maginormalumi = magiLumi + normaLumi;
+
+  float magiratio = magiLumi / maginormalumi;
+  float normaRatio = normaLumi / maginormalumi;
+
+  float target = calculateluminance(magic * magiratio + normalLight * normaRatio);
+  float3 properLightColor = magic + normalLight;
+  float properLuminance = calculateluminance(magic + normalLight);
+  return properLightColor * max(0.0001, (target / properLuminance));
+}
+
+float3 getPoiLightingIndirect() {
+  return BetterSH9(float4(0, 0, 0, 1));
 }
 
 #endif  // __POI_INC

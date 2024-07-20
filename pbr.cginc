@@ -37,8 +37,9 @@ void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output) {
 
 UNITY_DECLARE_TEXCUBE(_Cubemap);
 
-UnityLight CreateDirectLight(float3 normal, v2f i, out float attenuation)
+float getShadowAttenuation(v2f i)
 {
+  float attenuation;
   // This whole block is yoinked from AutoLight.cginc. I needed a way to
   // control shadow strength so I had to duplicate the code.
 #if defined(DIRECTIONAL_COOKIE)
@@ -66,21 +67,20 @@ UnityLight CreateDirectLight(float3 normal, v2f i, out float attenuation)
   attenuation = 1;
 #endif
   attenuation *= lerp(1, shadow, _Shadow_Strength);
+  return attenuation;
+}
 
-  UnityLight light;
-  light.color = _LightColor0.rgb * attenuation;
+float3 getDirectLightDirection(v2f i) {
 #if defined(POINT) || defined(POINT_COOKIE) || defined(SPOT)
-  light.dir = normalize((_WorldSpaceLightPos0 - i.worldPos).xyz);
+  return normalize((_WorldSpaceLightPos0 - i.worldPos).xyz);
 #else
-  light.dir = _WorldSpaceLightPos0;
+  return _WorldSpaceLightPos0;
 #endif
+}
 
-  if (round(_Confabulate_Normals)) {
-    light.dir = normal;
-  }
-  light.ndotl = DotClamped(normal, light.dir);
-
-  return light;
+float3 getDirectLightColor()
+{
+  return _LightColor0.rgb;
 }
 
 float GetRoughness(float smoothness) {
@@ -104,24 +104,21 @@ float3 BoxProjection (
 	return direction;
 }
 
-UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, float3 normal,
+float4 getIndirectDiffuse(float4 vertexLightColor, float3 normal) {
+  float4 diffuse = vertexLightColor;
+  if (_Mesh_Normals_Mode == 3) {  // Toon
+    diffuse.xyz += max(0, BetterSH9(float4(0, 0, 0, 1)));
+  } else {
+    diffuse.xyz += max(0, BetterSH9(float4(normal, 1)));
+  }
+  return diffuse;
+}
+
+float3 getIndirectSpecular(float3 view_dir, float3 normal,
     float smoothness, float3 worldPos, float2 uv) {
-  UnityIndirect indirect;
-  indirect.diffuse = vertexLightColor;
-  indirect.specular = 0;
+  float3 specular = 0;
 
 #if defined(FORWARD_BASE_PASS)
-
-#if defined(LIGHTMAP_ON)
-  // Avatars are not static, don't use lightmap.
-  indirect.diffuse = 0;
-#else
-  if (_Mesh_Normals_Mode == 3) {  // Toon
-    indirect.diffuse += max(0, BetterSH9(float4(0, 0, 0, 1)));
-  } else {
-    indirect.diffuse += max(0, BetterSH9(float4(normal, 1)));
-  }
-#endif
   float3 reflect_dir = reflect(-view_dir, normal);
   Unity_GlossyEnvironmentData env_data;
   env_data.roughness = GetRoughness(smoothness);
@@ -133,7 +130,7 @@ UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, floa
   float3 probe0 = Unity_GlossyEnvironment(
       UNITY_PASS_TEXCUBE(unity_SpecCube0), unity_SpecCube0_HDR, env_data
       );
-  indirect.specular = probe0;
+  specular = probe0;
 #if UNITY_SPECCUBE_BLENDING
   if (unity_SpecCube0_BoxMin.w < 0.99999) {
     env_data.reflUVW = BoxProjection(
@@ -144,19 +141,17 @@ UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, floa
         UNITY_PASS_TEXCUBE_SAMPLER(unity_SpecCube1, unity_SpecCube0),
         unity_SpecCube1_HDR, env_data
         );
-    indirect.specular = lerp(probe1, probe0, unity_SpecCube0_BoxMin.w);
+    specular = lerp(probe1, probe0, unity_SpecCube0_BoxMin.w);
   }
-#else
-  indirect.specular = probe0;
 #endif  // UNITY_SPECCUBE_BLENDING
 
   // Lifted from poi toon shader (MIT).
   float horizon = min(1 + dot(reflect_dir, normal), 1);
-  indirect.specular *= horizon * horizon;
+  specular *= horizon * horizon;
 
 #if defined(_CUBEMAP)
   float roughness = GetRoughness(smoothness);
-  indirect.specular =
+  specular =
     UNITY_SAMPLE_TEXCUBE_LOD(
         _Cubemap,
         reflect_dir,
@@ -165,7 +160,7 @@ UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, floa
 
 #endif  // FORWARD_BASE_PASS
 
-  return indirect;
+  return specular;
 }
 
 float4 getLitColor(
@@ -196,11 +191,23 @@ float4 getLitColor(
   normal = lerp(normal, flat_normal, normals_mode == 0);
   normal = lerp(normal, spherical_normal, normals_mode == 1);
 
-	UnityIndirect indirect_light = CreateIndirectLight(vertexLightColor,
-			view_dir, normal, smoothness, worldPos, uv);
+	UnityIndirect indirect_light;
+  indirect_light.diffuse = getIndirectDiffuse(vertexLightColor, normal);
+  indirect_light.specular = getIndirectSpecular(view_dir, normal, smoothness,
+      worldPos, uv);
 
   float attenuation;
-  UnityLight direct_light = CreateDirectLight(normal, i, attenuation);
+  UnityLight direct_light;
+  direct_light.dir = getDirectLightDirection(i);
+  direct_light.ndotl = DotClamped(normal, direct_light.dir);
+  float shadow_attenuation = getShadowAttenuation(i);
+#define POI_LIGHTING
+#if defined(POI_LIGHTING)
+  direct_light.color = getPoiLightingDirect(normal) * shadow_attenuation;
+#else
+  direct_light.color = getDirectLightColor() * shadow_attenuation;
+#endif
+
   if (normals_mode == 0) {
     float e = 0.8;
     indirect_light.diffuse += direct_light.color * e;
@@ -227,6 +234,9 @@ float4 getLitColor(
   indirect_light.diffuse *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
 
   if (_Reflection_Probe_Saturation < 1.0) {
+    direct_light.color = RGBtoHSV(direct_light.color);
+    direct_light.color[1] *= _Reflection_Probe_Saturation;
+    direct_light.color = HSVtoRGB(direct_light.color);
     indirect_light.specular = RGBtoHSV(indirect_light.specular);
     indirect_light.specular[1] *= _Reflection_Probe_Saturation;
     indirect_light.specular = HSVtoRGB(indirect_light.specular);
@@ -260,7 +270,7 @@ float4 getLitColor(
       metallic,
       /*thickness=*/1,
       /*ssColor=*/0,
-      attenuation,
+      shadow_attenuation,
       /*lightmapUV=*/0,
       vertexLightColor,
       direct_light,

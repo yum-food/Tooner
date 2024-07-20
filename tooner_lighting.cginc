@@ -903,7 +903,7 @@ float4 effect(inout v2f i)
 #if defined(VERTEXLIGHT_ON)
   float4 vertex_light_color = float4(i.vertexLightColor, 1);
 #else
-  float4 vertex_light_color = 0;
+  float4 vertex_light_color = float4(0, 0, 0, 1);
 #endif
 
 #if defined(_GIMMICK_EYES_00)

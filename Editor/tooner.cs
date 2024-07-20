@@ -534,13 +534,6 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Flattening strength");
     }
-
-    bc = FindProperty("_Confabulate_Normals");
-    bool enabled = bc.floatValue > 1E-6;
-    EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Confabulate normals", enabled);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = enabled ? 1.0f : 0.0f;
   }
 
   void DoOKLAB() {
