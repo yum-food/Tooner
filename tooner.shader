@@ -158,6 +158,8 @@ Shader "yum_food/tooner"
     _Matcap0("Matcap", 2D) = "black" {}
     _Matcap0_Mask("Matcap mask", 2D) = "white" {}
     _Matcap0_Mask_Invert("Invert mask", Float) = 0.0
+    _Matcap0_Mask2("Matcap mask 2", 2D) = "white" {}
+    _Matcap0_Mask2_Invert("Invert mask", Float) = 0.0
     _Matcap0Mode("Matcap mode", Float) = 0
     _Matcap0Str("Matcap strength", Float) = 1
     _Matcap0Emission("Matcap emission", Float) = 0
@@ -167,6 +169,8 @@ Shader "yum_food/tooner"
     _Matcap1("Matcap", 2D) = "black" {}
     _Matcap1_Mask("Matcap mask", 2D) = "white" {}
     _Matcap1_Mask_Invert("Invert mask", Float) = 0.0
+    _Matcap1_Mask2("Matcap mask 2", 2D) = "white" {}
+    _Matcap1_Mask2_Invert("Invert mask", Float) = 0.0
     _Matcap1Mode("Matcap mode", Float) = 0
     _Matcap1Str("Matcap strength", Float) = 1
     _Matcap1Emission("Matcap emission", Float) = 0
@@ -352,6 +356,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType" = "Opaque"
@@ -420,6 +425,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

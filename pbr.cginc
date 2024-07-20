@@ -139,11 +139,10 @@ UnityIndirect CreateIndirectLight(float4 vertexLightColor, float3 view_dir, floa
     env_data.reflUVW = BoxProjection(
         reflect_dir, worldPos,
         unity_SpecCube1_ProbePosition,
-        unity_SpecCube1_BoxMin, unity_SpecCube1_BoxMax
-        );
+        unity_SpecCube1_BoxMin.xyz, unity_SpecCube1_BoxMax.xyz);
     float3 probe1 = Unity_GlossyEnvironment(
         UNITY_PASS_TEXCUBE_SAMPLER(unity_SpecCube1, unity_SpecCube0),
-        unity_SpecCube0_HDR, env_data
+        unity_SpecCube1_HDR, env_data
         );
     indirect.specular = lerp(probe1, probe0, unity_SpecCube0_BoxMin.w);
   }

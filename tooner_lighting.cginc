@@ -966,6 +966,15 @@ float4 effect(inout v2f i)
 #else
       float matcap_mask = 1;
 #endif
+#if defined(_MATCAP0_MASK2)
+      {
+        float4 matcap_mask2_raw = _Matcap0_Mask2.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
+        float matcap_mask2 = matcap_mask2_raw.r;
+        matcap_mask2 = (bool) round(_Matcap0_Mask2_Invert) ? 1 - matcap_mask2 : matcap_mask2;
+        matcap_mask2 *= matcap_mask2_raw.a;
+        matcap_mask *= matcap_mask2;
+      }
+#endif
 
       int mode = round(_Matcap0Mode);
       switch (mode) {
@@ -1018,6 +1027,15 @@ float4 effect(inout v2f i)
       matcap_mask *= matcap_mask_raw.a;
 #else
       float matcap_mask = 1;
+#endif
+#if defined(_MATCAP1_MASK2)
+      {
+        float4 matcap_mask2_raw = _Matcap1_Mask2.SampleGrad(linear_repeat_s, i.uv.xy, iddx, iddy);
+        float matcap_mask2 = matcap_mask2_raw.r;
+        matcap_mask2 = (bool) round(_Matcap1_Mask2_Invert) ? 1 - matcap_mask2 : matcap_mask2;
+        matcap_mask2 *= matcap_mask2_raw.a;
+        matcap_mask *= matcap_mask2;
+      }
 #endif
 
       int mode = round(_Matcap1Mode);

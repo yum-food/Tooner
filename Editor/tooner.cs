@@ -321,6 +321,21 @@ public class ToonerGUI : ShaderGUI {
         bc.floatValue = enabled ? 1.0f : 0.0f;
       }
 
+      bc = FindProperty($"_Matcap{i}_Mask2");
+      editor.TexturePropertySingleLine(
+          MakeLabel(bc, "Mask"),
+          bc);
+      SetKeyword($"_MATCAP{i}_MASK2", bc.textureValue);
+
+      if (bc.textureValue) {
+        bc = FindProperty($"_Matcap{i}_Mask2_Invert");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+      }
+
       EditorGUI.BeginChangeCheck();
       bc = FindProperty($"_Matcap{i}Mode");
       MatcapMode mode = (MatcapMode) Math.Round(bc.floatValue);

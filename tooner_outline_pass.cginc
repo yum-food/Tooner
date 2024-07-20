@@ -71,7 +71,7 @@ v2f vert(appdata v)
 #endif
 
   v2f o;
-  o.worldPos = mul(unity_ObjectToWorld, float4(objPos.xyz, 1));
+  o.worldPos = mul(unity_ObjectToWorld, objPos);
   o.objPos = objPos;
   o.pos = UnityObjectToClipPos(objPos);
   o.normal = UnityObjectToWorldNormal(v.normal);
