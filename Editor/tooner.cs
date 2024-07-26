@@ -1075,6 +1075,39 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickFaceMeWorldY() {
+    MaterialProperty bc;
+    bc = FindProperty("_FaceMeWorldY_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("FaceMeWorldY", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_FACE_ME_WORLD_Y", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_FaceMeWorldY_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    bc = FindProperty("_FaceMeWorldY_Enable_X");
+    editor.FloatProperty(bc, "X");
+    bc = FindProperty("_FaceMeWorldY_Enable_Y");
+    editor.FloatProperty(bc, "Y");
+    bc = FindProperty("_FaceMeWorldY_Enable_Z");
+    editor.FloatProperty(bc, "Z");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
 
   void DoGimmicks() {
     DoGimmickFlatColor();
@@ -1084,6 +1117,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickEyes00();
     DoGimmickPixellate();
     DoGimmickTrochoid();
+    DoGimmickFaceMeWorldY();
   }
 
   void DoMochieParams() {

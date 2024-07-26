@@ -291,6 +291,12 @@ Shader "yum_food/tooner"
     _Trochoid_r("r", Float) = 3.0
     _Trochoid_d("d", Float) = 5.0
 
+    _FaceMeWorldY_Enable_Static("Enable face me gimmick", Float) = 0.0
+    _FaceMeWorldY_Enable_Dynamic("Enable face me gimmick", Float) = 0.0
+    _FaceMeWorldY_Enable_X("x", Float) = 0
+    _FaceMeWorldY_Enable_Y("x", Float) = 1
+    _FaceMeWorldY_Enable_Z("x", Float) = 0
+
     _Enable_SSR("Enable SSR", Float) = 0
     _SSRStrength("SSR Strength", Float) = 1
     _SSRHeight("SSR Height", Float) = 0.1

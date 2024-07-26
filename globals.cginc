@@ -390,5 +390,13 @@ float _Trochoid_r;
 float _Trochoid_d;
 #endif
 
+#if defined(_FACE_ME_WORLD_Y)
+float _FaceMeWorldY_Enable_Static;
+float _FaceMeWorldY_Enable_Dynamic;
+float _FaceMeWorldY_Enable_X;
+float _FaceMeWorldY_Enable_Y;
+float _FaceMeWorldY_Enable_Z;
+#endif
+
 #endif
 

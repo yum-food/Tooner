@@ -100,12 +100,45 @@ v2f vert(appdata v)
 #define TAU PI * 2.0
     float theta = v.uv0.x * TAU;
     float r0 = length(v.vertex.xyz);
+    v.vertex.xyz = trochoid_map(theta, r0, v.vertex.z);
+  }
+#endif
+#if defined(_FACE_ME_WORLD_Y)
+  if (_FaceMeWorldY_Enable_Dynamic) {
+    // Undo object coordinate system rotation.
+    float3x3 rotation = float3x3(
+        normalize(unity_ObjectToWorld._m00_m10_m20),
+        normalize(unity_ObjectToWorld._m01_m11_m21),
+        normalize(unity_ObjectToWorld._m02_m12_m22));
+    rotation = transpose(rotation);
+    float3 unrotated = mul(transpose(rotation),
+        v.vertex.xyz);
+    float4 pos = mul(unity_ObjectToWorld,
+        float4(unrotated, v.vertex.w));
+    float3 unrotated_n = mul(transpose(rotation),
+        v.normal);
+    float3 n = UnityObjectToWorldNormal(unrotated_n);
 
-    float x = v.vertex.x;
-    float y = v.vertex.y;
-    float z = v.vertex.z;
+    float3 origin = mul(unity_ObjectToWorld, float4(0, 0, 0, 1)).xyz;
+    float3 view_dir = _WorldSpaceCameraPos - origin;
+    // Project onto xz plane
+    n.y = 0;
+    view_dir.y = 0;
+    // Normalize
+    n = normalize(n);
+    view_dir = normalize(view_dir);
+    // Calculate angles and rotate
+    float ct = dot(view_dir, n);
+    float3 n_cross_v = cross(view_dir, n);
+    float st = length(n_cross_v);
+    st *= sign(n_cross_v.y);
+    float2x2 rot = float2x2(
+        ct, -st,
+        st, ct);
+    pos.xz = mul(rot, pos.xz - origin.xz) + origin.xz;
 
-    v.vertex.xyz = trochoid_map(theta, r0, z);
+    v.vertex = mul(unity_WorldToObject, pos);
+    o.normal = view_dir;
   }
 #endif
 
@@ -140,7 +173,13 @@ v2f vert(appdata v)
   o.screenPos = ComputeGrabScreenPos(o.pos);
 #endif
 
+#if defined(_FACE_ME_WORLD_Y)
+  if (!_FaceMeWorldY_Enable_Dynamic) {
+    o.normal = UnityObjectToWorldNormal(v.normal);
+  }
+#else
   o.normal = UnityObjectToWorldNormal(v.normal);
+#endif
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv = v.uv0;
 #if defined(LIGHTMAP_ON)
