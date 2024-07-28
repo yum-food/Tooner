@@ -11,6 +11,8 @@ struct appdata
   float3 normal : NORMAL;
   float2 uv0 : TEXCOORD0;
   float2 uv1 : TEXCOORD1;
+
+  UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct v2f
@@ -26,6 +28,8 @@ struct v2f
   #if defined(SSR_ENABLED)
   float4 screenPos                  : TEXCOORD5;
   #endif
+
+  UNITY_VERTEX_OUTPUT_STEREO
 };
 
 #else
@@ -37,6 +41,8 @@ struct appdata
   float2 uv1 : TEXCOORD1;
   float3 normal : NORMAL;
   float4 tangent : TANGENT;
+
+  UNITY_VERTEX_INPUT_INSTANCE_ID
 };
 
 struct v2f
@@ -58,6 +64,8 @@ struct v2f
   #if defined(SSR_ENABLED)
   float4 screenPos                  : TEXCOORD8;
   #endif
+
+  UNITY_VERTEX_OUTPUT_STEREO
 };
 #endif
 

@@ -192,6 +192,7 @@ float4 getLitColor(
   normal = lerp(normal, spherical_normal, normals_mode == 1);
 
 	UnityIndirect indirect_light;
+  vertexLightColor *= _Vertex_Lighting_Factor;
   indirect_light.diffuse = getIndirectDiffuse(vertexLightColor, normal);
   indirect_light.specular = getIndirectSpecular(view_dir, normal, smoothness,
       worldPos, uv);
@@ -229,10 +230,6 @@ float4 getLitColor(
   }
 #endif
 
-  direct_light.color *= _Lighting_Factor * _Direct_Lighting_Factor * enable_direct;
-  indirect_light.specular *= _Lighting_Factor * _Indirect_Specular_Lighting_Factor;
-  indirect_light.diffuse *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
-
   if (_Reflection_Probe_Saturation < 1.0) {
     direct_light.color = RGBtoHSV(direct_light.color);
     direct_light.color[1] *= _Reflection_Probe_Saturation;
@@ -248,6 +245,11 @@ float4 getLitColor(
   direct_light.color = clamp(direct_light.color, _Min_Brightness, _Max_Brightness);
   indirect_light.diffuse = clamp(indirect_light.diffuse, _Min_Brightness, _Max_Brightness);
   indirect_light.specular = clamp(indirect_light.specular, _Min_Brightness, _Max_Brightness);
+
+  // TODO move back before clamping
+  direct_light.color *= _Lighting_Factor * _Direct_Lighting_Factor * enable_direct;
+  indirect_light.specular *= _Lighting_Factor * _Indirect_Specular_Lighting_Factor;
+  indirect_light.diffuse *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
 
   // Apply AO
   indirect_light.diffuse *= ao;
@@ -303,7 +305,7 @@ float4 getLitColor(
           cc_LoH,
           cc_H);
       pbr.rgb += clearcoat * saturate(dot(i.normal, cc_L)) *
-        cc_mask * direct_color * 10;
+        cc_mask * direct_color * _Direct_Lighting_Factor;
     }
     // Indirect specular lighting
 #if 1
@@ -319,7 +321,7 @@ float4 getLitColor(
           in_LoH,
           in_H);
       pbr.rgb += clearcoat * saturate(dot(i.normal, in_L)) *
-        cc_mask * indirect_light.specular * 1;
+        cc_mask * indirect_light.specular * _Indirect_Specular_Lighting_Factor;
     }
 #endif
 #if defined(VERTEXLIGHT_ON)
@@ -341,7 +343,7 @@ float4 getLitColor(
           vlh,
           vhalf);
       pbr.rgb += clearcoat * saturate(dot(i.normal, vl)) *
-        cc_mask * c * 10;
+        cc_mask * c * _Vertex_Lighting_Factor;
     }
 #endif
 #endif

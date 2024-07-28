@@ -104,6 +104,7 @@ Shader "yum_food/tooner"
 		_Cubemap("Cubemap", Cube) = "" {}
     _Lighting_Factor("Lighting factor", Range(0, 5)) = 1
     _Direct_Lighting_Factor("Direct lighting factor", Range(0, 5)) = 1
+    _Vertex_Lighting_Factor("Vertex lighting factor", Range(0, 5)) = 1
     _Indirect_Specular_Lighting_Factor("Indirect specular lighting factor", Range(0, 5)) = 1
     _Indirect_Diffuse_Lighting_Factor("Indirect diffuse lighting factor", Range(0, 5)) = 1
     _Reflection_Probe_Saturation("Reflection probe saturation", Range(0, 1)) = 1
@@ -345,7 +346,9 @@ Shader "yum_food/tooner"
       CGPROGRAM
       #pragma target 5.0
 
-      #pragma multi_compile _ VERTEXLIGHT_ON SHADOWS_SCREEN
+			#pragma multi_compile_fwdbase
+			#pragma multi_compile_instancing
+      #pragma multi_compile _ VERTEXLIGHT_ON
 
       #include "feature_macros.cginc"
 
@@ -376,7 +379,7 @@ Shader "yum_food/tooner"
       #pragma target 5.0
 
       #pragma multi_compile_fwdadd_fullshadows
-      #pragma multi_compile DIRECTIONAL DIRECTIONAL_COOKIE POINT SPOT
+			#pragma multi_compile_instancing
       #include "feature_macros.cginc"
 
 			#pragma vertex vert
@@ -403,6 +406,7 @@ Shader "yum_food/tooner"
 
 			CGPROGRAM
       #pragma target 5.0
+			#pragma multi_compile_instancing
       #include "feature_macros.cginc"
 
 			#pragma vertex vert
@@ -422,6 +426,7 @@ Shader "yum_food/tooner"
       }
 			CGPROGRAM
       #pragma target 5.0
+			#pragma multi_compile_instancing
       #include "feature_macros.cginc"
 
       #pragma vertex vert

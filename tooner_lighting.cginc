@@ -219,10 +219,10 @@ tess_data hull_vertex(appdata v)
 {
   tess_data o;
 
-  UNITY_INITIALIZE_OUTPUT(tess_data, o);
   UNITY_SETUP_INSTANCE_ID(v);
-  UNITY_TRANSFER_INSTANCE_ID(v, o);
+  UNITY_INITIALIZE_OUTPUT(tess_data, o);
   UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+  UNITY_TRANSFER_INSTANCE_ID(v, o);
 
   o.pos = v.vertex;
   //o.vertex = UnityObjectToClipPos(v.vertex);
@@ -1340,6 +1340,7 @@ float4 effect(inout v2f i)
 
 fixed4 frag(v2f i) : SV_Target
 {
+  UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
   return effect(i);
 }
 

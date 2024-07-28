@@ -14,6 +14,7 @@ float _NormalStr;
 
 float _Lighting_Factor;
 float _Direct_Lighting_Factor;
+float _Vertex_Lighting_Factor;
 float _Indirect_Specular_Lighting_Factor;
 float _Indirect_Diffuse_Lighting_Factor;
 float _Reflection_Probe_Saturation;

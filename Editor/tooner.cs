@@ -1300,6 +1300,11 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Direct multiplier");
 
+      bc = FindProperty("_Vertex_Lighting_Factor");
+      editor.RangeProperty(
+          bc,
+          "Vertex light multiplier");
+
       bc = FindProperty("_Indirect_Specular_Lighting_Factor");
       editor.RangeProperty(
           bc,
