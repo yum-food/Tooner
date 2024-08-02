@@ -48,7 +48,14 @@ float3 _ReflShadowStrength;
 float _Clearcoat_Enabled;
 float _Clearcoat_Strength;
 float _Clearcoat_Roughness;
+#if defined(_CLEARCOAT_MASK)
 texture2D _Clearcoat_Mask;
+float _Clearcoat_Mask_Invert;
+#endif
+#if defined(_CLEARCOAT_MASK2)
+texture2D _Clearcoat_Mask2;
+float _Clearcoat_Mask2_Invert;
+#endif
 #endif
 
 #if defined(SSR_ENABLED)

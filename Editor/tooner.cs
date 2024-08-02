@@ -115,6 +115,33 @@ public class ToonerGUI : ShaderGUI {
         editor.RangeProperty(bc, "Roughness");
         bc = FindProperty("_Clearcoat_Mask");
         editor.TexturePropertySingleLine(MakeLabel(bc, "Mask"), bc);
+        SetKeyword($"_CLEARCOAT_MASK", bc.textureValue);
+
+        if (bc.textureValue) {
+          EditorGUI.indentLevel += 1;
+          bc = FindProperty("_Clearcoat_Mask_Invert");
+          enabled = bc.floatValue > 1E-6;
+          EditorGUI.BeginChangeCheck();
+          enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+          EditorGUI.EndChangeCheck();
+          bc.floatValue = enabled ? 1.0f : 0.0f;
+          EditorGUI.indentLevel -= 1;
+        }
+
+        bc = FindProperty("_Clearcoat_Mask2");
+        editor.TexturePropertySingleLine(MakeLabel(bc, "Mask 2"), bc);
+        SetKeyword($"_CLEARCOAT_MASK2", bc.textureValue);
+
+        if (bc.textureValue) {
+          EditorGUI.indentLevel += 1;
+          bc = FindProperty("_Clearcoat_Mask2_Invert");
+          enabled = bc.floatValue > 1E-6;
+          EditorGUI.BeginChangeCheck();
+          enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+          EditorGUI.EndChangeCheck();
+          bc.floatValue = enabled ? 1.0f : 0.0f;
+          EditorGUI.indentLevel -= 1;
+        }
     }
   }
 

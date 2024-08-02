@@ -10,6 +10,9 @@ Shader "yum_food/tooner"
     _Clearcoat_Strength("Clearcoat strength", Range(0, 1)) = 0
     _Clearcoat_Roughness("Clearcoat strength", Range(0, 1)) = 0
     _Clearcoat_Mask("Clearcoat mask", 2D) = "white" {}
+    _Clearcoat_Mask_Invert("Clearcoat mask invert", Float) = 0
+    _Clearcoat_Mask2("Clearcoat mask 2", 2D) = "white" {}
+    _Clearcoat_Mask2_Invert("Clearcoat mask 2 invert", Float) = 0
 
     [NoScaleOffset] _MainTex("Base color", 2D) = "white" {}
     [NoScaleOffset] _NormalTex("Normal", 2D) = "bump" {}

@@ -96,6 +96,8 @@
 #pragma shader_feature_local _ _TROCHOID
 #pragma shader_feature_local _ _FACE_ME_WORLD_Y
 #pragma shader_feature_local _ _CLEARCOAT
+#pragma shader_feature_local _ _CLEARCOAT_MASK
+#pragma shader_feature_local _ _CLEARCOAT_MASK2
 
 #endif  // __FEATURE_MACROS_INC
 
