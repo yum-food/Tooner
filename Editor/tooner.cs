@@ -166,6 +166,23 @@ public class ToonerGUI : ShaderGUI {
         SetKeyword($"_PBR_OVERLAY{i}_MIX_MIN", mode == PbrAlbedoMixMode.Min);
         SetKeyword($"_PBR_OVERLAY{i}_MIX_MAX", mode == PbrAlbedoMixMode.Max);
 
+        bc = FindProperty($"_PBR_Overlay{i}_Constrain_By_Alpha");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Constrain to transparent sections", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+        if (enabled) {
+          EditorGUI.indentLevel += 1;
+          bc = FindProperty($"_PBR_Overlay{i}_Constrain_By_Alpha_Min");
+          editor.RangeProperty(bc, "Min");
+          bc = FindProperty($"_PBR_Overlay{i}_Constrain_By_Alpha_Max");
+          editor.RangeProperty(bc, "Max");
+          EditorGUI.indentLevel -= 1;
+        }
+        bc = FindProperty($"_PBR_Overlay{i}_Alpha_Multiplier");
+        editor.RangeProperty(bc, "Alpha multiplier");
+
         bc = FindProperty($"_PBR_Overlay{i}_Emission");
         bct = FindProperty($"_PBR_Overlay{i}_EmissionTex");
         editor.TexturePropertySingleLine(
@@ -223,6 +240,17 @@ public class ToonerGUI : ShaderGUI {
           EditorGUI.EndChangeCheck();
           bc.floatValue = enabled ? 1.0f : 0.0f;
         }
+      } else {
+        SetKeyword($"_PBR_OVERLAY{i}_BASECOLOR_MAP", false);
+        SetKeyword($"_PBR_OVERLAY{i}_MIX_ALPHA_BLEND", false);
+        SetKeyword($"_PBR_OVERLAY{i}_MIX_ADD", false);
+        SetKeyword($"_PBR_OVERLAY{i}_MIX_MIN", false);
+        SetKeyword($"_PBR_OVERLAY{i}_MIX_MAX", false);
+        SetKeyword($"_PBR_OVERLAY{i}_EMISSION_MAP", false);
+        SetKeyword($"_PBR_OVERLAY{i}_NORMAL_MAP", false);
+        SetKeyword($"_PBR_OVERLAY{i}_METALLIC_MAP", false);
+        SetKeyword($"_PBR_OVERLAY{i}_ROUGHNESS_MAP", false);
+        SetKeyword($"_PBR_OVERLAY{i}_MASK", false);
       }
       EditorGUI.indentLevel -= 1;
     }
@@ -1217,7 +1245,7 @@ public class ToonerGUI : ShaderGUI {
         case RenderingMode.TransClipping:
           queue = RenderQueue.AlphaTest;
           render_type = "Transparent";
-          src_blend = BlendMode.One;
+          src_blend = BlendMode.SrcAlpha;
           dst_blend = BlendMode.OneMinusSrcAlpha;
           zwrite = true;
           break;

@@ -614,7 +614,7 @@ void getOverlayAlbedo(inout PbrOverlay ov,
 }
 
 void applyDecalAlbedoImpl(
-    inout float3 albedo,
+    inout float4 albedo,
     inout float decal_emission,
     v2f i,
     texture2D tex,
@@ -645,10 +645,11 @@ void applyDecalAlbedoImpl(
   d0_c *= d0_in_range;
 
   albedo.rgb = lerp(albedo.rgb, d0_c.rgb, d0_c.a);
+  albedo.a = max(albedo.a, d0_c.a);
   decal_emission += d0_c.rgb * emission_strength;
 }
 
-void applyDecalAlbedo(inout float3 albedo,
+void applyDecalAlbedo(inout float4 albedo,
     inout float decal_emission,
     v2f i)
 {
@@ -682,10 +683,45 @@ void applyDecalAlbedo(inout float3 albedo,
 #endif  // _DECAL3
 }
 
-void mixOverlayAlbedo(inout float3 albedo, PbrOverlay ov) {
+void mixOverlayAlbedo(inout float4 albedo, PbrOverlay ov) {
+  // Calculate alpha masks before we start mutating alpha.
+#if defined(_PBR_OVERLAY0)
+  float a0 = saturate(ov.ov0_albedo.a * _PBR_Overlay0_Alpha_Multiplier);
+  if (_PBR_Overlay0_Constrain_By_Alpha) {
+    bool in_range = (albedo.a > _PBR_Overlay0_Constrain_By_Alpha_Min) *
+      (albedo.a < _PBR_Overlay0_Constrain_By_Alpha_Max);
+    a0 *= in_range;
+  }
+#endif
+#if defined(_PBR_OVERLAY1)
+  float a1 = saturate(ov.ov1_albedo.a * _PBR_Overlay1_Alpha_Multiplier);
+  if (_PBR_Overlay1_Constrain_By_Alpha) {
+    bool in_range = (albedo.a > _PBR_Overlay1_Constrain_By_Alpha_Min) *
+      (albedo.a < _PBR_Overlay1_Constrain_By_Alpha_Max);
+    a1 *= in_range;
+  }
+#endif
+#if defined(_PBR_OVERLAY2)
+  float a2 = saturate(ov.ov2_albedo.a * _PBR_Overlay2_Alpha_Multiplier);
+  if (_PBR_Overlay2_Constrain_By_Alpha) {
+    bool in_range = (albedo.a > _PBR_Overlay2_Constrain_By_Alpha_Min) *
+      (albedo.a < _PBR_Overlay2_Constrain_By_Alpha_Max);
+    a2 *= in_range;
+  }
+#endif
+#if defined(_PBR_OVERLAY3)
+  float a3 = saturate(ov.ov3_albedo.a * _PBR_Overlay3_Alpha_Multiplier);
+  if (_PBR_Overlay3_Constrain_By_Alpha) {
+    bool in_range = (albedo.a > _PBR_Overlay3_Constrain_By_Alpha_Min) *
+      (albedo.a < _PBR_Overlay3_Constrain_By_Alpha_Max);
+    a3 *= in_range;
+  }
+#endif
+
 #if defined(_PBR_OVERLAY0)
 #if defined(_PBR_OVERLAY0_MIX_ALPHA_BLEND)
-  albedo.rgb = lerp(albedo.rgb, ov.ov0_albedo.rgb, ov.ov0_albedo.a);
+  albedo.rgb = lerp(albedo.rgb, ov.ov0_albedo.rgb, a0);
+  albedo.a = max(albedo.a, a0);
 #elif defined(_PBR_OVERLAY0_MIX_ADD)
   albedo.rgb += ov.ov0_albedo;
 #elif defined(_PBR_OVERLAY0_MIX_MIN)
@@ -697,7 +733,8 @@ void mixOverlayAlbedo(inout float3 albedo, PbrOverlay ov) {
 
 #if defined(_PBR_OVERLAY1)
 #if defined(_PBR_OVERLAY1_MIX_ALPHA_BLEND)
-  albedo.rgb = lerp(albedo.rgb, ov.ov1_albedo.rgb, ov.ov1_albedo.a);
+  albedo.rgb = lerp(albedo.rgb, ov.ov1_albedo.rgb, a1);
+  albedo.a = max(albedo.a, a1);
 #elif defined(_PBR_OVERLAY1_MIX_ADD)
   albedo.rgb += ov.ov1_albedo;
 #elif defined(_PBR_OVERLAY1_MIX_MIN)
@@ -710,6 +747,7 @@ void mixOverlayAlbedo(inout float3 albedo, PbrOverlay ov) {
 #if defined(_PBR_OVERLAY2)
 #if defined(_PBR_OVERLAY2_MIX_ALPHA_BLEND)
   albedo.rgb = lerp(albedo.rgb, ov.ov2_albedo.rgb, ov.ov2_albedo.a);
+  albedo.a = max(albedo.a, a2);
 #elif defined(_PBR_OVERLAY2_MIX_ADD)
   albedo.rgb += ov.ov2_albedo;
 #elif defined(_PBR_OVERLAY2_MIX_MIN)
@@ -721,7 +759,8 @@ void mixOverlayAlbedo(inout float3 albedo, PbrOverlay ov) {
 
 #if defined(_PBR_OVERLAY3)
 #if defined(_PBR_OVERLAY3_MIX_ALPHA_BLEND)
-  albedo.rgb = lerp(albedo.rgb, ov.ov3_albedo.rgb, ov.ov3_albedo.a);
+  albedo.rgb = lerp(albedo.rgb, ov.ov3_albedo.rgb, a3);
+  albedo.a = max(albedo.a, a3);
 #elif defined(_PBR_OVERLAY3_MIX_ADD)
   albedo.rgb += ov.ov3_albedo;
 #elif defined(_PBR_OVERLAY3_MIX_MIN)
@@ -732,10 +771,16 @@ void mixOverlayAlbedo(inout float3 albedo, PbrOverlay ov) {
 #endif
 }
 
-void applyOverlayNormal(inout float3 raw_normal, PbrOverlay ov, v2f i, float iddx, float iddy)
+void applyOverlayNormal(inout float3 raw_normal, float4 albedo, PbrOverlay ov, v2f i, float iddx, float iddy)
 {
   float3 raw_normal_2;
 #if defined(_PBR_OVERLAY0) && defined(_PBR_OVERLAY0_NORMAL_MAP)
+  float a0 = 1;
+  if (_PBR_Overlay0_Constrain_By_Alpha) {
+    bool in_range = (albedo.a > _PBR_Overlay0_Constrain_By_Alpha_Min) *
+      (albedo.a < _PBR_Overlay0_Constrain_By_Alpha_Max);
+    a0 *= in_range;
+  }
   // Use UVs to smoothly blend between fully detailed normals when close up and
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
@@ -743,40 +788,58 @@ void applyOverlayNormal(inout float3 raw_normal, PbrOverlay ov, v2f i, float idd
         UV_SCOFF(i.uv, _PBR_Overlay0_NormalTex_ST),
         iddx * _PBR_Overlay0_NormalTex_ST.x,
         iddy * _PBR_Overlay0_NormalTex_ST.y),
-      _PBR_Overlay0_Tex_NormalStr * ov.ov0_mask);
+      _PBR_Overlay0_Tex_NormalStr * ov.ov0_mask * a0);
 
   raw_normal = BlendNormals(
       raw_normal,
       raw_normal_2);
 #endif  // _PBR_OVERLAY0 && _PBR_OVERLAY0_NORMAL_MAP
 #if defined(_PBR_OVERLAY1) && defined(_PBR_OVERLAY1_NORMAL_MAP)
+  float a1 = 1;
+  if (_PBR_Overlay1_Constrain_By_Alpha) {
+    bool in_range = (albedo.a > _PBR_Overlay1_Constrain_By_Alpha_Min) *
+      (albedo.a < _PBR_Overlay1_Constrain_By_Alpha_Max);
+    a1 *= in_range;
+  }
   raw_normal_2 = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleGrad(linear_repeat_s,
         UV_SCOFF(i.uv, _PBR_Overlay1_NormalTex_ST),
         iddx * _PBR_Overlay1_NormalTex_ST.x,
         iddy * _PBR_Overlay1_NormalTex_ST.y),
-      _PBR_Overlay1_Tex_NormalStr * ov.ov0_mask);
+      _PBR_Overlay1_Tex_NormalStr * ov.ov1_mask * a1);
 
   raw_normal = BlendNormals(
       raw_normal,
       raw_normal_2);
 #endif  // _PBR_OVERLAY1 && _PBR_OVERLAY1_NORMAL_MAP
 #if defined(_PBR_OVERLAY2) && defined(_PBR_OVERLAY2_NORMAL_MAP)
+  float a2 = 1;
+  if (_PBR_Overlay2_Constrain_By_Alpha) {
+    bool in_range = (albedo.a > _PBR_Overlay2_Constrain_By_Alpha_Min) *
+      (albedo.a < _PBR_Overlay2_Constrain_By_Alpha_Max);
+    a2 *= in_range;
+  }
   raw_normal_2 = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleGrad(linear_repeat_s,
         UV_SCOFF(i.uv, _PBR_Overlay2_NormalTex_ST),
         iddx * _PBR_Overlay2_NormalTex_ST.x,
         iddy * _PBR_Overlay2_NormalTex_ST.y),
-      _PBR_Overlay2_Tex_NormalStr * ov.ov0_mask);
+      _PBR_Overlay2_Tex_NormalStr * ov.ov2_mask * a2);
 
   raw_normal = BlendNormals(
       raw_normal,
       raw_normal_2);
 #endif  // _PBR_OVERLAY2 && _PBR_OVERLAY2_NORMAL_MAP
 #if defined(_PBR_OVERLAY3) && defined(_PBR_OVERLAY3_NORMAL_MAP)
+  float a3 = 1;
+  if (_PBR_Overlay3_Constrain_By_Alpha) {
+    bool in_range = (albedo.a > _PBR_Overlay3_Constrain_By_Alpha_Min) *
+      (albedo.a < _PBR_Overlay3_Constrain_By_Alpha_Max);
+    a3 *= in_range;
+  }
   raw_normal_2 = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleGrad(linear_repeat_s,
         UV_SCOFF(i.uv, _PBR_Overlay3_NormalTex_ST),
         iddx * _PBR_Overlay3_NormalTex_ST.x,
         iddy * _PBR_Overlay3_NormalTex_ST.y),
-      _PBR_Overlay3_Tex_NormalStr * ov.ov0_mask);
+      _PBR_Overlay3_Tex_NormalStr * ov.ov3_mask * a3);
 
   raw_normal = BlendNormals(
       raw_normal,
@@ -910,7 +973,9 @@ float4 effect(inout v2f i)
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
   float fw = clamp(fwidth(i.uv), .001, 1) * 1200;
-  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _NormalTex_ST), iddx, iddy), _Tex_NormalStr);
+  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _NormalTex_ST),
+        iddx * _NormalTex_ST.x,
+        iddy * _NormalTex_ST.y), _Tex_NormalStr);
 
   raw_normal = BlendNormals(
       (1/fw) * raw_normal,
@@ -919,7 +984,7 @@ float4 effect(inout v2f i)
   float3 raw_normal = UnpackNormal(float4(0.5, 0.5, 1, 1));
 #endif  // _NORMAL_MAP
 
-  applyOverlayNormal(raw_normal, ov, i, iddx, iddy);
+  applyOverlayNormal(raw_normal, albedo, ov, i, iddx, iddy);
 
   float3 binormal = CreateBinormal(i.normal, i.tangent.xyz, i.tangent.w);
   // normalize is not necessary; result is already normalized
@@ -958,10 +1023,10 @@ float4 effect(inout v2f i)
   }
 #endif
 
-  mixOverlayAlbedo(albedo.rgb, ov);
+  mixOverlayAlbedo(albedo, ov);
 #if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
   float decal_emission = 0;
-  applyDecalAlbedo(albedo.rgb, decal_emission, i);
+  applyDecalAlbedo(albedo, decal_emission, i);
 #endif
 
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)

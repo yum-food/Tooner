@@ -92,6 +92,10 @@ float4 _PBR_Overlay0_RoughnessTex_ST;
 float _PBR_Overlay0_Tex_NormalStr;
 texture2D _PBR_Overlay0_Mask;
 float _PBR_Overlay0_Mask_Invert;
+float _PBR_Overlay0_Constrain_By_Alpha;
+float _PBR_Overlay0_Constrain_By_Alpha_Min;
+float _PBR_Overlay0_Constrain_By_Alpha_Max;
+float _PBR_Overlay0_Alpha_Multiplier;
 #endif
 
 #if defined(_PBR_OVERLAY1)
@@ -112,6 +116,10 @@ float4 _PBR_Overlay1_RoughnessTex_ST;
 float _PBR_Overlay1_Tex_NormalStr;
 texture2D _PBR_Overlay1_Mask;
 float _PBR_Overlay1_Mask_Invert;
+float _PBR_Overlay1_Constrain_By_Alpha;
+float _PBR_Overlay1_Constrain_By_Alpha_Min;
+float _PBR_Overlay1_Constrain_By_Alpha_Max;
+float _PBR_Overlay1_Alpha_Multiplier;
 #endif
 
 #if defined(_PBR_OVERLAY2)
@@ -132,6 +140,10 @@ float4 _PBR_Overlay2_RoughnessTex_ST;
 float _PBR_Overlay2_Tex_NormalStr;
 texture2D _PBR_Overlay2_Mask;
 float _PBR_Overlay2_Mask_Invert;
+float _PBR_Overlay2_Constrain_By_Alpha;
+float _PBR_Overlay2_Constrain_By_Alpha_Min;
+float _PBR_Overlay2_Constrain_By_Alpha_Max;
+float _PBR_Overlay2_Alpha_Multiplier;
 #endif
 
 #if defined(_PBR_OVERLAY3)
@@ -152,6 +164,10 @@ float4 _PBR_Overlay3_RoughnessTex_ST;
 float _PBR_Overlay3_Tex_NormalStr;
 texture2D _PBR_Overlay3_Mask;
 float _PBR_Overlay3_Mask_Invert;
+float _PBR_Overlay3_Constrain_By_Alpha;
+float _PBR_Overlay3_Constrain_By_Alpha_Min;
+float _PBR_Overlay3_Constrain_By_Alpha_Max;
+float _PBR_Overlay3_Alpha_Multiplier;
 #endif
 
 #if defined(_DECAL0)
