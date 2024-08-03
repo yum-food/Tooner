@@ -242,16 +242,28 @@ public class ToonerGUI : ShaderGUI {
         }
         SetKeyword($"_PBR_OVERLAY{i}_METALLIC_MAP", bct.textureValue);
 
-        bc = FindProperty($"_PBR_Overlay{i}_Roughness");
-        bct = FindProperty($"_PBR_Overlay{i}_RoughnessTex");
-        editor.TexturePropertySingleLine(
-            MakeLabel(bct, "Roughness (RGBA)"),
-            bct,
-            bc);
-        if (bct.textureValue) {
-          editor.TextureScaleOffsetProperty(bct);
+        bc = FindProperty($"_PBR_Overlay{i}_Roughness_Enable");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Enable roughness", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+        SetKeyword($"_PBR_OVERLAY{i}_ROUGHNESS", enabled);
+
+        if (enabled) {
+          EditorGUI.indentLevel += 1;
+          bc = FindProperty($"_PBR_Overlay{i}_Roughness");
+          bct = FindProperty($"_PBR_Overlay{i}_RoughnessTex");
+          editor.TexturePropertySingleLine(
+              MakeLabel(bct, "Roughness (RGBA)"),
+              bct,
+              bc);
+          if (bct.textureValue) {
+            editor.TextureScaleOffsetProperty(bct);
+          }
+          SetKeyword($"_PBR_OVERLAY{i}_ROUGHNESS_MAP", bct.textureValue);
+          EditorGUI.indentLevel -= 1;
         }
-        SetKeyword($"_PBR_OVERLAY{i}_ROUGHNESS_MAP", bct.textureValue);
 
         bct = FindProperty($"_PBR_Overlay{i}_Mask");
         editor.TexturePropertySingleLine(

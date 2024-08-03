@@ -22,6 +22,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay0_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay0_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
     _PBR_Overlay0_Metallic("Metallic", Range(0, 1)) = 0
+    _PBR_Overlay0_Roughness_Enable("Roughness enable", Float) = 0
     _PBR_Overlay0_Roughness("Roughness", Range(0, 1)) = 1
     _PBR_Overlay0_BaseColorTex("Base color", 2D) = "white" {}
     _PBR_Overlay0_Emission("Emission", Color) = (1, 1, 1, 1)
@@ -41,6 +42,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay1_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay1_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
     _PBR_Overlay1_Metallic("Metallic", Range(0, 1)) = 0
+    _PBR_Overlay1_Roughness_Enable("Roughness enable", Float) = 0
     _PBR_Overlay1_Roughness("Roughness", Range(0, 1)) = 1
     _PBR_Overlay1_BaseColorTex("Base color", 2D) = "white" {}
     _PBR_Overlay1_Emission("Emission", Color) = (1, 1, 1, 1)
@@ -60,6 +62,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay2_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay2_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
     _PBR_Overlay2_Metallic("Metallic", Range(0, 1)) = 0
+    _PBR_Overlay2_Roughness_Enable("Roughness enable", Float) = 0
     _PBR_Overlay2_Roughness("Roughness", Range(0, 1)) = 1
     _PBR_Overlay2_BaseColorTex("Base color", 2D) = "white" {}
     _PBR_Overlay2_Emission("Emission", Color) = (1, 1, 1, 1)
@@ -79,6 +82,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay3_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay3_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
     _PBR_Overlay3_Metallic("Metallic", Range(0, 1)) = 0
+    _PBR_Overlay3_Roughness_Enable("Roughness enable", Float) = 0
     _PBR_Overlay3_Roughness("Roughness", Range(0, 1)) = 1
     _PBR_Overlay3_BaseColorTex("Base color", 2D) = "white" {}
     _PBR_Overlay3_Emission("Emission", Color) = (1, 1, 1, 1)

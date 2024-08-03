@@ -84,7 +84,11 @@ float4 _RoughnessTex_ST;
 #if defined(_PBR_OVERLAY0)
 float4 _PBR_Overlay0_BaseColor;
 float _PBR_Overlay0_Metallic;
+#if defined(_PBR_OVERLAY0_ROUGHNESS)
 float _PBR_Overlay0_Roughness;
+texture2D _PBR_Overlay0_RoughnessTex;
+float4 _PBR_Overlay0_RoughnessTex_ST;
+#endif
 texture2D _PBR_Overlay0_BaseColorTex;
 float4 _PBR_Overlay0_BaseColorTex_ST;
 float4 _PBR_Overlay0_Emission;
@@ -94,8 +98,6 @@ texture2D _PBR_Overlay0_NormalTex;
 float4 _PBR_Overlay0_NormalTex_ST;
 texture2D _PBR_Overlay0_MetallicTex;
 float4 _PBR_Overlay0_MetallicTex_ST;
-texture2D _PBR_Overlay0_RoughnessTex;
-float4 _PBR_Overlay0_RoughnessTex_ST;
 float _PBR_Overlay0_Tex_NormalStr;
 texture2D _PBR_Overlay0_Mask;
 float _PBR_Overlay0_Mask_Invert;
@@ -108,7 +110,11 @@ float _PBR_Overlay0_Alpha_Multiplier;
 #if defined(_PBR_OVERLAY1)
 float4 _PBR_Overlay1_BaseColor;
 float _PBR_Overlay1_Metallic;
+#if defined(_PBR_OVERLAY1_ROUGHNESS)
 float _PBR_Overlay1_Roughness;
+texture2D _PBR_Overlay1_RoughnessTex;
+float4 _PBR_Overlay1_RoughnessTex_ST;
+#endif
 texture2D _PBR_Overlay1_BaseColorTex;
 float4 _PBR_Overlay1_BaseColorTex_ST;
 float4 _PBR_Overlay1_Emission;
@@ -118,8 +124,6 @@ texture2D _PBR_Overlay1_NormalTex;
 float4 _PBR_Overlay1_NormalTex_ST;
 texture2D _PBR_Overlay1_MetallicTex;
 float4 _PBR_Overlay1_MetallicTex_ST;
-texture2D _PBR_Overlay1_RoughnessTex;
-float4 _PBR_Overlay1_RoughnessTex_ST;
 float _PBR_Overlay1_Tex_NormalStr;
 texture2D _PBR_Overlay1_Mask;
 float _PBR_Overlay1_Mask_Invert;
@@ -132,7 +136,11 @@ float _PBR_Overlay1_Alpha_Multiplier;
 #if defined(_PBR_OVERLAY2)
 float4 _PBR_Overlay2_BaseColor;
 float _PBR_Overlay2_Metallic;
+#if defined(_PBR_OVERLAY2_ROUGHNESS)
 float _PBR_Overlay2_Roughness;
+texture2D _PBR_Overlay2_RoughnessTex;
+float4 _PBR_Overlay2_RoughnessTex_ST;
+#endif
 texture2D _PBR_Overlay2_BaseColorTex;
 float4 _PBR_Overlay2_BaseColorTex_ST;
 float4 _PBR_Overlay2_Emission;
@@ -142,8 +150,6 @@ texture2D _PBR_Overlay2_NormalTex;
 float4 _PBR_Overlay2_NormalTex_ST;
 texture2D _PBR_Overlay2_MetallicTex;
 float4 _PBR_Overlay2_MetallicTex_ST;
-texture2D _PBR_Overlay2_RoughnessTex;
-float4 _PBR_Overlay2_RoughnessTex_ST;
 float _PBR_Overlay2_Tex_NormalStr;
 texture2D _PBR_Overlay2_Mask;
 float _PBR_Overlay2_Mask_Invert;
@@ -156,7 +162,11 @@ float _PBR_Overlay2_Alpha_Multiplier;
 #if defined(_PBR_OVERLAY3)
 float4 _PBR_Overlay3_BaseColor;
 float _PBR_Overlay3_Metallic;
+#if defined(_PBR_OVERLAY3_ROUGHNESS)
 float _PBR_Overlay3_Roughness;
+texture2D _PBR_Overlay3_RoughnessTex;
+float4 _PBR_Overlay3_RoughnessTex_ST;
+#endif
 texture2D _PBR_Overlay3_BaseColorTex;
 float4 _PBR_Overlay3_BaseColorTex_ST;
 float4 _PBR_Overlay3_Emission;
@@ -166,8 +176,6 @@ texture2D _PBR_Overlay3_NormalTex;
 float4 _PBR_Overlay3_NormalTex_ST;
 texture2D _PBR_Overlay3_MetallicTex;
 float4 _PBR_Overlay3_MetallicTex_ST;
-texture2D _PBR_Overlay3_RoughnessTex;
-float4 _PBR_Overlay3_RoughnessTex_ST;
 float _PBR_Overlay3_Tex_NormalStr;
 texture2D _PBR_Overlay3_Mask;
 float _PBR_Overlay3_Mask_Invert;

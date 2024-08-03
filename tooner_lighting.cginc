@@ -525,23 +525,35 @@ float2 matcap_distortion0(float2 matcap_uv) {
 struct PbrOverlay {
 #if defined(_PBR_OVERLAY0)
   float4 ov0_albedo;
+#if defined(_PBR_OVERLAY0_ROUGHNESS)
+  float ov0_roughness;
+#endif
   float ov0_mask;
 #endif
 #if defined(_PBR_OVERLAY1)
   float4 ov1_albedo;
+#if defined(_PBR_OVERLAY1_ROUGHNESS)
+  float ov1_roughness;
+#endif
   float ov1_mask;
 #endif
 #if defined(_PBR_OVERLAY2)
   float4 ov2_albedo;
+#if defined(_PBR_OVERLAY2_ROUGHNESS)
+  float ov2_roughness;
+#endif
   float ov2_mask;
 #endif
 #if defined(_PBR_OVERLAY3)
   float4 ov3_albedo;
+#if defined(_PBR_OVERLAY3_ROUGHNESS)
+  float ov3_roughness;
+#endif
   float ov3_mask;
 #endif
 };
 
-void getOverlayAlbedo(inout PbrOverlay ov,
+void getOverlayAlbedoRoughness(inout PbrOverlay ov,
     v2f i, float iddx, float iddy)
 {
 #if defined(_PBR_OVERLAY0)
@@ -551,6 +563,15 @@ void getOverlayAlbedo(inout PbrOverlay ov,
 #else
   ov.ov0_albedo = _PBR_Overlay0_BaseColor;
 #endif  // _PBR_OVERLAY0_BASECOLOR_MAP
+
+#if defined(_PBR_OVERLAY0_ROUGHNESS)
+#if defined(_PBR_OVERLAY0_ROUGHNESS_MAP)
+  ov.ov0_roughness = _PBR_Overlay0_RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay0_RoughnessTex_ST), iddx * _PBR_Overlay0_RoughnessTex_ST.x, iddy * _PBR_Overlay0_RoughnessTex_ST.y);
+  ov.ov0_roughness *= _PBR_Overlay0_Roughness;
+#else
+  ov.ov0_roughness = _PBR_Overlay0_Roughness;
+#endif  // _PBR_OVERLAY0_ROUGHNESS_MAP
+#endif
 
 #if defined(_PBR_OVERLAY0_MASK)
   ov.ov0_mask = _PBR_Overlay0_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
@@ -569,6 +590,15 @@ void getOverlayAlbedo(inout PbrOverlay ov,
   ov.ov1_albedo = _PBR_Overlay1_BaseColor;
 #endif  // _PBR_OVERLAY1_BASECOLOR_MAP
 
+#if defined(_PBR_OVERLAY1_ROUGHNESS)
+#if defined(_PBR_OVERLAY1_ROUGHNESS_MAP)
+  ov.ov0_roughness = _PBR_Overlay1_RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay1_RoughnessTex_ST), iddx * _PBR_Overlay1_RoughnessTex_ST.x, iddy * _PBR_Overlay1_RoughnessTex_ST.y);
+  ov.ov0_roughness *= _PBR_Overlay1_Roughness;
+#else
+  ov.ov0_roughness = _PBR_Overlay1_Roughness;
+#endif  // _PBR_OVERLAY1_ROUGHNESS_MAP
+#endif
+
 #if defined(_PBR_OVERLAY1_MASK)
   ov.ov1_mask = _PBR_Overlay1_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
   ov.ov1_mask = ((bool) round(_PBR_Overlay1_Mask_Invert)) ? 1.0 - ov.ov1_mask : ov.ov1_mask;
@@ -586,6 +616,15 @@ void getOverlayAlbedo(inout PbrOverlay ov,
   ov.ov2_albedo = _PBR_Overlay2_BaseColor;
 #endif  // _PBR_OVERLAY2_BASECOLOR_MAP
 
+#if defined(_PBR_OVERLAY2_ROUGHNESS)
+#if defined(_PBR_OVERLAY2_ROUGHNESS_MAP)
+  ov.ov0_roughness = _PBR_Overlay2_RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay2_RoughnessTex_ST), iddx * _PBR_Overlay2_RoughnessTex_ST.x, iddy * _PBR_Overlay2_RoughnessTex_ST.y);
+  ov.ov0_roughness *= _PBR_Overlay2_Roughness;
+#else
+  ov.ov0_roughness = _PBR_Overlay2_Roughness;
+#endif  // _PBR_OVERLAY2_ROUGHNESS_MAP
+#endif
+
 #if defined(_PBR_OVERLAY2_MASK)
   ov.ov2_mask = _PBR_Overlay2_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
   ov.ov2_mask = ((bool) round(_PBR_Overlay2_Mask_Invert)) ? 1.0 - ov.ov2_mask : ov.ov2_mask;
@@ -602,6 +641,15 @@ void getOverlayAlbedo(inout PbrOverlay ov,
 #else
   ov.ov3_albedo = _PBR_Overlay3_BaseColor;
 #endif  // _PBR_OVERLAY3_BASECOLOR_MAP
+
+#if defined(_PBR_OVERLAY3_ROUGHNESS)
+#if defined(_PBR_OVERLAY3_ROUGHNESS_MAP)
+  ov.ov0_roughness = _PBR_Overlay3_RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv, _PBR_Overlay3_RoughnessTex_ST), iddx * _PBR_Overlay3_RoughnessTex_ST.x, iddy * _PBR_Overlay3_RoughnessTex_ST.y);
+  ov.ov0_roughness *= _PBR_Overlay3_Roughness;
+#else
+  ov.ov0_roughness = _PBR_Overlay3_Roughness;
+#endif  // _PBR_OVERLAY3_ROUGHNESS_MAP
+#endif
 
 #if defined(_PBR_OVERLAY3_MASK)
   ov.ov3_mask = _PBR_Overlay3_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
@@ -683,7 +731,7 @@ void applyDecalAlbedo(inout float4 albedo,
 #endif  // _DECAL3
 }
 
-void mixOverlayAlbedo(inout float4 albedo, PbrOverlay ov) {
+void mixOverlayAlbedoRoughness(inout float4 albedo, inout float roughness, PbrOverlay ov) {
   // Calculate alpha masks before we start mutating alpha.
 #if defined(_PBR_OVERLAY0)
   float a0 = saturate(ov.ov0_albedo.a * _PBR_Overlay0_Alpha_Multiplier);
@@ -721,6 +769,9 @@ void mixOverlayAlbedo(inout float4 albedo, PbrOverlay ov) {
 #if defined(_PBR_OVERLAY0)
 #if defined(_PBR_OVERLAY0_MIX_ALPHA_BLEND)
   albedo.rgb = lerp(albedo.rgb, ov.ov0_albedo.rgb, a0);
+#if defined(_PBR_OVERLAY0_ROUGHNESS)
+  roughness = lerp(roughness, ov.ov0_roughness, a0);
+#endif
   albedo.a = max(albedo.a, a0);
 #elif defined(_PBR_OVERLAY0_MIX_ADD)
   albedo.rgb += ov.ov0_albedo;
@@ -734,6 +785,9 @@ void mixOverlayAlbedo(inout float4 albedo, PbrOverlay ov) {
 #if defined(_PBR_OVERLAY1)
 #if defined(_PBR_OVERLAY1_MIX_ALPHA_BLEND)
   albedo.rgb = lerp(albedo.rgb, ov.ov1_albedo.rgb, a1);
+#if defined(_PBR_OVERLAY0_ROUGHNESS)
+  roughness = lerp(roughness, ov.ov1_roughness, a1);
+#endif
   albedo.a = max(albedo.a, a1);
 #elif defined(_PBR_OVERLAY1_MIX_ADD)
   albedo.rgb += ov.ov1_albedo;
@@ -747,6 +801,9 @@ void mixOverlayAlbedo(inout float4 albedo, PbrOverlay ov) {
 #if defined(_PBR_OVERLAY2)
 #if defined(_PBR_OVERLAY2_MIX_ALPHA_BLEND)
   albedo.rgb = lerp(albedo.rgb, ov.ov2_albedo.rgb, ov.ov2_albedo.a);
+#if defined(_PBR_OVERLAY0_ROUGHNESS)
+  roughness = lerp(roughness, ov.ov2_roughness, a2);
+#endif
   albedo.a = max(albedo.a, a2);
 #elif defined(_PBR_OVERLAY2_MIX_ADD)
   albedo.rgb += ov.ov2_albedo;
@@ -760,6 +817,9 @@ void mixOverlayAlbedo(inout float4 albedo, PbrOverlay ov) {
 #if defined(_PBR_OVERLAY3)
 #if defined(_PBR_OVERLAY3_MIX_ALPHA_BLEND)
   albedo.rgb = lerp(albedo.rgb, ov.ov3_albedo.rgb, a3);
+#if defined(_PBR_OVERLAY0_ROUGHNESS)
+  roughness = lerp(roughness, ov.ov3_roughness, a3);
+#endif
   albedo.a = max(albedo.a, a3);
 #elif defined(_PBR_OVERLAY3_MIX_ADD)
   albedo.rgb += ov.ov3_albedo;
@@ -966,7 +1026,7 @@ float4 effect(inout v2f i)
 #endif
 
   PbrOverlay ov;
-  getOverlayAlbedo(ov, i, iddx, iddy);
+  getOverlayAlbedoRoughness(ov, i, iddx, iddy);
 
 #if defined(_NORMAL_MAP)
   // Use UVs to smoothly blend between fully detailed normals when close up and
@@ -1023,7 +1083,7 @@ float4 effect(inout v2f i)
   }
 #endif
 
-  mixOverlayAlbedo(albedo, ov);
+  mixOverlayAlbedoRoughness(albedo, roughness, ov);
 #if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
   float decal_emission = 0;
   applyDecalAlbedo(albedo, decal_emission, i);
