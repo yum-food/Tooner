@@ -663,7 +663,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 void applyDecalAlbedoImpl(
     inout float4 albedo,
-    inout float decal_emission,
+    inout float3 decal_emission,
     v2f i,
     texture2D tex,
     float4 tex_st,
@@ -698,7 +698,7 @@ void applyDecalAlbedoImpl(
 }
 
 void applyDecalAlbedo(inout float4 albedo,
-    inout float decal_emission,
+    inout float3 decal_emission,
     v2f i)
 {
 #if defined(_DECAL0)
@@ -1083,12 +1083,6 @@ float4 effect(inout v2f i)
   }
 #endif
 
-  mixOverlayAlbedoRoughness(albedo, roughness, ov);
-#if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
-  float decal_emission = 0;
-  applyDecalAlbedo(albedo, decal_emission, i);
-#endif
-
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
   float3 matcap_emission = 0;
   float2 matcap_uv;
@@ -1237,6 +1231,13 @@ float4 effect(inout v2f i)
 #endif  // _MATCAP1
   }
 #endif  // _MATCAP0 || _MATCAP1
+
+  mixOverlayAlbedoRoughness(albedo, roughness, ov);
+#if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
+  float3 decal_emission = 0;
+  applyDecalAlbedo(albedo, decal_emission, i);
+#endif
+
 #if defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
   {
     // identity: (a, b, c) and (c, c, -(a +b)) are perpendicular to each other
