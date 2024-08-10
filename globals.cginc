@@ -188,26 +188,38 @@ float _PBR_Overlay3_Alpha_Multiplier;
 #if defined(_DECAL0)
 texture2D _Decal0_BaseColor;
 float4 _Decal0_BaseColor_ST;
+texture2D _Decal0_Roughness;
+texture2D _Decal0_Metallic;
 float _Decal0_Emission_Strength;
 float _Decal0_Angle;
+float _Decal0_UV_Select;
 #endif
 #if defined(_DECAL1)
 texture2D _Decal1_BaseColor;
 float4 _Decal1_BaseColor_ST;
+texture2D _Decal1_Roughness;
+texture2D _Decal1_Metallic;
 float _Decal1_Emission_Strength;
 float _Decal1_Angle;
+float _Decal1_UV_Select;
 #endif
 #if defined(_DECAL2)
 texture2D _Decal2_BaseColor;
 float4 _Decal2_BaseColor_ST;
+texture2D _Decal2_Roughness;
+texture2D _Decal2_Metallic;
 float _Decal2_Emission_Strength;
 float _Decal2_Angle;
+float _Decal2_UV_Select;
 #endif
 #if defined(_DECAL3)
 texture2D _Decal3_BaseColor;
 float4 _Decal3_BaseColor_ST;
+texture2D _Decal3_Roughness;
+texture2D _Decal3_Metallic;
 float _Decal3_Emission_Strength;
 float _Decal3_Angle;
+float _Decal3_UV_Select;
 #endif
 
 #if defined(_EMISSION)

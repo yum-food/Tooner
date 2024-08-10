@@ -316,6 +316,19 @@ public class ToonerGUI : ShaderGUI {
         if (bc.textureValue) {
           editor.TextureScaleOffsetProperty(bc);
         }
+
+        bc = FindProperty($"_Decal{i}_Roughness");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bc, "Roughness"),
+            bc);
+        SetKeyword($"_DECAL{i}_ROUGHNESS", bc.textureValue);
+
+        bc = FindProperty($"_Decal{i}_Metallic");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bc, "Metallic"),
+            bc);
+        SetKeyword($"_DECAL{i}_METALLIC", bc.textureValue);
+
         bc = FindProperty($"_Decal{i}_Emission_Strength");
         editor.FloatProperty(
             bc,
@@ -324,6 +337,12 @@ public class ToonerGUI : ShaderGUI {
         editor.RangeProperty(
             bc,
             "Angle");
+
+        bc = FindProperty($"_Decal{i}_UV_Select");
+        editor.RangeProperty(
+            bc,
+            "UV");
+
       }
 
       EditorGUI.indentLevel -= 1;
@@ -1354,6 +1373,16 @@ public class ToonerGUI : ShaderGUI {
         MakeLabel(bc, "Cubemap"),
         bc);
     SetKeyword("_CUBEMAP", bc.textureValue);
+
+    if (bc.textureValue) {
+      bc = FindProperty("_Cubemap_Limit_To_Metallic");
+      bool cube_lim_enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      cube_lim_enabled = EditorGUILayout.Toggle("Limit to metallic",
+          cube_lim_enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = cube_lim_enabled ? 1.0f : 0.0f;
+    }
 
     bc = FindProperty("_Lighting_Factor");
     editor.RangeProperty(

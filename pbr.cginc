@@ -36,6 +36,7 @@ void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output) {
 #endif  // __LTCGI
 
 UNITY_DECLARE_TEXCUBE(_Cubemap);
+float _Cubemap_Limit_To_Metallic;
 
 float getShadowAttenuation(v2f i)
 {
@@ -115,7 +116,7 @@ float4 getIndirectDiffuse(float4 vertexLightColor, float3 normal) {
 }
 
 float3 getIndirectSpecular(float3 view_dir, float3 normal,
-    float smoothness, float3 worldPos, float2 uv) {
+    float smoothness, float metallic, float3 worldPos, float2 uv) {
   float3 specular = 0;
 
 #if defined(FORWARD_BASE_PASS)
@@ -151,11 +152,16 @@ float3 getIndirectSpecular(float3 view_dir, float3 normal,
 
 #if defined(_CUBEMAP)
   float roughness = GetRoughness(smoothness);
-  specular =
+  float3 specular_tmp =
     UNITY_SAMPLE_TEXCUBE_LOD(
         _Cubemap,
         reflect_dir,
         roughness * UNITY_SPECCUBE_LOD_STEPS);
+  if (_Cubemap_Limit_To_Metallic) {
+    specular = lerp(specular, specular_tmp, metallic);
+  } else {
+    specular = specular_tmp;
+  }
 #endif  // _CUBEMAP
 
 #endif  // FORWARD_BASE_PASS
@@ -195,7 +201,7 @@ float4 getLitColor(
   vertexLightColor *= _Vertex_Lighting_Factor;
   indirect_light.diffuse = getIndirectDiffuse(vertexLightColor, normal);
   indirect_light.specular = getIndirectSpecular(view_dir, normal, smoothness,
-      worldPos, uv);
+      metallic, worldPos, uv);
 
   float attenuation;
   UnityLight direct_light;
@@ -294,14 +300,14 @@ float4 getLitColor(
     // TODO add keywords to optimize away mask samples when not used
     float cc_mask = 1;
 #if defined(_CLEARCOAT_MASK)
-    float cc_mask_tmp = _Clearcoat_Mask.SampleGrad(linear_repeat_s, i.uv, ddx(i.uv.x), ddy(i.uv.y));
+    float cc_mask_tmp = _Clearcoat_Mask.SampleGrad(linear_repeat_s, i.uv0, ddx(i.uv0.x), ddy(i.uv0.y));
     if (_Clearcoat_Mask_Invert) {
       cc_mask_tmp = 1 - cc_mask_tmp;
     }
     cc_mask *= cc_mask_tmp;
 #endif
 #if defined(_CLEARCOAT_MASK2)
-    float cc_mask2_tmp = _Clearcoat_Mask2.SampleGrad(linear_repeat_s, i.uv, ddx(i.uv.x), ddy(i.uv.y));
+    float cc_mask2_tmp = _Clearcoat_Mask2.SampleGrad(linear_repeat_s, i.uv0, ddx(i.uv0.x), ddy(i.uv0.y));
     if (_Clearcoat_Mask_Invert) {
       cc_mask2_tmp = 1 - cc_mask2_tmp;
     }

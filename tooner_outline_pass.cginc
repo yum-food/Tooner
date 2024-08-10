@@ -16,7 +16,7 @@
 struct tess_data
 {
   float4 pos : INTERNALTESSPOS;
-  float2 uv : TEXCOORD0;
+  float2 uv0 : TEXCOORD0;
   float3 normal : TEXCOORD2;
 };
 
@@ -75,7 +75,7 @@ v2f vert(appdata v)
   o.objPos = objPos;
   o.pos = UnityObjectToClipPos(objPos);
   o.normal = UnityObjectToWorldNormal(v.normal);
-  o.uv = v.uv0.xy;
+  o.uv0 = v.uv0.xy;
 #if defined(LIGHTMAP_ON)
   o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif
@@ -111,7 +111,7 @@ tess_data hull_vertex(appdata v)
   tess_data o;
   o.pos = v.vertex;
   o.normal = normal;
-  o.uv = v.uv0.xy;
+  o.uv0 = v.uv0.xy;
 
   return o;
 #endif  // _OUTLINES
@@ -161,7 +161,7 @@ v2f domain(
   patch[0].fieldName * baryc.x + \
   patch[1].fieldName * baryc.y + \
   patch[2].fieldName * baryc.z;
-  DOMAIN_INTERP(uv);
+  DOMAIN_INTERP(uv0);
   DOMAIN_INTERP(normal);
   //DOMAIN_INTERP(tangent);
 
@@ -210,9 +210,9 @@ void geom(triangle v2f tri_in[3],
 
   if (phase > 1E-6) {
     float3 axis = normalize(float3(
-          rand((int) ((v0.uv.x + v0.uv.y) * 1E9)) * 2 - 1,
-          rand((int) ((v1.uv.x + v1.uv.y) * 1E9)) * 2 - 1,
-          rand((int) ((v2.uv.x + v2.uv.y) * 1E9)) * 2 - 1));
+          rand((int) ((v0.uv0.x + v0.uv0.y) * 1E9)) * 2 - 1,
+          rand((int) ((v1.uv0.x + v1.uv0.y) * 1E9)) * 2 - 1,
+          rand((int) ((v2.uv0.x + v2.uv0.y) * 1E9)) * 2 - 1));
     float3 np = BlendNormals(n, axis * phase);
 
     v0.worldPos += np * phase * pid_rand;
@@ -343,10 +343,10 @@ fixed4 frag (v2f i) : SV_Target
   i.normal = -normalize(i.normal);
 
 #if defined(_OUTLINES)
-  float iddx = ddx(i.uv.x) / 4;
-  float iddy = ddx(i.uv.y) / 4;
+  float iddx = ddx(i.uv0.x) / 4;
+  float iddy = ddx(i.uv0.y) / 4;
 #if defined(_BASECOLOR_MAP)
-  float4 albedo = _MainTex.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+  float4 albedo = _MainTex.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
   albedo *= _Color;
 #else
   float4 albedo = _Color;
@@ -363,7 +363,7 @@ fixed4 frag (v2f i) : SV_Target
 #if defined(_OKLAB)
   // Do hue shift in perceptually uniform color space so it doesn't look like
   // shit.
- float oklab_mask = _OKLAB_Mask.SampleGrad(linear_repeat_s, i.uv, iddx, iddy);
+ float oklab_mask = _OKLAB_Mask.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
  if (oklab_mask > 0.01 &&
      (_OKLAB_Hue_Shift > 1E-6 ||
       abs(_OKLAB_Chroma_Shift) > 1E-6 ||
@@ -384,7 +384,7 @@ fixed4 frag (v2f i) : SV_Target
       vertex_light_color,
       albedo, i.worldPos, i.normal,
       /*metallic=*/0, /*smoothness=*/0,
-      i.uv, ao, /*enable_direct=*/false, i);
+      i.uv0, ao, /*enable_direct=*/false, i);
 
   result += albedo * _Outline_Emission_Strength;
 
@@ -393,7 +393,7 @@ fixed4 frag (v2f i) : SV_Target
     float4 al_color =
       AudioLinkData(
           ALPASS_CCLIGHTS +
-          uint2(uint(i.uv.x * 8) + uint(i.uv.y * 16) * 8, 0 )).rgba;
+          uint2(uint(i.uv0.x * 8) + uint(i.uv0.y * 16) * 8, 0 )).rgba;
     result = lerp(result, al_color, _Explode_Phase * _Explode_Phase);
   }
 #endif

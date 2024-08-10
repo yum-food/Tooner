@@ -101,23 +101,35 @@ Shader "yum_food/tooner"
 
     _Decal0_Enable("Enable decal", Float) = 0.0
     _Decal0_BaseColor("Base color", 2D) = "white" {}
+    _Decal0_Roughness("Roughness", 2D) = "white" {}
+    _Decal0_Metallic("Metallic", 2D) = "black" {}
     _Decal0_Emission_Strength("Emission strength", Float) = 0
     _Decal0_Angle("Emission strength", Range(0,1)) = 0
+    _Decal0_UV_Select("UV channel", Range(0,1)) = 0
 
     _Decal1_Enable("Enable decal", Float) = 0.0
     _Decal1_BaseColor("Base color", 2D) = "white" {}
+    _Decal1_Roughness("Roughness", 2D) = "white" {}
+    _Decal1_Metallic("Metallic", 2D) = "black" {}
     _Decal1_Emission_Strength("Emission strength", Float) = 0
     _Decal1_Angle("Emission strength", Range(0,1)) = 0
+    _Decal1_UV_Select("UV channel", Range(0,1)) = 0
 
     _Decal2_Enable("Enable decal", Float) = 0.0
     _Decal2_BaseColor("Base color", 2D) = "white" {}
+    _Decal2_Roughness("Roughness", 2D) = "white" {}
+    _Decal2_Metallic("Metallic", 2D) = "black" {}
     _Decal2_Emission_Strength("Emission strength", Float) = 0
     _Decal2_Angle("Emission strength", Range(0,1)) = 0
+    _Decal2_UV_Select("UV channel", Range(0,1)) = 0
 
     _Decal3_Enable("Enable decal", Float) = 0.0
     _Decal3_BaseColor("Base color", 2D) = "white" {}
+    _Decal3_Roughness("Roughness", 2D) = "white" {}
+    _Decal3_Metallic("Metallic", 2D) = "black" {}
     _Decal3_Emission_Strength("Emission strength", Float) = 0
     _Decal3_Angle("Emission strength", Range(0,1)) = 0
+    _Decal3_UV_Select("UV channel", Range(0,1)) = 0
 
     [NoScaleOffset] _EmissionTex("Emission map", 2D) = "black" {}
     _EmissionStrength("Emission strength", Range(0, 2)) = 0
@@ -125,6 +137,7 @@ Shader "yum_food/tooner"
     [NoScaleOffset] _Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
 
 		_Cubemap("Cubemap", Cube) = "" {}
+    _Cubemap_Limit_To_Metallic("Limit cubemap to metallic", Float) = 0.0
     _Lighting_Factor("Lighting factor", Range(0, 5)) = 1
     _Direct_Lighting_Factor("Direct lighting factor", Range(0, 5)) = 1
     _Vertex_Lighting_Factor("Vertex lighting factor", Range(0, 5)) = 1
