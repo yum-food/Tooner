@@ -22,6 +22,7 @@ struct tess_data
 {
   float4 pos : INTERNALTESSPOS;
   float2 uv0 : TEXCOORD0;
+  float2 uv2 : TEXCOORD1;
   #if defined(LIGHTMAP_ON)
   float2 lmuv : TEXCOORD1;
   #endif
@@ -180,10 +181,12 @@ v2f vert(appdata v)
 #else
   o.normal = UnityObjectToWorldNormal(v.normal);
 #endif
+
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv0 = v.uv0;
+  o.uv2 = v.uv2;
 #if defined(LIGHTMAP_ON)
-  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
+  o.lmuv = v.uv2 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif
 #if defined(SHADOWS_SCREEN)
   TRANSFER_SHADOW(o);
@@ -232,8 +235,9 @@ tess_data hull_vertex(appdata v)
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv0 = v.uv0.xy;
+  o.uv2 = v.uv2.xy;
   #if defined(LIGHTMAP_ON)
-  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
+  o.lmuv = v.uv2 * unity_LightmapST.xy + unity_LightmapST.zw;
   #endif
 
   getVertexLightColorTess(o);
@@ -286,6 +290,7 @@ v2f domain(
   patch[1].fieldName * baryc.y + \
   patch[2].fieldName * baryc.z;
   DOMAIN_INTERP(uv0);
+  DOMAIN_INTERP(uv2);
   #if defined(LIGHTMAP_ON)
   DOMAIN_INTERP(lmuv);
   #endif
@@ -661,6 +666,8 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 #endif  // _PBR_OVERLAY3
 }
 
+#define GET_UV(i, which_channel) (which_channel == 0 ? i.uv0 : i.uv2)
+
 void applyDecalImpl(
     inout float4 albedo,
     inout float3 decal_emission,
@@ -674,9 +681,10 @@ void applyDecalImpl(
     float emission_strength,
     float angle,
     bool do_roughness,
-    bool do_metallic)
+    bool do_metallic,
+    float which_uv)
 {
-  float2 d0_uv = ((i.uv0 - 0.5) - tex_st.zw) * tex_st.xy + 0.5;
+  float2 d0_uv = ((GET_UV(i, which_uv) - 0.5) - tex_st.zw) * tex_st.xy + 0.5;
 
   if (abs(angle) > 1E-6) {
     float theta = angle * 2.0 * 3.14159265;
@@ -745,7 +753,8 @@ void applyDecal(inout float4 albedo,
       _Decal0_Emission_Strength,
       _Decal0_Angle,
       d0_do_roughness,
-      d0_do_metallic);
+      d0_do_metallic,
+      _Decal0_UV_Select);
 #endif  // _DECAL0
 #if defined(_DECAL1)
 #if defined(_DECAL1_ROUGHNESS)
@@ -766,7 +775,8 @@ void applyDecal(inout float4 albedo,
       _Decal1_Emission_Strength,
       _Decal1_Angle,
       d1_do_roughness,
-      d1_do_metallic);
+      d1_do_metallic,
+      _Decal1_UV_Select);
 #endif  // _DECAL1
 #if defined(_DECAL2)
 #if defined(_DECAL2_ROUGHNESS)
@@ -787,7 +797,8 @@ void applyDecal(inout float4 albedo,
       _Decal2_Emission_Strength,
       _Decal2_Angle,
       d2_do_roughness,
-      d2_do_metallic);
+      d2_do_metallic,
+      _Decal2_UV_Select);
 #endif  // _DECAL2
 #if defined(_DECAL3)
 #if defined(_DECAL3_ROUGHNESS)
@@ -808,7 +819,8 @@ void applyDecal(inout float4 albedo,
       _Decal3_Emission_Strength,
       _Decal3_Angle,
       d3_do_roughness,
-      d3_do_metallic);
+      d3_do_metallic,
+      _Decal3_UV_Select);
 #endif  // _DECAL3
 }
 

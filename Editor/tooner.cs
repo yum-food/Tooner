@@ -341,8 +341,7 @@ public class ToonerGUI : ShaderGUI {
         bc = FindProperty($"_Decal{i}_UV_Select");
         editor.RangeProperty(
             bc,
-            "UV");
-
+            "UV channel");
       }
 
       EditorGUI.indentLevel -= 1;
