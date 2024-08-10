@@ -555,12 +555,18 @@ struct PbrOverlay {
 #if defined(_PBR_OVERLAY0_ROUGHNESS)
   float ov0_roughness;
 #endif
+#if defined(_PBR_OVERLAY0_METALLIC)
+  float ov0_metallic;
+#endif
   float ov0_mask;
 #endif
 #if defined(_PBR_OVERLAY1)
   float4 ov1_albedo;
 #if defined(_PBR_OVERLAY1_ROUGHNESS)
   float ov1_roughness;
+#endif
+#if defined(_PBR_OVERLAY1_METALLIC)
+  float ov1_metallic;
 #endif
   float ov1_mask;
 #endif
@@ -569,6 +575,9 @@ struct PbrOverlay {
 #if defined(_PBR_OVERLAY2_ROUGHNESS)
   float ov2_roughness;
 #endif
+#if defined(_PBR_OVERLAY2_METALLIC)
+  float ov2_metallic;
+#endif
   float ov2_mask;
 #endif
 #if defined(_PBR_OVERLAY3)
@@ -576,11 +585,14 @@ struct PbrOverlay {
 #if defined(_PBR_OVERLAY3_ROUGHNESS)
   float ov3_roughness;
 #endif
+#if defined(_PBR_OVERLAY3_METALLIC)
+  float ov3_metallic;
+#endif
   float ov3_mask;
 #endif
 };
 
-void getOverlayAlbedoRoughness(inout PbrOverlay ov,
+void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
     v2f i, float iddx, float iddy)
 {
 #if defined(_PBR_OVERLAY0)
@@ -598,6 +610,15 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 #else
   ov.ov0_roughness = _PBR_Overlay0_Roughness;
 #endif  // _PBR_OVERLAY0_ROUGHNESS_MAP
+#endif
+
+#if defined(_PBR_OVERLAY0_METALLIC)
+#if defined(_PBR_OVERLAY0_METALLIC_MAP)
+  ov.ov0_metallic = _PBR_Overlay0_MetallicTex.SampleGrad(GET_SAMPLER_OV0, UV_SCOFF(i, _PBR_Overlay0_MetallicTex_ST, _PBR_Overlay0_UV_Select), iddx * _PBR_Overlay0_MetallicTex_ST.x, iddy * _PBR_Overlay0_MetallicTex_ST.y);
+  ov.ov0_metallic *= _PBR_Overlay0_Metallic;
+#else
+  ov.ov0_metallic = _PBR_Overlay0_Metallic;
+#endif  // _PBR_OVERLAY0_METALLIC_MAP
 #endif
 
 #if defined(_PBR_OVERLAY0_MASK)
@@ -619,11 +640,20 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY1_ROUGHNESS)
 #if defined(_PBR_OVERLAY1_ROUGHNESS_MAP)
-  ov.ov0_roughness = _PBR_Overlay1_RoughnessTex.SampleGrad(GET_SAMPLER_OV1, UV_SCOFF(i, _PBR_Overlay1_RoughnessTex_ST, _PBR_Overlay1_UV_Select), iddx * _PBR_Overlay1_RoughnessTex_ST.x, iddy * _PBR_Overlay1_RoughnessTex_ST.y);
-  ov.ov0_roughness *= _PBR_Overlay1_Roughness;
+  ov.ov1_roughness = _PBR_Overlay1_RoughnessTex.SampleGrad(GET_SAMPLER_OV1, UV_SCOFF(i, _PBR_Overlay1_RoughnessTex_ST, _PBR_Overlay1_UV_Select), iddx * _PBR_Overlay1_RoughnessTex_ST.x, iddy * _PBR_Overlay1_RoughnessTex_ST.y);
+  ov.ov1_roughness *= _PBR_Overlay1_Roughness;
 #else
-  ov.ov0_roughness = _PBR_Overlay1_Roughness;
+  ov.ov1_roughness = _PBR_Overlay1_Roughness;
 #endif  // _PBR_OVERLAY1_ROUGHNESS_MAP
+#endif
+
+#if defined(_PBR_OVERLAY1_METALLIC)
+#if defined(_PBR_OVERLAY1_METALLIC_MAP)
+  ov.ov1_metallic = _PBR_Overlay1_MetallicTex.SampleGrad(GET_SAMPLER_OV1, UV_SCOFF(i, _PBR_Overlay1_MetallicTex_ST, _PBR_Overlay1_UV_Select), iddx * _PBR_Overlay1_MetallicTex_ST.x, iddy * _PBR_Overlay1_MetallicTex_ST.y);
+  ov.ov1_metallic *= _PBR_Overlay1_Metallic;
+#else
+  ov.ov1_metallic = _PBR_Overlay1_Metallic;
+#endif  // _PBR_OVERLAY1_METALLIC_MAP
 #endif
 
 #if defined(_PBR_OVERLAY1_MASK)
@@ -645,11 +675,20 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY2_ROUGHNESS)
 #if defined(_PBR_OVERLAY2_ROUGHNESS_MAP)
-  ov.ov0_roughness = _PBR_Overlay2_RoughnessTex.SampleGrad(GET_SAMPLER_OV2, UV_SCOFF(i, _PBR_Overlay2_RoughnessTex_ST, _PBR_Overlay2_UV_Select), iddx * _PBR_Overlay2_RoughnessTex_ST.x, iddy * _PBR_Overlay2_RoughnessTex_ST.y);
-  ov.ov0_roughness *= _PBR_Overlay2_Roughness;
+  ov.ov2_roughness = _PBR_Overlay2_RoughnessTex.SampleGrad(GET_SAMPLER_OV2, UV_SCOFF(i, _PBR_Overlay2_RoughnessTex_ST, _PBR_Overlay2_UV_Select), iddx * _PBR_Overlay2_RoughnessTex_ST.x, iddy * _PBR_Overlay2_RoughnessTex_ST.y);
+  ov.ov2_roughness *= _PBR_Overlay2_Roughness;
 #else
-  ov.ov0_roughness = _PBR_Overlay2_Roughness;
+  ov.ov2_roughness = _PBR_Overlay2_Roughness;
 #endif  // _PBR_OVERLAY2_ROUGHNESS_MAP
+#endif
+
+#if defined(_PBR_OVERLAY2_METALLIC)
+#if defined(_PBR_OVERLAY2_METALLIC_MAP)
+  ov.ov2_metallic = _PBR_Overlay2_MetallicTex.SampleGrad(GET_SAMPLER_OV2, UV_SCOFF(i, _PBR_Overlay2_MetallicTex_ST, _PBR_Overlay2_UV_Select), iddx * _PBR_Overlay2_MetallicTex_ST.x, iddy * _PBR_Overlay2_MetallicTex_ST.y);
+  ov.ov2_metallic *= _PBR_Overlay2_Metallic;
+#else
+  ov.ov2_metallic = _PBR_Overlay2_Metallic;
+#endif  // _PBR_OVERLAY2_METALLIC_MAP
 #endif
 
 #if defined(_PBR_OVERLAY2_MASK)
@@ -671,11 +710,20 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY3_ROUGHNESS)
 #if defined(_PBR_OVERLAY3_ROUGHNESS_MAP)
-  ov.ov0_roughness = _PBR_Overlay3_RoughnessTex.SampleGrad(GET_SAMPLER_OV3, UV_SCOFF(i, _PBR_Overlay3_RoughnessTex_ST, _PBR_Overlay3_UV_Select), iddx * _PBR_Overlay3_RoughnessTex_ST.x, iddy * _PBR_Overlay3_RoughnessTex_ST.y);
-  ov.ov0_roughness *= _PBR_Overlay3_Roughness;
+  ov.ov3_roughness = _PBR_Overlay3_RoughnessTex.SampleGrad(GET_SAMPLER_OV3, UV_SCOFF(i, _PBR_Overlay3_RoughnessTex_ST, _PBR_Overlay3_UV_Select), iddx * _PBR_Overlay3_RoughnessTex_ST.x, iddy * _PBR_Overlay3_RoughnessTex_ST.y);
+  ov.ov3_roughness *= _PBR_Overlay3_Roughness;
 #else
-  ov.ov0_roughness = _PBR_Overlay3_Roughness;
+  ov.ov3_roughness = _PBR_Overlay3_Roughness;
 #endif  // _PBR_OVERLAY3_ROUGHNESS_MAP
+#endif
+
+#if defined(_PBR_OVERLAY3_METALLIC)
+#if defined(_PBR_OVERLAY3_METALLIC_MAP)
+  ov.ov3_metallic = _PBR_Overlay3_MetallicTex.SampleGrad(GET_SAMPLER_OV3, UV_SCOFF(i, _PBR_Overlay3_MetallicTex_ST, _PBR_Overlay3_UV_Select), iddx * _PBR_Overlay3_MetallicTex_ST.x, iddy * _PBR_Overlay3_MetallicTex_ST.y);
+  ov.ov3_metallic *= _PBR_Overlay3_Metallic;
+#else
+  ov.ov3_metallic = _PBR_Overlay3_Metallic;
+#endif  // _PBR_OVERLAY3_METALLIC_MAP
 #endif
 
 #if defined(_PBR_OVERLAY3_MASK)
@@ -844,7 +892,8 @@ void applyDecal(inout float4 albedo,
 #endif  // _DECAL3
 }
 
-void mixOverlayAlbedoRoughness(inout float4 albedo, inout float roughness, PbrOverlay ov) {
+void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
+    inout float roughness, inout float metallic, PbrOverlay ov) {
   // Calculate alpha masks before we start mutating alpha.
 #if defined(_PBR_OVERLAY0)
   float a0 = saturate(ov.ov0_albedo.a * _PBR_Overlay0_Alpha_Multiplier);
@@ -885,6 +934,9 @@ void mixOverlayAlbedoRoughness(inout float4 albedo, inout float roughness, PbrOv
 #if defined(_PBR_OVERLAY0_ROUGHNESS)
   roughness = lerp(roughness, ov.ov0_roughness, a0);
 #endif
+#if defined(_PBR_OVERLAY0_METALLIC)
+  metallic = lerp(metallic, ov.ov0_metallic, a0);
+#endif
   albedo.a = max(albedo.a, a0);
 #elif defined(_PBR_OVERLAY0_MIX_ADD)
   albedo.rgb += ov.ov0_albedo;
@@ -900,6 +952,9 @@ void mixOverlayAlbedoRoughness(inout float4 albedo, inout float roughness, PbrOv
   albedo.rgb = lerp(albedo.rgb, ov.ov1_albedo.rgb, a1);
 #if defined(_PBR_OVERLAY0_ROUGHNESS)
   roughness = lerp(roughness, ov.ov1_roughness, a1);
+#endif
+#if defined(_PBR_OVERLAY0_METALLIC)
+  metallic = lerp(metallic, ov.ov1_metallic, a1);
 #endif
   albedo.a = max(albedo.a, a1);
 #elif defined(_PBR_OVERLAY1_MIX_ADD)
@@ -917,6 +972,9 @@ void mixOverlayAlbedoRoughness(inout float4 albedo, inout float roughness, PbrOv
 #if defined(_PBR_OVERLAY0_ROUGHNESS)
   roughness = lerp(roughness, ov.ov2_roughness, a2);
 #endif
+#if defined(_PBR_OVERLAY0_METALLIC)
+  metallic = lerp(metallic, ov.ov2_metallic, a2);
+#endif
   albedo.a = max(albedo.a, a2);
 #elif defined(_PBR_OVERLAY2_MIX_ADD)
   albedo.rgb += ov.ov2_albedo;
@@ -932,6 +990,9 @@ void mixOverlayAlbedoRoughness(inout float4 albedo, inout float roughness, PbrOv
   albedo.rgb = lerp(albedo.rgb, ov.ov3_albedo.rgb, a3);
 #if defined(_PBR_OVERLAY0_ROUGHNESS)
   roughness = lerp(roughness, ov.ov3_roughness, a3);
+#endif
+#if defined(_PBR_OVERLAY0_METALLIC)
+  metallic = lerp(metallic, ov.ov3_metallic, a3);
 #endif
   albedo.a = max(albedo.a, a3);
 #elif defined(_PBR_OVERLAY3_MIX_ADD)
@@ -1139,7 +1200,7 @@ float4 effect(inout v2f i)
 #endif
 
   PbrOverlay ov;
-  getOverlayAlbedoRoughness(ov, i, iddx, iddy);
+  getOverlayAlbedoRoughnessMetallic(ov, i, iddx, iddy);
 
 #if defined(_NORMAL_MAP)
   // Use UVs to smoothly blend between fully detailed normals when close up and
@@ -1345,7 +1406,7 @@ float4 effect(inout v2f i)
   }
 #endif  // _MATCAP0 || _MATCAP1
 
-  mixOverlayAlbedoRoughness(albedo, roughness, ov);
+  mixOverlayAlbedoRoughnessMetallic(albedo, roughness, metallic, ov);
 #if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
   float3 decal_emission = 0;
   applyDecal(albedo, roughness, metallic, decal_emission, i);

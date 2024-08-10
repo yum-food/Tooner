@@ -235,16 +235,26 @@ public class ToonerGUI : ShaderGUI {
         }
         SetKeyword($"_PBR_OVERLAY{i}_NORMAL_MAP", bct.textureValue);
 
-        bc = FindProperty($"_PBR_Overlay{i}_Metallic");
-        bct = FindProperty($"_PBR_Overlay{i}_MetallicTex");
-        editor.TexturePropertySingleLine(
-            MakeLabel(bct, "Metallic (RGBA)"),
-            bct,
-            bc);
-        if (bct.textureValue) {
-          editor.TextureScaleOffsetProperty(bct);
+        bc = FindProperty($"_PBR_Overlay{i}_Metallic_Enable");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Enable metallic", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+        SetKeyword($"_PBR_OVERLAY{i}_METALLIC", enabled);
+
+        if (enabled) {
+          bc = FindProperty($"_PBR_Overlay{i}_Metallic");
+          bct = FindProperty($"_PBR_Overlay{i}_MetallicTex");
+          editor.TexturePropertySingleLine(
+              MakeLabel(bct, "Metallic (RGBA)"),
+              bct,
+              bc);
+          if (bct.textureValue) {
+            editor.TextureScaleOffsetProperty(bct);
+          }
+          SetKeyword($"_PBR_OVERLAY{i}_METALLIC_MAP", bct.textureValue);
         }
-        SetKeyword($"_PBR_OVERLAY{i}_METALLIC_MAP", bct.textureValue);
 
         bc = FindProperty($"_PBR_Overlay{i}_Roughness_Enable");
         enabled = bc.floatValue > 1E-6;
