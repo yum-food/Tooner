@@ -9,6 +9,7 @@ SamplerState linear_clamp_s;
 float4 _Color;
 float _Metallic;
 float _Roughness;
+float _Roughness_Invert;
 float _Tex_NormalStr;
 float _NormalStr;
 
@@ -368,6 +369,7 @@ float _Rim_Lighting1_PolarMask_Power;
 #if defined(_OKLAB)
 float _OKLAB_Enabled;
 texture2D _OKLAB_Mask;
+float _OKLAB_Mask_Invert;
 float _OKLAB_Lightness_Shift;
 float _OKLAB_Chroma_Shift;
 float _OKLAB_Hue_Shift;

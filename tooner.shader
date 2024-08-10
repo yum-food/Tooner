@@ -5,6 +5,7 @@ Shader "yum_food/tooner"
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
     _Metallic("Metallic", Range(0, 1)) = 0
     _Roughness("Roughness", Range(0, 1)) = 1
+    _Roughness_Invert("Roughness invert", Float) = 0
 
     _Clearcoat_Enabled("Clearcoat enabled", Float) = 0
     _Clearcoat_Strength("Clearcoat strength", Range(0, 1)) = 0
@@ -266,6 +267,7 @@ Shader "yum_food/tooner"
 
     _OKLAB_Enabled("Enable OKLAB", Float) = 0.0
     _OKLAB_Mask("Mask", 2D) = "white" {}
+    _OKLAB_Mask_Invert("Mask invert", Float) = 0.0
     _OKLAB_Lightness_Shift("OKLAB lightness shift", Range(-1.0, 1.0)) = 0.0
     _OKLAB_Chroma_Shift("OKLAB chroma shift", Range(-0.37, 0.37)) = 0.0
     _OKLAB_Hue_Shift("OKLAB hue shift", Range(0, 6.283185307)) = 0.0
@@ -413,6 +415,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType" = "Opaque"
@@ -483,6 +486,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

@@ -1235,6 +1235,10 @@ float4 effect(inout v2f i)
 #endif
 #if defined(_ROUGHNESS_MAP)
   float roughness = _RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i, _RoughnessTex_ST, 0), iddx, iddy);
+  if (_Roughness_Invert) {
+    roughness = 1 - roughness;
+  }
+  roughness *= _Roughness;
 #else
   float roughness = _Roughness;
 #endif
@@ -1556,6 +1560,9 @@ float4 effect(inout v2f i)
   // Do hue shift in perceptually uniform color space so it doesn't look like
   // shit.
  float oklab_mask = _OKLAB_Mask.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
+ if (_OKLAB_Mask_Invert) {
+   oklab_mask = 1 - oklab_mask;
+ }
  if (oklab_mask > 0.01 &&
      (_OKLAB_Hue_Shift > 1E-6 ||
       abs(_OKLAB_Chroma_Shift) > 1E-6 ||

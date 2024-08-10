@@ -94,7 +94,15 @@ public class ToonerGUI : ShaderGUI {
           bc);
       if (bct.textureValue) {
         editor.TextureScaleOffsetProperty(bct);
+
+        bc = FindProperty("_Roughness_Invert");
+        bool enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Invert", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
       }
+
       SetKeyword("_ROUGHNESS_MAP", bct.textureValue);
   }
 
@@ -669,6 +677,15 @@ public class ToonerGUI : ShaderGUI {
       editor.TexturePropertySingleLine(
           MakeLabel(bc, "Mask"),
           bc);
+
+      if (bc.textureValue) {
+        bc = FindProperty("_OKLAB_Mask_Invert");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Invert", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+      }
 
       bc = FindProperty("_OKLAB_Lightness_Shift");
       editor.RangeProperty(
