@@ -525,7 +525,29 @@ float2 matcap_distortion0(float2 matcap_uv) {
   return matcap_uv;
 }
 
-#define UV_SCOFF(uv, tex_st) (uv) * (tex_st).xy + (tex_st).zw
+#define GET_UV_BY_CHANNEL(i, which_channel) (which_channel == 0 ? i.uv0 : i.uv2)
+#define UV_SCOFF(i, tex_st, which_channel) GET_UV_BY_CHANNEL(i, which_channel) * (tex_st).xy + (tex_st).zw
+
+#if defined(_PBR_OVERLAY0_SAMPLER_REPEAT)
+#define GET_SAMPLER_OV0 linear_repeat_s
+#elif defined(_PBR_OVERLAY0_SAMPLER_CLAMP)
+#define GET_SAMPLER_OV0 linear_clamp_s
+#endif
+#if defined(_PBR_OVERLAY1_SAMPLER_REPEAT)
+#define GET_SAMPLER_OV1 linear_repeat_s
+#elif defined(_PBR_OVERLAY1_SAMPLER_CLAMP)
+#define GET_SAMPLER_OV1 linear_clamp_s
+#endif
+#if defined(_PBR_OVERLAY2_SAMPLER_REPEAT)
+#define GET_SAMPLER_OV2 linear_repeat_s
+#elif defined(_PBR_OVERLAY2_SAMPLER_CLAMP)
+#define GET_SAMPLER_OV2 linear_clamp_s
+#endif
+#if defined(_PBR_OVERLAY3_SAMPLER_REPEAT)
+#define GET_SAMPLER_OV3 linear_repeat_s
+#elif defined(_PBR_OVERLAY3_SAMPLER_CLAMP)
+#define GET_SAMPLER_OV3 linear_clamp_s
+#endif
 
 struct PbrOverlay {
 #if defined(_PBR_OVERLAY0)
@@ -563,7 +585,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 {
 #if defined(_PBR_OVERLAY0)
 #if defined(_PBR_OVERLAY0_BASECOLOR_MAP)
-  ov.ov0_albedo = _PBR_Overlay0_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay0_BaseColorTex_ST), iddx * _PBR_Overlay0_BaseColorTex_ST.x, iddy * _PBR_Overlay0_BaseColorTex_ST.y);
+  ov.ov0_albedo = _PBR_Overlay0_BaseColorTex.SampleGrad(GET_SAMPLER_OV0, UV_SCOFF(i, _PBR_Overlay0_BaseColorTex_ST, _PBR_Overlay0_UV_Select), iddx * _PBR_Overlay0_BaseColorTex_ST.x, iddy * _PBR_Overlay0_BaseColorTex_ST.y);
   ov.ov0_albedo *= _PBR_Overlay0_BaseColor;
 #else
   ov.ov0_albedo = _PBR_Overlay0_BaseColor;
@@ -571,7 +593,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY0_ROUGHNESS)
 #if defined(_PBR_OVERLAY0_ROUGHNESS_MAP)
-  ov.ov0_roughness = _PBR_Overlay0_RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay0_RoughnessTex_ST), iddx * _PBR_Overlay0_RoughnessTex_ST.x, iddy * _PBR_Overlay0_RoughnessTex_ST.y);
+  ov.ov0_roughness = _PBR_Overlay0_RoughnessTex.SampleGrad(GET_SAMPLER_OV0, UV_SCOFF(i, _PBR_Overlay0_RoughnessTex_ST, _PBR_Overlay0_UV_Select), iddx * _PBR_Overlay0_RoughnessTex_ST.x, iddy * _PBR_Overlay0_RoughnessTex_ST.y);
   ov.ov0_roughness *= _PBR_Overlay0_Roughness;
 #else
   ov.ov0_roughness = _PBR_Overlay0_Roughness;
@@ -579,7 +601,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY0_MASK)
-  ov.ov0_mask = _PBR_Overlay0_Mask.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
+  ov.ov0_mask = _PBR_Overlay0_Mask.SampleGrad(GET_SAMPLER_OV0, i.uv0, iddx, iddy);
   ov.ov0_mask = ((bool) round(_PBR_Overlay0_Mask_Invert)) ? 1.0 - ov.ov0_mask : ov.ov0_mask;
 #else
   ov.ov0_mask = 1;
@@ -589,7 +611,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY1)
 #if defined(_PBR_OVERLAY1_BASECOLOR_MAP)
-  ov.ov1_albedo = _PBR_Overlay1_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay1_BaseColorTex_ST), iddx * _PBR_Overlay1_BaseColorTex_ST.x, iddy * _PBR_Overlay1_BaseColorTex_ST.y);
+  ov.ov1_albedo = _PBR_Overlay1_BaseColorTex.SampleGrad(GET_SAMPLER_OV1, UV_SCOFF(i, _PBR_Overlay1_BaseColorTex_ST, _PBR_Overlay1_UV_Select), iddx * _PBR_Overlay1_BaseColorTex_ST.x, iddy * _PBR_Overlay1_BaseColorTex_ST.y);
   ov.ov1_albedo *= _PBR_Overlay1_BaseColor;
 #else
   ov.ov1_albedo = _PBR_Overlay1_BaseColor;
@@ -597,7 +619,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY1_ROUGHNESS)
 #if defined(_PBR_OVERLAY1_ROUGHNESS_MAP)
-  ov.ov0_roughness = _PBR_Overlay1_RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay1_RoughnessTex_ST), iddx * _PBR_Overlay1_RoughnessTex_ST.x, iddy * _PBR_Overlay1_RoughnessTex_ST.y);
+  ov.ov0_roughness = _PBR_Overlay1_RoughnessTex.SampleGrad(GET_SAMPLER_OV1, UV_SCOFF(i, _PBR_Overlay1_RoughnessTex_ST, _PBR_Overlay1_UV_Select), iddx * _PBR_Overlay1_RoughnessTex_ST.x, iddy * _PBR_Overlay1_RoughnessTex_ST.y);
   ov.ov0_roughness *= _PBR_Overlay1_Roughness;
 #else
   ov.ov0_roughness = _PBR_Overlay1_Roughness;
@@ -605,7 +627,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY1_MASK)
-  ov.ov1_mask = _PBR_Overlay1_Mask.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
+  ov.ov1_mask = _PBR_Overlay1_Mask.SampleGrad(GET_SAMPLER_OV1, i.uv0, iddx, iddy);
   ov.ov1_mask = ((bool) round(_PBR_Overlay1_Mask_Invert)) ? 1.0 - ov.ov1_mask : ov.ov1_mask;
 #else
   ov.ov1_mask = 1;
@@ -615,7 +637,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY2)
 #if defined(_PBR_OVERLAY2_BASECOLOR_MAP)
-  ov.ov2_albedo = _PBR_Overlay2_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay2_BaseColorTex_ST), iddx * _PBR_Overlay2_BaseColorTex_ST.x, iddy * _PBR_Overlay2_BaseColorTex_ST.y);
+  ov.ov2_albedo = _PBR_Overlay2_BaseColorTex.SampleGrad(GET_SAMPLER_OV2, UV_SCOFF(i, _PBR_Overlay2_BaseColorTex_ST, _PBR_Overlay2_UV_Select), iddx * _PBR_Overlay2_BaseColorTex_ST.x, iddy * _PBR_Overlay2_BaseColorTex_ST.y);
   ov.ov2_albedo *= _PBR_Overlay2_BaseColor;
 #else
   ov.ov2_albedo = _PBR_Overlay2_BaseColor;
@@ -623,7 +645,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY2_ROUGHNESS)
 #if defined(_PBR_OVERLAY2_ROUGHNESS_MAP)
-  ov.ov0_roughness = _PBR_Overlay2_RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay2_RoughnessTex_ST), iddx * _PBR_Overlay2_RoughnessTex_ST.x, iddy * _PBR_Overlay2_RoughnessTex_ST.y);
+  ov.ov0_roughness = _PBR_Overlay2_RoughnessTex.SampleGrad(GET_SAMPLER_OV2, UV_SCOFF(i, _PBR_Overlay2_RoughnessTex_ST, _PBR_Overlay2_UV_Select), iddx * _PBR_Overlay2_RoughnessTex_ST.x, iddy * _PBR_Overlay2_RoughnessTex_ST.y);
   ov.ov0_roughness *= _PBR_Overlay2_Roughness;
 #else
   ov.ov0_roughness = _PBR_Overlay2_Roughness;
@@ -631,7 +653,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY2_MASK)
-  ov.ov2_mask = _PBR_Overlay2_Mask.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
+  ov.ov2_mask = _PBR_Overlay2_Mask.SampleGrad(GET_SAMPLER_OV2, i.uv0, iddx, iddy);
   ov.ov2_mask = ((bool) round(_PBR_Overlay2_Mask_Invert)) ? 1.0 - ov.ov2_mask : ov.ov2_mask;
 #else
   ov.ov2_mask = 1;
@@ -641,7 +663,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY3)
 #if defined(_PBR_OVERLAY3_BASECOLOR_MAP)
-  ov.ov3_albedo = _PBR_Overlay3_BaseColorTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay3_BaseColorTex_ST), iddx * _PBR_Overlay3_BaseColorTex_ST.x, iddy * _PBR_Overlay3_BaseColorTex_ST.y);
+  ov.ov3_albedo = _PBR_Overlay3_BaseColorTex.SampleGrad(GET_SAMPLER_OV3, UV_SCOFF(i, _PBR_Overlay3_BaseColorTex_ST, _PBR_Overlay3_UV_Select), iddx * _PBR_Overlay3_BaseColorTex_ST.x, iddy * _PBR_Overlay3_BaseColorTex_ST.y);
   ov.ov3_albedo *= _PBR_Overlay3_BaseColor;
 #else
   ov.ov3_albedo = _PBR_Overlay3_BaseColor;
@@ -649,7 +671,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY3_ROUGHNESS)
 #if defined(_PBR_OVERLAY3_ROUGHNESS_MAP)
-  ov.ov0_roughness = _PBR_Overlay3_RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay3_RoughnessTex_ST), iddx * _PBR_Overlay3_RoughnessTex_ST.x, iddy * _PBR_Overlay3_RoughnessTex_ST.y);
+  ov.ov0_roughness = _PBR_Overlay3_RoughnessTex.SampleGrad(GET_SAMPLER_OV3, UV_SCOFF(i, _PBR_Overlay3_RoughnessTex_ST, _PBR_Overlay3_UV_Select), iddx * _PBR_Overlay3_RoughnessTex_ST.x, iddy * _PBR_Overlay3_RoughnessTex_ST.y);
   ov.ov0_roughness *= _PBR_Overlay3_Roughness;
 #else
   ov.ov0_roughness = _PBR_Overlay3_Roughness;
@@ -657,7 +679,7 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY3_MASK)
-  ov.ov3_mask = _PBR_Overlay3_Mask.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
+  ov.ov3_mask = _PBR_Overlay3_Mask.SampleGrad(GET_SAMPLER_OV3, i.uv0, iddx, iddy);
   ov.ov3_mask = ((bool) round(_PBR_Overlay3_Mask_Invert)) ? 1.0 - ov.ov3_mask : ov.ov3_mask;
 #else
   ov.ov3_mask = 1;
@@ -665,8 +687,6 @@ void getOverlayAlbedoRoughness(inout PbrOverlay ov,
   ov.ov3_albedo.a *= ov.ov3_mask;
 #endif  // _PBR_OVERLAY3
 }
-
-#define GET_UV(i, which_channel) (which_channel == 0 ? i.uv0 : i.uv2)
 
 void applyDecalImpl(
     inout float4 albedo,
@@ -684,7 +704,7 @@ void applyDecalImpl(
     bool do_metallic,
     float which_uv)
 {
-  float2 d0_uv = ((GET_UV(i, which_uv) - 0.5) - tex_st.zw) * tex_st.xy + 0.5;
+  float2 d0_uv = ((GET_UV_BY_CHANNEL(i, which_uv) - 0.5) - tex_st.zw) * tex_st.xy + 0.5;
 
   if (abs(angle) > 1E-6) {
     float theta = angle * 2.0 * 3.14159265;
@@ -937,8 +957,8 @@ void applyOverlayNormal(inout float3 raw_normal, float4 albedo, PbrOverlay ov, v
   // Use UVs to smoothly blend between fully detailed normals when close up and
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(linear_repeat_s,
-        UV_SCOFF(i.uv0, _PBR_Overlay0_NormalTex_ST),
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleGrad(GET_SAMPLER_OV0,
+        UV_SCOFF(i, _PBR_Overlay0_NormalTex_ST, _PBR_Overlay0_UV_Select),
         iddx * _PBR_Overlay0_NormalTex_ST.x,
         iddy * _PBR_Overlay0_NormalTex_ST.y),
       _PBR_Overlay0_Tex_NormalStr * ov.ov0_mask * a0);
@@ -954,8 +974,8 @@ void applyOverlayNormal(inout float3 raw_normal, float4 albedo, PbrOverlay ov, v
       (albedo.a < _PBR_Overlay1_Constrain_By_Alpha_Max);
     a1 *= in_range;
   }
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleGrad(linear_repeat_s,
-        UV_SCOFF(i.uv0, _PBR_Overlay1_NormalTex_ST),
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleGrad(GET_SAMPLER_OV1,
+        UV_SCOFF(i, _PBR_Overlay1_NormalTex_ST, _PBR_Overlay1_UV_Select),
         iddx * _PBR_Overlay1_NormalTex_ST.x,
         iddy * _PBR_Overlay1_NormalTex_ST.y),
       _PBR_Overlay1_Tex_NormalStr * ov.ov1_mask * a1);
@@ -971,8 +991,8 @@ void applyOverlayNormal(inout float3 raw_normal, float4 albedo, PbrOverlay ov, v
       (albedo.a < _PBR_Overlay2_Constrain_By_Alpha_Max);
     a2 *= in_range;
   }
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleGrad(linear_repeat_s,
-        UV_SCOFF(i.uv0, _PBR_Overlay2_NormalTex_ST),
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleGrad(GET_SAMPLER_OV2,
+        UV_SCOFF(i, _PBR_Overlay2_NormalTex_ST, _PBR_Overlay2_UV_Select),
         iddx * _PBR_Overlay2_NormalTex_ST.x,
         iddy * _PBR_Overlay2_NormalTex_ST.y),
       _PBR_Overlay2_Tex_NormalStr * ov.ov2_mask * a2);
@@ -988,8 +1008,8 @@ void applyOverlayNormal(inout float3 raw_normal, float4 albedo, PbrOverlay ov, v
       (albedo.a < _PBR_Overlay3_Constrain_By_Alpha_Max);
     a3 *= in_range;
   }
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleGrad(linear_repeat_s,
-        UV_SCOFF(i.uv0, _PBR_Overlay3_NormalTex_ST),
+  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleGrad(GET_SAMPLER_OV3,
+        UV_SCOFF(i, _PBR_Overlay3_NormalTex_ST, _PBR_Overlay3_UV_Select),
         iddx * _PBR_Overlay3_NormalTex_ST.x,
         iddy * _PBR_Overlay3_NormalTex_ST.y),
       _PBR_Overlay3_Tex_NormalStr * ov.ov3_mask * a3);
@@ -1004,19 +1024,19 @@ float3 getOverlayEmission(PbrOverlay ov, v2f i, float iddx, float iddy)
 {
   float3 em = 0;
 #if defined(_PBR_OVERLAY0_EMISSION_MAP)
-  em += _PBR_Overlay0_EmissionTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay0_EmissionTex_ST), iddx * _PBR_Overlay0_EmissionTex_ST.x, iddy * _PBR_Overlay0_EmissionTex_ST.y) * _PBR_Overlay0_Emission * ov.ov0_mask;
+  em += _PBR_Overlay0_EmissionTex.SampleGrad(GET_SAMPLER_OV0, UV_SCOFF(i, _PBR_Overlay0_EmissionTex_ST, _PBR_Overlay0_UV_Select), iddx * _PBR_Overlay0_EmissionTex_ST.x, iddy * _PBR_Overlay0_EmissionTex_ST.y) * _PBR_Overlay0_Emission * ov.ov0_mask;
 #endif
 
 #if defined(_PBR_OVERLAY1_EMISSION_MAP)
-  em += _PBR_Overlay1_EmissionTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay1_EmissionTex_ST), iddx * _PBR_Overlay1_EmissionTex_ST.x, iddy * _PBR_Overlay1_EmissionTex_ST.y) * _PBR_Overlay1_Emission * ov.ov1_mask;
+  em += _PBR_Overlay1_EmissionTex.SampleGrad(GET_SAMPLER_OV1, UV_SCOFF(i, _PBR_Overlay1_EmissionTex_ST, _PBR_Overlay1_UV_Select), iddx * _PBR_Overlay1_EmissionTex_ST.x, iddy * _PBR_Overlay1_EmissionTex_ST.y) * _PBR_Overlay1_Emission * ov.ov1_mask;
 #endif
 
 #if defined(_PBR_OVERLAY2_EMISSION_MAP)
-  em += _PBR_Overlay2_EmissionTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay2_EmissionTex_ST), iddx * _PBR_Overlay2_EmissionTex_ST.x, iddy * _PBR_Overlay2_EmissionTex_ST.y) * _PBR_Overlay2_Emission * ov.ov2_mask;
+  em += _PBR_Overlay2_EmissionTex.SampleGrad(GET_SAMPLER_OV2, UV_SCOFF(i, _PBR_Overlay2_EmissionTex_ST, _PBR_Overlay2_UV_Select), iddx * _PBR_Overlay2_EmissionTex_ST.x, iddy * _PBR_Overlay2_EmissionTex_ST.y) * _PBR_Overlay2_Emission * ov.ov2_mask;
 #endif
 
 #if defined(_PBR_OVERLAY3_EMISSION_MAP)
-  em += _PBR_Overlay3_EmissionTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _PBR_Overlay3_EmissionTex_ST), iddx * _PBR_Overlay3_EmissionTex_ST.x, iddy * _PBR_Overlay3_EmissionTex_ST.y) * _PBR_Overlay3_Emission * ov.ov3_mask;
+  em += _PBR_Overlay3_EmissionTex.SampleGrad(GET_SAMPLER_OV3, UV_SCOFF(i, _PBR_Overlay3_EmissionTex_ST, _PBR_Overlay3_UV_Select), iddx * _PBR_Overlay3_EmissionTex_ST.x, iddy * _PBR_Overlay3_EmissionTex_ST.y) * _PBR_Overlay3_Emission * ov.ov3_mask;
 #endif
   return em;
 }
@@ -1077,7 +1097,7 @@ float4 effect(inout v2f i)
 #endif
 
 #if defined(_BASECOLOR_MAP)
-  float4 albedo = _MainTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _MainTex_ST), iddx, iddy);
+  float4 albedo = _MainTex.SampleGrad(linear_repeat_s, UV_SCOFF(i, _MainTex_ST, 0), iddx, iddy);
   albedo *= _Color;
 #else
   float4 albedo = _Color;
@@ -1126,7 +1146,7 @@ float4 effect(inout v2f i)
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
   float fw = clamp(fwidth(i.uv0), .001, 1) * 1200;
-  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _NormalTex_ST),
+  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleGrad(linear_repeat_s, UV_SCOFF(i, _NormalTex_ST, 0),
         iddx * _NormalTex_ST.x,
         iddy * _NormalTex_ST.y), _Tex_NormalStr);
 
@@ -1148,12 +1168,12 @@ float4 effect(inout v2f i)
 	);
 
 #if defined(_METALLIC_MAP)
-  float metallic = _MetallicTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _MetallicTex_ST), iddx, iddy);
+  float metallic = _MetallicTex.SampleGrad(linear_repeat_s, UV_SCOFF(i, _MetallicTex_ST, 0), iddx, iddy);
 #else
   float metallic = _Metallic;
 #endif
 #if defined(_ROUGHNESS_MAP)
-  float roughness = _RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i.uv0, _RoughnessTex_ST), iddx, iddy);
+  float roughness = _RoughnessTex.SampleGrad(linear_repeat_s, UV_SCOFF(i, _RoughnessTex_ST, 0), iddx, iddy);
 #else
   float roughness = _Roughness;
 #endif

@@ -151,6 +151,10 @@ public class ToonerGUI : ShaderGUI {
     Min,
     Max
   };
+  enum SamplerMode {
+    Repeat,
+    Clamp,
+  };
 
   void DoPBROverlay() {
     for (int i = 0; i < 4; i++) {
@@ -279,6 +283,21 @@ public class ToonerGUI : ShaderGUI {
           EditorGUI.EndChangeCheck();
           bc.floatValue = enabled ? 1.0f : 0.0f;
         }
+
+        bc = FindProperty($"_PBR_Overlay{i}_UV_Select");
+        editor.RangeProperty(
+            bc,
+            "UV channel");
+
+        EditorGUI.BeginChangeCheck();
+        bc = FindProperty($"_PBR_Overlay{i}_Sampler_Mode");
+        SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
+        sampler_mode = (SamplerMode) EditorGUILayout.EnumPopup(
+            MakeLabel("Sampler mode"), sampler_mode);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = (int) sampler_mode;
+        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
+        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
       } else {
         SetKeyword($"_PBR_OVERLAY{i}_BASECOLOR_MAP", false);
         SetKeyword($"_PBR_OVERLAY{i}_MIX_ALPHA_BLEND", false);
@@ -290,6 +309,8 @@ public class ToonerGUI : ShaderGUI {
         SetKeyword($"_PBR_OVERLAY{i}_METALLIC_MAP", false);
         SetKeyword($"_PBR_OVERLAY{i}_ROUGHNESS_MAP", false);
         SetKeyword($"_PBR_OVERLAY{i}_MASK", false);
+        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_REPEAT", false);
+        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_CLAMP", false);
       }
       EditorGUI.indentLevel -= 1;
     }

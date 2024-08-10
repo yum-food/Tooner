@@ -38,6 +38,8 @@ Shader "yum_food/tooner"
     _PBR_Overlay0_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay0_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay0_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
+    _PBR_Overlay0_UV_Select("UV channel", Range(0,1)) = 0
+    _PBR_Overlay0_Sampler_Mode("Sampler mode", Range(0,1)) = 0
 
     _PBR_Overlay1_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay1_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -58,6 +60,8 @@ Shader "yum_food/tooner"
     _PBR_Overlay1_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay1_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay1_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
+    _PBR_Overlay1_UV_Select("UV channel", Range(0,1)) = 0
+    _PBR_Overlay1_Sampler_Mode("Sampler mode", Range(0,1)) = 0
 
     _PBR_Overlay2_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay2_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -78,6 +82,8 @@ Shader "yum_food/tooner"
     _PBR_Overlay2_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay2_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay2_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
+    _PBR_Overlay2_UV_Select("UV channel", Range(0,1)) = 0
+    _PBR_Overlay2_Sampler_Mode("Sampler mode", Range(0,1)) = 0
 
     _PBR_Overlay3_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay3_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -98,6 +104,8 @@ Shader "yum_food/tooner"
     _PBR_Overlay3_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay3_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay3_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
+    _PBR_Overlay3_UV_Select("UV channel", Range(0,1)) = 0
+    _PBR_Overlay3_Sampler_Mode("Sampler mode", Range(0,1)) = 0
 
     _Decal0_Enable("Enable decal", Float) = 0.0
     _Decal0_BaseColor("Base color", 2D) = "white" {}

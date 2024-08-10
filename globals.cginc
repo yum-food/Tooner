@@ -105,6 +105,8 @@ float _PBR_Overlay0_Constrain_By_Alpha;
 float _PBR_Overlay0_Constrain_By_Alpha_Min;
 float _PBR_Overlay0_Constrain_By_Alpha_Max;
 float _PBR_Overlay0_Alpha_Multiplier;
+float _PBR_Overlay0_UV_Select;
+float _PBR_Overlay0_Sampler_Mode;
 #endif
 
 #if defined(_PBR_OVERLAY1)
@@ -131,6 +133,8 @@ float _PBR_Overlay1_Constrain_By_Alpha;
 float _PBR_Overlay1_Constrain_By_Alpha_Min;
 float _PBR_Overlay1_Constrain_By_Alpha_Max;
 float _PBR_Overlay1_Alpha_Multiplier;
+float _PBR_Overlay1_UV_Select;
+float _PBR_Overlay1_Sampler_Mode;
 #endif
 
 #if defined(_PBR_OVERLAY2)
@@ -157,6 +161,8 @@ float _PBR_Overlay2_Constrain_By_Alpha;
 float _PBR_Overlay2_Constrain_By_Alpha_Min;
 float _PBR_Overlay2_Constrain_By_Alpha_Max;
 float _PBR_Overlay2_Alpha_Multiplier;
+float _PBR_Overlay2_UV_Select;
+float _PBR_Overlay2_Sampler_Mode;
 #endif
 
 #if defined(_PBR_OVERLAY3)
@@ -183,6 +189,8 @@ float _PBR_Overlay3_Constrain_By_Alpha;
 float _PBR_Overlay3_Constrain_By_Alpha_Min;
 float _PBR_Overlay3_Constrain_By_Alpha_Max;
 float _PBR_Overlay3_Alpha_Multiplier;
+float _PBR_Overlay3_UV_Select;
+float _PBR_Overlay3_Sampler_Mode;
 #endif
 
 #if defined(_DECAL0)
