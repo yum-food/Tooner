@@ -265,6 +265,44 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting1_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
 
+    _Rim_Lighting2_Enabled("Enable rim lighting", Float) = 0
+    _Rim_Lighting2_Mode("Rim lighting mode", Float) = 0
+    _Rim_Lighting2_Mask("Rim lighting mask", 2D) = "white" {}
+    _Rim_Lighting2_Mask_Invert("Invert rim lighting mask", Float) = 0.0
+    _Rim_Lighting2_Color("Rim lighting color", Color) = (1, 1, 1, 1)
+    _Rim_Lighting2_Center("Rim lighting center", Float) = 0.5
+    _Rim_Lighting2_Power("Rim lighting power", Float) = 2.0
+    _Rim_Lighting2_Strength("Rim lighting strength", Float) = 1.0
+    _Rim_Lighting2_Emission("Rim lighting emission", Float) = 0
+    _Rim_Lighting2_Quantization("Rim lighting quantization", Float) = -1
+    _Rim_Lighting2_Glitter_Enabled("Rim lighting glitter", Float) = 0
+    _Rim_Lighting2_Glitter_Density("Rim lighting glitter density", Float) = 100
+    _Rim_Lighting2_Glitter_Amount("Rim lighting glitter amount", Float) = 100
+    _Rim_Lighting2_Glitter_Speed("Rim lighting glitter speed", Float) = 1
+    _Rim_Lighting2_Glitter_Quantization("Rim lighting glitter quantization", Float) = 1000
+    _Rim_Lighting2_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
+    _Rim_Lighting2_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
+    _Rim_Lighting2_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
+
+    _Rim_Lighting3_Enabled("Enable rim lighting", Float) = 0
+    _Rim_Lighting3_Mode("Rim lighting mode", Float) = 0
+    _Rim_Lighting3_Mask("Rim lighting mask", 2D) = "white" {}
+    _Rim_Lighting3_Mask_Invert("Invert rim lighting mask", Float) = 0.0
+    _Rim_Lighting3_Color("Rim lighting color", Color) = (1, 1, 1, 1)
+    _Rim_Lighting3_Center("Rim lighting center", Float) = 0.5
+    _Rim_Lighting3_Power("Rim lighting power", Float) = 2.0
+    _Rim_Lighting3_Strength("Rim lighting strength", Float) = 1.0
+    _Rim_Lighting3_Emission("Rim lighting emission", Float) = 0
+    _Rim_Lighting3_Quantization("Rim lighting quantization", Float) = -1
+    _Rim_Lighting3_Glitter_Enabled("Rim lighting glitter", Float) = 0
+    _Rim_Lighting3_Glitter_Density("Rim lighting glitter density", Float) = 100
+    _Rim_Lighting3_Glitter_Amount("Rim lighting glitter amount", Float) = 100
+    _Rim_Lighting3_Glitter_Speed("Rim lighting glitter speed", Float) = 1
+    _Rim_Lighting3_Glitter_Quantization("Rim lighting glitter quantization", Float) = 1000
+    _Rim_Lighting3_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
+    _Rim_Lighting3_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
+    _Rim_Lighting3_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
+
     _OKLAB_Enabled("Enable OKLAB", Float) = 0.0
     _OKLAB_Mask("Mask", 2D) = "white" {}
     _OKLAB_Mask_Invert("Mask invert", Float) = 0.0

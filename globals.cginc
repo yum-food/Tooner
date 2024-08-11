@@ -366,6 +366,56 @@ float _Rim_Lighting1_PolarMask_Power;
 #endif
 #endif
 
+#if defined(_RIM_LIGHTING2)
+float _Rim_Lighting2_Enabled;
+float _Rim_Lighting2_Mode;
+float3 _Rim_Lighting2_Color;
+texture2D _Rim_Lighting2_Mask;
+float _Rim_Lighting2_Mask_Invert;
+float _Rim_Lighting2_Center;
+float _Rim_Lighting2_Power;
+float _Rim_Lighting2_Strength;
+float _Rim_Lighting2_Emission;
+float _Rim_Lighting2_Quantization;
+#if defined(_RIM_LIGHTING2_GLITTER)
+float _Rim_Lighting2_Glitter_Enabled;
+float _Rim_Lighting2_Glitter_Density;
+float _Rim_Lighting2_Glitter_Amount;
+float _Rim_Lighting2_Glitter_Speed;
+float _Rim_Lighting2_Glitter_Quantization;
+#endif
+#if defined(_RIM_LIGHTING2_POLAR_MASK)
+float _Rim_Lighting2_PolarMask_Enabled;
+float _Rim_Lighting2_PolarMask_Theta;
+float _Rim_Lighting2_PolarMask_Power;
+#endif
+#endif
+
+#if defined(_RIM_LIGHTING3)
+float _Rim_Lighting3_Enabled;
+float _Rim_Lighting3_Mode;
+float3 _Rim_Lighting3_Color;
+texture2D _Rim_Lighting3_Mask;
+float _Rim_Lighting3_Mask_Invert;
+float _Rim_Lighting3_Center;
+float _Rim_Lighting3_Power;
+float _Rim_Lighting3_Strength;
+float _Rim_Lighting3_Emission;
+float _Rim_Lighting3_Quantization;
+#if defined(_RIM_LIGHTING3_GLITTER)
+float _Rim_Lighting3_Glitter_Enabled;
+float _Rim_Lighting3_Glitter_Density;
+float _Rim_Lighting3_Glitter_Amount;
+float _Rim_Lighting3_Glitter_Speed;
+float _Rim_Lighting3_Glitter_Quantization;
+#endif
+#if defined(_RIM_LIGHTING3_POLAR_MASK)
+float _Rim_Lighting3_PolarMask_Enabled;
+float _Rim_Lighting3_PolarMask_Theta;
+float _Rim_Lighting3_PolarMask_Power;
+#endif
+#endif
+
 #if defined(_OKLAB)
 float _OKLAB_Enabled;
 texture2D _OKLAB_Mask;

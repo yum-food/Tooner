@@ -500,7 +500,7 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoRimLighting() {
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 4; i++) {
       GUILayout.Label($"Rim lighting {i}", EditorStyles.boldLabel);
       EditorGUI.indentLevel += 1;
 

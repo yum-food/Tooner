@@ -474,7 +474,7 @@ void geom(triangle v2f tri_in[3],
   tri_out.RestartStrip();
 }
 
-#if defined(_GLITTER) || defined(_RIM_LIGHTING0_GLITTER) || defined(_RIM_LIGHTING1_GLITTER)
+#if defined(_GLITTER) || defined(_RIM_LIGHTING0_GLITTER) || defined(_RIM_LIGHTING1_GLITTER) || defined(_RIM_LIGHTING2_GLITTER) || defined(_RIM_LIGHTING3_GLITTER)
 float get_glitter(float2 uv, float3 worldPos,
     float3 normal, float density, float amount, float speed,
     float mask, float brightness, float angle, float power)
@@ -1261,7 +1261,7 @@ float4 effect(inout v2f i)
   }
 #endif
 
-#if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
+#if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1) || defined(_RIM_LIGHTING2) || defined(_RIM_LIGHTING3)
   float3 matcap_emission = 0;
   float2 matcap_uv;
   float matcap_theta;
@@ -1416,7 +1416,7 @@ float4 effect(inout v2f i)
   applyDecal(albedo, roughness, metallic, decal_emission, i);
 #endif
 
-#if defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
+#if defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1) || defined(_RIM_LIGHTING2) || defined(_RIM_LIGHTING3)
   {
     // identity: (a, b, c) and (c, c, -(a +b)) are perpendicular to each other
     float theta = atan2(length(cross(view_dir, normal)), dot(view_dir, normal));
@@ -1462,7 +1462,7 @@ float4 effect(inout v2f i)
           matcap_emission += lerp(0, matcap, matcap_mask) * _Rim_Lighting0_Emission;
           break;
         case 1:
-          matcap_emission = albedo.rgb * lerp(1, matcap, matcap_mask) * _Rim_Lighting0_Emission;
+          matcap_emission = albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting0_Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
@@ -1529,7 +1529,7 @@ float4 effect(inout v2f i)
           matcap_emission += lerp(0, matcap, matcap_mask) * _Rim_Lighting1_Emission;
           break;
         case 1:
-          matcap_emission = albedo.rgb * lerp(1, matcap, matcap_mask) * _Rim_Lighting1_Emission;
+          matcap_emission = albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting1_Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
@@ -1553,8 +1553,142 @@ float4 effect(inout v2f i)
       }
     }
 #endif  // _RIM_LIGHTING1
+#if defined(_RIM_LIGHTING2)
+    {
+      float rl = abs(theta) / PI;  // on [0, 1]
+      rl = pow(2, -_Rim_Lighting2_Power * abs(rl - _Rim_Lighting2_Center));
+      float q = _Rim_Lighting2_Quantization;
+      if (q > 0) {
+        rl = floor(rl * q) / q;
+      }
+      float3 matcap = rl * _Rim_Lighting2_Color * _Rim_Lighting2_Strength;
+#if defined(_RIM_LIGHTING2_MASK)
+      float4 matcap_mask_raw = _Rim_Lighting2_Mask.SampleGrad(linear_repeat_s, i.uv0.xy, iddx, iddy);
+      float matcap_mask = matcap_mask_raw.r;
+      matcap_mask = (bool) round(_Rim_Lighting2_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
+      matcap_mask *= matcap_mask_raw.a;
+#else
+      float matcap_mask = 1;
+#endif
+#if defined(_RIM_LIGHTING2_POLAR_MASK)
+      if (_Rim_Lighting2_PolarMask_Enabled) {
+        float pmask_theta = _Rim_Lighting2_PolarMask_Theta;
+        float pmask_pow = _Rim_Lighting2_PolarMask_Power;
+        float filter = abs(1.0 / (1.0 + pow(abs(matcap_theta - pmask_theta), pmask_pow)));;
+        if (q > 0) {
+          filter = floor(filter * q) / q;
+        }
+        matcap_mask *= filter;
+      }
+#endif
+#if defined(_RIM_LIGHTING2_GLITTER)
+      float rl_glitter = get_glitter(i.uv0, i.worldPos, normal,
+          _Rim_Lighting2_Glitter_Density,
+          _Rim_Lighting2_Glitter_Amount, _Rim_Lighting2_Glitter_Speed,
+          /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
+      rl_glitter = floor(rl_glitter * _Rim_Lighting2_Glitter_Quantization) / _Rim_Lighting2_Glitter_Quantization;
+      matcap_mask *= rl_glitter;
+#endif
+      int mode = round(_Rim_Lighting2_Mode);
+      switch (mode) {
+        case 0:
+          albedo.rgb += lerp(0, matcap, matcap_mask);
+          matcap_emission += lerp(0, matcap, matcap_mask) * _Rim_Lighting2_Emission;
+          break;
+        case 1:
+          matcap_emission = albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting2_Emission;
+          albedo.rgb *= lerp(1, matcap, matcap_mask);
+          break;
+        case 2:
+          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);
+          matcap_emission = lerp(albedo.rgb, matcap, matcap_mask) * _Rim_Lighting2_Emission;
+          break;
+        case 3:
+          albedo.rgb -= lerp(0, matcap, matcap_mask);
+          matcap_emission -= lerp(0, matcap, matcap_mask) * _Rim_Lighting2_Emission;
+          break;
+        case 4:
+          albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask) * _Rim_Lighting2_Emission;
+          break;
+        case 5:
+          albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask) * _Rim_Lighting2_Emission;
+          break;
+        default:
+          break;
+      }
+    }
+#endif  // _RIM_LIGHTING2
+#if defined(_RIM_LIGHTING3)
+    {
+      float rl = abs(theta) / PI;  // on [0, 1]
+      rl = pow(2, -_Rim_Lighting3_Power * abs(rl - _Rim_Lighting3_Center));
+      float q = _Rim_Lighting3_Quantization;
+      if (q > 0) {
+        rl = floor(rl * q) / q;
+      }
+      float3 matcap = rl * _Rim_Lighting3_Color * _Rim_Lighting3_Strength;
+#if defined(_RIM_LIGHTING3_MASK)
+      float4 matcap_mask_raw = _Rim_Lighting3_Mask.SampleGrad(linear_repeat_s, i.uv0.xy, iddx, iddy);
+      float matcap_mask = matcap_mask_raw.r;
+      matcap_mask = (bool) round(_Rim_Lighting3_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
+      matcap_mask *= matcap_mask_raw.a;
+#else
+      float matcap_mask = 1;
+#endif
+#if defined(_RIM_LIGHTING3_POLAR_MASK)
+      if (_Rim_Lighting3_PolarMask_Enabled) {
+        float pmask_theta = _Rim_Lighting3_PolarMask_Theta;
+        float pmask_pow = _Rim_Lighting3_PolarMask_Power;
+        float filter = abs(1.0 / (1.0 + pow(abs(matcap_theta - pmask_theta), pmask_pow)));;
+        if (q > 0) {
+          filter = floor(filter * q) / q;
+        }
+        matcap_mask *= filter;
+      }
+#endif
+#if defined(_RIM_LIGHTING3_GLITTER)
+      float rl_glitter = get_glitter(i.uv0, i.worldPos, normal,
+          _Rim_Lighting3_Glitter_Density,
+          _Rim_Lighting3_Glitter_Amount, _Rim_Lighting3_Glitter_Speed,
+          /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
+      rl_glitter = floor(rl_glitter * _Rim_Lighting3_Glitter_Quantization) / _Rim_Lighting3_Glitter_Quantization;
+      matcap_mask *= rl_glitter;
+#endif
+      int mode = round(_Rim_Lighting3_Mode);
+      switch (mode) {
+        case 0:
+          albedo.rgb += lerp(0, matcap, matcap_mask);
+          matcap_emission += lerp(0, matcap, matcap_mask) * _Rim_Lighting3_Emission;
+          break;
+        case 1:
+          matcap_emission = albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting3_Emission;
+          albedo.rgb *= lerp(1, matcap, matcap_mask);
+          break;
+        case 2:
+          albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);
+          matcap_emission = lerp(albedo.rgb, matcap, matcap_mask) * _Rim_Lighting3_Emission;
+          break;
+        case 3:
+          albedo.rgb -= lerp(0, matcap, matcap_mask);
+          matcap_emission -= lerp(0, matcap, matcap_mask) * _Rim_Lighting3_Emission;
+          break;
+        case 4:
+          albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, min(albedo.rgb, matcap), matcap_mask) * _Rim_Lighting3_Emission;
+          break;
+        case 5:
+          albedo.rgb = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask);
+          matcap_emission = lerp(albedo.rgb, max(albedo.rgb, matcap), matcap_mask) * _Rim_Lighting3_Emission;
+          break;
+        default:
+          break;
+      }
+    }
+#endif  // _RIM_LIGHTING3
   }
-#endif  // _RIM_LIGHTING0 || _RIM_LIGHTING1
+#endif  // _RIM_LIGHTING0 || _RIM_LIGHTING1 || _RIM_LIGHTING2 || _RIM_LIGHTING3
 
 #if defined(_OKLAB)
   // Do hue shift in perceptually uniform color space so it doesn't look like
