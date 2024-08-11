@@ -548,6 +548,26 @@ float2 matcap_distortion0(float2 matcap_uv) {
 #elif defined(_PBR_OVERLAY3_SAMPLER_CLAMP)
 #define GET_SAMPLER_OV3 linear_clamp_s
 #endif
+#if defined(_RIM_LIGHTING0_SAMPLER_REPEAT)
+#define GET_SAMPLER_RL0 linear_repeat_s
+#elif defined(_RIM_LIGHTING0_SAMPLER_CLAMP)
+#define GET_SAMPLER_RL0 linear_clamp_s
+#endif
+#if defined(_RIM_LIGHTING1_SAMPLER_REPEAT)
+#define GET_SAMPLER_RL1 linear_repeat_s
+#elif defined(_RIM_LIGHTING1_SAMPLER_CLAMP)
+#define GET_SAMPLER_RL1 linear_clamp_s
+#endif
+#if defined(_RIM_LIGHTING2_SAMPLER_REPEAT)
+#define GET_SAMPLER_RL2 linear_repeat_s
+#elif defined(_RIM_LIGHTING2_SAMPLER_CLAMP)
+#define GET_SAMPLER_RL2 linear_clamp_s
+#endif
+#if defined(_RIM_LIGHTING3_SAMPLER_REPEAT)
+#define GET_SAMPLER_RL3 linear_repeat_s
+#elif defined(_RIM_LIGHTING3_SAMPLER_CLAMP)
+#define GET_SAMPLER_RL3 linear_clamp_s
+#endif
 
 struct PbrOverlay {
 #if defined(_PBR_OVERLAY0)
@@ -1433,7 +1453,8 @@ float4 effect(inout v2f i)
       float3 matcap = rl * _Rim_Lighting0_Color * _Rim_Lighting0_Strength;
 
 #if defined(_RIM_LIGHTING0_MASK)
-      float4 matcap_mask_raw = _Rim_Lighting0_Mask.SampleGrad(linear_repeat_s, i.uv0.xy, iddx, iddy);
+      float4 matcap_mask_raw = _Rim_Lighting0_Mask.SampleGrad(GET_SAMPLER_RL0,
+          GET_UV_BY_CHANNEL(i, _Rim_Lighting0_Mask_UV_Select), iddx, iddy);
       float matcap_mask = matcap_mask_raw.r;
       matcap_mask = (bool) round(_Rim_Lighting0_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
       matcap_mask *= matcap_mask_raw.a;
@@ -1496,7 +1517,8 @@ float4 effect(inout v2f i)
       }
       float3 matcap = rl * _Rim_Lighting1_Color * _Rim_Lighting1_Strength;
 #if defined(_RIM_LIGHTING1_MASK)
-      float4 matcap_mask_raw = _Rim_Lighting1_Mask.SampleGrad(linear_repeat_s, i.uv0.xy, iddx, iddy);
+      float4 matcap_mask_raw = _Rim_Lighting1_Mask.SampleGrad(GET_SAMPLER_RL1,
+          GET_UV_BY_CHANNEL(i, _Rim_Lighting1_Mask_UV_Select), iddx, iddy);
       float matcap_mask = matcap_mask_raw.r;
       matcap_mask = (bool) round(_Rim_Lighting1_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
       matcap_mask *= matcap_mask_raw.a;
@@ -1563,7 +1585,8 @@ float4 effect(inout v2f i)
       }
       float3 matcap = rl * _Rim_Lighting2_Color * _Rim_Lighting2_Strength;
 #if defined(_RIM_LIGHTING2_MASK)
-      float4 matcap_mask_raw = _Rim_Lighting2_Mask.SampleGrad(linear_repeat_s, i.uv0.xy, iddx, iddy);
+      float4 matcap_mask_raw = _Rim_Lighting2_Mask.SampleGrad(GET_SAMPLER_RL2,
+          GET_UV_BY_CHANNEL(i, _Rim_Lighting2_Mask_UV_Select), iddx, iddy);
       float matcap_mask = matcap_mask_raw.r;
       matcap_mask = (bool) round(_Rim_Lighting2_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
       matcap_mask *= matcap_mask_raw.a;
@@ -1630,7 +1653,8 @@ float4 effect(inout v2f i)
       }
       float3 matcap = rl * _Rim_Lighting3_Color * _Rim_Lighting3_Strength;
 #if defined(_RIM_LIGHTING3_MASK)
-      float4 matcap_mask_raw = _Rim_Lighting3_Mask.SampleGrad(linear_repeat_s, i.uv0.xy, iddx, iddy);
+      float4 matcap_mask_raw = _Rim_Lighting3_Mask.SampleGrad(GET_SAMPLER_RL3,
+          GET_UV_BY_CHANNEL(i, _Rim_Lighting3_Mask_UV_Select), iddx, iddy);
       float matcap_mask = matcap_mask_raw.r;
       matcap_mask = (bool) round(_Rim_Lighting3_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
       matcap_mask *= matcap_mask_raw.a;

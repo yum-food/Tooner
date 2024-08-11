@@ -528,12 +528,31 @@ public class ToonerGUI : ShaderGUI {
       SetKeyword($"_RIM_LIGHTING{i}_MASK", bc.textureValue);
 
       if (bc.textureValue) {
+        EditorGUI.indentLevel += 1;
+
         bc = FindProperty($"_Rim_Lighting{i}_Mask_Invert");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
         enabled = EditorGUILayout.Toggle("Invert mask", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
+
+        bc = FindProperty($"_Rim_Lighting{i}_Mask_UV_Select");
+        editor.RangeProperty(
+            bc,
+            "UV channel");
+
+        bc = FindProperty($"_Rim_Lighting{i}_Mask_Sampler_Mode");
+        SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
+        sampler_mode = (SamplerMode) EditorGUILayout.EnumPopup(
+            MakeLabel("Sampler mode"), sampler_mode);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = (int) sampler_mode;
+
+        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
+        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
+
+        EditorGUI.indentLevel -= 1;
       }
 
       EditorGUI.BeginChangeCheck();

@@ -231,6 +231,8 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_Mode("Rim lighting mode", Float) = 0
     _Rim_Lighting0_Mask("Rim lighting mask", 2D) = "white" {}
     _Rim_Lighting0_Mask_Invert("Invert rim lighting mask", Float) = 0.0
+    _Rim_Lighting0_Mask_UV_Select("mask UV select", Range(0, 1)) = 0.0
+    _Rim_Lighting0_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
     _Rim_Lighting0_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting0_Center("Rim lighting center", Float) = 0.5
     _Rim_Lighting0_Power("Rim lighting power", Float) = 2.0
@@ -250,6 +252,8 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_Mode("Rim lighting mode", Float) = 0
     _Rim_Lighting1_Mask("Rim lighting mask", 2D) = "white" {}
     _Rim_Lighting1_Mask_Invert("Invert rim lighting mask", Float) = 0.0
+    _Rim_Lighting1_Mask_UV_Select("mask UV select", Range(0, 1)) = 0.0
+    _Rim_Lighting1_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
     _Rim_Lighting1_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting1_Center("Rim lighting center", Float) = 0.5
     _Rim_Lighting1_Power("Rim lighting power", Float) = 2.0
@@ -269,6 +273,8 @@ Shader "yum_food/tooner"
     _Rim_Lighting2_Mode("Rim lighting mode", Float) = 0
     _Rim_Lighting2_Mask("Rim lighting mask", 2D) = "white" {}
     _Rim_Lighting2_Mask_Invert("Invert rim lighting mask", Float) = 0.0
+    _Rim_Lighting2_Mask_UV_Select("mask UV select", Range(0, 1)) = 0.0
+    _Rim_Lighting2_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
     _Rim_Lighting2_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting2_Center("Rim lighting center", Float) = 0.5
     _Rim_Lighting2_Power("Rim lighting power", Float) = 2.0
@@ -288,6 +294,8 @@ Shader "yum_food/tooner"
     _Rim_Lighting3_Mode("Rim lighting mode", Float) = 0
     _Rim_Lighting3_Mask("Rim lighting mask", 2D) = "white" {}
     _Rim_Lighting3_Mask_Invert("Invert rim lighting mask", Float) = 0.0
+    _Rim_Lighting3_Mask_UV_Select("mask UV select", Range(0, 1)) = 0.0
+    _Rim_Lighting3_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
     _Rim_Lighting3_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting3_Center("Rim lighting center", Float) = 0.5
     _Rim_Lighting3_Power("Rim lighting power", Float) = 2.0
@@ -453,7 +461,6 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
-    /*
     Pass {
       Tags {
         "RenderType" = "Opaque"
@@ -524,7 +531,6 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
-    */
   }
   CustomEditor "ToonerGUI"
 }
