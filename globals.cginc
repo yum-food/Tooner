@@ -45,6 +45,12 @@ float3 shadowedReflections;
 float3 _ReflShadows;
 float3 _ReflShadowStrength;
 
+#if defined(_PROXIMITY_DIMMING)
+float _Proximity_Dimming_Min_Dist;
+float _Proximity_Dimming_Max_Dist;
+float _Proximity_Dimming_Factor;
+#endif
+
 #if defined(_CLEARCOAT)
 float _Clearcoat_Enabled;
 float _Clearcoat_Strength;

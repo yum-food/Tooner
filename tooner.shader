@@ -164,6 +164,11 @@ Shader "yum_food/tooner"
     _Ambient_Occlusion("Ambient occlusion", 2D) = "white" {}
     _Ambient_Occlusion_Strength("Ambient occlusion", Range(0,1)) = 1
 
+    _Proximity_Dimming_Enable_Static("Enable proximity dimming", Float) = 0
+    _Proximity_Dimming_Min_Dist("Proximity dimming min distance", Float) = 0
+    _Proximity_Dimming_Max_Dist("Proximity dimming max distance", Float) = 1
+    _Proximity_Dimming_Factor("Proximity dimming max distance", Float) = 0
+
     _Shading_Mode("Shading mode", Range(0, 1)) = 0
     _Mesh_Normals_Mode("Normals mode", Float) = 0.0
     _Flatten_Mesh_Normals_Str("Flatten mesh normals strength", Float) = 100.0

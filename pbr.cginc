@@ -236,26 +236,53 @@ float4 getLitColor(
   }
 #endif
 
+  direct_light.color = RGBtoHSV(direct_light.color);
+  indirect_light.specular = RGBtoHSV(indirect_light.specular);
+  indirect_light.diffuse = RGBtoHSV(indirect_light.diffuse);
+
   if (_Reflection_Probe_Saturation < 1.0) {
-    direct_light.color = RGBtoHSV(direct_light.color);
     direct_light.color[1] *= _Reflection_Probe_Saturation;
-    direct_light.color = HSVtoRGB(direct_light.color);
-    indirect_light.specular = RGBtoHSV(indirect_light.specular);
     indirect_light.specular[1] *= _Reflection_Probe_Saturation;
-    indirect_light.specular = HSVtoRGB(indirect_light.specular);
-    indirect_light.diffuse = RGBtoHSV(indirect_light.diffuse);
     indirect_light.diffuse[1] *= _Reflection_Probe_Saturation;
-    indirect_light.diffuse = HSVtoRGB(indirect_light.diffuse);
   }
 
-  direct_light.color = clamp(direct_light.color, _Min_Brightness, _Max_Brightness);
-  indirect_light.diffuse = clamp(indirect_light.diffuse, _Min_Brightness, _Max_Brightness);
-  indirect_light.specular = clamp(indirect_light.specular, _Min_Brightness, _Max_Brightness);
+#if defined(_PROXIMITY_DIMMING)
+  {
+    float cam_dist = length(_WorldSpaceCameraPos - worldPos);
+    cam_dist = clamp(cam_dist, _Proximity_Dimming_Min_Dist,
+        _Proximity_Dimming_Max_Dist);
+    // Map onto [0, 1]
+    cam_dist = (cam_dist - _Proximity_Dimming_Min_Dist) /
+      (_Proximity_Dimming_Max_Dist - _Proximity_Dimming_Min_Dist);
+    float dim_factor = lerp(_Proximity_Dimming_Factor, 1, cam_dist);
+    direct_light.color[2] *= dim_factor;
+    indirect_light.diffuse[2] *= dim_factor;
+    indirect_light.specular[2] *= dim_factor;
+  }
+#endif
 
-  // TODO move back before clamping
-  direct_light.color *= _Lighting_Factor * _Direct_Lighting_Factor * enable_direct;
-  indirect_light.specular *= _Lighting_Factor * _Indirect_Specular_Lighting_Factor;
-  indirect_light.diffuse *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
+  direct_light.color[2] *= _Lighting_Factor * _Direct_Lighting_Factor * enable_direct;
+  indirect_light.specular[2] *= _Lighting_Factor * _Indirect_Specular_Lighting_Factor;
+  indirect_light.diffuse[2] *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
+
+  float2 brightnesses = float2(
+      direct_light.color[2],
+      indirect_light.diffuse[2]);
+  // Do this to avoid division by 0. If both light sources are black,
+  // sum_brightness could be 0;
+  brightnesses = max(brightnesses, min(_Min_Brightness, .001));
+  float sum_brightness = brightnesses[0] + brightnesses[1];
+  float2 brightness_proportions = brightnesses / sum_brightness;
+  sum_brightness = clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
+  direct_light.color[2] = sum_brightness * brightness_proportions[0];
+  indirect_light.diffuse[2] = sum_brightness * brightness_proportions[1];
+
+  // Specular has to be clamped separately to avoid artifacting.
+  indirect_light.specular[2] = clamp(indirect_light.specular[2], _Min_Brightness, _Max_Brightness);
+
+  direct_light.color = HSVtoRGB(direct_light.color);
+  indirect_light.specular = HSVtoRGB(indirect_light.specular);
+  indirect_light.diffuse = HSVtoRGB(indirect_light.diffuse);
 
   // Apply AO
   indirect_light.diffuse *= ao;

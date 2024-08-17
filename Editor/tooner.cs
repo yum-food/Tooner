@@ -1495,9 +1495,32 @@ public class ToonerGUI : ShaderGUI {
         "Mipmap multiplier");
     bc.floatValue = (float) Math.Max(1E-6, bc.floatValue);
 
+    bc = FindProperty("_Proximity_Dimming_Enable_Static");
+    bool enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Proximity dimming", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_PROXIMITY_DIMMING", enabled);
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Proximity_Dimming_Min_Dist");
+      editor.FloatProperty(bc, "Min distance");
+
+      bc = FindProperty("_Proximity_Dimming_Max_Dist");
+      editor.FloatProperty(bc, "Max distance");
+
+      bc = FindProperty("_Proximity_Dimming_Factor");
+      editor.FloatProperty(bc, "Dimming factor");
+
+      EditorGUI.indentLevel -= 1;
+    }
+
 #if LTCGI_INCLUDED
     bc = FindProperty("_LTCGI_Enabled");
-    bool enabled = bc.floatValue > 1E-6;
+    enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
     enabled = EditorGUILayout.Toggle("Enable LTCGI", enabled);
     EditorGUI.EndChangeCheck();
