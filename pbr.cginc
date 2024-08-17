@@ -261,10 +261,6 @@ float4 getLitColor(
   }
 #endif
 
-  direct_light.color[2] *= _Lighting_Factor * _Direct_Lighting_Factor * enable_direct;
-  indirect_light.specular[2] *= _Lighting_Factor * _Indirect_Specular_Lighting_Factor;
-  indirect_light.diffuse[2] *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
-
   float2 brightnesses = float2(
       direct_light.color[2],
       indirect_light.diffuse[2]);
@@ -276,6 +272,10 @@ float4 getLitColor(
   sum_brightness = clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
   direct_light.color[2] = sum_brightness * brightness_proportions[0];
   indirect_light.diffuse[2] = sum_brightness * brightness_proportions[1];
+
+  direct_light.color[2] *= _Lighting_Factor * _Direct_Lighting_Factor * enable_direct;
+  indirect_light.specular[2] *= _Lighting_Factor * _Indirect_Specular_Lighting_Factor;
+  indirect_light.diffuse[2] *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
 
   // Specular has to be clamped separately to avoid artifacting.
   indirect_light.specular[2] = clamp(indirect_light.specular[2], _Min_Brightness, _Max_Brightness);
