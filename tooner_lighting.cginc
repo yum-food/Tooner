@@ -32,6 +32,9 @@ struct tess_data
   #if defined(VERTEXLIGHT_ON)
   float3 vertexLightColor : TEXCOORD4;
   #endif
+
+  UNITY_VERTEX_INPUT_INSTANCE_ID
+  UNITY_VERTEX_OUTPUT_STEREO
 };
 
 struct tess_factors {
@@ -222,10 +225,10 @@ tess_data hull_vertex(appdata v)
 {
   tess_data o;
 
-  UNITY_SETUP_INSTANCE_ID(v);
   UNITY_INITIALIZE_OUTPUT(tess_data, o);
-  UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+  UNITY_SETUP_INSTANCE_ID(v);
   UNITY_TRANSFER_INSTANCE_ID(v, o);
+  UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
   o.pos = v.vertex;
   //o.vertex = UnityObjectToClipPos(v.vertex);
