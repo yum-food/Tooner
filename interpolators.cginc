@@ -30,6 +30,7 @@ struct v2f
   float4 screenPos                  : TEXCOORD6;
   #endif
 
+  UNITY_VERTEX_INPUT_INSTANCE_ID
   UNITY_VERTEX_OUTPUT_STEREO
 };
 
@@ -67,6 +68,7 @@ struct v2f
   float4 screenPos                  : TEXCOORD9;
   #endif
 
+  UNITY_VERTEX_INPUT_INSTANCE_ID
   UNITY_VERTEX_OUTPUT_STEREO
 };
 #endif
