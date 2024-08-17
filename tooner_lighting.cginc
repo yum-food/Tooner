@@ -618,9 +618,21 @@ struct PbrOverlay {
 void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
     v2f i, float iddx, float iddy)
 {
+#if defined(_PBR_OVERLAY0) || defined(_PBR_OVERLAY1) || defined(_PBR_OVERLAY2) || defined(_PBR_OVERLAY3)
+  float uv0_iddx = (ddx(i.uv0.x) + ddx(i.uv0.y)) * _Mip_Multiplier;
+  float uv0_iddy = (ddy(i.uv0.x) + ddy(i.uv0.y)) * _Mip_Multiplier;
+  float uv2_iddx = (ddx(i.uv2.x) + ddx(i.uv2.y)) * _Mip_Multiplier;
+  float uv2_iddy = (ddy(i.uv2.x) + ddy(i.uv2.y)) * _Mip_Multiplier;
+#define GET_IDDX(which_channel) (which_channel == 0 ? uv0_iddx : uv2_iddx)
+#define GET_IDDY(which_channel) (which_channel == 0 ? uv0_iddy : uv2_iddy)
+#endif
+
 #if defined(_PBR_OVERLAY0)
 #if defined(_PBR_OVERLAY0_BASECOLOR_MAP)
-  ov.ov0_albedo = _PBR_Overlay0_BaseColorTex.SampleGrad(GET_SAMPLER_OV0, UV_SCOFF(i, _PBR_Overlay0_BaseColorTex_ST, _PBR_Overlay0_UV_Select), iddx * _PBR_Overlay0_BaseColorTex_ST.x, iddy * _PBR_Overlay0_BaseColorTex_ST.y);
+  ov.ov0_albedo = _PBR_Overlay0_BaseColorTex.SampleGrad(GET_SAMPLER_OV0,
+      UV_SCOFF(i, _PBR_Overlay0_BaseColorTex_ST, _PBR_Overlay0_UV_Select),
+      GET_IDDX(_PBR_Overlay0_UV_Select) * _PBR_Overlay0_BaseColorTex_ST.x,
+      GET_IDDY(_PBR_Overlay0_UV_Select) * _PBR_Overlay0_BaseColorTex_ST.y);
   ov.ov0_albedo *= _PBR_Overlay0_BaseColor;
 #else
   ov.ov0_albedo = _PBR_Overlay0_BaseColor;
@@ -628,7 +640,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY0_ROUGHNESS)
 #if defined(_PBR_OVERLAY0_ROUGHNESS_MAP)
-  ov.ov0_roughness = _PBR_Overlay0_RoughnessTex.SampleGrad(GET_SAMPLER_OV0, UV_SCOFF(i, _PBR_Overlay0_RoughnessTex_ST, _PBR_Overlay0_UV_Select), iddx * _PBR_Overlay0_RoughnessTex_ST.x, iddy * _PBR_Overlay0_RoughnessTex_ST.y);
+  ov.ov0_roughness = _PBR_Overlay0_RoughnessTex.SampleGrad(GET_SAMPLER_OV0,
+      UV_SCOFF(i, _PBR_Overlay0_RoughnessTex_ST, _PBR_Overlay0_UV_Select),
+      GET_IDDX(_PBR_Overlay0_UV_Select) * _PBR_Overlay0_RoughnessTex_ST.x,
+      GET_IDDY(_PBR_Overlay0_UV_Select) * _PBR_Overlay0_RoughnessTex_ST.y);
   ov.ov0_roughness *= _PBR_Overlay0_Roughness;
 #else
   ov.ov0_roughness = _PBR_Overlay0_Roughness;
@@ -637,7 +652,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY0_METALLIC)
 #if defined(_PBR_OVERLAY0_METALLIC_MAP)
-  ov.ov0_metallic = _PBR_Overlay0_MetallicTex.SampleGrad(GET_SAMPLER_OV0, UV_SCOFF(i, _PBR_Overlay0_MetallicTex_ST, _PBR_Overlay0_UV_Select), iddx * _PBR_Overlay0_MetallicTex_ST.x, iddy * _PBR_Overlay0_MetallicTex_ST.y);
+  ov.ov0_metallic = _PBR_Overlay0_MetallicTex.SampleGrad(GET_SAMPLER_OV0,
+      UV_SCOFF(i, _PBR_Overlay0_MetallicTex_ST, _PBR_Overlay0_UV_Select),
+      GET_IDDX(_PBR_Overlay0_UV_Select) * _PBR_Overlay0_MetallicTex_ST.x,
+      GET_IDDY(_PBR_Overlay0_UV_Select) * _PBR_Overlay0_MetallicTex_ST.y);
   ov.ov0_metallic *= _PBR_Overlay0_Metallic;
 #else
   ov.ov0_metallic = _PBR_Overlay0_Metallic;
@@ -645,7 +663,9 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY0_MASK)
-  ov.ov0_mask = _PBR_Overlay0_Mask.SampleGrad(GET_SAMPLER_OV0, i.uv0, iddx, iddy);
+  ov.ov0_mask = _PBR_Overlay0_Mask.SampleGrad(GET_SAMPLER_OV0,
+      GET_UV_BY_CHANNEL(i, _PBR_Overlay0_UV_Select),
+      GET_IDDX(_PBR_Overlay0_UV_Select), GET_IDDY(_PBR_Overlay0_UV_Select));
   ov.ov0_mask = ((bool) round(_PBR_Overlay0_Mask_Invert)) ? 1.0 - ov.ov0_mask : ov.ov0_mask;
 #else
   ov.ov0_mask = 1;
@@ -655,7 +675,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY1)
 #if defined(_PBR_OVERLAY1_BASECOLOR_MAP)
-  ov.ov1_albedo = _PBR_Overlay1_BaseColorTex.SampleGrad(GET_SAMPLER_OV1, UV_SCOFF(i, _PBR_Overlay1_BaseColorTex_ST, _PBR_Overlay1_UV_Select), iddx * _PBR_Overlay1_BaseColorTex_ST.x, iddy * _PBR_Overlay1_BaseColorTex_ST.y);
+  ov.ov1_albedo = _PBR_Overlay1_BaseColorTex.SampleGrad(GET_SAMPLER_OV1,
+      UV_SCOFF(i, _PBR_Overlay1_BaseColorTex_ST, _PBR_Overlay1_UV_Select),
+      GET_IDDX(_PBR_Overlay1_UV_Select) * _PBR_Overlay1_BaseColorTex_ST.x,
+      GET_IDDY(_PBR_Overlay1_UV_Select) * _PBR_Overlay1_BaseColorTex_ST.y);
   ov.ov1_albedo *= _PBR_Overlay1_BaseColor;
 #else
   ov.ov1_albedo = _PBR_Overlay1_BaseColor;
@@ -663,7 +686,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY1_ROUGHNESS)
 #if defined(_PBR_OVERLAY1_ROUGHNESS_MAP)
-  ov.ov1_roughness = _PBR_Overlay1_RoughnessTex.SampleGrad(GET_SAMPLER_OV1, UV_SCOFF(i, _PBR_Overlay1_RoughnessTex_ST, _PBR_Overlay1_UV_Select), iddx * _PBR_Overlay1_RoughnessTex_ST.x, iddy * _PBR_Overlay1_RoughnessTex_ST.y);
+  ov.ov1_roughness = _PBR_Overlay1_RoughnessTex.SampleGrad(GET_SAMPLER_OV1,
+      UV_SCOFF(i, _PBR_Overlay1_RoughnessTex_ST, _PBR_Overlay1_UV_Select),
+      GET_IDDX(_PBR_Overlay1_UV_Select) * _PBR_Overlay1_RoughnessTex_ST.x,
+      GET_IDDY(_PBR_Overlay1_UV_Select) * _PBR_Overlay1_RoughnessTex_ST.y);
   ov.ov1_roughness *= _PBR_Overlay1_Roughness;
 #else
   ov.ov1_roughness = _PBR_Overlay1_Roughness;
@@ -672,7 +698,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY1_METALLIC)
 #if defined(_PBR_OVERLAY1_METALLIC_MAP)
-  ov.ov1_metallic = _PBR_Overlay1_MetallicTex.SampleGrad(GET_SAMPLER_OV1, UV_SCOFF(i, _PBR_Overlay1_MetallicTex_ST, _PBR_Overlay1_UV_Select), iddx * _PBR_Overlay1_MetallicTex_ST.x, iddy * _PBR_Overlay1_MetallicTex_ST.y);
+  ov.ov1_metallic = _PBR_Overlay1_MetallicTex.SampleGrad(GET_SAMPLER_OV1,
+      UV_SCOFF(i, _PBR_Overlay1_MetallicTex_ST, _PBR_Overlay1_UV_Select),
+      GET_IDDX(_PBR_Overlay1_UV_Select) * _PBR_Overlay1_MetallicTex_ST.x,
+      GET_IDDY(_PBR_Overlay1_UV_Select) * _PBR_Overlay1_MetallicTex_ST.y);
   ov.ov1_metallic *= _PBR_Overlay1_Metallic;
 #else
   ov.ov1_metallic = _PBR_Overlay1_Metallic;
@@ -680,7 +709,7 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY1_MASK)
-  ov.ov1_mask = _PBR_Overlay1_Mask.SampleGrad(GET_SAMPLER_OV1, i.uv0, iddx, iddy);
+  ov.ov1_mask = _PBR_Overlay1_Mask.SampleGrad(GET_SAMPLER_OV1, i.uv0, GET_IDDX(_PBR_Overlay1_UV_Select), GET_IDDY(_PBR_Overlay1_UV_Select));
   ov.ov1_mask = ((bool) round(_PBR_Overlay1_Mask_Invert)) ? 1.0 - ov.ov1_mask : ov.ov1_mask;
 #else
   ov.ov1_mask = 1;
@@ -690,7 +719,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY2)
 #if defined(_PBR_OVERLAY2_BASECOLOR_MAP)
-  ov.ov2_albedo = _PBR_Overlay2_BaseColorTex.SampleGrad(GET_SAMPLER_OV2, UV_SCOFF(i, _PBR_Overlay2_BaseColorTex_ST, _PBR_Overlay2_UV_Select), iddx * _PBR_Overlay2_BaseColorTex_ST.x, iddy * _PBR_Overlay2_BaseColorTex_ST.y);
+  ov.ov2_albedo = _PBR_Overlay2_BaseColorTex.SampleGrad(GET_SAMPLER_OV2,
+      UV_SCOFF(i, _PBR_Overlay2_BaseColorTex_ST, _PBR_Overlay2_UV_Select),
+      GET_IDDX(_PBR_Overlay2_UV_Select) * _PBR_Overlay2_BaseColorTex_ST.x,
+      GET_IDDY(_PBR_Overlay2_UV_Select) * _PBR_Overlay2_BaseColorTex_ST.y);
   ov.ov2_albedo *= _PBR_Overlay2_BaseColor;
 #else
   ov.ov2_albedo = _PBR_Overlay2_BaseColor;
@@ -698,7 +730,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY2_ROUGHNESS)
 #if defined(_PBR_OVERLAY2_ROUGHNESS_MAP)
-  ov.ov2_roughness = _PBR_Overlay2_RoughnessTex.SampleGrad(GET_SAMPLER_OV2, UV_SCOFF(i, _PBR_Overlay2_RoughnessTex_ST, _PBR_Overlay2_UV_Select), iddx * _PBR_Overlay2_RoughnessTex_ST.x, iddy * _PBR_Overlay2_RoughnessTex_ST.y);
+  ov.ov2_roughness = _PBR_Overlay2_RoughnessTex.SampleGrad(GET_SAMPLER_OV2,
+      UV_SCOFF(i, _PBR_Overlay2_RoughnessTex_ST, _PBR_Overlay2_UV_Select),
+      GET_IDDX(_PBR_Overlay2_UV_Select) * _PBR_Overlay2_RoughnessTex_ST.x,
+      GET_IDDY(_PBR_Overlay2_UV_Select) * _PBR_Overlay2_RoughnessTex_ST.y);
   ov.ov2_roughness *= _PBR_Overlay2_Roughness;
 #else
   ov.ov2_roughness = _PBR_Overlay2_Roughness;
@@ -707,7 +742,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY2_METALLIC)
 #if defined(_PBR_OVERLAY2_METALLIC_MAP)
-  ov.ov2_metallic = _PBR_Overlay2_MetallicTex.SampleGrad(GET_SAMPLER_OV2, UV_SCOFF(i, _PBR_Overlay2_MetallicTex_ST, _PBR_Overlay2_UV_Select), iddx * _PBR_Overlay2_MetallicTex_ST.x, iddy * _PBR_Overlay2_MetallicTex_ST.y);
+  ov.ov2_metallic = _PBR_Overlay2_MetallicTex.SampleGrad(GET_SAMPLER_OV2,
+      UV_SCOFF(i, _PBR_Overlay2_MetallicTex_ST, _PBR_Overlay2_UV_Select),
+      GET_IDDX(_PBR_Overlay2_UV_Select) * _PBR_Overlay2_MetallicTex_ST.x,
+      GET_IDDY(_PBR_Overlay2_UV_Select) * _PBR_Overlay2_MetallicTex_ST.y);
   ov.ov2_metallic *= _PBR_Overlay2_Metallic;
 #else
   ov.ov2_metallic = _PBR_Overlay2_Metallic;
@@ -715,7 +753,9 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY2_MASK)
-  ov.ov2_mask = _PBR_Overlay2_Mask.SampleGrad(GET_SAMPLER_OV2, i.uv0, iddx, iddy);
+  ov.ov2_mask = _PBR_Overlay2_Mask.SampleGrad(GET_SAMPLER_OV2, i.uv0,
+      GET_IDDX(_PBR_Overlay2_UV_Select),
+      GET_IDDY(_PBR_Overlay2_UV_Select));
   ov.ov2_mask = ((bool) round(_PBR_Overlay2_Mask_Invert)) ? 1.0 - ov.ov2_mask : ov.ov2_mask;
 #else
   ov.ov2_mask = 1;
@@ -725,7 +765,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY3)
 #if defined(_PBR_OVERLAY3_BASECOLOR_MAP)
-  ov.ov3_albedo = _PBR_Overlay3_BaseColorTex.SampleGrad(GET_SAMPLER_OV3, UV_SCOFF(i, _PBR_Overlay3_BaseColorTex_ST, _PBR_Overlay3_UV_Select), iddx * _PBR_Overlay3_BaseColorTex_ST.x, iddy * _PBR_Overlay3_BaseColorTex_ST.y);
+  ov.ov3_albedo = _PBR_Overlay3_BaseColorTex.SampleGrad(GET_SAMPLER_OV3,
+      UV_SCOFF(i, _PBR_Overlay3_BaseColorTex_ST, _PBR_Overlay3_UV_Select),
+      GET_IDDX(_PBR_Overlay3_UV_Select) * _PBR_Overlay3_BaseColorTex_ST.x,
+      GET_IDDY(_PBR_Overlay3_UV_Select) * _PBR_Overlay3_BaseColorTex_ST.y);
   ov.ov3_albedo *= _PBR_Overlay3_BaseColor;
 #else
   ov.ov3_albedo = _PBR_Overlay3_BaseColor;
@@ -733,7 +776,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY3_ROUGHNESS)
 #if defined(_PBR_OVERLAY3_ROUGHNESS_MAP)
-  ov.ov3_roughness = _PBR_Overlay3_RoughnessTex.SampleGrad(GET_SAMPLER_OV3, UV_SCOFF(i, _PBR_Overlay3_RoughnessTex_ST, _PBR_Overlay3_UV_Select), iddx * _PBR_Overlay3_RoughnessTex_ST.x, iddy * _PBR_Overlay3_RoughnessTex_ST.y);
+  ov.ov3_roughness = _PBR_Overlay3_RoughnessTex.SampleGrad(GET_SAMPLER_OV3,
+      UV_SCOFF(i, _PBR_Overlay3_RoughnessTex_ST, _PBR_Overlay3_UV_Select),
+      GET_IDDX(_PBR_Overlay3_UV_Select) * _PBR_Overlay3_RoughnessTex_ST.x,
+      GET_IDDY(_PBR_Overlay3_UV_Select) * _PBR_Overlay3_RoughnessTex_ST.y);
   ov.ov3_roughness *= _PBR_Overlay3_Roughness;
 #else
   ov.ov3_roughness = _PBR_Overlay3_Roughness;
@@ -742,7 +788,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 
 #if defined(_PBR_OVERLAY3_METALLIC)
 #if defined(_PBR_OVERLAY3_METALLIC_MAP)
-  ov.ov3_metallic = _PBR_Overlay3_MetallicTex.SampleGrad(GET_SAMPLER_OV3, UV_SCOFF(i, _PBR_Overlay3_MetallicTex_ST, _PBR_Overlay3_UV_Select), iddx * _PBR_Overlay3_MetallicTex_ST.x, iddy * _PBR_Overlay3_MetallicTex_ST.y);
+  ov.ov3_metallic = _PBR_Overlay3_MetallicTex.SampleGrad(GET_SAMPLER_OV3,
+      UV_SCOFF(i, _PBR_Overlay3_MetallicTex_ST, _PBR_Overlay3_UV_Select),
+      GET_IDDX(_PBR_Overlay3_UV_Select) * _PBR_Overlay3_MetallicTex_ST.x,
+      GET_IDDY(_PBR_Overlay3_UV_Select) * _PBR_Overlay3_MetallicTex_ST.y);
   ov.ov3_metallic *= _PBR_Overlay3_Metallic;
 #else
   ov.ov3_metallic = _PBR_Overlay3_Metallic;
@@ -750,7 +799,9 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY3_MASK)
-  ov.ov3_mask = _PBR_Overlay3_Mask.SampleGrad(GET_SAMPLER_OV3, i.uv0, iddx, iddy);
+  ov.ov3_mask = _PBR_Overlay3_Mask.SampleGrad(GET_SAMPLER_OV3, i.uv0,
+      GET_IDDX(_PBR_Overlay3_UV_Select),
+      GET_IDDY(_PBR_Overlay3_UV_Select));
   ov.ov3_mask = ((bool) round(_PBR_Overlay3_Mask_Invert)) ? 1.0 - ov.ov3_mask : ov.ov3_mask;
 #else
   ov.ov3_mask = 1;
