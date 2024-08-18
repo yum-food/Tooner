@@ -13,18 +13,6 @@
 #include "tooner_scroll.cginc"
 #include "UnityCG.cginc"
 
-struct tess_data
-{
-  float4 pos : INTERNALTESSPOS;
-  float2 uv0 : TEXCOORD0;
-  float3 normal : TEXCOORD2;
-};
-
-struct tess_factors {
-  float edge[3] : SV_TessFactor;
-  float inside: SV_InsideTessFactor;
-};
-
 v2f vert(appdata v)
 {
 #if defined(_TROCHOID)
@@ -81,99 +69,6 @@ v2f vert(appdata v)
 #endif
 
   return o;
-}
-
-tess_data hull_vertex(appdata v)
-{
-#if defined(_OUTLINES)
-  float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/3);
-  outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
-
-  float4 vertex = v.vertex;
-  vertex = mul(unity_ObjectToWorld, vertex);
-  const float3 normal = UnityObjectToWorldNormal(v.normal);
-
-  // Perform scaling operation in world space so that object scale doesn't
-  // affect outline width. This is handy on avatars with a bunch of different
-  // gameobjects that have different scale.
-#if defined(_EXPLODE)
-  if (_Explode_Phase <= 1E-6) {
-    vertex.xyz += normal * _Outline_Width * .1 * outline_mask;
-  }
-#else
-  vertex.xyz += normal * _Outline_Width * .1 * outline_mask;
-#endif
-
-  // Transform back to object, then clip.
-  vertex = mul(unity_WorldToObject, vertex);
-  v.vertex.xyz = vertex.xyz;
-
-  tess_data o;
-  o.pos = v.vertex;
-  o.normal = normal;
-  o.uv0 = v.uv0.xy;
-
-  return o;
-#endif  // _OUTLINES
-}
-
-tess_factors patch_constant(InputPatch<tess_data, 3> patch)
-{
-  tess_factors f;
-
-#if defined(_TESSELLATION)
-  float3 worldPos = mul(unity_ObjectToWorld, patch[0].pos);
-  float factor = _Tess_Factor;
-  if (_Tess_Dist_Cutoff > 0 && length(_WorldSpaceCameraPos - worldPos) > _Tess_Dist_Cutoff) {
-    factor = 1;
-  }
-#else
-  float factor = 1;
-#endif
-
-  f.edge[0] = factor;
-  f.edge[1] = factor;
-  f.edge[2] = factor;
-  f.inside = factor;
-  return f;
-}
-
-[UNITY_domain("tri")]
-[UNITY_outputcontrolpoints(3)]
-[UNITY_outputtopology("triangle_cw")]
-[UNITY_partitioning("fractional_odd")]
-[UNITY_patchconstantfunc("patch_constant")]
-tess_data hull(
-    InputPatch<tess_data, 3> patch,
-    uint id : SV_OutputControlPointID)
-{
-  return patch[id];
-}
-
-[UNITY_domain("tri")]
-v2f domain(
-    tess_factors factors,
-    OutputPatch<tess_data, 3> patch,
-    float3 baryc : SV_DomainLocation)
-{
-  v2f data;
-#define DOMAIN_INTERP(fieldName) data.fieldName = \
-  patch[0].fieldName * baryc.x + \
-  patch[1].fieldName * baryc.y + \
-  patch[2].fieldName * baryc.z;
-  DOMAIN_INTERP(uv0);
-  DOMAIN_INTERP(normal);
-  //DOMAIN_INTERP(tangent);
-
-  float4 vertex =
-    patch[0].pos * baryc.x +
-    patch[1].pos * baryc.y +
-    patch[2].pos * baryc.z;
-  data.pos = UnityObjectToClipPos(vertex);
-  data.objPos = vertex;
-  data.worldPos = mul(unity_ObjectToWorld, vertex);
-
-  return data;
 }
 
 // maxvertexcount == the number of vertices we create
