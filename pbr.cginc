@@ -187,15 +187,26 @@ float4 getLitColor(
   albedo.rgb = DiffuseAndSpecularFromMetallic(
     albedo, metallic, specular_tint, one_minus_reflectivity);
 
-  float3 view_dir = normalize(_WorldSpaceCameraPos - worldPos);
-
+  const float3 view_dir = normalize(_WorldSpaceCameraPos - worldPos);
   uint normals_mode = round(_Mesh_Normals_Mode);
-  float3 flat_normal = normalize(
-    (1.0 / _Flatten_Mesh_Normals_Str) * normal +
-    _Flatten_Mesh_Normals_Str * view_dir);
-  float3 spherical_normal = normalize(UnityObjectToWorldNormal(normalize(i.objPos)));
-  normal = lerp(normal, flat_normal, normals_mode == 0);
-  normal = lerp(normal, spherical_normal, normals_mode == 1);
+  switch (normals_mode) {
+    case 0:
+      {
+        float3 flat_normal = normalize(
+            (1.0 / _Flatten_Mesh_Normals_Str) * normal +
+            _Flatten_Mesh_Normals_Str * view_dir);
+        normal = flat_normal;
+      }
+      break;
+    case 1:
+      {
+        float3 spherical_normal = normalize(UnityObjectToWorldNormal(normalize(i.objPos)));
+        normal = spherical_normal;
+      }
+      break;
+    default:
+      break;
+  }
 
 	UnityIndirect indirect_light;
   vertexLightColor *= _Vertex_Lighting_Factor;
@@ -207,12 +218,11 @@ float4 getLitColor(
   UnityLight direct_light;
   direct_light.dir = getDirectLightDirection(i);
   direct_light.ndotl = DotClamped(normal, direct_light.dir);
-  float shadow_attenuation = getShadowAttenuation(i);
 #define POI_LIGHTING
 #if defined(POI_LIGHTING)
-  direct_light.color = getPoiLightingDirect(normal) * shadow_attenuation;
+  direct_light.color = getPoiLightingDirect(normal);
 #else
-  direct_light.color = getDirectLightColor() * shadow_attenuation;
+  direct_light.color = getDirectLightColor();
 #endif
 
   if (normals_mode == 0) {
@@ -288,6 +298,10 @@ float4 getLitColor(
   indirect_light.diffuse *= ao;
   float3 direct_color = direct_light.color;
   direct_light.color *= ao;
+
+  // Apply shadows
+  float shadow_attenuation = getShadowAttenuation(i);
+  direct_light.color *= shadow_attenuation;
 
   float2 screenUVs = 0;
   float4 screenPos = 0;

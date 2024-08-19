@@ -400,6 +400,9 @@ public class ToonerGUI : ShaderGUI {
           bc,
           bct);
       SetKeyword("_EMISSION", bc.textureValue);
+
+      bc = FindProperty("_Global_Emission_Factor");
+      editor.FloatProperty(bc, "Global emissions multiplier");
   }
 
   enum MatcapMode {
@@ -718,6 +721,48 @@ public class ToonerGUI : ShaderGUI {
       editor.RangeProperty(
           bc,
           "Hue shift");
+    }
+  }
+
+  void DoHSV() {
+    MaterialProperty bc;
+
+    bc = FindProperty("_HSV_Enabled");
+    bool enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Enable", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    SetKeyword("_HSV", enabled);
+
+    if (enabled) {
+      bc = FindProperty("_HSV_Mask");
+      editor.TexturePropertySingleLine(
+          MakeLabel(bc, "Mask"),
+          bc);
+
+      if (bc.textureValue) {
+        bc = FindProperty("_HSV_Mask_Invert");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Invert", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+      }
+
+      bc = FindProperty("_HSV_Hue_Shift");
+      editor.RangeProperty(
+          bc,
+          "Hue shift");
+      bc = FindProperty("_HSV_Sat_Shift");
+      editor.RangeProperty(
+          bc,
+          "Saturation shift");
+      bc = FindProperty("_HSV_Val_Shift");
+      editor.RangeProperty(
+          bc,
+          "Value shift");
     }
   }
 
@@ -1608,9 +1653,14 @@ public class ToonerGUI : ShaderGUI {
     DoTessellation();
     EditorGUI.indentLevel -= 1;
 
-    GUILayout.Label("Hue shift", EditorStyles.boldLabel);
+    GUILayout.Label("Hue shift (OKLAB)", EditorStyles.boldLabel);
     EditorGUI.indentLevel += 1;
     DoOKLAB();
+    EditorGUI.indentLevel -= 1;
+
+    GUILayout.Label("Hue shift (HSV)", EditorStyles.boldLabel);
+    EditorGUI.indentLevel += 1;
+    DoHSV();
     EditorGUI.indentLevel -= 1;
 
     GUILayout.Label("Clones", EditorStyles.boldLabel);

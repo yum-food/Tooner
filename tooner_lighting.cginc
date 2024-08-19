@@ -885,10 +885,10 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
 #if defined(_PBR_OVERLAY1)
 #if defined(_PBR_OVERLAY1_MIX_ALPHA_BLEND)
   albedo.rgb = lerp(albedo.rgb, ov.ov1_albedo.rgb, a1);
-#if defined(_PBR_OVERLAY0_ROUGHNESS)
+#if defined(_PBR_OVERLAY1_ROUGHNESS)
   roughness = lerp(roughness, ov.ov1_roughness, a1);
 #endif
-#if defined(_PBR_OVERLAY0_METALLIC)
+#if defined(_PBR_OVERLAY1_METALLIC)
   metallic = lerp(metallic, ov.ov1_metallic, a1);
 #endif
   albedo.a = max(albedo.a, a1);
@@ -904,10 +904,10 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
 #if defined(_PBR_OVERLAY2)
 #if defined(_PBR_OVERLAY2_MIX_ALPHA_BLEND)
   albedo.rgb = lerp(albedo.rgb, ov.ov2_albedo.rgb, ov.ov2_albedo.a);
-#if defined(_PBR_OVERLAY0_ROUGHNESS)
+#if defined(_PBR_OVERLAY2_ROUGHNESS)
   roughness = lerp(roughness, ov.ov2_roughness, a2);
 #endif
-#if defined(_PBR_OVERLAY0_METALLIC)
+#if defined(_PBR_OVERLAY2_METALLIC)
   metallic = lerp(metallic, ov.ov2_metallic, a2);
 #endif
   albedo.a = max(albedo.a, a2);
@@ -923,10 +923,10 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
 #if defined(_PBR_OVERLAY3)
 #if defined(_PBR_OVERLAY3_MIX_ALPHA_BLEND)
   albedo.rgb = lerp(albedo.rgb, ov.ov3_albedo.rgb, a3);
-#if defined(_PBR_OVERLAY0_ROUGHNESS)
+#if defined(_PBR_OVERLAY3_ROUGHNESS)
   roughness = lerp(roughness, ov.ov3_roughness, a3);
 #endif
-#if defined(_PBR_OVERLAY0_METALLIC)
+#if defined(_PBR_OVERLAY3_METALLIC)
   metallic = lerp(metallic, ov.ov3_metallic, a3);
 #endif
   albedo.a = max(albedo.a, a3);
@@ -1650,6 +1650,27 @@ float4 effect(inout v2f i)
  }
 #endif
 
+#if defined(_HSV)
+  // Do hue shift in perceptually uniform color space so it doesn't look like
+  // shit.
+ float hsv_mask = _HSV_Mask.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
+ if (_HSV_Mask_Invert) {
+   hsv_mask = 1 - hsv_mask;
+ }
+ if (hsv_mask > 0.01 &&
+     (_HSV_Hue_Shift > 1E-6 ||
+      abs(_HSV_Sat_Shift) > 1E-6 ||
+      abs(_HSV_Val_Shift) > 1E-6)) {
+   float3 c = albedo.rgb;
+   c = RGBtoHSV(c);
+   c += float3(_HSV_Hue_Shift, _HSV_Sat_Shift, _HSV_Val_Shift);
+   c.x = glsl_mod(c.x, 1.0);
+   c.yz = saturate(c.yz);
+   c = HSVtoRGB(c);
+   albedo.rgb = c;
+ }
+#endif
+
 #if defined(_AMBIENT_OCCLUSION)
   float ao = _Ambient_Occlusion.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
   ao = 1 - (1 - ao) * _Ambient_Occlusion_Strength;
@@ -1679,16 +1700,16 @@ float4 effect(inout v2f i)
     albedo.a = 1;
 #endif
 
-    return float4(lit.rgb + _Gimmick_Flat_Color_Emission, albedo.a);
+    return float4(lit.rgb + _Gimmick_Flat_Color_Emission * _Global_Emission_Factor, albedo.a);
   }
 #endif
 
   float4 result = lit;
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
-  result.rgb += matcap_emission;
+  result.rgb += matcap_emission * _Global_Emission_Factor;
 #endif
 #if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
-  result.rgb += decal_emission;
+  result.rgb += decal_emission * _Global_Emission_Factor;
 #endif
 #if defined(_GLITTER)
   float glitter_mask = _Glitter_Mask.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
@@ -1699,7 +1720,7 @@ float4 effect(inout v2f i)
 #endif
 #if defined(_EMISSION)
   float emission = _EmissionTex.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
-  result.rgb += albedo.rgb * emission * _EmissionStrength;
+  result.rgb += albedo.rgb * emission * _EmissionStrength * _Global_Emission_Factor;
 #endif
 #if defined(_EXPLODE) && defined(_AUDIOLINK)
   if (AudioLinkIsAvailable() && _Explode_Phase > 1E-6) {
@@ -1713,7 +1734,7 @@ float4 effect(inout v2f i)
 #if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)
   result.rgb *= result.a;
 #endif
-  result.rgb += getOverlayEmission(ov, i, iddx, iddy);
+  result.rgb += getOverlayEmission(ov, i, iddx, iddy) * _Global_Emission_Factor;
 
   return result;
 }

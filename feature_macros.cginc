@@ -48,6 +48,7 @@
 #pragma shader_feature_local _ _RIM_LIGHTING3_SAMPLER_REPEAT
 #pragma shader_feature_local _ _RIM_LIGHTING3_SAMPLER_CLAMP
 #pragma shader_feature_local _ _OKLAB
+#pragma shader_feature_local _ _HSV
 #pragma shader_feature_local _ _CLONES
 #pragma shader_feature_local _ _PBR_OVERLAY0
 #pragma shader_feature_local _ _PBR_OVERLAY0_BASECOLOR_MAP

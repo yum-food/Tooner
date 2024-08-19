@@ -249,6 +249,7 @@ float _Decal3_UV_Select;
 texture2D _EmissionTex;
 float _EmissionStrength;
 #endif
+float _Global_Emission_Factor;
 
 #if defined(_AMBIENT_OCCLUSION)
 texture2D _Ambient_Occlusion;
@@ -437,6 +438,15 @@ float _OKLAB_Mask_Invert;
 float _OKLAB_Lightness_Shift;
 float _OKLAB_Chroma_Shift;
 float _OKLAB_Hue_Shift;
+#endif
+
+#if defined(_HSV)
+float _HSV_Enabled;
+texture2D _HSV_Mask;
+float _HSV_Mask_Invert;
+float _HSV_Hue_Shift;
+float _HSV_Sat_Shift;
+float _HSV_Val_Shift;
 #endif
 
 #if defined(_CLONES)
