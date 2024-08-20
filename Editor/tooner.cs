@@ -480,6 +480,11 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Matcap strength");
 
+      bc = FindProperty($"_Matcap{i}MixFactor");
+      editor.RangeProperty(
+          bc,
+          "Mix factor");
+
       bc = FindProperty($"_Matcap{i}Emission");
       editor.FloatProperty(
           bc,
@@ -489,6 +494,29 @@ public class ToonerGUI : ShaderGUI {
       editor.FloatProperty(
           bc,
           "Quantization");
+
+      bc = FindProperty($"_Matcap{i}Normal_Enabled");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Replace normals", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      SetKeyword($"_MATCAP{i}_NORMAL", enabled);
+
+      if (enabled) {
+        EditorGUI.indentLevel += 1;
+        bc = FindProperty($"_Matcap{i}Normal");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bc, "Normal map"),
+            bc);
+        if (bc.textureValue) {
+          editor.TextureScaleOffsetProperty(bc);
+
+          bc = FindProperty($"_Matcap{i}Normal_Str");
+          editor.RangeProperty(bc, "Strength");
+        }
+        EditorGUI.indentLevel -= 1;
+      }
 
       bc = FindProperty($"_Matcap{i}Distortion0");
       enabled = bc.floatValue > 1E-6;

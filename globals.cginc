@@ -305,9 +305,15 @@ float _Matcap0_Mask_Invert;
 texture2D _Matcap0_Mask2;
 float _Matcap0_Mask2_Invert;
 float _Matcap0Str;
+float _Matcap0MixFactor;
 float _Matcap0Quantization;
 float _Matcap0Mode;
 float _Matcap0Emission;
+#if defined(_MATCAP0_NORMAL)
+texture2D _Matcap0Normal;
+float4 _Matcap0Normal_ST;
+float _Matcap0Normal_Str;
+#endif
 #endif
 
 #if defined(_MATCAP1)
@@ -318,9 +324,15 @@ float _Matcap1_Mask_Invert;
 texture2D _Matcap1_Mask2;
 float _Matcap1_Mask2_Invert;
 float _Matcap1Str;
+float _Matcap1MixFactor;
 float _Matcap1Quantization;
 float _Matcap1Mode;
 float _Matcap1Emission;
+#if defined(_MATCAP1_NORMAL)
+texture2D _Matcap1Normal;
+float4 _Matcap1Normal_ST;
+float _Matcap1Normal_Str;
+#endif
 #endif
 
 #if defined(_RIM_LIGHTING0)

@@ -828,7 +828,8 @@ void applyDecal(inout float4 albedo,
 }
 
 void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
-    inout float roughness, inout float metallic, PbrOverlay ov) {
+    inout float roughness, inout float metallic, PbrOverlay ov,
+    float mask) {
   // Calculate alpha masks before we start mutating alpha.
 #if defined(_PBR_OVERLAY0)
   float a0 = saturate(ov.ov0_albedo.a * _PBR_Overlay0_Alpha_Multiplier);
@@ -837,6 +838,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
       (albedo.a < _PBR_Overlay0_Constrain_By_Alpha_Max);
     a0 *= in_range;
   }
+  a0 *= mask;
 #endif
 #if defined(_PBR_OVERLAY1)
   float a1 = saturate(ov.ov1_albedo.a * _PBR_Overlay1_Alpha_Multiplier);
@@ -845,6 +847,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
       (albedo.a < _PBR_Overlay1_Constrain_By_Alpha_Max);
     a1 *= in_range;
   }
+  a1 *= mask;
 #endif
 #if defined(_PBR_OVERLAY2)
   float a2 = saturate(ov.ov2_albedo.a * _PBR_Overlay2_Alpha_Multiplier);
@@ -853,6 +856,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
       (albedo.a < _PBR_Overlay2_Constrain_By_Alpha_Max);
     a2 *= in_range;
   }
+  a2 *= mask;
 #endif
 #if defined(_PBR_OVERLAY3)
   float a3 = saturate(ov.ov3_albedo.a * _PBR_Overlay3_Alpha_Multiplier);
@@ -861,6 +865,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
       (albedo.a < _PBR_Overlay3_Constrain_By_Alpha_Max);
     a3 *= in_range;
   }
+  a3 *= mask;
 #endif
 
 #if defined(_PBR_OVERLAY0)
@@ -1068,8 +1073,8 @@ float4 pixellate_color(int2 px_res, float2 uv, float4 c)
 
 float4 effect(inout v2f i)
 {
-  float iddx = ddx(i.uv0.x) * _Mip_Multiplier;
-  float iddy = ddx(i.uv0.y) * _Mip_Multiplier;
+  float iddx = (ddx(i.uv0.x) + ddx(i.uv0.y)) * _Mip_Multiplier;
+  float iddy = (ddy(i.uv0.x) + ddy(i.uv0.y)) * _Mip_Multiplier;
   const float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
   // Not necessarily normalized after interpolation.
   i.normal = normalize(i.normal);
@@ -1204,22 +1209,67 @@ float4 effect(inout v2f i)
   {
     const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
     const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
-    const float3 refl = -reflect(cam_view_dir, cam_normal);
+    const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
     float m = 2.0 * sqrt(
-        refl.x * refl.x +
-        refl.y * refl.y +
-        (refl.z + 1) * (refl.z + 1));
-    matcap_uv = refl.xy / m + 0.5;
+        cam_refl.x * cam_refl.x +
+        cam_refl.y * cam_refl.y +
+        (cam_refl.z + 1) * (cam_refl.z + 1));
+    matcap_uv = cam_refl.xy / m + 0.5;
     matcap_radius = length(matcap_uv - 0.5);
     matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
   }
 #endif
+  float matcap_overwrite_mask = 0;
 #if defined(_MATCAP0) || defined(_MATCAP1)
   {
     float iddx = ddx(i.uv0.x);
     float iddy = ddy(i.uv0.y);
 #if defined(_MATCAP0)
     {
+#if defined(_MATCAP0_MASK)
+      float4 matcap_mask_raw = _Matcap0_Mask.SampleLevel(linear_repeat_s, i.uv0.xy, 0);
+      float matcap_mask = matcap_mask_raw.r;
+      matcap_mask = (bool) round(_Matcap0_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
+      matcap_mask *= matcap_mask_raw.a;
+#else
+      float matcap_mask = 1;
+#endif
+#if defined(_MATCAP0_MASK2)
+      {
+        float4 matcap_mask2_raw = _Matcap0_Mask2.SampleLevel(linear_repeat_s, i.uv0.xy, 0);
+        float matcap_mask2 = matcap_mask2_raw.r;
+        matcap_mask2 = (bool) round(_Matcap0_Mask2_Invert) ? 1 - matcap_mask2 : matcap_mask2;
+        matcap_mask2 *= matcap_mask2_raw.a;
+        matcap_mask *= matcap_mask2;
+      }
+#endif
+#if defined(_MATCAP0_NORMAL)
+      float3 matcap_normal = UnpackScaleNormal(
+          _Matcap0Normal.SampleGrad(linear_repeat_s,
+            UV_SCOFF(i, _Matcap0Normal_ST, /*uv_channel=*/0),
+            iddx * _Matcap0Normal_ST.x,
+            iddy * _Matcap0Normal_ST.y),
+          _Matcap0Normal_Str);
+      raw_normal = (round(matcap_mask) == 1 ? matcap_normal : raw_normal);
+      normal = float3(
+          raw_normal.x * i.tangent +
+          raw_normal.y * binormal +
+          raw_normal.z * i.normal
+          );
+  {
+    const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
+    const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
+    float m = 2.0 * sqrt(
+        cam_refl.x * cam_refl.x +
+        cam_refl.y * cam_refl.y +
+        (cam_refl.z + 1) * (cam_refl.z + 1));
+    matcap_uv = cam_refl.xy / m + 0.5;
+    matcap_radius = length(matcap_uv - 0.5);
+    matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
+  }
+#endif
+
 #if defined(_MATCAP0_DISTORTION0)
       float2 distort_uv = matcap_distortion0(matcap_uv);
       float2 matcap_uv = distort_uv;
@@ -1230,24 +1280,6 @@ float4 effect(inout v2f i)
       if (q > 0) {
         matcap = ceil(matcap * q) / q;
       }
-
-#if defined(_MATCAP0_MASK)
-      float4 matcap_mask_raw = _Matcap0_Mask.SampleGrad(linear_repeat_s, i.uv0.xy, iddx, iddy);
-      float matcap_mask = matcap_mask_raw.r;
-      matcap_mask = (bool) round(_Matcap0_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
-      matcap_mask *= matcap_mask_raw.a;
-#else
-      float matcap_mask = 1;
-#endif
-#if defined(_MATCAP0_MASK2)
-      {
-        float4 matcap_mask2_raw = _Matcap0_Mask2.SampleGrad(linear_repeat_s, i.uv0.xy, iddx, iddy);
-        float matcap_mask2 = matcap_mask2_raw.r;
-        matcap_mask2 = (bool) round(_Matcap0_Mask2_Invert) ? 1 - matcap_mask2 : matcap_mask2;
-        matcap_mask2 *= matcap_mask2_raw.a;
-        matcap_mask *= matcap_mask2;
-      }
-#endif
 
       int mode = round(_Matcap0Mode);
       switch (mode) {
@@ -1260,6 +1292,7 @@ float4 effect(inout v2f i)
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
+          matcap_overwrite_mask = max(matcap_mask, matcap_overwrite_mask);
           albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);
           matcap_emission = lerp(albedo.rgb, matcap, matcap_mask) * _Matcap0Emission;
           break;
@@ -1282,6 +1315,49 @@ float4 effect(inout v2f i)
 #endif  // _MATCAP0
 #if defined(_MATCAP1)
     {
+#if defined(_MATCAP1_MASK)
+      float4 matcap_mask_raw = _Matcap1_Mask.SampleLevel(linear_repeat_s, i.uv0.xy, 0);
+      float matcap_mask = matcap_mask_raw.r;
+      matcap_mask = (bool) round(_Matcap1_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
+      matcap_mask *= matcap_mask_raw.a;
+#else
+      float matcap_mask = 1;
+#endif
+#if defined(_MATCAP1_MASK2)
+      {
+        float4 matcap_mask2_raw = _Matcap1_Mask2.SampleLevel(linear_repeat_s, i.uv0.xy, 0);
+        float matcap_mask2 = matcap_mask2_raw.r;
+        matcap_mask2 = (bool) round(_Matcap1_Mask2_Invert) ? 1 - matcap_mask2 : matcap_mask2;
+        matcap_mask2 *= matcap_mask2_raw.a;
+        matcap_mask *= matcap_mask2;
+      }
+#endif
+#if defined(_MATCAP1_NORMAL)
+      float3 matcap_normal = UnpackScaleNormal(
+          _Matcap1Normal.SampleGrad(linear_repeat_s,
+            UV_SCOFF(i, _Matcap1Normal_ST, /*uv_channel=*/0),
+            iddx * _Matcap1Normal_ST.x,
+            iddy * _Matcap1Normal_ST.y),
+          _Matcap1Normal_Str * _Matcap1MixFactor);
+      raw_normal = (round(matcap_mask) == 1 ? matcap_normal : raw_normal);
+      normal = float3(
+          raw_normal.x * i.tangent +
+          raw_normal.y * binormal +
+          raw_normal.z * i.normal
+          );
+  {
+    const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
+    const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
+    float m = 2.0 * sqrt(
+        cam_refl.x * cam_refl.x +
+        cam_refl.y * cam_refl.y +
+        (cam_refl.z + 1) * (cam_refl.z + 1));
+    matcap_uv = cam_refl.xy / m + 0.5;
+    matcap_radius = length(matcap_uv - 0.5);
+    matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
+  }
+#endif
 #if defined(_MATCAP1_DISTORTION0)
       float2 distort_uv = matcap_distortion0(matcap_uv);
       float2 matcap_uv = distort_uv;
@@ -1293,23 +1369,7 @@ float4 effect(inout v2f i)
         matcap = ceil(matcap * q) / q;
       }
 
-#if defined(_MATCAP1_MASK)
-      float4 matcap_mask_raw = _Matcap1_Mask.SampleGrad(linear_repeat_s, i.uv0.xy, iddx, iddy);
-      float matcap_mask = matcap_mask_raw.r;
-      matcap_mask = (bool) round(_Matcap1_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
-      matcap_mask *= matcap_mask_raw.a;
-#else
-      float matcap_mask = 1;
-#endif
-#if defined(_MATCAP1_MASK2)
-      {
-        float4 matcap_mask2_raw = _Matcap1_Mask2.SampleGrad(linear_repeat_s, i.uv0.xy, iddx, iddy);
-        float matcap_mask2 = matcap_mask2_raw.r;
-        matcap_mask2 = (bool) round(_Matcap1_Mask2_Invert) ? 1 - matcap_mask2 : matcap_mask2;
-        matcap_mask2 *= matcap_mask2_raw.a;
-        matcap_mask *= matcap_mask2;
-      }
-#endif
+      matcap_mask *= _Matcap1MixFactor;
 
       int mode = round(_Matcap1Mode);
       switch (mode) {
@@ -1322,6 +1382,7 @@ float4 effect(inout v2f i)
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
+          matcap_overwrite_mask = max(matcap_mask, matcap_overwrite_mask);
           albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);
           matcap_emission = lerp(albedo.rgb, matcap, matcap_mask) * _Matcap1Emission;
           break;
@@ -1345,7 +1406,9 @@ float4 effect(inout v2f i)
   }
 #endif  // _MATCAP0 || _MATCAP1
 
-  mixOverlayAlbedoRoughnessMetallic(albedo, roughness, metallic, ov);
+  // TODO get rid of the pow. It's a hack to make matcap replace mode look
+  // better with overlay tattoos.
+  mixOverlayAlbedoRoughnessMetallic(albedo, roughness, metallic, ov, 1 - pow(matcap_overwrite_mask, 4));
 #if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
   float3 decal_emission = 0;
   applyDecal(albedo, roughness, metallic, decal_emission, i);

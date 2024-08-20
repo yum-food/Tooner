@@ -218,9 +218,13 @@ Shader "yum_food/tooner"
     _Matcap0_Mask2_Invert("Invert mask", Float) = 0.0
     _Matcap0Mode("Matcap mode", Float) = 0
     _Matcap0Str("Matcap strength", Float) = 1
+    _Matcap0MixFactor("Matcap mix factor", Range(0, 1)) = 1
     _Matcap0Emission("Matcap emission", Float) = 0
     _Matcap0Quantization("Matcap quantization", Float) = -1
     _Matcap0Distortion0("Matcap distortion0", Float) = 0
+    _Matcap0Normal_Enabled("Enable normal replacement", Float) = 0
+    _Matcap0Normal("Matcap normals", 2D) = "bump" {}
+    _Matcap0Normal_Str("Matcap normals", Range(0, 10)) = 1
 
     _Matcap1("Matcap", 2D) = "black" {}
     _Matcap1_Mask("Matcap mask", 2D) = "white" {}
@@ -229,9 +233,13 @@ Shader "yum_food/tooner"
     _Matcap1_Mask2_Invert("Invert mask", Float) = 0.0
     _Matcap1Mode("Matcap mode", Float) = 0
     _Matcap1Str("Matcap strength", Float) = 1
+    _Matcap1MixFactor("Matcap mix factor", Range(0, 1)) = 1
     _Matcap1Emission("Matcap emission", Float) = 0
     _Matcap1Quantization("Matcap quantization", Float) = -1
     _Matcap1Distortion0("Matcap distortion0", Float) = 0
+    _Matcap1Normal_Enabled("Enable normal replacement", Float) = 0
+    _Matcap1Normal("Matcap normals", 2D) = "bump" {}
+    _Matcap1Normal_Str("Matcap normals", Range(0, 10)) = 1
 
     _Rim_Lighting0_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting0_Mode("Rim lighting mode", Float) = 0
