@@ -40,7 +40,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay0_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay0_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay0_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
-    _PBR_Overlay0_UV_Select("UV channel", Range(0,1)) = 0
+    _PBR_Overlay0_UV_Select("UV channel", Range(0,3)) = 0
     _PBR_Overlay0_Sampler_Mode("Sampler mode", Range(0,1)) = 0
 
     _PBR_Overlay1_Enable("Enable PBR overlay", Float) = 0.0
@@ -63,7 +63,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay1_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay1_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay1_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
-    _PBR_Overlay1_UV_Select("UV channel", Range(0,1)) = 0
+    _PBR_Overlay1_UV_Select("UV channel", Range(0,3)) = 0
     _PBR_Overlay1_Sampler_Mode("Sampler mode", Range(0,1)) = 0
 
     _PBR_Overlay2_Enable("Enable PBR overlay", Float) = 0.0
@@ -86,7 +86,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay2_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay2_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay2_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
-    _PBR_Overlay2_UV_Select("UV channel", Range(0,1)) = 0
+    _PBR_Overlay2_UV_Select("UV channel", Range(0,3)) = 0
     _PBR_Overlay2_Sampler_Mode("Sampler mode", Range(0,1)) = 0
 
     _PBR_Overlay3_Enable("Enable PBR overlay", Float) = 0.0
@@ -109,7 +109,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay3_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay3_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay3_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
-    _PBR_Overlay3_UV_Select("UV channel", Range(0,1)) = 0
+    _PBR_Overlay3_UV_Select("UV channel", Range(0,3)) = 0
     _PBR_Overlay3_Sampler_Mode("Sampler mode", Range(0,1)) = 0
 
     _Decal0_Enable("Enable decal", Float) = 0.0
@@ -118,7 +118,7 @@ Shader "yum_food/tooner"
     _Decal0_Metallic("Metallic", 2D) = "black" {}
     _Decal0_Emission_Strength("Emission strength", Float) = 0
     _Decal0_Angle("Emission strength", Range(0,1)) = 0
-    _Decal0_UV_Select("UV channel", Range(0,1)) = 0
+    _Decal0_UV_Select("UV channel", Range(0,3)) = 0
 
     _Decal1_Enable("Enable decal", Float) = 0.0
     _Decal1_BaseColor("Base color", 2D) = "white" {}
@@ -126,7 +126,7 @@ Shader "yum_food/tooner"
     _Decal1_Metallic("Metallic", 2D) = "black" {}
     _Decal1_Emission_Strength("Emission strength", Float) = 0
     _Decal1_Angle("Emission strength", Range(0,1)) = 0
-    _Decal1_UV_Select("UV channel", Range(0,1)) = 0
+    _Decal1_UV_Select("UV channel", Range(0,3)) = 0
 
     _Decal2_Enable("Enable decal", Float) = 0.0
     _Decal2_BaseColor("Base color", 2D) = "white" {}
@@ -134,7 +134,7 @@ Shader "yum_food/tooner"
     _Decal2_Metallic("Metallic", 2D) = "black" {}
     _Decal2_Emission_Strength("Emission strength", Float) = 0
     _Decal2_Angle("Emission strength", Range(0,1)) = 0
-    _Decal2_UV_Select("UV channel", Range(0,1)) = 0
+    _Decal2_UV_Select("UV channel", Range(0,3)) = 0
 
     _Decal3_Enable("Enable decal", Float) = 0.0
     _Decal3_BaseColor("Base color", 2D) = "white" {}
@@ -142,7 +142,7 @@ Shader "yum_food/tooner"
     _Decal3_Metallic("Metallic", 2D) = "black" {}
     _Decal3_Emission_Strength("Emission strength", Float) = 0
     _Decal3_Angle("Emission strength", Range(0,1)) = 0
-    _Decal3_UV_Select("UV channel", Range(0,1)) = 0
+    _Decal3_UV_Select("UV channel", Range(0,3)) = 0
 
     [NoScaleOffset] _EmissionTex("Emission map", 2D) = "black" {}
     _EmissionStrength("Emission strength", Range(0, 2)) = 0
@@ -482,6 +482,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType" = "Opaque"
@@ -552,6 +553,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

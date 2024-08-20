@@ -163,9 +163,9 @@ v2f vert(appdata v)
 
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv0 = v.uv0;
-  o.uv2 = v.uv2;
+  o.uv1 = v.uv1;
 #if defined(LIGHTMAP_ON)
-  o.lmuv = v.uv2 * unity_LightmapST.xy + unity_LightmapST.zw;
+  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif
 #if defined(SHADOWS_SCREEN)
   TRANSFER_SHADOW(o);
@@ -389,8 +389,28 @@ float2 matcap_distortion0(float2 matcap_uv) {
   return matcap_uv;
 }
 
-#define GET_UV_BY_CHANNEL(i, which_channel) (which_channel == 0 ? i.uv0 : i.uv2)
-#define UV_SCOFF(i, tex_st, which_channel) GET_UV_BY_CHANNEL(i, which_channel) * (tex_st).xy + (tex_st).zw
+float2 get_uv_by_channel(v2f i, uint which_channel) {
+  switch (which_channel) {
+    case 0:
+      return i.uv0;
+      break;
+    case 1:
+      return i.uv1;
+      break;
+    case 2:
+      return i.uv2;
+      break;
+    case 3:
+      return i.uv3;
+      break;
+    default:
+      return 0;
+      break;
+  }
+}
+
+#define GET_UV_BY_CHANNEL(i, which_channel) (which_channel == 0 ? i.uv0 : i.uv1)
+#define UV_SCOFF(i, tex_st, which_channel) get_uv_by_channel(i, round(which_channel)) * (tex_st).xy + (tex_st).zw
 
 #if defined(_PBR_OVERLAY0_SAMPLER_REPEAT)
 #define GET_SAMPLER_OV0 linear_repeat_s
@@ -482,10 +502,10 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY0) || defined(_PBR_OVERLAY1) || defined(_PBR_OVERLAY2) || defined(_PBR_OVERLAY3)
   float uv0_iddx = (ddx(i.uv0.x) + ddx(i.uv0.y)) * _Mip_Multiplier;
   float uv0_iddy = (ddy(i.uv0.x) + ddy(i.uv0.y)) * _Mip_Multiplier;
-  float uv2_iddx = (ddx(i.uv2.x) + ddx(i.uv2.y)) * _Mip_Multiplier;
-  float uv2_iddy = (ddy(i.uv2.x) + ddy(i.uv2.y)) * _Mip_Multiplier;
-#define GET_IDDX(which_channel) (which_channel == 0 ? uv0_iddx : uv2_iddx)
-#define GET_IDDY(which_channel) (which_channel == 0 ? uv0_iddy : uv2_iddy)
+  float uv1_iddx = (ddx(i.uv1.x) + ddx(i.uv1.y)) * _Mip_Multiplier;
+  float uv1_iddy = (ddy(i.uv1.x) + ddy(i.uv1.y)) * _Mip_Multiplier;
+#define GET_IDDX(which_channel) (which_channel == 0 ? uv0_iddx : uv1_iddx)
+#define GET_IDDY(which_channel) (which_channel == 0 ? uv0_iddy : uv1_iddy)
 #endif
 
 #if defined(_PBR_OVERLAY0)
@@ -1025,19 +1045,31 @@ float3 getOverlayEmission(PbrOverlay ov, v2f i, float iddx, float iddy)
 {
   float3 em = 0;
 #if defined(_PBR_OVERLAY0_EMISSION_MAP)
-  em += _PBR_Overlay0_EmissionTex.SampleGrad(GET_SAMPLER_OV0, UV_SCOFF(i, _PBR_Overlay0_EmissionTex_ST, _PBR_Overlay0_UV_Select), iddx * _PBR_Overlay0_EmissionTex_ST.x, iddy * _PBR_Overlay0_EmissionTex_ST.y) * _PBR_Overlay0_Emission * ov.ov0_mask;
+  em += _PBR_Overlay0_EmissionTex.SampleGrad(GET_SAMPLER_OV0,
+      UV_SCOFF(i, _PBR_Overlay0_EmissionTex_ST, _PBR_Overlay0_UV_Select),
+      iddx * _PBR_Overlay0_EmissionTex_ST.x,
+      iddy * _PBR_Overlay0_EmissionTex_ST.y) * _PBR_Overlay0_Emission * ov.ov0_mask;
 #endif
 
 #if defined(_PBR_OVERLAY1_EMISSION_MAP)
-  em += _PBR_Overlay1_EmissionTex.SampleGrad(GET_SAMPLER_OV1, UV_SCOFF(i, _PBR_Overlay1_EmissionTex_ST, _PBR_Overlay1_UV_Select), iddx * _PBR_Overlay1_EmissionTex_ST.x, iddy * _PBR_Overlay1_EmissionTex_ST.y) * _PBR_Overlay1_Emission * ov.ov1_mask;
+  em += _PBR_Overlay1_EmissionTex.SampleGrad(GET_SAMPLER_OV1,
+      UV_SCOFF(i, _PBR_Overlay1_EmissionTex_ST, _PBR_Overlay1_UV_Select),
+      iddx * _PBR_Overlay1_EmissionTex_ST.x,
+      iddy * _PBR_Overlay1_EmissionTex_ST.y) * _PBR_Overlay1_Emission * ov.ov1_mask;
 #endif
 
 #if defined(_PBR_OVERLAY2_EMISSION_MAP)
-  em += _PBR_Overlay2_EmissionTex.SampleGrad(GET_SAMPLER_OV2, UV_SCOFF(i, _PBR_Overlay2_EmissionTex_ST, _PBR_Overlay2_UV_Select), iddx * _PBR_Overlay2_EmissionTex_ST.x, iddy * _PBR_Overlay2_EmissionTex_ST.y) * _PBR_Overlay2_Emission * ov.ov2_mask;
+  em += _PBR_Overlay2_EmissionTex.SampleGrad(GET_SAMPLER_OV2,
+      UV_SCOFF(i, _PBR_Overlay2_EmissionTex_ST, _PBR_Overlay2_UV_Select),
+      iddx * _PBR_Overlay2_EmissionTex_ST.x,
+      iddy * _PBR_Overlay2_EmissionTex_ST.y) * _PBR_Overlay2_Emission * ov.ov2_mask;
 #endif
 
 #if defined(_PBR_OVERLAY3_EMISSION_MAP)
-  em += _PBR_Overlay3_EmissionTex.SampleGrad(GET_SAMPLER_OV3, UV_SCOFF(i, _PBR_Overlay3_EmissionTex_ST, _PBR_Overlay3_UV_Select), iddx * _PBR_Overlay3_EmissionTex_ST.x, iddy * _PBR_Overlay3_EmissionTex_ST.y) * _PBR_Overlay3_Emission * ov.ov3_mask;
+  em += _PBR_Overlay3_EmissionTex.SampleGrad(GET_SAMPLER_OV3,
+      UV_SCOFF(i, _PBR_Overlay3_EmissionTex_ST, _PBR_Overlay3_UV_Select),
+      iddx * _PBR_Overlay3_EmissionTex_ST.x,
+      iddy * _PBR_Overlay3_EmissionTex_ST.y) * _PBR_Overlay3_Emission * ov.ov3_mask;
 #endif
   return em;
 }
