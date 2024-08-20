@@ -18,6 +18,13 @@
 #include "trochoid_math.cginc"
 #include "oklab.cginc"
 
+// Hacky parameterizable whiteout blending. Probably some big mistakes but it
+// passes the eyeball test.
+// At w=0.5, this looks kinda like whiteout blending.
+// At w=0, this returns n0.
+// At w=1, this returns n1.
+#define MY_BLEND_NORMALS(n0, n1, w) normalize(float3((n0.xy * (1 - w) + n1.xy * w), lerp(1, n0.z, (1-w)) * lerp(1, n1.z, w)))
+
 void getVertexLightColor(inout v2f i)
 {
   #if defined(VERTEXLIGHT_ON)
@@ -164,6 +171,8 @@ v2f vert(appdata v)
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv0 = v.uv0;
   o.uv1 = v.uv1;
+  o.uv2 = v.uv2;
+  o.uv3 = v.uv3;
 #if defined(LIGHTMAP_ON)
   o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif
@@ -1254,8 +1263,6 @@ float4 effect(inout v2f i)
   float matcap_overwrite_mask = 0;
 #if defined(_MATCAP0) || defined(_MATCAP1)
   {
-    float iddx = ddx(i.uv0.x);
-    float iddy = ddy(i.uv0.y);
 #if defined(_MATCAP0)
     {
 #if defined(_MATCAP0_MASK)
@@ -1277,12 +1284,10 @@ float4 effect(inout v2f i)
 #endif
 #if defined(_MATCAP0_NORMAL)
       float3 matcap_normal = UnpackScaleNormal(
-          _Matcap0Normal.SampleGrad(linear_repeat_s,
-            UV_SCOFF(i, _Matcap0Normal_ST, /*uv_channel=*/0),
-            iddx * _Matcap0Normal_ST.x,
-            iddy * _Matcap0Normal_ST.y),
-          _Matcap0Normal_Str);
-      raw_normal = (round(matcap_mask) == 1 ? matcap_normal : raw_normal);
+          _Matcap0Normal.Sample(linear_repeat_s,
+            UV_SCOFF(i, _Matcap0Normal_ST, _Matcap0Normal_UV_Select)),
+          _Matcap0Normal_Str * _Matcap0MixFactor);
+      raw_normal = MY_BLEND_NORMALS(raw_normal, matcap_normal, matcap_mask * _Matcap0MixFactor);
       normal = float3(
           raw_normal.x * i.tangent +
           raw_normal.y * binormal +
@@ -1306,7 +1311,7 @@ float4 effect(inout v2f i)
       float2 distort_uv = matcap_distortion0(matcap_uv);
       float2 matcap_uv = distort_uv;
 #endif
-      float3 matcap = _Matcap0.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap0Str;
+      float3 matcap = _Matcap0.Sample(linear_repeat_s, matcap_uv) * _Matcap0Str;
 
       float q = _Matcap0Quantization;
       if (q > 0) {
@@ -1366,12 +1371,10 @@ float4 effect(inout v2f i)
 #endif
 #if defined(_MATCAP1_NORMAL)
       float3 matcap_normal = UnpackScaleNormal(
-          _Matcap1Normal.SampleGrad(linear_repeat_s,
-            UV_SCOFF(i, _Matcap1Normal_ST, /*uv_channel=*/0),
-            iddx * _Matcap1Normal_ST.x,
-            iddy * _Matcap1Normal_ST.y),
+          _Matcap1Normal.Sample(linear_repeat_s,
+            UV_SCOFF(i, _Matcap1Normal_ST, _Matcap1Normal_UV_Select)),
           _Matcap1Normal_Str * _Matcap1MixFactor);
-      raw_normal = (round(matcap_mask) == 1 ? matcap_normal : raw_normal);
+      raw_normal = MY_BLEND_NORMALS(raw_normal, matcap_normal, matcap_mask * _Matcap1MixFactor);
       normal = float3(
           raw_normal.x * i.tangent +
           raw_normal.y * binormal +
@@ -1394,7 +1397,7 @@ float4 effect(inout v2f i)
       float2 distort_uv = matcap_distortion0(matcap_uv);
       float2 matcap_uv = distort_uv;
 #endif
-      float3 matcap = _Matcap1.SampleGrad(linear_repeat_s, matcap_uv, iddx, iddy) * _Matcap1Str;
+      float3 matcap = _Matcap1.Sample(linear_repeat_s, matcap_uv) * _Matcap1Str;
 
       float q = _Matcap1Quantization;
       if (q > 0) {
@@ -1463,8 +1466,8 @@ float4 effect(inout v2f i)
       float3 matcap = rl * _Rim_Lighting0_Color * _Rim_Lighting0_Strength;
 
 #if defined(_RIM_LIGHTING0_MASK)
-      float4 matcap_mask_raw = _Rim_Lighting0_Mask.SampleGrad(GET_SAMPLER_RL0,
-          GET_UV_BY_CHANNEL(i, _Rim_Lighting0_Mask_UV_Select), iddx, iddy);
+      float4 matcap_mask_raw = _Rim_Lighting0_Mask.Sample(GET_SAMPLER_RL0,
+          GET_UV_BY_CHANNEL(i, _Rim_Lighting0_Mask_UV_Select));
       float matcap_mask = matcap_mask_raw.r;
       matcap_mask = (bool) round(_Rim_Lighting0_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
       matcap_mask *= matcap_mask_raw.a;
@@ -1527,8 +1530,8 @@ float4 effect(inout v2f i)
       }
       float3 matcap = rl * _Rim_Lighting1_Color * _Rim_Lighting1_Strength;
 #if defined(_RIM_LIGHTING1_MASK)
-      float4 matcap_mask_raw = _Rim_Lighting1_Mask.SampleGrad(GET_SAMPLER_RL1,
-          GET_UV_BY_CHANNEL(i, _Rim_Lighting1_Mask_UV_Select), iddx, iddy);
+      float4 matcap_mask_raw = _Rim_Lighting1_Mask.Sample(GET_SAMPLER_RL1,
+          GET_UV_BY_CHANNEL(i, _Rim_Lighting1_Mask_UV_Select));
       float matcap_mask = matcap_mask_raw.r;
       matcap_mask = (bool) round(_Rim_Lighting1_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
       matcap_mask *= matcap_mask_raw.a;
@@ -1595,8 +1598,8 @@ float4 effect(inout v2f i)
       }
       float3 matcap = rl * _Rim_Lighting2_Color * _Rim_Lighting2_Strength;
 #if defined(_RIM_LIGHTING2_MASK)
-      float4 matcap_mask_raw = _Rim_Lighting2_Mask.SampleGrad(GET_SAMPLER_RL2,
-          GET_UV_BY_CHANNEL(i, _Rim_Lighting2_Mask_UV_Select), iddx, iddy);
+      float4 matcap_mask_raw = _Rim_Lighting2_Mask.Sample(GET_SAMPLER_RL2,
+          GET_UV_BY_CHANNEL(i, _Rim_Lighting2_Mask_UV_Select));
       float matcap_mask = matcap_mask_raw.r;
       matcap_mask = (bool) round(_Rim_Lighting2_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
       matcap_mask *= matcap_mask_raw.a;
@@ -1663,8 +1666,8 @@ float4 effect(inout v2f i)
       }
       float3 matcap = rl * _Rim_Lighting3_Color * _Rim_Lighting3_Strength;
 #if defined(_RIM_LIGHTING3_MASK)
-      float4 matcap_mask_raw = _Rim_Lighting3_Mask.SampleGrad(GET_SAMPLER_RL3,
-          GET_UV_BY_CHANNEL(i, _Rim_Lighting3_Mask_UV_Select), iddx, iddy);
+      float4 matcap_mask_raw = _Rim_Lighting3_Mask.Sample(GET_SAMPLER_RL3,
+          GET_UV_BY_CHANNEL(i, _Rim_Lighting3_Mask_UV_Select));
       float matcap_mask = matcap_mask_raw.r;
       matcap_mask = (bool) round(_Rim_Lighting3_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
       matcap_mask *= matcap_mask_raw.a;

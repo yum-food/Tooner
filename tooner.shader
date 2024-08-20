@@ -225,6 +225,7 @@ Shader "yum_food/tooner"
     _Matcap0Normal_Enabled("Enable normal replacement", Float) = 0
     _Matcap0Normal("Matcap normals", 2D) = "bump" {}
     _Matcap0Normal_Str("Matcap normals", Range(0, 10)) = 1
+    _Matcap0Normal_UV_Select("Matcap normals", Range(0, 3)) = 0
 
     _Matcap1("Matcap", 2D) = "black" {}
     _Matcap1_Mask("Matcap mask", 2D) = "white" {}
@@ -240,6 +241,7 @@ Shader "yum_food/tooner"
     _Matcap1Normal_Enabled("Enable normal replacement", Float) = 0
     _Matcap1Normal("Matcap normals", 2D) = "bump" {}
     _Matcap1Normal_Str("Matcap normals", Range(0, 10)) = 1
+    _Matcap1Normal_UV_Select("Matcap normals", Range(0, 3)) = 0
 
     _Rim_Lighting0_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting0_Mode("Rim lighting mode", Float) = 0

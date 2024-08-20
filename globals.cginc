@@ -313,6 +313,7 @@ float _Matcap0Emission;
 texture2D _Matcap0Normal;
 float4 _Matcap0Normal_ST;
 float _Matcap0Normal_Str;
+float _Matcap0Normal_UV_Select;
 #endif
 #endif
 
@@ -332,6 +333,7 @@ float _Matcap1Emission;
 texture2D _Matcap1Normal;
 float4 _Matcap1Normal_ST;
 float _Matcap1Normal_Str;
+float _Matcap1Normal_UV_Select;
 #endif
 #endif
 

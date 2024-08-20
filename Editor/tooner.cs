@@ -514,6 +514,11 @@ public class ToonerGUI : ShaderGUI {
 
           bc = FindProperty($"_Matcap{i}Normal_Str");
           editor.RangeProperty(bc, "Strength");
+
+          bc = FindProperty($"_Matcap{i}Normal_UV_Select");
+          editor.RangeProperty(
+              bc,
+              "UV channel");
         }
         EditorGUI.indentLevel -= 1;
       }
