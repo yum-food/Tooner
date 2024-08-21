@@ -1272,7 +1272,8 @@ float4 effect(inout v2f i)
 #if defined(_MATCAP0)
     {
 #if defined(_MATCAP0_MASK)
-      float4 matcap_mask_raw = _Matcap0_Mask.SampleLevel(linear_repeat_s, i.uv0.xy, 0);
+      float4 matcap_mask_raw = _Matcap0_Mask.SampleLevel(linear_repeat_s,
+          get_uv_by_channel(i, _Matcap0_Mask_UV_Select), 0);
       float matcap_mask = matcap_mask_raw.r;
       matcap_mask = (bool) round(_Matcap0_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
       matcap_mask *= matcap_mask_raw.a;
@@ -1281,7 +1282,8 @@ float4 effect(inout v2f i)
 #endif
 #if defined(_MATCAP0_MASK2)
       {
-        float4 matcap_mask2_raw = _Matcap0_Mask2.SampleLevel(linear_repeat_s, i.uv0.xy, 0);
+        float4 matcap_mask2_raw = _Matcap0_Mask2.SampleLevel(linear_repeat_s,
+            get_uv_by_channel(i, _Matcap0_Mask2_UV_Select), 0);
         float matcap_mask2 = matcap_mask2_raw.r;
         matcap_mask2 = (bool) round(_Matcap0_Mask2_Invert) ? 1 - matcap_mask2 : matcap_mask2;
         matcap_mask2 *= matcap_mask2_raw.a;
@@ -1359,7 +1361,8 @@ float4 effect(inout v2f i)
 #if defined(_MATCAP1)
     {
 #if defined(_MATCAP1_MASK)
-      float4 matcap_mask_raw = _Matcap1_Mask.SampleLevel(linear_repeat_s, i.uv0.xy, 0);
+      float4 matcap_mask_raw = _Matcap1_Mask.SampleLevel(linear_repeat_s,
+          get_uv_by_channel(i, _Matcap1_Mask_UV_Select), 0);
       float matcap_mask = matcap_mask_raw.r;
       matcap_mask = (bool) round(_Matcap1_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
       matcap_mask *= matcap_mask_raw.a;
@@ -1368,7 +1371,8 @@ float4 effect(inout v2f i)
 #endif
 #if defined(_MATCAP1_MASK2)
       {
-        float4 matcap_mask2_raw = _Matcap1_Mask2.SampleLevel(linear_repeat_s, i.uv0.xy, 0);
+        float4 matcap_mask2_raw = _Matcap1_Mask2.SampleLevel(linear_repeat_s,
+            get_uv_by_channel(i, _Matcap1_Mask2_UV_Select), 0);
         float matcap_mask2 = matcap_mask2_raw.r;
         matcap_mask2 = (bool) round(_Matcap1_Mask2_Invert) ? 1 - matcap_mask2 : matcap_mask2;
         matcap_mask2 *= matcap_mask2_raw.a;

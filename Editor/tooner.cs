@@ -440,12 +440,19 @@ public class ToonerGUI : ShaderGUI {
 
       bool enabled;  // c# is a shitty language
       if (bc.textureValue) {
+        EditorGUI.indentLevel += 1;
         bc = FindProperty($"_Matcap{i}_Mask_Invert");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
         enabled = EditorGUILayout.Toggle("Invert mask", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
+
+        bc = FindProperty($"_Matcap{i}_Mask_UV_Select");
+        editor.RangeProperty(
+            bc,
+            "UV channel");
+        EditorGUI.indentLevel -= 1;
       }
 
       bc = FindProperty($"_Matcap{i}_Mask2");
@@ -455,12 +462,19 @@ public class ToonerGUI : ShaderGUI {
       SetKeyword($"_MATCAP{i}_MASK2", bc.textureValue);
 
       if (bc.textureValue) {
+        EditorGUI.indentLevel += 1;
         bc = FindProperty($"_Matcap{i}_Mask2_Invert");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
         enabled = EditorGUILayout.Toggle("Invert mask", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
+
+        bc = FindProperty($"_Matcap{i}_Mask2_UV_Select");
+        editor.RangeProperty(
+            bc,
+            "UV channel");
+        EditorGUI.indentLevel -= 1;
       }
 
       EditorGUI.BeginChangeCheck();
