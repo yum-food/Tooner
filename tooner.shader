@@ -439,6 +439,9 @@ Shader "yum_food/tooner"
     shadowedReflections("shadowedReflections", Vector) = (0, 0, 0, 0)
     _ReflShadows("_ReflShadows", Vector) = (0, 0, 0, 0)
     _ReflShadowStrength("_ReflShadowStrength", Vector) = (0, 0, 0, 0)
+
+    _Discard_Enable_Static("Enable discard feature (static)", Float) = 0
+    _Discard_Enable_Dynamic("Enable discard feature (dynamic)", Float) = 0
   }
   SubShader
   {

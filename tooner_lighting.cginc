@@ -47,6 +47,12 @@ void getVertexLightColor(inout v2f i)
 
 v2f vert(appdata v)
 {
+#if defined(_DISCARD)
+  if (_Discard_Enable_Dynamic) {
+    return (v2f) (0.0 / 0.0);
+  }
+#endif
+
   v2f o;
 
   UNITY_INITIALIZE_OUTPUT(v2f, o);

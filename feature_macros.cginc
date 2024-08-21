@@ -142,6 +142,7 @@
 #pragma shader_feature_local _ _CLEARCOAT_MASK
 #pragma shader_feature_local _ _CLEARCOAT_MASK2
 #pragma shader_feature_local _ _PROXIMITY_DIMMING
+#pragma shader_feature_local _ _DISCARD
 
 #endif  // __FEATURE_MACROS_INC
 

@@ -1487,6 +1487,24 @@ public class ToonerGUI : ShaderGUI {
       RecordAction("Culling mode");
       bc.floatValue = (float) cull_mode;
     }
+
+    bc = FindProperty("_Discard_Enable_Static");
+    bool enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Discard", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_DISCARD", enabled);
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Discard_Enable_Dynamic");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Enable", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      EditorGUI.indentLevel -= 1;
+    }
   }
 
   void DoLighting() {

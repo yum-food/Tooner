@@ -45,6 +45,10 @@ float3 shadowedReflections;
 float3 _ReflShadows;
 float3 _ReflShadowStrength;
 
+#if defined(_DISCARD)
+float _Discard_Enable_Dynamic;
+#endif
+
 #if defined(_PROXIMITY_DIMMING)
 float _Proximity_Dimming_Min_Dist;
 float _Proximity_Dimming_Max_Dist;
