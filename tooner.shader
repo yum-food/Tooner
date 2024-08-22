@@ -156,6 +156,7 @@ Shader "yum_food/tooner"
     _Direct_Lighting_Factor("Direct lighting factor", Range(0, 5)) = 1
     _Vertex_Lighting_Factor("Vertex lighting factor", Range(0, 5)) = 1
     _Indirect_Specular_Lighting_Factor("Indirect specular lighting factor", Range(0, 5)) = 1
+    _Indirect_Specular_Lighting_Factor2("Indirect specular lighting factor", Range(0, 5)) = 1
     _Indirect_Diffuse_Lighting_Factor("Indirect diffuse lighting factor", Range(0, 5)) = 1
     _Reflection_Probe_Saturation("Reflection probe saturation", Range(0, 1)) = 1
     _Min_Brightness("Min brightness", Range(0, 1)) = 0

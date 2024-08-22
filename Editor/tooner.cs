@@ -1591,6 +1591,11 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Indirect specular multiplier");
 
+      bc = FindProperty("_Indirect_Specular_Lighting_Factor2");
+      editor.RangeProperty(
+          bc,
+          "Secondary ind. spec. multiplier");
+
       bc = FindProperty("_Indirect_Diffuse_Lighting_Factor");
       editor.RangeProperty(
           bc,
