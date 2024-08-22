@@ -321,6 +321,10 @@ float4 _Matcap0Normal_ST;
 float _Matcap0Normal_Str;
 float _Matcap0Normal_UV_Select;
 #endif
+float _Matcap0_Overwrite_Rim_Lighting_0;
+float _Matcap0_Overwrite_Rim_Lighting_1;
+float _Matcap0_Overwrite_Rim_Lighting_2;
+float _Matcap0_Overwrite_Rim_Lighting_3;
 #endif
 
 #if defined(_MATCAP1)
@@ -343,6 +347,10 @@ float4 _Matcap1Normal_ST;
 float _Matcap1Normal_Str;
 float _Matcap1Normal_UV_Select;
 #endif
+float _Matcap1_Overwrite_Rim_Lighting_0;
+float _Matcap1_Overwrite_Rim_Lighting_1;
+float _Matcap1_Overwrite_Rim_Lighting_2;
+float _Matcap1_Overwrite_Rim_Lighting_3;
 #endif
 
 #if defined(_RIM_LIGHTING0)

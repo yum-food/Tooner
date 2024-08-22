@@ -1266,7 +1266,7 @@ float4 effect(inout v2f i)
     matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
   }
 #endif
-  float matcap_overwrite_mask = 0;
+  float4 matcap_overwrite_mask = 0;
 #if defined(_MATCAP0) || defined(_MATCAP1)
   {
 #if defined(_MATCAP0)
@@ -1337,7 +1337,7 @@ float4 effect(inout v2f i)
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
-          matcap_overwrite_mask = max(matcap_mask, matcap_overwrite_mask);
+          matcap_overwrite_mask[0] = max(matcap_mask, matcap_overwrite_mask[0]);
           albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);
           matcap_emission = lerp(albedo.rgb, matcap, matcap_mask) * _Matcap0Emission;
           break;
@@ -1427,7 +1427,7 @@ float4 effect(inout v2f i)
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
-          matcap_overwrite_mask = max(matcap_mask, matcap_overwrite_mask);
+          matcap_overwrite_mask[1] = max(matcap_mask, matcap_overwrite_mask[1]);
           albedo.rgb = lerp(albedo.rgb, matcap, matcap_mask);
           matcap_emission = lerp(albedo.rgb, matcap, matcap_mask) * _Matcap1Emission;
           break;
@@ -1450,10 +1450,12 @@ float4 effect(inout v2f i)
 #endif  // _MATCAP1
   }
 #endif  // _MATCAP0 || _MATCAP1
+  matcap_overwrite_mask = 1 - matcap_overwrite_mask;
 
   // TODO get rid of the pow. It's a hack to make matcap replace mode look
   // better with overlay tattoos.
-  mixOverlayAlbedoRoughnessMetallic(albedo, roughness, metallic, ov, 1 - pow(matcap_overwrite_mask, 4));
+  mixOverlayAlbedoRoughnessMetallic(albedo, roughness, metallic, ov,
+      1 - pow((1 - min(matcap_overwrite_mask[0], matcap_overwrite_mask[1])), 8));
 #if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
   float3 decal_emission = 0;
   applyDecal(albedo, roughness, metallic, decal_emission, i);
@@ -1483,6 +1485,16 @@ float4 effect(inout v2f i)
       matcap_mask *= matcap_mask_raw.a;
 #else
       float matcap_mask = 1;
+#endif
+#if defined(_MATCAP0)
+        if (_Matcap0_Overwrite_Rim_Lighting_0) {
+          matcap_mask *= matcap_overwrite_mask[0];
+        }
+#endif
+#if defined(_MATCAP1)
+        if (_Matcap1_Overwrite_Rim_Lighting_0) {
+          matcap_mask *= matcap_overwrite_mask[1];
+        }
 #endif
 #if defined(_RIM_LIGHTING0_POLAR_MASK)
       if (_Rim_Lighting0_PolarMask_Enabled) {
@@ -1547,6 +1559,16 @@ float4 effect(inout v2f i)
       matcap_mask *= matcap_mask_raw.a;
 #else
       float matcap_mask = 1;
+#endif
+#if defined(_MATCAP0)
+        if (_Matcap0_Overwrite_Rim_Lighting_1) {
+          matcap_mask *= matcap_overwrite_mask[0];
+        }
+#endif
+#if defined(_MATCAP1)
+        if (_Matcap1_Overwrite_Rim_Lighting_1) {
+          matcap_mask *= matcap_overwrite_mask[1];
+        }
 #endif
 #if defined(_RIM_LIGHTING1_POLAR_MASK)
       if (_Rim_Lighting1_PolarMask_Enabled) {
@@ -1616,6 +1638,16 @@ float4 effect(inout v2f i)
 #else
       float matcap_mask = 1;
 #endif
+#if defined(_MATCAP0)
+        if (_Matcap0_Overwrite_Rim_Lighting_2) {
+          matcap_mask *= matcap_overwrite_mask[0];
+        }
+#endif
+#if defined(_MATCAP1)
+        if (_Matcap1_Overwrite_Rim_Lighting_2) {
+          matcap_mask *= matcap_overwrite_mask[1];
+        }
+#endif
 #if defined(_RIM_LIGHTING2_POLAR_MASK)
       if (_Rim_Lighting2_PolarMask_Enabled) {
         float pmask_theta = _Rim_Lighting2_PolarMask_Theta;
@@ -1683,6 +1715,16 @@ float4 effect(inout v2f i)
       matcap_mask *= matcap_mask_raw.a;
 #else
       float matcap_mask = 1;
+#endif
+#if defined(_MATCAP0)
+        if (_Matcap0_Overwrite_Rim_Lighting_3) {
+          matcap_mask *= matcap_overwrite_mask[0];
+        }
+#endif
+#if defined(_MATCAP1)
+        if (_Matcap1_Overwrite_Rim_Lighting_3) {
+          matcap_mask *= matcap_overwrite_mask[1];
+        }
 #endif
 #if defined(_RIM_LIGHTING3_POLAR_MASK)
       if (_Rim_Lighting3_PolarMask_Enabled) {
@@ -1821,6 +1863,7 @@ float4 effect(inout v2f i)
 #endif
 #if defined(_GLITTER)
   float glitter_mask = _Glitter_Mask.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
+  glitter_mask *= min(matcap_overwrite_mask[0], matcap_overwrite_mask[1]);
   float glitter = get_glitter(i.uv0, i.worldPos, normal,
       _Glitter_Density, _Glitter_Amount, _Glitter_Speed,
       glitter_mask, _Glitter_Brightness, _Glitter_Angle, _Glitter_Power);

@@ -545,6 +545,15 @@ public class ToonerGUI : ShaderGUI {
       bc.floatValue = enabled ? 1.0f : 0.0f;
       SetKeyword($"_MATCAP{i}_DISTORTION0", enabled);
 
+      for (int j = 0; j < 4; j++) {
+        bc = FindProperty($"_Matcap{i}_Overwrite_Rim_Lighting_{j}");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle($"Overwrite rim lighting {j}", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+      }
+
       EditorGUI.indentLevel -= 1;
     }
   }
