@@ -40,7 +40,7 @@ v2f vert(appdata v)
   float4 objPos = v.vertex;
 
 #if defined(_OUTLINES)
-  float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/1);
+  float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/0);
   outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
 
   objPos.xyz += v.normal * _Outline_Width * outline_mask * _Outline_Width_Multiplier;
@@ -247,10 +247,8 @@ fixed4 frag (v2f i) : SV_Target
   i.normal = -normalize(i.normal);
 
 #if defined(_OUTLINES)
-  float iddx = ddx(i.uv0.x) / 4;
-  float iddy = ddx(i.uv0.y) / 4;
 #if defined(_BASECOLOR_MAP)
-  float4 albedo = _MainTex.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
+  float4 albedo = _MainTex.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
   albedo *= _Color;
 #else
   float4 albedo = _Color;
@@ -267,7 +265,7 @@ fixed4 frag (v2f i) : SV_Target
 #if defined(_OKLAB)
   // Do hue shift in perceptually uniform color space so it doesn't look like
   // shit.
- float oklab_mask = _OKLAB_Mask.SampleGrad(linear_repeat_s, i.uv0, iddx, iddy);
+ float oklab_mask = _OKLAB_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
  if (oklab_mask > 0.01 &&
      (_OKLAB_Hue_Shift > 1E-6 ||
       abs(_OKLAB_Chroma_Shift) > 1E-6 ||

@@ -1613,11 +1613,10 @@ public class ToonerGUI : ShaderGUI {
         bc,
         "Shadows strength");
 
-    bc = FindProperty("_Mip_Multiplier");
+    bc = FindProperty("_Global_Sample_Bias");
     editor.FloatProperty(
         bc,
-        "Mipmap multiplier");
-    bc.floatValue = (float) Math.Max(1E-6, bc.floatValue);
+        "Global mipmap bias");
 
     bc = FindProperty("_Proximity_Dimming_Enable_Static");
     bool enabled = bc.floatValue > 1E-6;

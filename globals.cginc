@@ -28,7 +28,7 @@ float _Flatten_Mesh_Normals_Str;
 float _Confabulate_Normals;
 
 float _Shadow_Strength;
-float _Mip_Multiplier;
+float _Global_Sample_Bias;
 
 float _ScatterDist;
 float _ScatterPow;

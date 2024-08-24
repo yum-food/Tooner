@@ -377,7 +377,7 @@ Shader "yum_food/tooner"
     _Render_Queue_Offset("Render queue offset", Integer) = 0
 
     _Shadow_Strength("Shadows strength", Range(0, 1)) = 1.0
-    _Mip_Multiplier("Mipmap multiplier", Float) = 1.0
+    _Global_Sample_Bias("Mipmap multiplier", Float) = 0.0
 
     _Gimmick_Flat_Color_Enable_Static("Enable flat color gimmick", Float) = 0.0
     _Gimmick_Flat_Color_Enable_Dynamic("Enable flat color gimmick", Float) = 0.0
@@ -500,6 +500,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType" = "Opaque"
@@ -570,6 +571,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

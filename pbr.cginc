@@ -343,14 +343,14 @@ float4 getLitColor(
     // TODO add keywords to optimize away mask samples when not used
     float cc_mask = 1;
 #if defined(_CLEARCOAT_MASK)
-    float cc_mask_tmp = _Clearcoat_Mask.SampleGrad(linear_repeat_s, i.uv0, ddx(i.uv0.x), ddy(i.uv0.y));
+    float cc_mask_tmp = _Clearcoat_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
     if (_Clearcoat_Mask_Invert) {
       cc_mask_tmp = 1 - cc_mask_tmp;
     }
     cc_mask *= cc_mask_tmp;
 #endif
 #if defined(_CLEARCOAT_MASK2)
-    float cc_mask2_tmp = _Clearcoat_Mask2.SampleGrad(linear_repeat_s, i.uv0, ddx(i.uv0.x), ddy(i.uv0.y));
+    float cc_mask2_tmp = _Clearcoat_Mask2.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
     if (_Clearcoat_Mask_Invert) {
       cc_mask2_tmp = 1 - cc_mask2_tmp;
     }
