@@ -516,7 +516,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY0)
 #if defined(_PBR_OVERLAY0_BASECOLOR_MAP)
   ov.ov0_albedo = _PBR_Overlay0_BaseColorTex.SampleBias(GET_SAMPLER_OV0,
-      UV_SCOFF(i, _PBR_Overlay0_BaseColorTex_ST, _PBR_Overlay0_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay0_BaseColorTex_ST, _PBR_Overlay0_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias);
   ov.ov0_albedo *= _PBR_Overlay0_BaseColor;
 #else
   ov.ov0_albedo = _PBR_Overlay0_BaseColor;
@@ -525,7 +526,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY0_ROUGHNESS)
 #if defined(_PBR_OVERLAY0_ROUGHNESS_MAP)
   ov.ov0_roughness = _PBR_Overlay0_RoughnessTex.SampleBias(GET_SAMPLER_OV0,
-      UV_SCOFF(i, _PBR_Overlay0_RoughnessTex_ST, _PBR_Overlay0_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay0_RoughnessTex_ST, _PBR_Overlay0_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias);
   ov.ov0_roughness *= _PBR_Overlay0_Roughness;
 #else
   ov.ov0_roughness = _PBR_Overlay0_Roughness;
@@ -535,7 +537,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY0_METALLIC)
 #if defined(_PBR_OVERLAY0_METALLIC_MAP)
   ov.ov0_metallic = _PBR_Overlay0_MetallicTex.SampleBias(GET_SAMPLER_OV0,
-      UV_SCOFF(i, _PBR_Overlay0_MetallicTex_ST, _PBR_Overlay0_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay0_MetallicTex_ST, _PBR_Overlay0_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias);
   ov.ov0_metallic *= _PBR_Overlay0_Metallic;
 #else
   ov.ov0_metallic = _PBR_Overlay0_Metallic;
@@ -545,7 +548,7 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY0_MASK)
   ov.ov0_mask = _PBR_Overlay0_Mask.SampleBias(GET_SAMPLER_OV0,
       get_uv_by_channel(i, _PBR_Overlay0_UV_Select),
-      _Global_Sample_Bias);
+      _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias);
   ov.ov0_mask = ((bool) round(_PBR_Overlay0_Mask_Invert)) ? 1.0 - ov.ov0_mask : ov.ov0_mask;
 #else
   ov.ov0_mask = 1;
@@ -556,7 +559,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY1)
 #if defined(_PBR_OVERLAY1_BASECOLOR_MAP)
   ov.ov1_albedo = _PBR_Overlay1_BaseColorTex.SampleBias(GET_SAMPLER_OV1,
-      UV_SCOFF(i, _PBR_Overlay1_BaseColorTex_ST, _PBR_Overlay1_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay1_BaseColorTex_ST, _PBR_Overlay1_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias);
   ov.ov1_albedo *= _PBR_Overlay1_BaseColor;
 #else
   ov.ov1_albedo = _PBR_Overlay1_BaseColor;
@@ -565,7 +569,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY1_ROUGHNESS)
 #if defined(_PBR_OVERLAY1_ROUGHNESS_MAP)
   ov.ov1_roughness = _PBR_Overlay1_RoughnessTex.SampleBias(GET_SAMPLER_OV1,
-      UV_SCOFF(i, _PBR_Overlay1_RoughnessTex_ST, _PBR_Overlay1_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay1_RoughnessTex_ST, _PBR_Overlay1_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias);
   ov.ov1_roughness *= _PBR_Overlay1_Roughness;
 #else
   ov.ov1_roughness = _PBR_Overlay1_Roughness;
@@ -575,7 +580,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY1_METALLIC)
 #if defined(_PBR_OVERLAY1_METALLIC_MAP)
   ov.ov1_metallic = _PBR_Overlay1_MetallicTex.SampleBias(GET_SAMPLER_OV1,
-      UV_SCOFF(i, _PBR_Overlay1_MetallicTex_ST, _PBR_Overlay1_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay1_MetallicTex_ST, _PBR_Overlay1_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias);
   ov.ov1_metallic *= _PBR_Overlay1_Metallic;
 #else
   ov.ov1_metallic = _PBR_Overlay1_Metallic;
@@ -585,7 +591,7 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY1_MASK)
   ov.ov1_mask = _PBR_Overlay1_Mask.SampleBias(GET_SAMPLER_OV1,
       get_uv_by_channel(i, _PBR_Overlay1_UV_Select),
-      _Global_Sample_Bias);
+      _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias);
   ov.ov1_mask = ((bool) round(_PBR_Overlay1_Mask_Invert)) ? 1.0 - ov.ov1_mask : ov.ov1_mask;
 #else
   ov.ov1_mask = 1;
@@ -596,7 +602,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY2)
 #if defined(_PBR_OVERLAY2_BASECOLOR_MAP)
   ov.ov2_albedo = _PBR_Overlay2_BaseColorTex.SampleBias(GET_SAMPLER_OV2,
-      UV_SCOFF(i, _PBR_Overlay2_BaseColorTex_ST, _PBR_Overlay2_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay2_BaseColorTex_ST, _PBR_Overlay2_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias);
   ov.ov2_albedo *= _PBR_Overlay2_BaseColor;
 #else
   ov.ov2_albedo = _PBR_Overlay2_BaseColor;
@@ -605,7 +612,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY2_ROUGHNESS)
 #if defined(_PBR_OVERLAY2_ROUGHNESS_MAP)
   ov.ov2_roughness = _PBR_Overlay2_RoughnessTex.SampleBias(GET_SAMPLER_OV2,
-      UV_SCOFF(i, _PBR_Overlay2_RoughnessTex_ST, _PBR_Overlay2_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay2_RoughnessTex_ST, _PBR_Overlay2_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias);
   ov.ov2_roughness *= _PBR_Overlay2_Roughness;
 #else
   ov.ov2_roughness = _PBR_Overlay2_Roughness;
@@ -615,7 +623,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY2_METALLIC)
 #if defined(_PBR_OVERLAY2_METALLIC_MAP)
   ov.ov2_metallic = _PBR_Overlay2_MetallicTex.SampleBias(GET_SAMPLER_OV2,
-      UV_SCOFF(i, _PBR_Overlay2_MetallicTex_ST, _PBR_Overlay2_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay2_MetallicTex_ST, _PBR_Overlay2_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias);
   ov.ov2_metallic *= _PBR_Overlay2_Metallic;
 #else
   ov.ov2_metallic = _PBR_Overlay2_Metallic;
@@ -625,7 +634,7 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY2_MASK)
   ov.ov2_mask = _PBR_Overlay2_Mask.SampleBias(GET_SAMPLER_OV2,
       get_uv_by_channel(i, _PBR_Overlay2_UV_Select),
-      _Global_Sample_Bias);
+      _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias);
   ov.ov2_mask = ((bool) round(_PBR_Overlay2_Mask_Invert)) ? 1.0 - ov.ov2_mask : ov.ov2_mask;
 #else
   ov.ov2_mask = 1;
@@ -636,7 +645,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY3)
 #if defined(_PBR_OVERLAY3_BASECOLOR_MAP)
   ov.ov3_albedo = _PBR_Overlay3_BaseColorTex.SampleBias(GET_SAMPLER_OV3,
-      UV_SCOFF(i, _PBR_Overlay3_BaseColorTex_ST, _PBR_Overlay3_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay3_BaseColorTex_ST, _PBR_Overlay3_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias);
   ov.ov3_albedo *= _PBR_Overlay3_BaseColor;
 #else
   ov.ov3_albedo = _PBR_Overlay3_BaseColor;
@@ -645,7 +655,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY3_ROUGHNESS)
 #if defined(_PBR_OVERLAY3_ROUGHNESS_MAP)
   ov.ov3_roughness = _PBR_Overlay3_RoughnessTex.SampleBias(GET_SAMPLER_OV3,
-      UV_SCOFF(i, _PBR_Overlay3_RoughnessTex_ST, _PBR_Overlay3_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay3_RoughnessTex_ST, _PBR_Overlay3_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias);
   ov.ov3_roughness *= _PBR_Overlay3_Roughness;
 #else
   ov.ov3_roughness = _PBR_Overlay3_Roughness;
@@ -655,7 +666,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY3_METALLIC)
 #if defined(_PBR_OVERLAY3_METALLIC_MAP)
   ov.ov3_metallic = _PBR_Overlay3_MetallicTex.SampleBias(GET_SAMPLER_OV3,
-      UV_SCOFF(i, _PBR_Overlay3_MetallicTex_ST, _PBR_Overlay3_UV_Select), _Global_Sample_Bias);
+      UV_SCOFF(i, _PBR_Overlay3_MetallicTex_ST, _PBR_Overlay3_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias);
   ov.ov3_metallic *= _PBR_Overlay3_Metallic;
 #else
   ov.ov3_metallic = _PBR_Overlay3_Metallic;
@@ -665,7 +677,7 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #if defined(_PBR_OVERLAY3_MASK)
   ov.ov3_mask = _PBR_Overlay3_Mask.SampleBias(GET_SAMPLER_OV3,
       get_uv_by_channel(i, _PBR_Overlay3_UV_Select),
-      _Global_Sample_Bias);
+      _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias);
   ov.ov3_mask = ((bool) round(_PBR_Overlay3_Mask_Invert)) ? 1.0 - ov.ov3_mask : ov.ov3_mask;
 #else
   ov.ov3_mask = 1;
@@ -953,7 +965,8 @@ void applyOverlayNormal(inout float3 raw_normal, float4 albedo, PbrOverlay ov, v
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
   raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleBias(GET_SAMPLER_OV0,
-        UV_SCOFF(i, _PBR_Overlay0_NormalTex_ST, _PBR_Overlay0_UV_Select), _Global_Sample_Bias),
+        UV_SCOFF(i, _PBR_Overlay0_NormalTex_ST, _PBR_Overlay0_UV_Select),
+        _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias),
       _PBR_Overlay0_Tex_NormalStr * ov.ov0_mask * a0);
 
   raw_normal = BlendNormals(
@@ -968,7 +981,8 @@ void applyOverlayNormal(inout float3 raw_normal, float4 albedo, PbrOverlay ov, v
     a1 *= in_range;
   }
   raw_normal_2 = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleBias(GET_SAMPLER_OV1,
-        UV_SCOFF(i, _PBR_Overlay1_NormalTex_ST, _PBR_Overlay1_UV_Select), _Global_Sample_Bias),
+        UV_SCOFF(i, _PBR_Overlay1_NormalTex_ST, _PBR_Overlay1_UV_Select),
+        _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias),
       _PBR_Overlay1_Tex_NormalStr * ov.ov1_mask * a1);
 
   raw_normal = BlendNormals(
@@ -983,7 +997,8 @@ void applyOverlayNormal(inout float3 raw_normal, float4 albedo, PbrOverlay ov, v
     a2 *= in_range;
   }
   raw_normal_2 = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleBias(GET_SAMPLER_OV2,
-        UV_SCOFF(i, _PBR_Overlay2_NormalTex_ST, _PBR_Overlay2_UV_Select), _Global_Sample_Bias),
+        UV_SCOFF(i, _PBR_Overlay2_NormalTex_ST, _PBR_Overlay2_UV_Select),
+        _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias),
       _PBR_Overlay2_Tex_NormalStr * ov.ov2_mask * a2);
 
   raw_normal = BlendNormals(
@@ -998,7 +1013,8 @@ void applyOverlayNormal(inout float3 raw_normal, float4 albedo, PbrOverlay ov, v
     a3 *= in_range;
   }
   raw_normal_2 = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleBias(GET_SAMPLER_OV3,
-        UV_SCOFF(i, _PBR_Overlay3_NormalTex_ST, _PBR_Overlay3_UV_Select), _Global_Sample_Bias),
+        UV_SCOFF(i, _PBR_Overlay3_NormalTex_ST, _PBR_Overlay3_UV_Select),
+        _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias),
       _PBR_Overlay3_Tex_NormalStr * ov.ov3_mask * a3);
 
   raw_normal = BlendNormals(
@@ -1012,25 +1028,29 @@ float3 getOverlayEmission(PbrOverlay ov, v2f i)
   float3 em = 0;
 #if defined(_PBR_OVERLAY0_EMISSION_MAP)
   em += _PBR_Overlay0_EmissionTex.SampleBias(GET_SAMPLER_OV0,
-      UV_SCOFF(i, _PBR_Overlay0_EmissionTex_ST, _PBR_Overlay0_UV_Select), _Global_Sample_Bias) *
+      UV_SCOFF(i, _PBR_Overlay0_EmissionTex_ST, _PBR_Overlay0_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias) *
     _PBR_Overlay0_Emission * ov.ov0_mask;
 #endif
 
 #if defined(_PBR_OVERLAY1_EMISSION_MAP)
   em += _PBR_Overlay1_EmissionTex.SampleBias(GET_SAMPLER_OV1,
-      UV_SCOFF(i, _PBR_Overlay1_EmissionTex_ST, _PBR_Overlay1_UV_Select), _Global_Sample_Bias) *
+      UV_SCOFF(i, _PBR_Overlay1_EmissionTex_ST, _PBR_Overlay1_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias) *
     _PBR_Overlay1_Emission * ov.ov1_mask;
 #endif
 
 #if defined(_PBR_OVERLAY2_EMISSION_MAP)
   em += _PBR_Overlay2_EmissionTex.SampleBias(GET_SAMPLER_OV2,
-      UV_SCOFF(i, _PBR_Overlay2_EmissionTex_ST, _PBR_Overlay2_UV_Select), _Global_Sample_Bias) *
+      UV_SCOFF(i, _PBR_Overlay2_EmissionTex_ST, _PBR_Overlay2_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias) *
     _PBR_Overlay2_Emission * ov.ov2_mask;
 #endif
 
 #if defined(_PBR_OVERLAY3_EMISSION_MAP)
   em += _PBR_Overlay3_EmissionTex.SampleBias(GET_SAMPLER_OV3,
-      UV_SCOFF(i, _PBR_Overlay3_EmissionTex_ST, _PBR_Overlay3_UV_Select), _Global_Sample_Bias) *
+      UV_SCOFF(i, _PBR_Overlay3_EmissionTex_ST, _PBR_Overlay3_UV_Select),
+      _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias) *
     _PBR_Overlay3_Emission * ov.ov3_mask;
 #endif
   return em;
@@ -1239,7 +1259,8 @@ float4 effect(inout v2f i)
 #if defined(_MATCAP0_NORMAL)
       float3 matcap_normal = UnpackScaleNormal(
           _Matcap0Normal.SampleBias(linear_repeat_s,
-            UV_SCOFF(i, _Matcap0Normal_ST, _Matcap0Normal_UV_Select), _Global_Sample_Bias),
+            UV_SCOFF(i, _Matcap0Normal_ST, _Matcap0Normal_UV_Select),
+            _Global_Sample_Bias + _Matcap0Normal_Mip_Bias),
           _Matcap0Normal_Str * _Matcap0MixFactor);
       raw_normal = MY_BLEND_NORMALS(raw_normal, matcap_normal, matcap_mask * _Matcap0MixFactor);
       normal = float3(
@@ -1328,7 +1349,8 @@ float4 effect(inout v2f i)
 #if defined(_MATCAP1_NORMAL)
       float3 matcap_normal = UnpackScaleNormal(
           _Matcap1Normal.SampleBias(linear_repeat_s,
-            UV_SCOFF(i, _Matcap1Normal_ST, _Matcap1Normal_UV_Select), _Global_Sample_Bias),
+            UV_SCOFF(i, _Matcap1Normal_ST, _Matcap1Normal_UV_Select),
+            _Global_Sample_Bias + _Matcap1Normal_Mip_Bias),
           _Matcap1Normal_Str * _Matcap1MixFactor);
       raw_normal = MY_BLEND_NORMALS(raw_normal, matcap_normal, matcap_mask * _Matcap1MixFactor);
       normal = float3(

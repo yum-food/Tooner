@@ -42,6 +42,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay0_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
     _PBR_Overlay0_UV_Select("UV channel", Range(0,3)) = 0
     _PBR_Overlay0_Sampler_Mode("Sampler mode", Range(0,1)) = 0
+    _PBR_Overlay0_Mip_Bias("Mip bias", Float) = 0.0
 
     _PBR_Overlay1_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay1_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -65,6 +66,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay1_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
     _PBR_Overlay1_UV_Select("UV channel", Range(0,3)) = 0
     _PBR_Overlay1_Sampler_Mode("Sampler mode", Range(0,1)) = 0
+    _PBR_Overlay1_Mip_Bias("Mip bias", Float) = 0.0
 
     _PBR_Overlay2_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay2_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -88,6 +90,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay2_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
     _PBR_Overlay2_UV_Select("UV channel", Range(0,3)) = 0
     _PBR_Overlay2_Sampler_Mode("Sampler mode", Range(0,1)) = 0
+    _PBR_Overlay2_Mip_Bias("Mip bias", Float) = 0.0
 
     _PBR_Overlay3_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay3_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -111,6 +114,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay3_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
     _PBR_Overlay3_UV_Select("UV channel", Range(0,3)) = 0
     _PBR_Overlay3_Sampler_Mode("Sampler mode", Range(0,1)) = 0
+    _PBR_Overlay3_Mip_Bias("Mip bias", Float) = 0.0
 
     _Decal0_Enable("Enable decal", Float) = 0.0
     _Decal0_BaseColor("Base color", 2D) = "white" {}
@@ -227,6 +231,7 @@ Shader "yum_food/tooner"
     _Matcap0Distortion0("Matcap distortion0", Float) = 0
     _Matcap0Normal_Enabled("Enable normal replacement", Float) = 0
     _Matcap0Normal("Matcap normals", 2D) = "bump" {}
+    _Matcap0Normal_Mip_Bias("Matcap normals mip bias", Float) = 0
     _Matcap0Normal_Str("Matcap normals", Range(0, 10)) = 1
     _Matcap0Normal_UV_Select("Matcap normals", Range(0, 3)) = 0
     _Matcap0_Overwrite_Rim_Lighting_0("Overwrite RL", Float) = 0
@@ -249,6 +254,7 @@ Shader "yum_food/tooner"
     _Matcap1Distortion0("Matcap distortion0", Float) = 0
     _Matcap1Normal_Enabled("Enable normal replacement", Float) = 0
     _Matcap1Normal("Matcap normals", 2D) = "bump" {}
+    _Matcap1Normal_Mip_Bias("Matcap normals mip bias", Float) = 0
     _Matcap1Normal_Str("Matcap normals", Range(0, 10)) = 1
     _Matcap1Normal_UV_Select("Matcap normals", Range(0, 3)) = 0
     _Matcap1_Overwrite_Rim_Lighting_0("Overwrite RL", Float) = 0
@@ -500,7 +506,6 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
-    /*
     Pass {
       Tags {
         "RenderType" = "Opaque"
@@ -571,7 +576,6 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
-    */
   }
   CustomEditor "ToonerGUI"
 }

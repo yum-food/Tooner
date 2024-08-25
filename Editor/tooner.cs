@@ -316,6 +316,9 @@ public class ToonerGUI : ShaderGUI {
         bc.floatValue = (int) sampler_mode;
         SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
         SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
+
+        bc = FindProperty($"_PBR_Overlay{i}_Mip_Bias");
+        editor.FloatProperty(bc, "Mip bias");
       } else {
         SetKeyword($"_PBR_OVERLAY{i}_BASECOLOR_MAP", false);
         SetKeyword($"_PBR_OVERLAY{i}_MIX_ALPHA_BLEND", false);
@@ -533,6 +536,9 @@ public class ToonerGUI : ShaderGUI {
           editor.RangeProperty(
               bc,
               "UV channel");
+
+          bc = FindProperty($"_Matcap{i}Normal_Mip_Bias");
+          editor.FloatProperty(bc, "Mip bias");
         }
         EditorGUI.indentLevel -= 1;
       }
