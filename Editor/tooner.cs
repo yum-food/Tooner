@@ -888,13 +888,6 @@ public class ToonerGUI : ShaderGUI {
         editor.FloatProperty(
             bc,
             "Outline width multiplier");
-
-        bc = FindProperty("_Outline_Stenciling");
-        bool enabled = (bc.floatValue == 1.0);
-        EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Enable stenciling", enabled);
-        EditorGUI.EndChangeCheck();
-        bc.floatValue = enabled ? 1.0f : 2.0f;
       }
   }
 
@@ -1532,6 +1525,60 @@ public class ToonerGUI : ShaderGUI {
       enabled = EditorGUILayout.Toggle("Enable", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
+      EditorGUI.indentLevel -= 1;
+    }
+
+    EditorGUILayout.LabelField("Stenciling", EditorStyles.boldLabel);
+    for (int i = 0; i < 2; i++) {
+      EditorGUI.indentLevel += 1;
+
+      string pass_str = "";
+      switch (i) {
+        case 0:
+          pass_str = "Base";
+          break;
+        case 1:
+          pass_str = "Outline";
+          break;
+      }
+
+      EditorGUILayout.LabelField($"{pass_str} pass");
+      {
+        EditorGUI.indentLevel += 1;
+        bc = FindProperty($"_Stencil_Ref_{pass_str}");
+        editor.FloatProperty(bc, "Ref");
+
+        bc = FindProperty($"_Stencil_Comp_{pass_str}");
+        EditorGUI.BeginChangeCheck();
+        UnityEngine.Rendering.CompareFunction stencil_comp =
+          (UnityEngine.Rendering.CompareFunction) bc.floatValue;
+        stencil_comp = (UnityEngine.Rendering.CompareFunction)
+          EditorGUILayout.EnumPopup(MakeLabel("Comp"), stencil_comp);
+        EditorGUI.EndChangeCheck();
+        RecordAction("Rendering mode");
+        bc.floatValue = (float) stencil_comp;
+
+        bc = FindProperty($"_Stencil_Pass_Op_{pass_str}");
+        EditorGUI.BeginChangeCheck();
+        UnityEngine.Rendering.StencilOp stencil_op =
+          (UnityEngine.Rendering.StencilOp) bc.floatValue;
+        stencil_op = (UnityEngine.Rendering.StencilOp)
+          EditorGUILayout.EnumPopup(MakeLabel("Pass op"), stencil_op);
+        EditorGUI.EndChangeCheck();
+        RecordAction("Rendering mode");
+        bc.floatValue = (float) stencil_op;
+
+        bc = FindProperty($"_Stencil_Fail_Op_{pass_str}");
+        EditorGUI.BeginChangeCheck();
+        stencil_op = (UnityEngine.Rendering.StencilOp) bc.floatValue;
+        stencil_op = (UnityEngine.Rendering.StencilOp)
+          EditorGUILayout.EnumPopup(MakeLabel("Fail op"), stencil_op);
+        EditorGUI.EndChangeCheck();
+        RecordAction("Rendering mode");
+        bc.floatValue = (float) stencil_op;
+
+        EditorGUI.indentLevel -= 1;
+      }
       EditorGUI.indentLevel -= 1;
     }
   }

@@ -188,7 +188,6 @@ Shader "yum_food/tooner"
     _Outline_Mask("Outline mask", 2D) = "white" {}
     _Outline_Mask_Invert("Invert outline mask", Float) = 0.0
     _Outline_Width_Multiplier("Outline width multiplier", Float) = 1
-    [MaterialToggle] _Outline_Stenciling("Enable outline stenciling", Float) = 1
 
     _Glitter_Enabled("Glitter enabled", Float) = 0
     _Glitter_Mask("Glitter mask", 2D) = "white" {}
@@ -204,6 +203,16 @@ Shader "yum_food/tooner"
 		_Explode_Phase("Explode phase", Range(0, 1)) = 0
     [Enum(UnityEngine.Rendering.CullMode)] _OutlinesCull ("Outlines pass culling mode", Float) = 1
     [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Culling mode", Float) = 2
+
+    _Stencil_Ref_Base("Stencil ref", Float) = 1
+    [Enum(UnityEngine.Rendering.CompareFunction)] _Stencil_Comp_Base("Stencil compare", Float) = 0  // Disabled
+    [Enum(UnityEngine.Rendering.StencilOp)] _Stencil_Pass_Op_Base("Stencil op", Float) = 0  // Keep
+    [Enum(UnityEngine.Rendering.StencilOp)] _Stencil_Fail_Op_Base("Stencil op", Float) = 0  // Keep
+
+    _Stencil_Ref_Outline("Stencil ref", Float) = 1
+    [Enum(UnityEngine.Rendering.CompareFunction)] _Stencil_Comp_Outline("Stencil compare", Float) = 0  // Disabled
+    [Enum(UnityEngine.Rendering.StencilOp)] _Stencil_Pass_Op_Outline("Stencil op", Float) = 0  // Keep
+    [Enum(UnityEngine.Rendering.StencilOp)] _Stencil_Fail_Op_Outline("Stencil op", Float) = 0  // Keep
 
 		[MaterialToggle] _Scroll_Toggle("Scroll toggle", Float) = 0
 		_Scroll_Top("Scroll top (m)", Range(-5, 5)) = 1
@@ -479,9 +488,10 @@ Shader "yum_food/tooner"
       Cull [_Cull]
 
       Stencil {
-        Ref 1
-        Comp Always
-        Pass Replace
+        Ref [_Stencil_Ref_Base]
+        Comp [_Stencil_Comp_Base]
+        Pass [_Stencil_Pass_Op_Base]
+        Fail [_Stencil_Fail_Op_Base]
       }
 
       CGPROGRAM
@@ -541,8 +551,10 @@ Shader "yum_food/tooner"
       ZTest LEqual
 
       Stencil {
-        Ref [_Outline_Stenciling]
-        Comp Greater
+        Ref [_Stencil_Ref_Outline]
+        Comp [_Stencil_Comp_Outline]
+        Pass [_Stencil_Pass_Op_Outline]
+        Fail [_Stencil_Fail_Op_Outline]
       }
 
 			CGPROGRAM
