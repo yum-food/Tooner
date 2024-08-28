@@ -410,8 +410,15 @@ public class ToonerGUI : ShaderGUI {
             bct);
         SetKeyword($"_EMISSION{i}", bc.textureValue);
 
-        bc = FindProperty($"_Emission{i}Multiplier");
-        editor.RangeProperty(bc, "Multiplier");
+        if (bc.textureValue) {
+          bc = FindProperty($"_Emission{i}_UV_Select");
+          editor.RangeProperty(
+              bc,
+              "UV channel");
+
+          bc = FindProperty($"_Emission{i}Multiplier");
+          editor.RangeProperty(bc, "Multiplier");
+        }
       }
       EditorGUI.indentLevel -= 1;
     }

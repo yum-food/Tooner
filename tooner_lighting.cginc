@@ -1860,14 +1860,14 @@ float4 effect(inout v2f i)
 #endif
 #if defined(_EMISSION0)
   {
-    float emission = _Emission0Tex.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+    float emission = _Emission0Tex.SampleBias(linear_repeat_s, get_uv_by_channel(i, round(_Emission0_UV_Select)), _Global_Sample_Bias);
     result.rgb += albedo.rgb * emission * _Emission0Strength *
       _Global_Emission_Factor * _Emission0Multiplier;
   }
 #endif
 #if defined(_EMISSION1)
   {
-    float emission = _Emission1Tex.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+    float emission = _Emission1Tex.SampleBias(linear_repeat_s, get_uv_by_channel(i, round(_Emission1_UV_Select)), _Global_Sample_Bias);
     result.rgb += albedo.rgb * emission * _Emission1Strength *
       _Global_Emission_Factor * _Emission1Multiplier;
   }

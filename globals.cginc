@@ -258,11 +258,13 @@ float _Decal3_UV_Select;
 texture2D _Emission0Tex;
 float _Emission0Strength;
 float _Emission0Multiplier;
+float _Emission0_UV_Select;
 #endif
 #if defined(_EMISSION1)
 texture2D _Emission1Tex;
 float _Emission1Strength;
 float _Emission1Multiplier;
+float _Emission1_UV_Select;
 #endif
 float _Global_Emission_Factor;
 
