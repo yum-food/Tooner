@@ -1856,7 +1856,7 @@ float4 effect(inout v2f i)
   float glitter = get_glitter(i.uv0, i.worldPos, normal,
       _Glitter_Density, _Glitter_Amount, _Glitter_Speed,
       glitter_mask, _Glitter_Brightness, _Glitter_Angle, _Glitter_Power);
-  result.rgb += glitter;
+  result.rgb += glitter * _Glitter_Color;
 #endif
 #if defined(_EMISSION0)
   {

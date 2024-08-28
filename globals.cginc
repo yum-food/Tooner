@@ -288,6 +288,7 @@ float _Outline_Width_Multiplier;
 
 #if defined(_GLITTER)
 texture2D _Glitter_Mask;
+float3 _Glitter_Color;
 float _Glitter_Density;
 float _Glitter_Amount;
 float _Glitter_Speed;

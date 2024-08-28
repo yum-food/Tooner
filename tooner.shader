@@ -197,6 +197,7 @@ Shader "yum_food/tooner"
 
     _Glitter_Enabled("Glitter enabled", Float) = 0
     _Glitter_Mask("Glitter mask", 2D) = "white" {}
+    _Glitter_Color("Glitter mask", Color) = (1, 1, 1, 1)
     _Glitter_Density("Glitter density", float) = 400
     _Glitter_Amount("Glitter amount", Range(1, 100)) = 35
     _Glitter_Speed("Glitter speed", float) = 1

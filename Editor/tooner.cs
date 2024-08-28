@@ -928,6 +928,9 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bc, "Glitter mask (RGBA)"),
           bc);
 
+      bc = FindProperty("_Glitter_Color");
+      editor.ColorProperty(bc, "Color");
+
       bc = FindProperty("_Glitter_Density");
       editor.FloatProperty(
           bc,
