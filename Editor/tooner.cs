@@ -396,16 +396,28 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoEmission() {
-      MaterialProperty bc = FindProperty("_EmissionTex");
-      MaterialProperty bct = FindProperty("_EmissionStrength");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bct, "Emission map"),
-          bc,
-          bct);
-      SetKeyword("_EMISSION", bc.textureValue);
+    MaterialProperty bc;
+    MaterialProperty bct;
+    for (int i = 0; i < 2; i++) {
+      EditorGUILayout.LabelField($"Slot {i}", EditorStyles.boldLabel);
+      EditorGUI.indentLevel += 1;
+      {
+        bc = FindProperty($"_Emission{i}Tex");
+        bct = FindProperty($"_Emission{i}Strength");
+        editor.TexturePropertySingleLine(
+            MakeLabel(bct, "Map"),
+            bc,
+            bct);
+        SetKeyword($"_EMISSION{i}", bc.textureValue);
 
-      bc = FindProperty("_Global_Emission_Factor");
-      editor.FloatProperty(bc, "Global emissions multiplier");
+        bc = FindProperty($"_Emission{i}Multiplier");
+        editor.RangeProperty(bc, "Multiplier");
+      }
+      EditorGUI.indentLevel -= 1;
+    }
+
+    bc = FindProperty("_Global_Emission_Factor");
+    editor.FloatProperty(bc, "Global emissions multiplier");
   }
 
   enum MatcapMode {

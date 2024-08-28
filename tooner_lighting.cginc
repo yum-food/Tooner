@@ -1858,9 +1858,19 @@ float4 effect(inout v2f i)
       glitter_mask, _Glitter_Brightness, _Glitter_Angle, _Glitter_Power);
   result.rgb += glitter;
 #endif
-#if defined(_EMISSION)
-  float emission = _EmissionTex.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
-  result.rgb += albedo.rgb * emission * _EmissionStrength * _Global_Emission_Factor;
+#if defined(_EMISSION0)
+  {
+    float emission = _Emission0Tex.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+    result.rgb += albedo.rgb * emission * _Emission0Strength *
+      _Global_Emission_Factor * _Emission0Multiplier;
+  }
+#endif
+#if defined(_EMISSION1)
+  {
+    float emission = _Emission1Tex.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+    result.rgb += albedo.rgb * emission * _Emission1Strength *
+      _Global_Emission_Factor * _Emission1Multiplier;
+  }
 #endif
 #if defined(_EXPLODE) && defined(_AUDIOLINK)
   if (AudioLinkIsAvailable() && _Explode_Phase > 1E-6) {

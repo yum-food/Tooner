@@ -254,9 +254,15 @@ float _Decal3_Angle;
 float _Decal3_UV_Select;
 #endif
 
-#if defined(_EMISSION)
-texture2D _EmissionTex;
-float _EmissionStrength;
+#if defined(_EMISSION0)
+texture2D _Emission0Tex;
+float _Emission0Strength;
+float _Emission0Multiplier;
+#endif
+#if defined(_EMISSION1)
+texture2D _Emission1Tex;
+float _Emission1Strength;
+float _Emission1Multiplier;
 #endif
 float _Global_Emission_Factor;
 
