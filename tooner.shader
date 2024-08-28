@@ -537,6 +537,13 @@ Shader "yum_food/tooner"
       ZWrite Off
       Cull [_Cull]
 
+      Stencil {
+        Ref [_Stencil_Ref_Base]
+        Comp [_Stencil_Comp_Base]
+        Pass [_Stencil_Pass_Op_Base]
+        Fail [_Stencil_Fail_Op_Base]
+      }
+
       CGPROGRAM
       #pragma target 5.0
 
@@ -588,6 +595,14 @@ Shader "yum_food/tooner"
       Tags {
         "LightMode" = "ShadowCaster"
       }
+
+      Stencil {
+        Ref [_Stencil_Ref_Base]
+        Comp [_Stencil_Comp_Base]
+        Pass [_Stencil_Pass_Op_Base]
+        Fail [_Stencil_Fail_Op_Base]
+      }
+
 			CGPROGRAM
       #pragma target 5.0
 			#pragma multi_compile_instancing
