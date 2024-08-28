@@ -1768,24 +1768,45 @@ float4 effect(inout v2f i)
  }
 #endif
 
-#if defined(_HSV)
-  // Do hue shift in perceptually uniform color space so it doesn't look like
-  // shit.
- float hsv_mask = _HSV_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
- if (_HSV_Mask_Invert) {
-   hsv_mask = 1 - hsv_mask;
+#if defined(_HSV0)
+ {
+   float hsv_mask = _HSV0_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+   if (_HSV0_Mask_Invert) {
+     hsv_mask = 1 - hsv_mask;
+   }
+   if (hsv_mask > 0.01 &&
+       (_HSV0_Hue_Shift > 1E-6 ||
+        abs(_HSV0_Sat_Shift) > 1E-6 ||
+        abs(_HSV0_Val_Shift) > 1E-6)) {
+     float3 c = albedo.rgb;
+     c = RGBtoHSV(c);
+     c += float3(_HSV0_Hue_Shift, _HSV0_Sat_Shift, _HSV0_Val_Shift);
+     c.x = glsl_mod(c.x, 1.0);
+     c.yz = saturate(c.yz);
+     c = HSVtoRGB(c);
+     albedo.rgb = c;
+   }
  }
- if (hsv_mask > 0.01 &&
-     (_HSV_Hue_Shift > 1E-6 ||
-      abs(_HSV_Sat_Shift) > 1E-6 ||
-      abs(_HSV_Val_Shift) > 1E-6)) {
-   float3 c = albedo.rgb;
-   c = RGBtoHSV(c);
-   c += float3(_HSV_Hue_Shift, _HSV_Sat_Shift, _HSV_Val_Shift);
-   c.x = glsl_mod(c.x, 1.0);
-   c.yz = saturate(c.yz);
-   c = HSVtoRGB(c);
-   albedo.rgb = c;
+#endif
+
+#if defined(_HSV1)
+ {
+   float hsv_mask = _HSV1_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+   if (_HSV1_Mask_Invert) {
+     hsv_mask = 1 - hsv_mask;
+   }
+   if (hsv_mask > 0.01 &&
+       (_HSV1_Hue_Shift > 1E-6 ||
+        abs(_HSV1_Sat_Shift) > 1E-6 ||
+        abs(_HSV1_Val_Shift) > 1E-6)) {
+     float3 c = albedo.rgb;
+     c = RGBtoHSV(c);
+     c += float3(_HSV1_Hue_Shift, _HSV1_Sat_Shift, _HSV1_Val_Shift);
+     c.x = glsl_mod(c.x, 1.0);
+     c.yz = saturate(c.yz);
+     c = HSVtoRGB(c);
+     albedo.rgb = c;
+   }
  }
 #endif
 

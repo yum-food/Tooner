@@ -789,43 +789,45 @@ public class ToonerGUI : ShaderGUI {
   void DoHSV() {
     MaterialProperty bc;
 
-    bc = FindProperty("_HSV_Enabled");
-    bool enabled = bc.floatValue > 1E-6;
-    EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = enabled ? 1.0f : 0.0f;
+		for (int i = 0; i < 2; i++) {
+			bc = FindProperty($"_HSV{i}_Enabled");
+			bool enabled = bc.floatValue > 1E-6;
+			EditorGUI.BeginChangeCheck();
+			enabled = EditorGUILayout.Toggle($"Enable slot {i}", enabled);
+			EditorGUI.EndChangeCheck();
+			bc.floatValue = enabled ? 1.0f : 0.0f;
 
-    SetKeyword("_HSV", enabled);
+			SetKeyword($"_HSV{i}", enabled);
 
-    if (enabled) {
-      bc = FindProperty("_HSV_Mask");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bc, "Mask"),
-          bc);
+			if (enabled) {
+				bc = FindProperty($"_HSV{i}_Mask");
+				editor.TexturePropertySingleLine(
+						MakeLabel(bc, "Mask"),
+						bc);
 
-      if (bc.textureValue) {
-        bc = FindProperty("_HSV_Mask_Invert");
-        enabled = bc.floatValue > 1E-6;
-        EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Invert", enabled);
-        EditorGUI.EndChangeCheck();
-        bc.floatValue = enabled ? 1.0f : 0.0f;
-      }
+				if (bc.textureValue) {
+					bc = FindProperty($"_HSV{i}_Mask_Invert");
+					enabled = bc.floatValue > 1E-6;
+					EditorGUI.BeginChangeCheck();
+					enabled = EditorGUILayout.Toggle("Invert", enabled);
+					EditorGUI.EndChangeCheck();
+					bc.floatValue = enabled ? 1.0f : 0.0f;
+				}
 
-      bc = FindProperty("_HSV_Hue_Shift");
-      editor.RangeProperty(
-          bc,
-          "Hue shift");
-      bc = FindProperty("_HSV_Sat_Shift");
-      editor.RangeProperty(
-          bc,
-          "Saturation shift");
-      bc = FindProperty("_HSV_Val_Shift");
-      editor.RangeProperty(
-          bc,
-          "Value shift");
-    }
+				bc = FindProperty($"_HSV{i}_Hue_Shift");
+				editor.RangeProperty(
+						bc,
+						"Hue shift");
+				bc = FindProperty($"_HSV{i}_Sat_Shift");
+				editor.RangeProperty(
+						bc,
+						"Saturation shift");
+				bc = FindProperty($"_HSV{i}_Val_Shift");
+				editor.RangeProperty(
+						bc,
+						"Value shift");
+			}
+		}
   }
 
   void DoClones() {

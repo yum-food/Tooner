@@ -477,13 +477,22 @@ float _OKLAB_Chroma_Shift;
 float _OKLAB_Hue_Shift;
 #endif
 
-#if defined(_HSV)
-float _HSV_Enabled;
-texture2D _HSV_Mask;
-float _HSV_Mask_Invert;
-float _HSV_Hue_Shift;
-float _HSV_Sat_Shift;
-float _HSV_Val_Shift;
+#if defined(_HSV0)
+float _HSV0_Enabled;
+texture2D _HSV0_Mask;
+float _HSV0_Mask_Invert;
+float _HSV0_Hue_Shift;
+float _HSV0_Sat_Shift;
+float _HSV0_Val_Shift;
+#endif
+
+#if defined(_HSV1)
+float _HSV1_Enabled;
+texture2D _HSV1_Mask;
+float _HSV1_Mask_Invert;
+float _HSV1_Hue_Shift;
+float _HSV1_Sat_Shift;
+float _HSV1_Val_Shift;
 #endif
 
 #if defined(_CLONES)

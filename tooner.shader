@@ -362,12 +362,19 @@ Shader "yum_food/tooner"
     _OKLAB_Chroma_Shift("OKLAB chroma shift", Range(-0.37, 0.37)) = 0.0
     _OKLAB_Hue_Shift("OKLAB hue shift", Range(0, 6.283185307)) = 0.0
 
-    _HSV_Enabled("Enable HSV", Float) = 0.0
-    _HSV_Mask("Mask", 2D) = "white" {}
-    _HSV_Mask_Invert("Mask invert", Float) = 0.0
-    _HSV_Hue_Shift("HSV hue shift", Range(0.0, 1.0)) = 0.0
-    _HSV_Sat_Shift("HSV saturation shift", Range(-1.0, 1.0)) = 0.0
-    _HSV_Val_Shift("HSV value shift", Range(-1.0, 1.0)) = 0.0
+    _HSV0_Enabled("Enable HSV", Float) = 0.0
+    _HSV0_Mask("Mask", 2D) = "white" {}
+    _HSV0_Mask_Invert("Mask invert", Float) = 0.0
+    _HSV0_Hue_Shift("HSV hue shift", Range(0.0, 1.0)) = 0.0
+    _HSV0_Sat_Shift("HSV saturation shift", Range(-1.0, 1.0)) = 0.0
+    _HSV0_Val_Shift("HSV value shift", Range(-1.0, 1.0)) = 0.0
+
+    _HSV1_Enabled("Enable HSV", Float) = 0.0
+    _HSV1_Mask("Mask", 2D) = "white" {}
+    _HSV1_Mask_Invert("Mask invert", Float) = 0.0
+    _HSV1_Hue_Shift("HSV hue shift", Range(0.0, 1.0)) = 0.0
+    _HSV1_Sat_Shift("HSV saturation shift", Range(-1.0, 1.0)) = 0.0
+    _HSV1_Val_Shift("HSV value shift", Range(-1.0, 1.0)) = 0.0
 
     _Clones_Enabled("Enable clones", Float) = 0.0
     _Clones_Count("Clones count", Range(0,16)) = 0.0
