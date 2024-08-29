@@ -149,11 +149,11 @@ Shader "yum_food/tooner"
     _Decal3_UV_Select("UV channel", Range(0,3)) = 0
 
     [NoScaleOffset] _Emission0Tex("Emission map", 2D) = "black" {}
-    _Emission0Strength("Emission strength", Range(0, 2)) = 0
+    _Emission0Strength("Emission strength", Range(0, 10)) = 0
     _Emission0Multiplier("Emission multiplier", Range(0, 2)) = 1
     _Emission0_UV_Select("UV channel", Range(0,3)) = 0
     [NoScaleOffset] _Emission1Tex("Emission map", 2D) = "black" {}
-    _Emission1Strength("Emission strength", Range(0, 2)) = 0
+    _Emission1Strength("Emission strength", Range(0, 10)) = 0
     _Emission1Multiplier("Emission multiplier", Range(0, 2)) = 1
     _Emission1_UV_Select("UV channel", Range(0,3)) = 0
     _Global_Emission_Factor("Global emission factor", Float) = 1

@@ -50,6 +50,11 @@ struct v2f {
 };
 
 v2f vert (appdata v){
+#if defined(_DISCARD)
+  if (_Discard_Enable_Dynamic) {
+    return (v2f) (0.0 / 0.0);
+  }
+#endif
 	v2f o = (v2f)0;
 	UNITY_SETUP_INSTANCE_ID(v);
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
