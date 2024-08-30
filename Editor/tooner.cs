@@ -951,10 +951,15 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Speed");
 
+      bc = FindProperty("_Glitter_Brightness_Lit");
+      editor.FloatProperty(
+          bc,
+          "Brightness (lit)");
+
       bc = FindProperty("_Glitter_Brightness");
       editor.FloatProperty(
           bc,
-          "Brightness");
+          "Brightness (unlit)");
 
       bc = FindProperty("_Glitter_Angle");
       editor.FloatProperty(

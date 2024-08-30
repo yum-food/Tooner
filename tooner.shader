@@ -202,7 +202,8 @@ Shader "yum_food/tooner"
     _Glitter_Amount("Glitter amount", Range(1, 100)) = 35
     _Glitter_Speed("Glitter speed", float) = 1
     _Glitter_Seed("Glitter seed", float) = 1
-    _Glitter_Brightness("Glitter brightness", float) = 1
+    _Glitter_Brightness("Glitter brightness (unlit)", float) = 1
+    _Glitter_Brightness_Lit("Glitter brightness (lit)", float) = 0
     _Glitter_Angle("Glitter angle", Range(0, 90)) = 90
     _Glitter_Power("Glitter power", float) = 30
     _Glitter_UV_Select("Glitter UV channel", Range(0, 7)) = 0

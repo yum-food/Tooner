@@ -256,21 +256,6 @@ float4 getLitColor(
     indirect_light.diffuse[1] *= _Reflection_Probe_Saturation;
   }
 
-#if defined(_PROXIMITY_DIMMING)
-  {
-    float cam_dist = length(_WorldSpaceCameraPos - worldPos);
-    cam_dist = clamp(cam_dist, _Proximity_Dimming_Min_Dist,
-        _Proximity_Dimming_Max_Dist);
-    // Map onto [0, 1]
-    cam_dist = (cam_dist - _Proximity_Dimming_Min_Dist) /
-      (_Proximity_Dimming_Max_Dist - _Proximity_Dimming_Min_Dist);
-    float dim_factor = lerp(_Proximity_Dimming_Factor, 1, cam_dist);
-    direct_light.color[2] *= dim_factor;
-    indirect_light.diffuse[2] *= dim_factor;
-    indirect_light.specular[2] *= dim_factor;
-  }
-#endif
-
   float2 brightnesses = float2(
       direct_light.color[2],
       indirect_light.diffuse[2]);
@@ -282,6 +267,23 @@ float4 getLitColor(
   sum_brightness = clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
   direct_light.color[2] = sum_brightness * brightness_proportions[0];
   indirect_light.diffuse[2] = sum_brightness * brightness_proportions[1];
+
+#if defined(_PROXIMITY_DIMMING)
+  {
+    float cam_dist = length(_WorldSpaceCameraPos - worldPos);
+    // Map onto [min, max]
+    cam_dist = clamp(cam_dist, _Proximity_Dimming_Min_Dist,
+        _Proximity_Dimming_Max_Dist);
+    // Map onto [0, max - min]
+    cam_dist -= _Proximity_Dimming_Min_Dist;
+    // Map onto [0, 1]
+    cam_dist /= _Proximity_Dimming_Max_Dist - _Proximity_Dimming_Min_Dist;
+    float dim_factor = lerp(_Proximity_Dimming_Factor, 1, cam_dist);
+    direct_light.color[2] *= dim_factor;
+    indirect_light.diffuse[2] *= dim_factor;
+    indirect_light.specular[2] *= dim_factor;
+  }
+#endif
 
   direct_light.color[2] *= _Lighting_Factor * _Direct_Lighting_Factor * enable_direct;
   indirect_light.specular[2] *= _Lighting_Factor *

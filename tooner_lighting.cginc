@@ -360,7 +360,7 @@ void geom(triangle v2f tri_in[3],
 #if defined(_GLITTER) || defined(_RIM_LIGHTING0_GLITTER) || defined(_RIM_LIGHTING1_GLITTER) || defined(_RIM_LIGHTING2_GLITTER) || defined(_RIM_LIGHTING3_GLITTER)
 float get_glitter(float2 uv, float3 worldPos,
     float3 normal, float density, float amount, float speed,
-    float mask, float brightness, float angle, float power)
+    float mask, float angle, float power)
 {
   // A regular divide here causes flickering. The leading guess is that NVIDIA
   // hardware implements the divide instruction slightly differently on
@@ -379,7 +379,6 @@ float get_glitter(float2 uv, float3 worldPos,
   glitter *= mask;
 
   glitter = clamp(glitter, 0, 1);
-  glitter *= brightness;
 
   if (angle < 90) {
     float ndotl = abs(dot(normal, normalize(_WorldSpaceCameraPos.xyz - worldPos)));
@@ -1493,7 +1492,7 @@ float4 effect(inout v2f i)
           i.worldPos, normal,
           _Rim_Lighting0_Glitter_Density,
           _Rim_Lighting0_Glitter_Amount, _Rim_Lighting0_Glitter_Speed,
-          /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
+          /*mask=*/1, /*angle=*/91, /*power=*/1);
       rl_glitter = floor(rl_glitter * _Rim_Lighting0_Glitter_Quantization) / _Rim_Lighting0_Glitter_Quantization;
       matcap_mask *= rl_glitter;
 #endif
@@ -1573,7 +1572,7 @@ float4 effect(inout v2f i)
           i.worldPos, normal,
           _Rim_Lighting1_Glitter_Density,
           _Rim_Lighting1_Glitter_Amount, _Rim_Lighting1_Glitter_Speed,
-          /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
+          /*mask=*/1, /*angle=*/91, /*power=*/1);
       rl_glitter = floor(rl_glitter * _Rim_Lighting1_Glitter_Quantization) / _Rim_Lighting1_Glitter_Quantization;
       matcap_mask *= rl_glitter;
 #endif
@@ -1653,7 +1652,7 @@ float4 effect(inout v2f i)
           i.worldPos, normal,
           _Rim_Lighting2_Glitter_Density,
           _Rim_Lighting2_Glitter_Amount, _Rim_Lighting2_Glitter_Speed,
-          /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
+          /*mask=*/1, /*angle=*/91, /*power=*/1);
       rl_glitter = floor(rl_glitter * _Rim_Lighting2_Glitter_Quantization) / _Rim_Lighting2_Glitter_Quantization;
       matcap_mask *= rl_glitter;
 #endif
@@ -1733,7 +1732,7 @@ float4 effect(inout v2f i)
           i.worldPos, normal,
           _Rim_Lighting3_Glitter_Density,
           _Rim_Lighting3_Glitter_Amount, _Rim_Lighting3_Glitter_Speed,
-          /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
+          /*mask=*/1, /*angle=*/91, /*power=*/1);
       rl_glitter = floor(rl_glitter * _Rim_Lighting3_Glitter_Quantization) / _Rim_Lighting3_Glitter_Quantization;
       matcap_mask *= rl_glitter;
 #endif
@@ -1847,6 +1846,20 @@ float4 effect(inout v2f i)
     normal = i.normal;
   }
 #endif
+#if defined(_GLITTER)
+  float3 glitter_color_unlit;
+  {
+    float glitter_mask = _Glitter_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+    glitter_mask *= min(matcap_overwrite_mask[0], matcap_overwrite_mask[1]);
+    float glitter = get_glitter(
+        get_uv_by_channel(i, round(_Glitter_UV_Select)),
+        i.worldPos, normal,
+        _Glitter_Density, _Glitter_Amount, _Glitter_Speed,
+        glitter_mask, _Glitter_Angle, _Glitter_Power);
+        glitter_color_unlit = glitter * _Glitter_Color;
+  }
+  albedo.rgb += glitter_color_unlit * _Glitter_Brightness_Lit;
+#endif
 
   float4 lit = getLitColor(vertex_light_color, albedo, i.worldPos, normal,
       metallic, 1.0 - roughness, i.uv0, ao, /*enable_direct=*/true, i);
@@ -1875,14 +1888,7 @@ float4 effect(inout v2f i)
   result.rgb += decal_emission * _Global_Emission_Factor;
 #endif
 #if defined(_GLITTER)
-  float glitter_mask = _Glitter_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
-  glitter_mask *= min(matcap_overwrite_mask[0], matcap_overwrite_mask[1]);
-  float glitter = get_glitter(
-      get_uv_by_channel(i, round(_Glitter_UV_Select)),
-      i.worldPos, normal,
-      _Glitter_Density, _Glitter_Amount, _Glitter_Speed,
-      glitter_mask, _Glitter_Brightness, _Glitter_Angle, _Glitter_Power);
-  result.rgb += glitter * _Glitter_Color;
+  result.rgb += glitter_color_unlit * _Glitter_Brightness;
 #endif
 #if defined(_EMISSION0)
   {

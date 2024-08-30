@@ -293,6 +293,7 @@ float _Glitter_Density;
 float _Glitter_Amount;
 float _Glitter_Speed;
 float _Glitter_Brightness;
+float _Glitter_Brightness_Lit;
 float _Glitter_Angle;
 float _Glitter_Power;
 float _Glitter_UV_Select;
