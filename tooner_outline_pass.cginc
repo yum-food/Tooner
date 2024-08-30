@@ -78,6 +78,10 @@ v2f vert(appdata v)
   o.uv1 = v.uv1;
   o.uv2 = v.uv2;
   o.uv3 = v.uv3;
+  o.uv4 = v.uv4;
+  o.uv5 = v.uv5;
+  o.uv6 = v.uv6;
+  o.uv7 = v.uv7;
 #if defined(LIGHTMAP_ON)
   o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif

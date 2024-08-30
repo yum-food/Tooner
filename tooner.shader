@@ -40,7 +40,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay0_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay0_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay0_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
-    _PBR_Overlay0_UV_Select("UV channel", Range(0,3)) = 0
+    _PBR_Overlay0_UV_Select("UV channel", Range(0,7)) = 0
     _PBR_Overlay0_Sampler_Mode("Sampler mode", Range(0,1)) = 0
     _PBR_Overlay0_Mip_Bias("Mip bias", Float) = 0.0
 
@@ -64,7 +64,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay1_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay1_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay1_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
-    _PBR_Overlay1_UV_Select("UV channel", Range(0,3)) = 0
+    _PBR_Overlay1_UV_Select("UV channel", Range(0,7)) = 0
     _PBR_Overlay1_Sampler_Mode("Sampler mode", Range(0,1)) = 0
     _PBR_Overlay1_Mip_Bias("Mip bias", Float) = 0.0
 
@@ -88,7 +88,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay2_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay2_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay2_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
-    _PBR_Overlay2_UV_Select("UV channel", Range(0,3)) = 0
+    _PBR_Overlay2_UV_Select("UV channel", Range(0,7)) = 0
     _PBR_Overlay2_Sampler_Mode("Sampler mode", Range(0,1)) = 0
     _PBR_Overlay2_Mip_Bias("Mip bias", Float) = 0.0
 
@@ -112,7 +112,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay3_Constrain_By_Alpha_Min("Constrain by alpha channel", Range(0, 1)) = 0
     _PBR_Overlay3_Constrain_By_Alpha_Max("Constrain by alpha channel", Range(0, 1)) = 1
     _PBR_Overlay3_Alpha_Multiplier("Constrain by alpha channel", Range(0, 5)) = 1
-    _PBR_Overlay3_UV_Select("UV channel", Range(0,3)) = 0
+    _PBR_Overlay3_UV_Select("UV channel", Range(0,7)) = 0
     _PBR_Overlay3_Sampler_Mode("Sampler mode", Range(0,1)) = 0
     _PBR_Overlay3_Mip_Bias("Mip bias", Float) = 0.0
 
@@ -122,7 +122,7 @@ Shader "yum_food/tooner"
     _Decal0_Metallic("Metallic", 2D) = "black" {}
     _Decal0_Emission_Strength("Emission strength", Float) = 0
     _Decal0_Angle("Emission strength", Range(0,1)) = 0
-    _Decal0_UV_Select("UV channel", Range(0,3)) = 0
+    _Decal0_UV_Select("UV channel", Range(0,7)) = 0
 
     _Decal1_Enable("Enable decal", Float) = 0.0
     _Decal1_BaseColor("Base color", 2D) = "white" {}
@@ -130,7 +130,7 @@ Shader "yum_food/tooner"
     _Decal1_Metallic("Metallic", 2D) = "black" {}
     _Decal1_Emission_Strength("Emission strength", Float) = 0
     _Decal1_Angle("Emission strength", Range(0,1)) = 0
-    _Decal1_UV_Select("UV channel", Range(0,3)) = 0
+    _Decal1_UV_Select("UV channel", Range(0,7)) = 0
 
     _Decal2_Enable("Enable decal", Float) = 0.0
     _Decal2_BaseColor("Base color", 2D) = "white" {}
@@ -138,7 +138,7 @@ Shader "yum_food/tooner"
     _Decal2_Metallic("Metallic", 2D) = "black" {}
     _Decal2_Emission_Strength("Emission strength", Float) = 0
     _Decal2_Angle("Emission strength", Range(0,1)) = 0
-    _Decal2_UV_Select("UV channel", Range(0,3)) = 0
+    _Decal2_UV_Select("UV channel", Range(0,7)) = 0
 
     _Decal3_Enable("Enable decal", Float) = 0.0
     _Decal3_BaseColor("Base color", 2D) = "white" {}
@@ -146,16 +146,16 @@ Shader "yum_food/tooner"
     _Decal3_Metallic("Metallic", 2D) = "black" {}
     _Decal3_Emission_Strength("Emission strength", Float) = 0
     _Decal3_Angle("Emission strength", Range(0,1)) = 0
-    _Decal3_UV_Select("UV channel", Range(0,3)) = 0
+    _Decal3_UV_Select("UV channel", Range(0,7)) = 0
 
     [NoScaleOffset] _Emission0Tex("Emission map", 2D) = "black" {}
     _Emission0Strength("Emission strength", Range(0, 10)) = 0
     _Emission0Multiplier("Emission multiplier", Range(0, 2)) = 1
-    _Emission0_UV_Select("UV channel", Range(0,3)) = 0
+    _Emission0_UV_Select("UV channel", Range(0,7)) = 0
     [NoScaleOffset] _Emission1Tex("Emission map", 2D) = "black" {}
     _Emission1Strength("Emission strength", Range(0, 10)) = 0
     _Emission1Multiplier("Emission multiplier", Range(0, 2)) = 1
-    _Emission1_UV_Select("UV channel", Range(0,3)) = 0
+    _Emission1_UV_Select("UV channel", Range(0,7)) = 0
     _Global_Emission_Factor("Global emission factor", Float) = 1
 
     [NoScaleOffset] _Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
@@ -205,6 +205,7 @@ Shader "yum_food/tooner"
     _Glitter_Brightness("Glitter brightness", float) = 1
     _Glitter_Angle("Glitter angle", Range(0, 90)) = 90
     _Glitter_Power("Glitter power", float) = 30
+    _Glitter_UV_Select("Glitter UV channel", Range(0, 7)) = 0
 
 		[MaterialToggle] _Explode_Toggle("Explode toggle", Float) = 0
 		_Explode_Phase("Explode phase", Range(0, 1)) = 0
@@ -235,10 +236,10 @@ Shader "yum_food/tooner"
     _Matcap0("Matcap", 2D) = "black" {}
     _Matcap0_Mask("Matcap mask", 2D) = "white" {}
     _Matcap0_Mask_Invert("Invert mask", Float) = 0.0
-    _Matcap0_Mask_UV_Select("Matcap mask UV select", Range(0, 3)) = 0
+    _Matcap0_Mask_UV_Select("Matcap mask UV select", Range(0, 7)) = 0
     _Matcap0_Mask2("Matcap mask 2", 2D) = "white" {}
     _Matcap0_Mask2_Invert("Invert mask", Float) = 0.0
-    _Matcap0_Mask2_UV_Select("Matcap mask UV select", Range(0, 3)) = 0
+    _Matcap0_Mask2_UV_Select("Matcap mask UV select", Range(0, 7)) = 0
     _Matcap0Mode("Matcap mode", Float) = 0
     _Matcap0Str("Matcap strength", Float) = 1
     _Matcap0MixFactor("Matcap mix factor", Range(0, 1)) = 1
@@ -249,7 +250,7 @@ Shader "yum_food/tooner"
     _Matcap0Normal("Matcap normals", 2D) = "bump" {}
     _Matcap0Normal_Mip_Bias("Matcap normals mip bias", Float) = 0
     _Matcap0Normal_Str("Matcap normals", Range(0, 10)) = 1
-    _Matcap0Normal_UV_Select("Matcap normals", Range(0, 3)) = 0
+    _Matcap0Normal_UV_Select("Matcap normals", Range(0, 7)) = 0
     _Matcap0_Overwrite_Rim_Lighting_0("Overwrite RL", Float) = 0
     _Matcap0_Overwrite_Rim_Lighting_1("Overwrite RL", Float) = 0
     _Matcap0_Overwrite_Rim_Lighting_2("Overwrite RL", Float) = 0
@@ -258,10 +259,10 @@ Shader "yum_food/tooner"
     _Matcap1("Matcap", 2D) = "black" {}
     _Matcap1_Mask("Matcap mask", 2D) = "white" {}
     _Matcap1_Mask_Invert("Invert mask", Float) = 0.0
-    _Matcap1_Mask_UV_Select("Matcap mask UV select", Range(0, 3)) = 0
+    _Matcap1_Mask_UV_Select("Matcap mask UV select", Range(0, 7)) = 0
     _Matcap1_Mask2("Matcap mask 2", 2D) = "white" {}
     _Matcap1_Mask2_Invert("Invert mask", Float) = 0.0
-    _Matcap1_Mask2_UV_Select("Matcap mask UV select", Range(0, 3)) = 0
+    _Matcap1_Mask2_UV_Select("Matcap mask UV select", Range(0, 7)) = 0
     _Matcap1Mode("Matcap mode", Float) = 0
     _Matcap1Str("Matcap strength", Float) = 1
     _Matcap1MixFactor("Matcap mix factor", Range(0, 1)) = 1
@@ -272,7 +273,7 @@ Shader "yum_food/tooner"
     _Matcap1Normal("Matcap normals", 2D) = "bump" {}
     _Matcap1Normal_Mip_Bias("Matcap normals mip bias", Float) = 0
     _Matcap1Normal_Str("Matcap normals", Range(0, 10)) = 1
-    _Matcap1Normal_UV_Select("Matcap normals", Range(0, 3)) = 0
+    _Matcap1Normal_UV_Select("Matcap normals", Range(0, 7)) = 0
     _Matcap1_Overwrite_Rim_Lighting_0("Overwrite RL", Float) = 0
     _Matcap1_Overwrite_Rim_Lighting_1("Overwrite RL", Float) = 0
     _Matcap1_Overwrite_Rim_Lighting_2("Overwrite RL", Float) = 0
@@ -282,7 +283,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_Mode("Rim lighting mode", Float) = 0
     _Rim_Lighting0_Mask("Rim lighting mask", 2D) = "white" {}
     _Rim_Lighting0_Mask_Invert("Invert rim lighting mask", Float) = 0.0
-    _Rim_Lighting0_Mask_UV_Select("mask UV select", Range(0, 1)) = 0.0
+    _Rim_Lighting0_Mask_UV_Select("mask UV select", Range(0, 7)) = 0.0
     _Rim_Lighting0_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
     _Rim_Lighting0_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting0_Center("Rim lighting center", Float) = 0.5
@@ -295,6 +296,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_Glitter_Amount("Rim lighting glitter amount", Float) = 100
     _Rim_Lighting0_Glitter_Speed("Rim lighting glitter speed", Float) = 1
     _Rim_Lighting0_Glitter_Quantization("Rim lighting glitter quantization", Float) = 1000
+    _Rim_Lighting0_Glitter_UV_Select("Rim lighting glitter UV select", Range(0, 7)) = 0
     _Rim_Lighting0_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting0_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting0_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
@@ -303,7 +305,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_Mode("Rim lighting mode", Float) = 0
     _Rim_Lighting1_Mask("Rim lighting mask", 2D) = "white" {}
     _Rim_Lighting1_Mask_Invert("Invert rim lighting mask", Float) = 0.0
-    _Rim_Lighting1_Mask_UV_Select("mask UV select", Range(0, 1)) = 0.0
+    _Rim_Lighting1_Mask_UV_Select("mask UV select", Range(0, 7)) = 0.0
     _Rim_Lighting1_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
     _Rim_Lighting1_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting1_Center("Rim lighting center", Float) = 0.5
@@ -316,6 +318,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_Glitter_Amount("Rim lighting glitter amount", Float) = 100
     _Rim_Lighting1_Glitter_Speed("Rim lighting glitter speed", Float) = 1
     _Rim_Lighting1_Glitter_Quantization("Rim lighting glitter quantization", Float) = 1000
+    _Rim_Lighting1_Glitter_UV_Select("Rim lighting glitter UV select", Range(0, 7)) = 0
     _Rim_Lighting1_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting1_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting1_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
@@ -324,7 +327,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting2_Mode("Rim lighting mode", Float) = 0
     _Rim_Lighting2_Mask("Rim lighting mask", 2D) = "white" {}
     _Rim_Lighting2_Mask_Invert("Invert rim lighting mask", Float) = 0.0
-    _Rim_Lighting2_Mask_UV_Select("mask UV select", Range(0, 1)) = 0.0
+    _Rim_Lighting2_Mask_UV_Select("mask UV select", Range(0, 7)) = 0.0
     _Rim_Lighting2_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
     _Rim_Lighting2_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting2_Center("Rim lighting center", Float) = 0.5
@@ -337,6 +340,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting2_Glitter_Amount("Rim lighting glitter amount", Float) = 100
     _Rim_Lighting2_Glitter_Speed("Rim lighting glitter speed", Float) = 1
     _Rim_Lighting2_Glitter_Quantization("Rim lighting glitter quantization", Float) = 1000
+    _Rim_Lighting2_Glitter_UV_Select("Rim lighting glitter UV select", Range(0, 7)) = 0
     _Rim_Lighting2_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting2_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting2_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
@@ -345,7 +349,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting3_Mode("Rim lighting mode", Float) = 0
     _Rim_Lighting3_Mask("Rim lighting mask", 2D) = "white" {}
     _Rim_Lighting3_Mask_Invert("Invert rim lighting mask", Float) = 0.0
-    _Rim_Lighting3_Mask_UV_Select("mask UV select", Range(0, 1)) = 0.0
+    _Rim_Lighting3_Mask_UV_Select("mask UV select", Range(0, 7)) = 0.0
     _Rim_Lighting3_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
     _Rim_Lighting3_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting3_Center("Rim lighting center", Float) = 0.5
@@ -358,6 +362,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting3_Glitter_Amount("Rim lighting glitter amount", Float) = 100
     _Rim_Lighting3_Glitter_Speed("Rim lighting glitter speed", Float) = 1
     _Rim_Lighting3_Glitter_Quantization("Rim lighting glitter quantization", Float) = 1000
+    _Rim_Lighting3_Glitter_UV_Select("Rim lighting glitter UV select", Range(0, 7)) = 0
     _Rim_Lighting3_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting3_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting3_PolarMask_Power("Rim lighting polar mask - power", Float) = 3

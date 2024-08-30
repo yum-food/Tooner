@@ -295,6 +295,7 @@ float _Glitter_Speed;
 float _Glitter_Brightness;
 float _Glitter_Angle;
 float _Glitter_Power;
+float _Glitter_UV_Select;
 #endif
 
 #if defined(_EXPLODE)
@@ -388,6 +389,7 @@ float _Rim_Lighting0_Glitter_Density;
 float _Rim_Lighting0_Glitter_Amount;
 float _Rim_Lighting0_Glitter_Speed;
 float _Rim_Lighting0_Glitter_Quantization;
+float _Rim_Lighting0_Glitter_UV_Select;
 #endif
 #if defined(_RIM_LIGHTING0_POLAR_MASK)
 float _Rim_Lighting0_PolarMask_Enabled;
@@ -415,6 +417,7 @@ float _Rim_Lighting1_Glitter_Density;
 float _Rim_Lighting1_Glitter_Amount;
 float _Rim_Lighting1_Glitter_Speed;
 float _Rim_Lighting1_Glitter_Quantization;
+float _Rim_Lighting1_Glitter_UV_Select;
 #endif
 #if defined(_RIM_LIGHTING1_POLAR_MASK)
 float _Rim_Lighting1_PolarMask_Enabled;
@@ -442,6 +445,7 @@ float _Rim_Lighting2_Glitter_Density;
 float _Rim_Lighting2_Glitter_Amount;
 float _Rim_Lighting2_Glitter_Speed;
 float _Rim_Lighting2_Glitter_Quantization;
+float _Rim_Lighting2_Glitter_UV_Select;
 #endif
 #if defined(_RIM_LIGHTING2_POLAR_MASK)
 float _Rim_Lighting2_PolarMask_Enabled;
@@ -469,6 +473,7 @@ float _Rim_Lighting3_Glitter_Density;
 float _Rim_Lighting3_Glitter_Amount;
 float _Rim_Lighting3_Glitter_Speed;
 float _Rim_Lighting3_Glitter_Quantization;
+float _Rim_Lighting3_Glitter_UV_Select;
 #endif
 #if defined(_RIM_LIGHTING3_POLAR_MASK)
 float _Rim_Lighting3_PolarMask_Enabled;

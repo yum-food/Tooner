@@ -179,6 +179,10 @@ v2f vert(appdata v)
   o.uv1 = v.uv1;
   o.uv2 = v.uv2;
   o.uv3 = v.uv3;
+  o.uv4 = v.uv4;
+  o.uv5 = v.uv5;
+  o.uv6 = v.uv6;
+  o.uv7 = v.uv7;
 #if defined(LIGHTMAP_ON)
   o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif
@@ -417,6 +421,18 @@ float2 get_uv_by_channel(v2f i, uint which_channel) {
       break;
     case 3:
       return i.uv3;
+      break;
+    case 4:
+      return i.uv4;
+      break;
+    case 5:
+      return i.uv5;
+      break;
+    case 6:
+      return i.uv6;
+      break;
+    case 7:
+      return i.uv7;
       break;
     default:
       return 0;
@@ -1472,7 +1488,9 @@ float4 effect(inout v2f i)
       }
 #endif
 #if defined(_RIM_LIGHTING0_GLITTER)
-      float rl_glitter = get_glitter(i.uv0.xy, i.worldPos, normal,
+      float rl_glitter = get_glitter(
+          get_uv_by_channel(i, round(_Rim_Lighting0_Glitter_UV_Select)),
+          i.worldPos, normal,
           _Rim_Lighting0_Glitter_Density,
           _Rim_Lighting0_Glitter_Amount, _Rim_Lighting0_Glitter_Speed,
           /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
@@ -1550,7 +1568,9 @@ float4 effect(inout v2f i)
       }
 #endif
 #if defined(_RIM_LIGHTING1_GLITTER)
-      float rl_glitter = get_glitter(i.uv0, i.worldPos, normal,
+      float rl_glitter = get_glitter(
+          get_uv_by_channel(i, round(_Rim_Lighting1_Glitter_UV_Select)),
+          i.worldPos, normal,
           _Rim_Lighting1_Glitter_Density,
           _Rim_Lighting1_Glitter_Amount, _Rim_Lighting1_Glitter_Speed,
           /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
@@ -1628,7 +1648,9 @@ float4 effect(inout v2f i)
       }
 #endif
 #if defined(_RIM_LIGHTING2_GLITTER)
-      float rl_glitter = get_glitter(i.uv0, i.worldPos, normal,
+      float rl_glitter = get_glitter(
+          get_uv_by_channel(i, round(_Rim_Lighting2_Glitter_UV_Select)),
+          i.worldPos, normal,
           _Rim_Lighting2_Glitter_Density,
           _Rim_Lighting2_Glitter_Amount, _Rim_Lighting2_Glitter_Speed,
           /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
@@ -1706,7 +1728,9 @@ float4 effect(inout v2f i)
       }
 #endif
 #if defined(_RIM_LIGHTING3_GLITTER)
-      float rl_glitter = get_glitter(i.uv0, i.worldPos, normal,
+      float rl_glitter = get_glitter(
+          get_uv_by_channel(i, round(_Rim_Lighting3_Glitter_UV_Select)),
+          i.worldPos, normal,
           _Rim_Lighting3_Glitter_Density,
           _Rim_Lighting3_Glitter_Amount, _Rim_Lighting3_Glitter_Speed,
           /*mask=*/1, /*brightness=*/1, /*angle=*/91, /*power=*/1);
@@ -1853,7 +1877,9 @@ float4 effect(inout v2f i)
 #if defined(_GLITTER)
   float glitter_mask = _Glitter_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
   glitter_mask *= min(matcap_overwrite_mask[0], matcap_overwrite_mask[1]);
-  float glitter = get_glitter(i.uv0, i.worldPos, normal,
+  float glitter = get_glitter(
+      get_uv_by_channel(i, round(_Glitter_UV_Select)),
+      i.worldPos, normal,
       _Glitter_Density, _Glitter_Amount, _Glitter_Speed,
       glitter_mask, _Glitter_Brightness, _Glitter_Angle, _Glitter_Power);
   result.rgb += glitter * _Glitter_Color;

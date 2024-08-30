@@ -707,6 +707,11 @@ public class ToonerGUI : ShaderGUI {
             bc,
             "Quantization");
 
+        bc = FindProperty($"_Rim_Lighting{i}_Glitter_UV_Select");
+        editor.RangeProperty(
+            bc,
+            "UV channel");
+
         EditorGUI.indentLevel -= 1;
       }
 
@@ -934,32 +939,37 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty("_Glitter_Density");
       editor.FloatProperty(
           bc,
-          "Glitter density");
+          "Density");
 
       bc = FindProperty("_Glitter_Amount");
       editor.FloatProperty(
           bc,
-          "Glitter amount");
+          "Amount");
 
       bc = FindProperty("_Glitter_Speed");
       editor.FloatProperty(
           bc,
-          "Glitter speed");
+          "Speed");
 
       bc = FindProperty("_Glitter_Brightness");
       editor.FloatProperty(
           bc,
-          "Glitter brightness");
+          "Brightness");
 
       bc = FindProperty("_Glitter_Angle");
       editor.FloatProperty(
           bc,
-          "Glitter angle");
+          "Angle");
 
       bc = FindProperty("_Glitter_Power");
       editor.FloatProperty(
           bc,
-          "Glitter power");
+          "Power");
+
+      bc = FindProperty("_Glitter_UV_Select");
+      editor.RangeProperty(
+          bc,
+          "UV select");
     }
   }
 

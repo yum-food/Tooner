@@ -13,6 +13,10 @@ struct appdata
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
   float2 uv3 : TEXCOORD3;
+  float2 uv4 : TEXCOORD4;
+  float2 uv5 : TEXCOORD5;
+  float2 uv6 : TEXCOORD6;
+  float2 uv7 : TEXCOORD7;
 
   UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -24,14 +28,18 @@ struct v2f
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
   float2 uv3 : TEXCOORD3;
+  float2 uv4 : TEXCOORD4;
+  float2 uv5 : TEXCOORD5;
+  float2 uv6 : TEXCOORD6;
+  float2 uv7 : TEXCOORD7;
   #if defined(LIGHTMAP_ON)
-  float2 lmuv : TEXCOORD4;
+  float2 lmuv : TEXCOORD8;
   #endif
-  float3 worldPos : TEXCOORD5;
-  float3 normal : TEXCOORD6;
-  float3 objPos : TEXCOORD7;
+  float3 worldPos : TEXCOORD9;
+  float3 normal : TEXCOORD10;
+  float3 objPos : TEXCOORD11;
   #if defined(SSR_ENABLED)
-  float4 screenPos : TEXCOORD8;
+  float4 screenPos : TEXCOORD12;
   #endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID
@@ -47,6 +55,10 @@ struct appdata
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
   float2 uv3 : TEXCOORD3;
+  float2 uv4 : TEXCOORD4;
+  float2 uv5 : TEXCOORD5;
+  float2 uv6 : TEXCOORD6;
+  float2 uv7 : TEXCOORD7;
   float3 normal : NORMAL;
   float4 tangent : TANGENT;
 
@@ -60,20 +72,24 @@ struct v2f
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
   float2 uv3 : TEXCOORD3;
+  float2 uv4 : TEXCOORD4;
+  float2 uv5 : TEXCOORD5;
+  float2 uv6 : TEXCOORD6;
+  float2 uv7 : TEXCOORD7;
   #if defined(LIGHTMAP_ON)
-  float2 lmuv : TEXCOORD4;
+  float2 lmuv : TEXCOORD8;
   #endif
-  float3 normal : TEXCOORD5;
-  float4 tangent : TEXCOORD6;
-  float3 worldPos : TEXCOORD7;
-  float3 objPos : TEXCOORD8;
+  float3 normal : TEXCOORD9;
+  float4 tangent : TEXCOORD10;
+  float3 worldPos : TEXCOORD11;
+  float3 objPos : TEXCOORD12;
 
-  SHADOW_COORDS(9)
+  SHADOW_COORDS(13)
   #if defined(VERTEXLIGHT_ON)
-  float3 vertexLightColor : TEXCOORD10;
+  float3 vertexLightColor : TEXCOORD14;
   #endif
   #if defined(SSR_ENABLED)
-  float4 screenPos : TEXCOORD11;
+  float4 screenPos : TEXCOORD15;
   #endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID
