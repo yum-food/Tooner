@@ -106,6 +106,32 @@ public class ToonerGUI : ShaderGUI {
       SetKeyword("_ROUGHNESS_MAP", bct.textureValue);
   }
 
+  enum SamplerMode {
+    Repeat,
+    Clamp,
+  };
+  void DoPBR() {
+    GUILayout.Label("PBR", EditorStyles.boldLabel);
+    EditorGUI.indentLevel += 1;
+    {
+      DoBaseColor();
+      DoNormal();
+      DoMetallic();
+      DoRoughness();
+
+      EditorGUI.BeginChangeCheck();
+      MaterialProperty bc = FindProperty($"_PBR_Sampler_Mode");
+      SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
+      sampler_mode = (SamplerMode) EditorGUILayout.EnumPopup(
+          MakeLabel("Sampler mode"), sampler_mode);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = (int) sampler_mode;
+      SetKeyword($"_PBR_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
+      SetKeyword($"_PBR_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
+    }
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoClearcoat() {
     MaterialProperty bc;
     bc = FindProperty("_Clearcoat_Enabled");
@@ -158,10 +184,6 @@ public class ToonerGUI : ShaderGUI {
     Add,
     Min,
     Max
-  };
-  enum SamplerMode {
-    Repeat,
-    Clamp,
   };
 
   void DoPBROverlay() {
@@ -1758,14 +1780,7 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoMain() {
-    GUILayout.Label("PBR", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
-    DoBaseColor();
-    DoNormal();
-    DoMetallic();
-    DoRoughness();
-    EditorGUI.indentLevel -= 1;
-
+    DoPBR();
     DoPBROverlay();
 
     GUILayout.Label("Clearcoat", EditorStyles.boldLabel);

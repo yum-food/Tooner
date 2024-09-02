@@ -19,6 +19,7 @@ Shader "yum_food/tooner"
     [NoScaleOffset] _NormalTex("Normal", 2D) = "bump" {}
     [NoScaleOffset] _MetallicTex("Metallic", 2D) = "white" {}
     [NoScaleOffset] _RoughnessTex("Roughness", 2D) = "black" {}
+    _PBR_Sampler_Mode("Sampler mode", Range(0,1)) = 0
 
     _PBR_Overlay0_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay0_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -524,10 +525,6 @@ Shader "yum_food/tooner"
       #include "feature_macros.cginc"
 
 			#pragma vertex vert
-			//#pragma vertex hull_vertex
-			//#pragma hull hull
-			//#pragma domain domain
-
       #pragma geometry geom
       #pragma fragment frag
 
@@ -538,9 +535,9 @@ Shader "yum_food/tooner"
     }
     Pass {
       Tags {
-        "RenderType" = "Opaque"
+        "RenderType"="Opaque"
         "Queue"="Geometry"
-        "LightMode" = "ForwardAdd"
+        "LightMode"="ForwardAdd"
       }
       Blend [_SrcBlend] One
       ZWrite Off
@@ -561,10 +558,6 @@ Shader "yum_food/tooner"
       #include "feature_macros.cginc"
 
 			#pragma vertex vert
-			//#pragma vertex hull_vertex
-			//#pragma hull hull
-			//#pragma domain domain
-
       #pragma geometry geom
       #pragma fragment frag
 
@@ -590,10 +583,6 @@ Shader "yum_food/tooner"
       #include "feature_macros.cginc"
 
 			#pragma vertex vert
-			//#pragma vertex hull_vertex
-			//#pragma hull hull
-			//#pragma domain domain
-
       #pragma geometry geom
 			#pragma fragment frag
 

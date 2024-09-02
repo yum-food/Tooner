@@ -441,6 +441,11 @@ float2 get_uv_by_channel(v2f i, uint which_channel) {
 
 #define UV_SCOFF(i, tex_st, which_channel) get_uv_by_channel(i, round(which_channel)) * (tex_st).xy + (tex_st).zw
 
+#if defined(_PBR_SAMPLER_REPEAT)
+#define GET_SAMPLER_PBR linear_repeat_s
+#elif defined(_PBR_SAMPLER_CLAMP)
+#define GET_SAMPLER_PBR linear_clamp_s
+#endif
 #if defined(_PBR_OVERLAY0_SAMPLER_REPEAT)
 #define GET_SAMPLER_OV0 linear_repeat_s
 #elif defined(_PBR_OVERLAY0_SAMPLER_CLAMP)
@@ -1125,7 +1130,7 @@ float4 effect(inout v2f i)
 #endif
 
 #if defined(_BASECOLOR_MAP)
-  float4 albedo = _MainTex.SampleBias(linear_repeat_s, UV_SCOFF(i, _MainTex_ST, 0), _Global_Sample_Bias);
+  float4 albedo = _MainTex.SampleBias(GET_SAMPLER_PBR, UV_SCOFF(i, _MainTex_ST, 0), _Global_Sample_Bias);
   albedo *= _Color;
 #else
   float4 albedo = _Color;
@@ -1173,14 +1178,9 @@ float4 effect(inout v2f i)
   // Use UVs to smoothly blend between fully detailed normals when close up and
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
-  float fw = clamp(fwidth(i.uv0), .001, 1) * 1200;
-  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleBias(linear_repeat_s,
+  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleBias(GET_SAMPLER_PBR,
         UV_SCOFF(i, _NormalTex_ST, 0), _Global_Sample_Bias),
       _Tex_NormalStr);
-
-  raw_normal = BlendNormals(
-      (1/fw) * raw_normal,
-      fw * float3(0, 0, 1));
 #else
   float3 raw_normal = UnpackNormal(float4(0.5, 0.5, 1, 1));
 #endif  // _NORMAL_MAP
@@ -1196,13 +1196,13 @@ float4 effect(inout v2f i)
 	);
 
 #if defined(_METALLIC_MAP)
-  float metallic = _MetallicTex.SampleBias(linear_repeat_s,
+  float metallic = _MetallicTex.SampleBias(GET_SAMPLER_PBR,
       UV_SCOFF(i, _MetallicTex_ST, 0), _Global_Sample_Bias);
 #else
   float metallic = _Metallic;
 #endif
 #if defined(_ROUGHNESS_MAP)
-  float roughness = _RoughnessTex.SampleBias(linear_repeat_s, UV_SCOFF(i, _RoughnessTex_ST, 0), _Global_Sample_Bias);
+  float roughness = _RoughnessTex.SampleBias(GET_SAMPLER_PBR, UV_SCOFF(i, _RoughnessTex_ST, 0), _Global_Sample_Bias);
   if (_Roughness_Invert) {
     roughness = 1 - roughness;
   }
