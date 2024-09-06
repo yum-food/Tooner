@@ -595,5 +595,11 @@ float _FaceMeWorldY_Enable_Y;
 float _FaceMeWorldY_Enable_Z;
 #endif
 
+#if defined(_RORSCHACH)
+float _Rorschach_Enable_Dynamic;
+float _Rorschach_Count_X;
+float _Rorschach_Count_Y;
+#endif
+
 #endif
 

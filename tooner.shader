@@ -470,6 +470,11 @@ Shader "yum_food/tooner"
     _FaceMeWorldY_Enable_Y("x", Float) = 1
     _FaceMeWorldY_Enable_Z("x", Float) = 0
 
+    _Rorschach_Enable_Static("Enable rorschach gimmick", Float) = 0.0
+    _Rorschach_Enable_Dynamic("Enable rorschach gimmick", Float) = 0.0
+    _Rorschach_Count_X("Enable rorschach gimmick", Float) = 2
+    _Rorschach_Count_Y("Enable rorschach gimmick", Float) = 2
+
     _Enable_SSR("Enable SSR", Float) = 0
     _SSRStrength("SSR Strength", Float) = 1
     _SSRHeight("SSR Height", Float) = 0.1

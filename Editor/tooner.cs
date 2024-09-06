@@ -1421,6 +1421,36 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickRorschach() {
+    MaterialProperty bc;
+    bc = FindProperty("_Rorschach_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Rorschach", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_RORSCHACH", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Rorschach_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    bc = FindProperty("_Rorschach_Count_X");
+    editor.FloatProperty(bc, "Count (x)");
+    bc = FindProperty("_Rorschach_Count_Y");
+    editor.FloatProperty(bc, "Count (y)");
+
+    EditorGUI.indentLevel -= 1;
+  }
 
   void DoGimmicks() {
     DoGimmickFlatColor();
@@ -1431,6 +1461,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickPixellate();
     DoGimmickTrochoid();
     DoGimmickFaceMeWorldY();
+    DoGimmickRorschach();
   }
 
   void DoMochieParams() {

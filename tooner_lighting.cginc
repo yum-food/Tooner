@@ -13,6 +13,7 @@
 #include "motion.cginc"
 #include "pbr.cginc"
 #include "poi.cginc"
+#include "rorschach.cginc"
 #include "shear_math.cginc"
 #include "tooner_scroll.cginc"
 #include "trochoid_math.cginc"
@@ -1160,6 +1161,11 @@ float4 effect(inout v2f i)
   }
 #endif
 
+#if defined(_RORSCHACH)
+  if (_Rorschach_Enable_Dynamic) {
+    albedo = get_rorschach(i).albedo;
+  }
+#endif
 
 #if defined(_RENDERING_CUTOUT)
 #if defined(_RENDERING_CUTOUT_STOCHASTIC)

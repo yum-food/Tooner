@@ -1,3 +1,6 @@
+#ifndef __IQ_SDF_INC
+#define __IQ_SDF_INC
+
 #include "pema99.cginc"
 
 // The MIT License
@@ -100,3 +103,5 @@ float3 op_rep(in float3 p, in float3 c)
 }
 
 // End licensed section
+
+#endif  // __IQ_SDF_INC
