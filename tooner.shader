@@ -3,7 +3,7 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 8
+  // Build nonce: 9
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -452,12 +452,12 @@ Shader "yum_food/tooner"
     _Gimmick_Vertex_Normal_Slide_Distance("Vertex normal slide distance", Float) = 0.01
 
     _Gimmick_Eyes00_Enable_Static("Enable eyes 00", Float) = 0.0
-    _Gimmick_Eyes00_Effect_Mask("Effect mask", 2D) = "white"
+    _Gimmick_Eyes00_Effect_Mask("Effect mask", 2D) = "white" {}
 
     _Gimmick_Pixellate_Enable_Static("Enable pixellation", Float) = 0.0
     _Gimmick_Pixellate_Resolution_U("Resolution (U)", Float) = 64
     _Gimmick_Pixellate_Resolution_V("Resolution (V)", Float) = 64
-    _Gimmick_Pixellate_Effect_Mask("Effect mask", 2D) = "white"
+    _Gimmick_Pixellate_Effect_Mask("Effect mask", 2D) = "white" {}
 
     _Trochoid_Enable_Static("Enable trochoid", Float) = 0.0
     _Trochoid_R("R", Float) = 5.0
@@ -472,12 +472,15 @@ Shader "yum_food/tooner"
 
     _Rorschach_Enable_Static("Enable rorschach gimmick", Float) = 0.0
     _Rorschach_Enable_Dynamic("Enable rorschach gimmick", Float) = 0.0
+    _Rorschach_Color("Col", Color) = (1, 1, 1, 1)
+    _Rorschach_Alpha_Cutoff("Alpha cutoff", Float) = 0.0
     _Rorschach_Count_X("Enable rorschach gimmick", Float) = 2
     _Rorschach_Count_Y("Enable rorschach gimmick", Float) = 2
     _Rorschach_Center_Randomization("Center randomization", Float) = 0
     _Rorschach_Radius("Radius", Float) = 1
     _Rorschach_Emission_Strength("Emission", Float) = 0
     _Rorschach_Speed("Speed", Float) = 1
+    _Rorschach_Quantization("Quantization", Float) = -1
     _Rorschach_Mask("Mask", 2D) = "white" {}
     _Rorschach_Mask_Invert("Mask invert", Float) = 0
 
@@ -548,6 +551,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType"="Opaque"
@@ -627,6 +631,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

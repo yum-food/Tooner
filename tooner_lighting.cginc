@@ -1165,7 +1165,8 @@ float4 effect(inout v2f i)
   float4 rorschach_albedo = 0;
   if (_Rorschach_Enable_Dynamic) {
     rorschach_albedo = get_rorschach(i).albedo;
-    albedo = rorschach_albedo;
+    albedo.rgb = rorschach_albedo.rgb * rorschach_albedo.a + albedo.rgb * (1 - rorschach_albedo.a);
+    albedo.a = saturate(rorschach_albedo.a + albedo.a * (1 - rorschach_albedo.a));
   }
 #endif
 

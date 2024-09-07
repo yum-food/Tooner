@@ -1444,6 +1444,8 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
+    bc = FindProperty("_Rorschach_Color");
+    editor.ColorProperty(bc, "Color");
     bc = FindProperty("_Rorschach_Count_X");
     editor.FloatProperty(bc, "Count (x)");
     bc = FindProperty("_Rorschach_Count_Y");
@@ -1456,6 +1458,10 @@ public class ToonerGUI : ShaderGUI {
     editor.FloatProperty(bc, "Emission strength");
     bc = FindProperty("_Rorschach_Speed");
     editor.FloatProperty(bc, "Speed");
+    bc = FindProperty("_Rorschach_Quantization");
+    editor.FloatProperty(bc, "Quantization");
+    bc = FindProperty("_Rorschach_Alpha_Cutoff");
+    editor.FloatProperty(bc, "Alpha cutoff");
     bc = FindProperty("_Rorschach_Mask");
     editor.TexturePropertySingleLine(
         MakeLabel(bc, "Mask"),

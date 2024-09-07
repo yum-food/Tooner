@@ -597,12 +597,15 @@ float _FaceMeWorldY_Enable_Z;
 
 #if defined(_RORSCHACH)
 float _Rorschach_Enable_Dynamic;
+float4 _Rorschach_Color;
+float _Rorschach_Alpha_Cutoff;
 float _Rorschach_Count_X;
 float _Rorschach_Count_Y;
 float _Rorschach_Center_Randomization;
 float _Rorschach_Radius;
 float _Rorschach_Emission_Strength;
 float _Rorschach_Speed;
+float _Rorschach_Quantization;
 texture2D _Rorschach_Mask;
 float _Rorschach_Mask_Invert;
 #endif

@@ -69,6 +69,10 @@ RorschachPBR get_rorschach(v2f i)
   float3 period = float3(1 / (_Rorschach_Count_X+1), 1 / (_Rorschach_Count_Y+1), 1);
   float3 count = float3(_Rorschach_Count_X, _Rorschach_Count_Y, 1);
   float d = map_dr(ro, period, count, which);
+
+  d *= max(_Rorschach_Count_X + 1, _Rorschach_Count_Y + 1);
+
+  #if 0
   d -= map_dr(1 - ro, period, count, which) * 4;
 
   d = 1 - d;
@@ -78,6 +82,9 @@ RorschachPBR get_rorschach(v2f i)
   d = 1 - d;
 
   d *= 3;
+  #endif
+
+  d = 1 - d;
   d = saturate(d);
 
 #if defined(_RORSCHACH_MASK)
@@ -93,7 +100,13 @@ RorschachPBR get_rorschach(v2f i)
   d *= mask;
 #endif
 
-  result.albedo.rgb = d;
+  // This also quantizes alpha. It isn't exactly intended, but it looks nice.
+  if (_Rorschach_Quantization > 0) {
+    d = round(d * _Rorschach_Quantization) / _Rorschach_Quantization;
+  }
+
+  float4 col = _Rorschach_Color * d;
+  result.albedo = lerp(0, col, d > _Rorschach_Alpha_Cutoff);
 
   return result;
 }
