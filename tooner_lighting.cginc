@@ -1162,8 +1162,10 @@ float4 effect(inout v2f i)
 #endif
 
 #if defined(_RORSCHACH)
+  float4 rorschach_albedo = 0;
   if (_Rorschach_Enable_Dynamic) {
-    albedo = get_rorschach(i).albedo;
+    rorschach_albedo = get_rorschach(i).albedo;
+    albedo = rorschach_albedo;
   }
 #endif
 
@@ -1909,6 +1911,9 @@ float4 effect(inout v2f i)
     result.rgb += albedo.rgb * emission * _Emission1Strength *
       _Global_Emission_Factor * _Emission1Multiplier;
   }
+#endif
+#if defined(_RORSCHACH)
+  result.rgb += rorschach_albedo.rgb * _Rorschach_Emission_Strength;
 #endif
 #if defined(_EXPLODE) && defined(_AUDIOLINK)
   if (AudioLinkIsAvailable() && _Explode_Phase > 1E-6) {

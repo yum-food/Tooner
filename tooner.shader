@@ -3,7 +3,7 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 0
+  // Build nonce: 8
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -474,6 +474,12 @@ Shader "yum_food/tooner"
     _Rorschach_Enable_Dynamic("Enable rorschach gimmick", Float) = 0.0
     _Rorschach_Count_X("Enable rorschach gimmick", Float) = 2
     _Rorschach_Count_Y("Enable rorschach gimmick", Float) = 2
+    _Rorschach_Center_Randomization("Center randomization", Float) = 0
+    _Rorschach_Radius("Radius", Float) = 1
+    _Rorschach_Emission_Strength("Emission", Float) = 0
+    _Rorschach_Speed("Speed", Float) = 1
+    _Rorschach_Mask("Mask", 2D) = "white" {}
+    _Rorschach_Mask_Invert("Mask invert", Float) = 0
 
     _Enable_SSR("Enable SSR", Float) = 0
     _SSRStrength("SSR Strength", Float) = 1

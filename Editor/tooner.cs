@@ -1448,6 +1448,29 @@ public class ToonerGUI : ShaderGUI {
     editor.FloatProperty(bc, "Count (x)");
     bc = FindProperty("_Rorschach_Count_Y");
     editor.FloatProperty(bc, "Count (y)");
+    bc = FindProperty("_Rorschach_Center_Randomization");
+    editor.FloatProperty(bc, "Center randomization");
+    bc = FindProperty("_Rorschach_Radius");
+    editor.FloatProperty(bc, "Radius");
+    bc = FindProperty("_Rorschach_Emission_Strength");
+    editor.FloatProperty(bc, "Emission strength");
+    bc = FindProperty("_Rorschach_Speed");
+    editor.FloatProperty(bc, "Speed");
+    bc = FindProperty("_Rorschach_Mask");
+    editor.TexturePropertySingleLine(
+        MakeLabel(bc, "Mask"),
+        bc);
+    SetKeyword("_RORSCHACH_MASK", bc.textureValue);
+    if (bc.textureValue) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Rorschach_Mask_Invert");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Invert", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      EditorGUI.indentLevel -= 1;
+    }
 
     EditorGUI.indentLevel -= 1;
   }

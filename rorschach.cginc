@@ -14,10 +14,16 @@ struct RorschachPBR {
 
 float map_sdf(float3 p, float2 e, float3 period)
 {
-  float r = 1 * min(period.x, min(period.y, period.z));
-  float st = sin(_Time[1] * e.y * e.y + e.x * 3.14159265 * 2);
+  float r = _Rorschach_Radius * min(period.x, min(period.y, period.z));
+  float st = sin(_Time[1] * _Rorschach_Speed * e.y * e.y + e.x * 3.14159265 * 2);
   r *= st;
-  return distance_from_sphere(p, r);
+  float3 o = float3(
+    (e.x - 0.5) * period.x,
+    (e.y - 0.5) * period.y,
+    0);
+  //o *= _SinTime[1];
+  o *= _Rorschach_Center_Randomization;
+  return distance_from_sphere(p + o, r);
 }
 
 float map_dr(
@@ -73,6 +79,19 @@ RorschachPBR get_rorschach(v2f i)
 
   d *= 3;
   d = saturate(d);
+
+#if defined(_RORSCHACH_MASK)
+  float mask = _Rorschach_Mask.SampleLevel(linear_repeat_s, i.uv0.xy, /*lod=*/0);
+  mask = _Rorschach_Mask_Invert ? 1 - mask : mask;
+  float mask_e = 0.1;
+  // map mask onto [mask_e, 1 - mask_e]
+  mask = clamp(mask, mask_e, 1.0 - mask_e);
+  // map mask onto [0, 1 - 2 * mask_e]
+  mask -= mask_e;
+  // map mask onto [0, 1]
+  mask /= (1 - 2 * mask_e);
+  d *= mask;
+#endif
 
   result.albedo.rgb = d;
 
