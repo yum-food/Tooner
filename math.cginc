@@ -59,7 +59,7 @@ float rand2(float2 p)
 // Generate a random number on [0, 1].
 float rand3(float3 p)
 {
-  return glsl_mod(sin(dot(p, float3(897.0, 367.0, 197.0))) * 1073.6, 1.0);
+  return glsl_mod(sin(dot(p, float3(151.0, 157.0, 163.0))) * 997.0, 1.0);
 }
 
 float length2(float2 p)

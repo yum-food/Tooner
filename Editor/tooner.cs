@@ -621,7 +621,7 @@ public class ToonerGUI : ShaderGUI {
       SetKeyword($"_RIM_LIGHTING{i}", enabled);
 
       if (!enabled) {
-        return;
+        continue;
       }
 
       bc = FindProperty($"_Rim_Lighting{i}_Color");
@@ -1334,6 +1334,28 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickEyes01() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Eyes01_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Eyes 01", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_EYES_01", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Eyes01_Radius");
+    editor.FloatProperty(bc, "Radius (meters, object space)");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmickPixellate() {
     MaterialProperty bc;
     bc = FindProperty("_Gimmick_Pixellate_Enable_Static");
@@ -1481,16 +1503,44 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickMirrorUVFlip() {
+    MaterialProperty bc;
+    bc = FindProperty("_Mirror_UV_Flip_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Flip UVs in mirror", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_MIRROR_UV_FLIP", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Mirror_UV_Flip_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmicks() {
     DoGimmickFlatColor();
     DoGimmickQuantizeLocation();
     DoGimmickShearLocation();
     DoGimmickSpherizeLocation();
     DoGimmickEyes00();
+    DoGimmickEyes01();
     DoGimmickPixellate();
     DoGimmickTrochoid();
     DoGimmickFaceMeWorldY();
     DoGimmickRorschach();
+    DoGimmickMirrorUVFlip();
   }
 
   void DoMochieParams() {

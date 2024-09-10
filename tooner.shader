@@ -3,7 +3,7 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 9
+  // Build nonce: 18
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -454,6 +454,9 @@ Shader "yum_food/tooner"
     _Gimmick_Eyes00_Enable_Static("Enable eyes 00", Float) = 0.0
     _Gimmick_Eyes00_Effect_Mask("Effect mask", 2D) = "white" {}
 
+    _Gimmick_Eyes01_Enable_Static("Enable eyes 01", Float) = 0.0
+    _Gimmick_Eyes01_Radius("Radius (meters, obj space)", Float) = 1.0
+
     _Gimmick_Pixellate_Enable_Static("Enable pixellation", Float) = 0.0
     _Gimmick_Pixellate_Resolution_U("Resolution (U)", Float) = 64
     _Gimmick_Pixellate_Resolution_V("Resolution (V)", Float) = 64
@@ -483,6 +486,9 @@ Shader "yum_food/tooner"
     _Rorschach_Quantization("Quantization", Float) = -1
     _Rorschach_Mask("Mask", 2D) = "white" {}
     _Rorschach_Mask_Invert("Mask invert", Float) = 0
+
+    _Mirror_UV_Flip_Enable_Static("Enable rorschach gimmick", Float) = 0.0
+    _Mirror_UV_Flip_Enable_Dynamic("Enable rorschach gimmick", Float) = 0.0
 
     _Enable_SSR("Enable SSR", Float) = 0
     _SSRStrength("SSR Strength", Float) = 1
@@ -551,7 +557,6 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
-    /*
     Pass {
       Tags {
         "RenderType"="Opaque"
@@ -631,7 +636,6 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
-    */
   }
   CustomEditor "ToonerGUI"
 }

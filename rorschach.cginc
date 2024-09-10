@@ -21,7 +21,7 @@ float map_sdf(float3 p, float2 e, float3 period)
     (e.x - 0.5) * period.x,
     (e.y - 0.5) * period.y,
     0);
-  //o *= _SinTime[1];
+  //o *= ((_SinTime[1] + 1) / 2) * 1.3;
   o *= _Rorschach_Center_Randomization;
   return distance_from_sphere(p + o, r);
 }
@@ -40,8 +40,8 @@ float map_dr(
 
   float d = 1E9;
   float3 which_tmp = which;
-  for (int xi = -2; xi < 3; xi++)
-  for (int yi = -2; yi < 3; yi++)
+  for (int xi = -1; xi < 3; xi++)
+  for (int yi = -1; yi < 3; yi++)
   {
     float3 rid = which + float3(xi, yi, 0) * o;
     float3 r = p - period * rid;
@@ -86,6 +86,13 @@ RorschachPBR get_rorschach(v2f i)
 
   d = 1 - d;
   d = saturate(d);
+
+  //d = rand3(which);
+  /*
+  if (_Rorschach_Quantization > 0) {
+    d = round(glsl_mod(d, _Rorschach_Quantization) / _Rorschach_Quantization);
+  }
+  */
 
 #if defined(_RORSCHACH_MASK)
   float mask = _Rorschach_Mask.SampleLevel(linear_repeat_s, i.uv0.xy, /*lod=*/0);

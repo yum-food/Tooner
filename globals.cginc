@@ -574,6 +574,10 @@ float _Gimmick_Eyes00_Enable_Static;
 texture2D _Gimmick_Eyes00_Effect_Mask;
 #endif
 
+#if defined(_GIMMICK_EYES_01)
+float _Gimmick_Eyes01_Radius;
+#endif
+
 #if defined(_PIXELLATE)
 float _Gimmick_Pixellate_Enable_Static;
 float _Gimmick_Pixellate_Resolution_U;
@@ -608,6 +612,10 @@ float _Rorschach_Speed;
 float _Rorschach_Quantization;
 texture2D _Rorschach_Mask;
 float _Rorschach_Mask_Invert;
+#endif
+
+#if defined(_MIRROR_UV_FLIP)
+float _Mirror_UV_Flip_Enable_Dynamic;
 #endif
 
 #endif

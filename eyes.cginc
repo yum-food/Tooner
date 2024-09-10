@@ -1,6 +1,10 @@
 #ifndef __EYES_INC
 #define __EYES_INC
 
+#include "globals.cginc"
+#include "interpolators.cginc"
+#include "iq_sdf.cginc"
+
 #if defined(_GIMMICK_EYES_00)
 
 float eyes00_distance_from_sphere(float3 p, float3 c, float r)
@@ -98,7 +102,88 @@ float4 eyes00_march(float2 uv, inout float3 normal)
     return float4(shaded_color, 1.0);
 }
 
-#endif  // _EYES
+#endif  // _GIMMICK_EYES_00
+
+#if defined(_GIMMICK_EYES_01)
+
+struct Eyes01PBR {
+  float4 albedo;
+  float3 normal;
+};
+
+float eyes01_map(float3 p)
+{
+  return length(p) - .01;
+}
+
+float3 eyes01_calc_normal(in float3 p)
+{
+    const float3 small_step = float3(0.0001, 0.0, 0.0);
+
+    float gradient_x = eyes01_map(p + small_step.xyy) - eyes01_map(p - small_step.xyy);
+    float gradient_y = eyes01_map(p + small_step.yxy) - eyes01_map(p - small_step.yxy);
+    float gradient_z = eyes01_map(p + small_step.yyx) - eyes01_map(p - small_step.yyx);
+
+    float3 normal = float3(gradient_x, gradient_y, gradient_z);
+
+    return normalize(normal);
+}
+
+void __eyes01_march(float3 ro, float3 rd, inout Eyes01PBR result)
+{
+  float total_distance_traveled = 0.0;
+  const float MINIMUM_HIT_DISTANCE = 0.001;
+  const float MAXIMUM_TRACE_DISTANCE = 1000.0;
+
+#define EYES01_MARCH_STEPS 50
+  float distance_to_closest;
+  float3 current_position;
+  for (int i = 0; i < EYES01_MARCH_STEPS; i++)
+  {
+    current_position = ro + total_distance_traveled * rd;
+
+    distance_to_closest = eyes01_map(current_position);
+
+    if (distance_to_closest < MINIMUM_HIT_DISTANCE) 
+    {
+      break;
+    }
+
+    if (total_distance_traveled > MAXIMUM_TRACE_DISTANCE)
+    {
+      break;
+    }
+    total_distance_traveled += distance_to_closest;
+  }
+
+  if (distance_to_closest < MINIMUM_HIT_DISTANCE) {
+    result.normal = eyes01_calc_normal(current_position);
+    result.albedo = 1;
+  }
+
+  result.normal = float3(0, 0, 1);  // doesn't matter
+  result.albedo = 0;
+}
+
+Eyes01PBR eyes01_march(v2f i)
+{
+  Eyes01PBR result;
+
+  float3 cam_pos = _WorldSpaceCameraPos;
+  float3 ro = cam_pos;
+  float3 rd = normalize(i.worldPos - cam_pos);
+
+  float r_world = _Gimmick_Eyes01_Radius;
+  float3 o = -i.normal * r_world;
+
+  ro -= o;
+
+  __eyes01_march(ro, rd, result);
+
+  return result;
+}
+
+#endif  // _GIMMICK_EYES_01
 
 #endif  // __EYES_INC
 

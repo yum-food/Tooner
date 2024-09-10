@@ -184,6 +184,19 @@ v2f vert(appdata v)
   o.uv5 = v.uv5;
   o.uv6 = v.uv6;
   o.uv7 = v.uv7;
+#if defined(_MIRROR_UV_FLIP)
+  if (_Mirror_UV_Flip_Enable_Dynamic) {
+    bool in_mirror = isInMirror();
+    o.uv0.x = lerp(o.uv0.x, 1 - o.uv0.x, in_mirror);
+    o.uv1.x = lerp(o.uv1.x, 1 - o.uv1.x, in_mirror);
+    o.uv2.x = lerp(o.uv2.x, 1 - o.uv2.x, in_mirror);
+    o.uv3.x = lerp(o.uv3.x, 1 - o.uv3.x, in_mirror);
+    o.uv4.x = lerp(o.uv4.x, 1 - o.uv4.x, in_mirror);
+    o.uv5.x = lerp(o.uv5.x, 1 - o.uv5.x, in_mirror);
+    o.uv6.x = lerp(o.uv6.x, 1 - o.uv6.x, in_mirror);
+    o.uv7.x = lerp(o.uv7.x, 1 - o.uv7.x, in_mirror);
+  }
+#endif
 #if defined(LIGHTMAP_ON)
   o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif
@@ -866,6 +879,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
     a0 *= in_range;
   }
   a0 *= mask;
+  a0 *= ov.ov0_mask;
 #endif
 #if defined(_PBR_OVERLAY1)
   float a1 = saturate(ov.ov1_albedo.a * _PBR_Overlay1_Alpha_Multiplier);
@@ -875,6 +889,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
     a1 *= in_range;
   }
   a1 *= mask;
+  a1 *= ov.ov1_mask;
 #endif
 #if defined(_PBR_OVERLAY2)
   float a2 = saturate(ov.ov2_albedo.a * _PBR_Overlay2_Alpha_Multiplier);
@@ -884,6 +899,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
     a2 *= in_range;
   }
   a2 *= mask;
+  a2 *= ov.ov2_mask;
 #endif
 #if defined(_PBR_OVERLAY3)
   float a3 = saturate(ov.ov3_albedo.a * _PBR_Overlay3_Alpha_Multiplier);
@@ -893,6 +909,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
     a3 *= in_range;
   }
   a3 *= mask;
+  a3 *= ov.ov3_mask;
 #endif
 
 #if defined(_PBR_OVERLAY0)
@@ -906,11 +923,11 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
 #endif
   albedo.a = max(albedo.a, a0);
 #elif defined(_PBR_OVERLAY0_MIX_ADD)
-  albedo.rgb += ov.ov0_albedo;
+  albedo.rgb += ov.ov0_albedo * mask * ov.ov0_mask;
 #elif defined(_PBR_OVERLAY0_MIX_MIN)
-  albedo.rgb = min(albedo.rgb, ov.ov0_albedo);
+  albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov0_albedo), mask * ov.ov0_mask);
 #elif defined(_PBR_OVERLAY0_MIX_MAX)
-  albedo.rgb = max(albedo.rgb, ov.ov0_albedo);
+  albedo.rgb = max(albedo.rgb, ov.ov0_albedo * mask * ov.ov0_mask);
 #endif
 #endif
 
@@ -925,11 +942,11 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
 #endif
   albedo.a = max(albedo.a, a1);
 #elif defined(_PBR_OVERLAY1_MIX_ADD)
-  albedo.rgb += ov.ov1_albedo;
+  albedo.rgb += ov.ov1_albedo * mask * ov.ov1_mask;
 #elif defined(_PBR_OVERLAY1_MIX_MIN)
-  albedo.rgb = min(albedo.rgb, ov.ov1_albedo);
+  albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov1_albedo), mask * ov.ov1_mask);
 #elif defined(_PBR_OVERLAY1_MIX_MAX)
-  albedo.rgb = max(albedo.rgb, ov.ov1_albedo);
+  albedo.rgb = max(albedo.rgb, ov.ov1_albedo * mask * ov.ov1_mask);
 #endif
 #endif
 
@@ -944,11 +961,11 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
 #endif
   albedo.a = max(albedo.a, a2);
 #elif defined(_PBR_OVERLAY2_MIX_ADD)
-  albedo.rgb += ov.ov2_albedo;
+  albedo.rgb += ov.ov2_albedo * mask * ov.ov2_mask;
 #elif defined(_PBR_OVERLAY2_MIX_MIN)
-  albedo.rgb = min(albedo.rgb, ov.ov2_albedo);
+  albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov2_albedo), mask * ov.ov2_mask);
 #elif defined(_PBR_OVERLAY2_MIX_MAX)
-  albedo.rgb = max(albedo.rgb, ov.ov2_albedo);
+  albedo.rgb = max(albedo.rgb, ov.ov2_albedo * mask * ov.ov2_mask);
 #endif
 #endif
 
@@ -963,11 +980,11 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
 #endif
   albedo.a = max(albedo.a, a3);
 #elif defined(_PBR_OVERLAY3_MIX_ADD)
-  albedo.rgb += ov.ov3_albedo;
+  albedo.rgb += ov.ov3_albedo * mask * ov.ov3_mask;
 #elif defined(_PBR_OVERLAY3_MIX_MIN)
-  albedo.rgb = min(albedo.rgb, ov.ov3_albedo);
+  albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov3_albedo), mask * ov.ov3_mask);
 #elif defined(_PBR_OVERLAY3_MIX_MAX)
-  albedo.rgb = max(albedo.rgb, ov.ov3_albedo);
+  albedo.rgb = max(albedo.rgb, ov.ov3_albedo * mask * ov.ov3_mask);
 #endif
 #endif
 }
@@ -1227,14 +1244,21 @@ float4 effect(inout v2f i)
 
 #if defined(_GIMMICK_EYES_00)
   {
-    float3 eyes00_normal = 0;
-    float3 eyes00_albedo = eyes00_march(i.uv0, eyes00_normal).rgb;
-    bool is_ray_hit = (eyes00_albedo.r > 0 || eyes00_albedo.g > 0 || eyes00_albedo.b > 0);
+    float3 eyes_normal = 0;
+    float3 eyes_albedo = eyes00_march(i.uv0, eyes_normal).rgb;
+    bool is_ray_hit = (eyes_albedo.r > 0 || eyes_albedo.g > 0 || eyes_albedo.b > 0);
     if (is_ray_hit) {
       float mask = _Gimmick_Eyes00_Effect_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
-      albedo.rgb = lerp(eyes00_albedo * 1.5, albedo.rgb * 20.0, mask);
-      normal = eyes00_normal;
+      albedo.rgb = lerp(eyes_albedo * 1.5, albedo.rgb * 20.0, mask);
+      normal = eyes_normal;
     }
+  }
+#endif
+
+#if defined(_GIMMICK_EYES_01)
+  {
+    Eyes01PBR pbr = eyes01_march(i);
+    albedo = pbr.albedo;
   }
 #endif
 
