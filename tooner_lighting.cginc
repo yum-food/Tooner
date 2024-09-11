@@ -13,7 +13,6 @@
 #include "motion.cginc"
 #include "pbr.cginc"
 #include "poi.cginc"
-#include "rorschach.cginc"
 #include "shear_math.cginc"
 #include "tooner_scroll.cginc"
 #include "trochoid_math.cginc"
@@ -371,11 +370,128 @@ void geom(triangle v2f tri_in[3],
   tri_out.RestartStrip();
 }
 
-#if defined(_GLITTER) || defined(_RIM_LIGHTING0_GLITTER) || defined(_RIM_LIGHTING1_GLITTER) || defined(_RIM_LIGHTING2_GLITTER) || defined(_RIM_LIGHTING3_GLITTER)
+#if defined(_RORSCHACH) || defined(_GLITTER) || defined(_RIM_LIGHTING0_GLITTER) || defined(_RIM_LIGHTING1_GLITTER) || defined(_RIM_LIGHTING2_GLITTER) || defined(_RIM_LIGHTING3_GLITTER)
+struct RorschachPBR {
+  float4 albedo;
+};
+
+float rorschach_map_sdf(float3 p, float2 e, float3 period, float center_randomization)
+{
+  float r = _Rorschach_Radius * min(period.x, min(period.y, period.z));
+  float st = sin(_Time[1] * _Rorschach_Speed * e.y * e.y + e.x * 3.14159265 * 2);
+  r *= st;
+  float3 o = float3(
+    (e.x - 0.5) * period.x,
+    (e.y - 0.5) * period.y,
+    0);
+  o *= center_randomization;
+  return distance_from_sphere(p + o, r);
+}
+
+float rorschach_map_dr(
+    float3 p,
+    float3 period,
+    float3 count,
+    float center_randomization,
+    float2 uv,
+    out float3 which
+    )
+{
+  which = round(p / period);
+  // Direction to nearest neighboring cell.
+  float3 min_d = p - period * which;
+  float3 o = sign(min_d);
+
+  float d = 1E9;
+  float3 which_tmp = which;
+  for (uint xi = 0; xi < 4; xi++)
+  for (uint yi = 0; yi < 4; yi++)
+  {
+    float3 rid = which + float3(((float) xi) - 1, ((float) yi) - 1, 0) * o;
+    float3 r = p - period * rid;
+    float2 e = float2(
+        rand3(rid / 100.0),
+        rand3(rid / 100.0 + 1));
+    float cur_d = rorschach_map_sdf(r, e, period, center_randomization);
+    which_tmp = cur_d < d ? rid : which;
+    d = min(d, cur_d);
+  }
+
+  which = which_tmp;
+  return d;
+}
+
+struct RorschachParams {
+  float4 color;
+  float count_x, count_y;
+  float mask;
+  float mask_invert;
+  float quantization;
+  float alpha_cutoff;
+  float center_randomization;
+};
+
+RorschachPBR get_rorschach(float2 uv, RorschachParams p)
+{
+  RorschachPBR result;
+  result.albedo = float4(0, 0, 0, 1);
+
+  float3 ro = float3(uv.x - 0.5, uv.y - 0.5, 0);
+  float3 rd = float3(0, 0, 1);
+
+  float3 which;
+  float3 period = float3(1 / (p.count_x+1), 1 / (p.count_y+1), 1);
+  float3 count = float3(p.count_x, p.count_y, 1);
+  float d = rorschach_map_dr(ro, period, count, p.center_randomization, uv, which);
+
+  d *= max(p.count_x + 1, p.count_y + 1);
+
+  d = 1 - d;
+  d = saturate(d);
+
+  // This also quantizes alpha. It isn't exactly intended, but it looks nice.
+  if (p.quantization > 0) {
+    d = round(d * p.quantization) / p.quantization;
+  }
+
+  float4 col = p.color * d;
+  result.albedo = lerp(0, col, d > p.alpha_cutoff);
+
+  float mask = p.mask;
+  mask = p.mask_invert ? 1 - mask : mask;
+  result.albedo *= mask;
+
+  return result;
+}
+
 float get_glitter(float2 uv, float3 worldPos,
     float3 normal, float density, float amount, float speed,
     float mask, float angle, float power)
 {
+  // To increase amount: make count_{x,y} closer to each other
+  // To increase density: make both numbers larger
+  RorschachParams p;
+  p.color = 1;
+  p.count_x = density * amount;
+  p.count_y = density * rcp(amount);
+  p.mask = mask;
+  p.mask_invert = 0;
+  p.quantization = 1;
+  p.alpha_cutoff = 0.5;
+  p.center_randomization = 1;
+  RorschachPBR result = get_rorschach(uv, p);
+
+  float glitter = result.albedo.r;
+  if (angle < 90) {
+    float ndotl = abs(dot(normal, normalize(_WorldSpaceCameraPos.xyz - worldPos)));
+    float cutoff = cos((angle / 180) * 3.14159);
+
+    glitter *= saturate(pow(ndotl / cutoff, power));
+  }
+
+  return glitter;
+
+  /*
   // A regular divide here causes flickering. The leading guess is that NVIDIA
   // hardware implements the divide instruction slightly differently on
   // different cores.
@@ -402,6 +518,7 @@ float get_glitter(float2 uv, float3 worldPos,
   }
 
   return glitter;
+  */
 }
 #endif  // _GLITTER
 
@@ -1181,7 +1298,21 @@ float4 effect(inout v2f i)
 #if defined(_RORSCHACH)
   float4 rorschach_albedo = 0;
   if (_Rorschach_Enable_Dynamic) {
-    rorschach_albedo = get_rorschach(i).albedo;
+    RorschachParams p;
+    p.color = _Rorschach_Color;
+    p.count_x = _Rorschach_Count_X;
+    p.count_y = _Rorschach_Count_Y;
+#if defined(_RORSCHACH_MASK)
+    p.mask = _Rorschach_Mask.SampleLevel(linear_repeat_s, i.uv0.xy, /*lod=*/0);
+    p.mask_invert = _Rorschach_Mask_Invert;
+#else
+    p.mask = 1;
+    p.mask_invert = 0;
+#endif
+    p.quantization = _Rorschach_Quantization;
+    p.alpha_cutoff = _Rorschach_Alpha_Cutoff;
+    p.center_randomization = _Rorschach_Center_Randomization;
+    rorschach_albedo = get_rorschach(i.uv0, p).albedo;
     albedo.rgb = rorschach_albedo.rgb * rorschach_albedo.a + albedo.rgb * (1 - rorschach_albedo.a);
     albedo.a = saturate(rorschach_albedo.a + albedo.a * (1 - rorschach_albedo.a));
   }
@@ -1882,7 +2013,8 @@ float4 effect(inout v2f i)
 #if defined(_GLITTER)
   float3 glitter_color_unlit;
   {
-    float glitter_mask = _Glitter_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+
+    float glitter_mask = _Glitter_Mask.SampleLevel(linear_repeat_s, i.uv0, /*lod=*/0);
     glitter_mask *= min(matcap_overwrite_mask[0], matcap_overwrite_mask[1]);
     float glitter = get_glitter(
         get_uv_by_channel(i, round(_Glitter_UV_Select)),

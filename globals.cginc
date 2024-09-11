@@ -599,7 +599,7 @@ float _FaceMeWorldY_Enable_Y;
 float _FaceMeWorldY_Enable_Z;
 #endif
 
-#if defined(_RORSCHACH)
+#if defined(_RORSCHACH) || defined(_GLITTER) || defined(_RIM_LIGHTING0_GLITTER) || defined(_RIM_LIGHTING1_GLITTER) || defined(_RIM_LIGHTING2_GLITTER) || defined(_RIM_LIGHTING3_GLITTER)
 float _Rorschach_Enable_Dynamic;
 float4 _Rorschach_Color;
 float _Rorschach_Alpha_Cutoff;
