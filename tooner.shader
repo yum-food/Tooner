@@ -3,7 +3,7 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 18
+  // Build nonce: 19
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -187,7 +187,7 @@ Shader "yum_food/tooner"
     _Proximity_Dimming_Factor("Proximity dimming max distance", Float) = 0
 
     _Shading_Mode("Shading mode", Range(0, 1)) = 0
-    _Mesh_Normals_Mode("Normals mode", Float) = 0.0
+    _Mesh_Normals_Mode("Normals mode", Float) = 3
     _Flatten_Mesh_Normals_Str("Flatten mesh normals strength", Float) = 100.0
     [MaterialToggle] _Confabulate_Normals("Confabulate mesh normals", Float) = 0.0
 
@@ -457,6 +457,8 @@ Shader "yum_food/tooner"
     _Gimmick_Eyes01_Enable_Static("Enable eyes 01", Float) = 0.0
     _Gimmick_Eyes01_Radius("Radius (meters, obj space)", Float) = 1.0
 
+    _Gimmick_Halo00_Enable_Static("Enable halo", Float) = 0.0
+
     _Gimmick_Pixellate_Enable_Static("Enable pixellation", Float) = 0.0
     _Gimmick_Pixellate_Resolution_U("Resolution (U)", Float) = 64
     _Gimmick_Pixellate_Resolution_V("Resolution (V)", Float) = 64
@@ -557,6 +559,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType"="Opaque"
@@ -636,6 +639,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

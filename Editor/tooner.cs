@@ -1356,6 +1356,25 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickHalo00() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Halo00_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Halo 00", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_HALO_00", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmickPixellate() {
     MaterialProperty bc;
     bc = FindProperty("_Gimmick_Pixellate_Enable_Static");
@@ -1536,6 +1555,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickSpherizeLocation();
     DoGimmickEyes00();
     DoGimmickEyes01();
+    DoGimmickHalo00();
     DoGimmickPixellate();
     DoGimmickTrochoid();
     DoGimmickFaceMeWorldY();

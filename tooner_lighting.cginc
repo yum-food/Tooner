@@ -7,6 +7,7 @@
 #include "clones.cginc"
 #include "eyes.cginc"
 #include "globals.cginc"
+#include "halos.cginc"
 #include "interpolators.cginc"
 #include "iq_sdf.cginc"
 #include "math.cginc"
@@ -374,7 +375,6 @@ void geom(triangle v2f tri_in[3],
 struct RorschachPBR {
   float4 albedo;
 };
-
 float rorschach_map_sdf(float3 p, float2 e, float3 period, float center_randomization)
 {
   float r = _Rorschach_Radius * min(period.x, min(period.y, period.z));
@@ -393,7 +393,6 @@ float rorschach_map_dr(
     float3 period,
     float3 count,
     float center_randomization,
-    float2 uv,
     out float3 which
     )
 {
@@ -442,7 +441,7 @@ RorschachPBR get_rorschach(float2 uv, RorschachParams p)
   float3 which;
   float3 period = float3(1 / (p.count_x+1), 1 / (p.count_y+1), 1);
   float3 count = float3(p.count_x, p.count_y, 1);
-  float d = rorschach_map_dr(ro, period, count, p.center_randomization, uv, which);
+  float d = rorschach_map_dr(ro, period, count, p.center_randomization, which);
 
   d *= max(p.count_x + 1, p.count_y + 1);
 
@@ -1318,16 +1317,6 @@ float4 effect(inout v2f i)
   }
 #endif
 
-#if defined(_RENDERING_CUTOUT)
-#if defined(_RENDERING_CUTOUT_STOCHASTIC)
-  float ar = rand2(i.uv0);
-  clip(albedo.a - ar);
-#else
-  clip(albedo.a - _Alpha_Cutoff);
-#endif
-  albedo.a = 1;
-#endif
-
   PbrOverlay ov;
   getOverlayAlbedoRoughnessMetallic(ov, i);
 
@@ -1351,6 +1340,24 @@ float4 effect(inout v2f i)
 		raw_normal.y * binormal +
 		raw_normal.z * i.normal
 	);
+
+#if defined(_GIMMICK_HALO_00)
+  {
+    Halo00PBR pbr = halo00_march(i.worldPos, i.uv0);
+    albedo = pbr.albedo;
+    normal = pbr.normal;
+  }
+#endif
+
+#if defined(_RENDERING_CUTOUT)
+#if defined(_RENDERING_CUTOUT_STOCHASTIC)
+  float ar = rand2(i.uv0);
+  clip(albedo.a - ar);
+#else
+  clip(albedo.a - _Alpha_Cutoff);
+#endif
+  albedo.a = 1;
+#endif
 
 #if defined(_METALLIC_MAP)
   float metallic = _MetallicTex.SampleBias(GET_SAMPLER_PBR,
