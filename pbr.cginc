@@ -187,7 +187,7 @@ float4 getLitColor(
   albedo.rgb = DiffuseAndSpecularFromMetallic(
     albedo, metallic, specular_tint, one_minus_reflectivity);
 
-  const float3 view_dir = normalize(_WorldSpaceCameraPos - worldPos);
+  const float3 view_dir = normalize(i.centerCamPos - worldPos);
   uint normals_mode = round(_Mesh_Normals_Mode);
   switch (normals_mode) {
     case 0:
@@ -270,7 +270,7 @@ float4 getLitColor(
 
 #if defined(_PROXIMITY_DIMMING)
   {
-    float cam_dist = length(_WorldSpaceCameraPos - worldPos);
+    float cam_dist = length(i.centerCamPos - worldPos);
     // Map onto [min, max]
     cam_dist = clamp(cam_dist, _Proximity_Dimming_Min_Dist,
         _Proximity_Dimming_Max_Dist);

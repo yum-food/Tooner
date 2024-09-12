@@ -5,6 +5,7 @@
 
 #include "audiolink.cginc"
 #include "clones.cginc"
+#include "cnlohr.cginc"
 #include "globals.cginc"
 #include "math.cginc"
 #include "pbr.cginc"
@@ -86,6 +87,7 @@ v2f vert(appdata v)
   o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif
 
+  o.centerCamPos = getCenterCamPos();
   return o;
 }
 

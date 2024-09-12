@@ -5,6 +5,7 @@
 
 #include "audiolink.cginc"
 #include "clones.cginc"
+#include "cnlohr.cginc"
 #include "eyes.cginc"
 #include "globals.cginc"
 #include "halos.cginc"
@@ -29,7 +30,7 @@
 void getVertexLightColor(inout v2f i)
 {
   #if defined(VERTEXLIGHT_ON)
-  float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
+  float3 view_dir = normalize(i.centerCamPos - i.worldPos);
   uint normals_mode = round(_Mesh_Normals_Mode);
   bool flat = (normals_mode == 0);
   float3 flat_normal = normalize(
@@ -114,7 +115,7 @@ v2f vert(appdata v)
     float3 n = UnityObjectToWorldNormal(unrotated_n);
 
     float3 origin = mul(unity_ObjectToWorld, float4(0, 0, 0, 1)).xyz;
-    float3 view_dir = _WorldSpaceCameraPos - origin;
+    float3 view_dir = i.centerCamPos - origin;
     // Project onto xz plane
     n.y = 0;
     view_dir.y = 0;
@@ -204,6 +205,7 @@ v2f vert(appdata v)
   TRANSFER_SHADOW(o);
 #endif
 
+  o.centerCamPos = getCenterCamPos();
   getVertexLightColor(o);
 
   return o;
@@ -463,7 +465,7 @@ RorschachPBR get_rorschach(float2 uv, RorschachParams p)
   return result;
 }
 
-float get_glitter(float2 uv, float3 worldPos,
+float get_glitter(float2 uv, float3 worldPos, float3 centerCamPos,
     float3 normal, float density, float amount, float speed,
     float mask, float angle, float power)
 {
@@ -482,7 +484,7 @@ float get_glitter(float2 uv, float3 worldPos,
 
   float glitter = result.albedo.r;
   if (angle < 90) {
-    float ndotl = abs(dot(normal, normalize(_WorldSpaceCameraPos.xyz - worldPos)));
+    float ndotl = abs(dot(normal, normalize(centerCamPos - worldPos)));
     float cutoff = cos((angle / 180) * 3.14159);
 
     glitter *= saturate(pow(ndotl / cutoff, power));
@@ -1241,7 +1243,7 @@ float4 pixellate_color(int2 px_res, float2 uv, float4 c)
 
 float4 effect(inout v2f i)
 {
-  const float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
+  const float3 view_dir = normalize(i.centerCamPos - i.worldPos);
   // Not necessarily normalized after interpolation.
   i.normal = normalize(i.normal);
   i.tangent.xyz = normalize(i.tangent.xyz);
@@ -1660,7 +1662,7 @@ float4 effect(inout v2f i)
 #if defined(_RIM_LIGHTING0_GLITTER)
       float rl_glitter = get_glitter(
           get_uv_by_channel(i, round(_Rim_Lighting0_Glitter_UV_Select)),
-          i.worldPos, normal,
+          i.worldPos, i.centerCamPos, normal,
           _Rim_Lighting0_Glitter_Density,
           _Rim_Lighting0_Glitter_Amount, _Rim_Lighting0_Glitter_Speed,
           /*mask=*/1, /*angle=*/91, /*power=*/1);
@@ -1740,7 +1742,7 @@ float4 effect(inout v2f i)
 #if defined(_RIM_LIGHTING1_GLITTER)
       float rl_glitter = get_glitter(
           get_uv_by_channel(i, round(_Rim_Lighting1_Glitter_UV_Select)),
-          i.worldPos, normal,
+          i.worldPos, i.centerCamPos, normal,
           _Rim_Lighting1_Glitter_Density,
           _Rim_Lighting1_Glitter_Amount, _Rim_Lighting1_Glitter_Speed,
           /*mask=*/1, /*angle=*/91, /*power=*/1);
@@ -1820,7 +1822,7 @@ float4 effect(inout v2f i)
 #if defined(_RIM_LIGHTING2_GLITTER)
       float rl_glitter = get_glitter(
           get_uv_by_channel(i, round(_Rim_Lighting2_Glitter_UV_Select)),
-          i.worldPos, normal,
+          i.worldPos, i.centerCamPos, normal,
           _Rim_Lighting2_Glitter_Density,
           _Rim_Lighting2_Glitter_Amount, _Rim_Lighting2_Glitter_Speed,
           /*mask=*/1, /*angle=*/91, /*power=*/1);
@@ -1900,7 +1902,7 @@ float4 effect(inout v2f i)
 #if defined(_RIM_LIGHTING3_GLITTER)
       float rl_glitter = get_glitter(
           get_uv_by_channel(i, round(_Rim_Lighting3_Glitter_UV_Select)),
-          i.worldPos, normal,
+          i.worldPos, i.centerCamPos, normal,
           _Rim_Lighting3_Glitter_Density,
           _Rim_Lighting3_Glitter_Amount, _Rim_Lighting3_Glitter_Speed,
           /*mask=*/1, /*angle=*/91, /*power=*/1);
@@ -2025,7 +2027,7 @@ float4 effect(inout v2f i)
     glitter_mask *= min(matcap_overwrite_mask[0], matcap_overwrite_mask[1]);
     float glitter = get_glitter(
         get_uv_by_channel(i, round(_Glitter_UV_Select)),
-        i.worldPos, normal,
+        i.worldPos, i.centerCamPos, normal,
         _Glitter_Density, _Glitter_Amount, _Glitter_Speed,
         glitter_mask, _Glitter_Angle, _Glitter_Power);
         glitter_color_unlit = glitter * _Glitter_Color;

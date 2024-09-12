@@ -38,9 +38,7 @@ struct v2f
   float3 worldPos : TEXCOORD9;
   float3 normal : TEXCOORD10;
   float3 objPos : TEXCOORD11;
-  #if defined(SSR_ENABLED)
-  float4 screenPos : TEXCOORD12;
-  #endif
+  float3 centerCamPos : TEXCOORD12;
 
   UNITY_VERTEX_INPUT_INSTANCE_ID
   UNITY_VERTEX_OUTPUT_STEREO
@@ -83,13 +81,11 @@ struct v2f
   float4 tangent : TEXCOORD10;
   float3 worldPos : TEXCOORD11;
   float3 objPos : TEXCOORD12;
+  float3 centerCamPos : TEXCOORD13;
 
-  SHADOW_COORDS(13)
+  SHADOW_COORDS(14)
   #if defined(VERTEXLIGHT_ON)
-  float3 vertexLightColor : TEXCOORD14;
-  #endif
-  #if defined(SSR_ENABLED)
-  float4 screenPos : TEXCOORD15;
+  float3 vertexLightColor : TEXCOORD15;
   #endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID

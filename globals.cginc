@@ -46,6 +46,9 @@ float3 shadowedReflections;
 float3 _ReflShadows;
 float3 _ReflShadowStrength;
 
+float _VRChatMirrorMode;
+float3 _VRChatMirrorCameraPos;
+
 #if defined(_DISCARD)
 float _Discard_Enable_Dynamic;
 #endif
