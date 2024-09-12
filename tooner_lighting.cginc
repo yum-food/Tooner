@@ -62,6 +62,8 @@ v2f vert(appdata v)
   UNITY_TRANSFER_INSTANCE_ID(v, o);
   UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 
+  o.centerCamPos = getCenterCamPos();
+
 #if defined(_GIMMICK_QUANTIZE_LOCATION)
   if (_Gimmick_Quantize_Location_Enable_Dynamic) {
     float q = _Gimmick_Quantize_Location_Precision /
@@ -115,7 +117,7 @@ v2f vert(appdata v)
     float3 n = UnityObjectToWorldNormal(unrotated_n);
 
     float3 origin = mul(unity_ObjectToWorld, float4(0, 0, 0, 1)).xyz;
-    float3 view_dir = i.centerCamPos - origin;
+    float3 view_dir = o.centerCamPos - origin;
     // Project onto xz plane
     n.y = 0;
     view_dir.y = 0;
@@ -205,7 +207,6 @@ v2f vert(appdata v)
   TRANSFER_SHADOW(o);
 #endif
 
-  o.centerCamPos = getCenterCamPos();
   getVertexLightColor(o);
 
   return o;
@@ -1488,7 +1489,7 @@ float4 effect(inout v2f i)
           matcap_emission += lerp(0, matcap, matcap_mask) * _Matcap0Emission;
           break;
         case 1:
-          matcap_emission = lerp(1, matcap, matcap_mask) * _Matcap0Emission;
+          matcap_emission += lerp(0, matcap, matcap_mask) * _Matcap0Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
@@ -1579,7 +1580,7 @@ float4 effect(inout v2f i)
           matcap_emission += lerp(0, matcap, matcap_mask) * _Matcap1Emission;
           break;
         case 1:
-          matcap_emission = lerp(1, matcap, matcap_mask) * _Matcap1Emission;
+          matcap_emission += lerp(0, matcap, matcap_mask) * _Matcap1Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
@@ -1676,7 +1677,7 @@ float4 effect(inout v2f i)
           matcap_emission += lerp(0, matcap, matcap_mask) * _Rim_Lighting0_Emission;
           break;
         case 1:
-          matcap_emission = albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting0_Emission;
+          matcap_emission += albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting0_Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
@@ -1756,7 +1757,7 @@ float4 effect(inout v2f i)
           matcap_emission += lerp(0, matcap, matcap_mask) * _Rim_Lighting1_Emission;
           break;
         case 1:
-          matcap_emission = albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting1_Emission;
+          matcap_emission += albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting1_Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
@@ -1836,7 +1837,7 @@ float4 effect(inout v2f i)
           matcap_emission += lerp(0, matcap, matcap_mask) * _Rim_Lighting2_Emission;
           break;
         case 1:
-          matcap_emission = albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting2_Emission;
+          matcap_emission += albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting2_Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
@@ -1916,7 +1917,7 @@ float4 effect(inout v2f i)
           matcap_emission += lerp(0, matcap, matcap_mask) * _Rim_Lighting3_Emission;
           break;
         case 1:
-          matcap_emission = albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting3_Emission;
+          matcap_emission += albedo.rgb * lerp(0, matcap, matcap_mask) * _Rim_Lighting3_Emission;
           albedo.rgb *= lerp(1, matcap, matcap_mask);
           break;
         case 2:
