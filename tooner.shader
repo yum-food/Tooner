@@ -503,12 +503,12 @@ Shader "yum_food/tooner"
     _ScatterAmbient("_ScatterAmbient", Float) = 0
     _GSAA("_GSAA", Float) = 0
     _GSAAStrength("_GSAAStrength", Float) = 0
-    _WrappingFactor("_WrappingFactor", Float) = 0
+    _WrappingFactor("_WrappingFactor", Range(0,1)) = 0
     _Subsurface("_Subsurface", Float) = 0
-    _SpecularStrength("_SpecularStrength", Float) = 1
-    _FresnelStrength("_FresnelStrength", Float) = 1
+    _SpecularStrength("_SpecularStrength", Range(0,1)) = 1
+    _FresnelStrength("_FresnelStrength", Range(0,1)) = 1
     _UseFresnel("_UseFresnel", Float) = 1
-    _ReflectionStrength("_ReflectionStrength", Float) = 1
+    _ReflectionStrength("_ReflectionStrength", Range(0,1)) = 1
     shadowedReflections("shadowedReflections", Vector) = (0, 0, 0, 0)
     _ReflShadows("_ReflShadows", Vector) = (0, 0, 0, 0)
     _ReflShadowStrength("_ReflShadowStrength", Vector) = (0, 0, 0, 0)
@@ -528,7 +528,7 @@ Shader "yum_food/tooner"
     _Decal1_UI_Show("UI hide", Float) = 0
     _Decal2_UI_Show("UI hide", Float) = 0
     _Decal3_UI_Show("UI hide", Float) = 0
-    _Lighting_UI_Show("UI hide", Float) = 1
+    _Lighting_UI_Show("UI hide", Float) = 0
     _Emission_UI_Show("UI hide", Float) = 0
     _Shading_UI_Show("UI hide", Float) = 0
     _Matcaps_UI_Show("UI hide", Float) = 0
@@ -541,7 +541,7 @@ Shader "yum_food/tooner"
     _Outlines_UI_Show("UI hide", Float) = 0
     _Glitter_UI_Show("UI hide", Float) = 0
     _Gimmicks_UI_Show("UI hide", Float) = 0
-    _Rendering_UI_Show("UI hide", Float) = 1
+    _Rendering_UI_Show("UI hide", Float) = 0
     _Explosion_UI_Show("UI hide", Float) = 0
     _Geometry_Scroll_UI_Show("UI hide", Float) = 0
     _UV_Scroll_UI_Show("UI hide", Float) = 0

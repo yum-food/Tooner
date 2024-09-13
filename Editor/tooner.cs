@@ -1689,15 +1689,21 @@ public class ToonerGUI : ShaderGUI {
     MaterialProperty bc;
 
     bc = FindProperty("_WrappingFactor");
-    editor.FloatProperty(bc, "Wrapping factor");
+    editor.RangeProperty(bc, "Wrapping factor");
     bc = FindProperty("_SpecularStrength");
-    editor.FloatProperty(bc, "Specular strength");
+    editor.RangeProperty(bc, "Specular strength");
     bc = FindProperty("_FresnelStrength");
-    editor.FloatProperty(bc, "Fresnel strength");
+    editor.RangeProperty(bc, "Fresnel strength");
+
     bc = FindProperty("_UseFresnel");
-    editor.FloatProperty(bc, "Use fresnel");
+    bool enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Use fresnel", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
     bc = FindProperty("_ReflectionStrength");
-    editor.FloatProperty(bc, "Reflection strength");
+    editor.RangeProperty(bc, "Reflection strength");
 
     EditorGUI.indentLevel -= 1;
   }
