@@ -3,7 +3,7 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 23
+  // Build nonce: 24
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -239,6 +239,8 @@ Shader "yum_food/tooner"
     [HideInInspector] _DstBlend ("_SrcBlend", Float) = 0
     [HideInInspector] _ZWrite ("_ZWrite", Float) = 1
 
+    _MatcapRL_Center_Eye_Correction("Apply center eye correction to matcaps and rim lighting", Float) = 0
+
     _Matcap0("Matcap", 2D) = "black" {}
     _Matcap0_Mask("Matcap mask", 2D) = "white" {}
     _Matcap0_Mask_Invert("Invert mask", Float) = 0.0
@@ -409,10 +411,6 @@ Shader "yum_food/tooner"
     _LTCGI_SpecularColor("LTCGI specular color", Color) = (1, 1, 1, 1)
     _LTCGI_DiffuseColor("LTCGI diffuse color", Color) = (1, 1, 1, 1)
 
-    _Enable_Tessellation("Enable tessellation", Float) = 0.0
-    _Tess_Factor("Tessellation factor", Range(1, 64)) = 1.0
-    _Tess_Dist_Cutoff("Tessellation distance cutoff", Float) = -1.0
-
     _Cutout_Mode("Cutout rendering mode", Float) = 0.0
     _Render_Queue_Offset("Render queue offset", Integer) = 0
 
@@ -517,6 +515,41 @@ Shader "yum_food/tooner"
 
     _Discard_Enable_Static("Enable discard feature (static)", Float) = 0
     _Discard_Enable_Dynamic("Enable discard feature (dynamic)", Float) = 0
+
+    _PBR_UI_Show("UI hide", Float) = 1
+    _PBR_Overlay_UI_Show("UI hide", Float) = 0
+    _PBR_Overlay0_UI_Show("UI hide", Float) = 0
+    _PBR_Overlay1_UI_Show("UI hide", Float) = 0
+    _PBR_Overlay2_UI_Show("UI hide", Float) = 0
+    _PBR_Overlay3_UI_Show("UI hide", Float) = 0
+    _Clearcoat_UI_Show("UI hide", Float) = 0
+    _Decal_UI_Show("UI hide", Float) = 0
+    _Decal0_UI_Show("UI hide", Float) = 0
+    _Decal1_UI_Show("UI hide", Float) = 0
+    _Decal2_UI_Show("UI hide", Float) = 0
+    _Decal3_UI_Show("UI hide", Float) = 0
+    _Lighting_UI_Show("UI hide", Float) = 1
+    _Emission_UI_Show("UI hide", Float) = 0
+    _Shading_UI_Show("UI hide", Float) = 0
+    _Matcaps_UI_Show("UI hide", Float) = 0
+    _Matcap0_UI_Show("UI hide", Float) = 0
+    _Matcap1_UI_Show("UI hide", Float) = 0
+    _Rim_Lighting0_UI_Show("UI hide", Float) = 0
+    _Rim_Lighting1_UI_Show("UI hide", Float) = 0
+    _Rim_Lighting2_UI_Show("UI hide", Float) = 0
+    _Rim_Lighting3_UI_Show("UI hide", Float) = 0
+    _Outlines_UI_Show("UI hide", Float) = 0
+    _Glitter_UI_Show("UI hide", Float) = 0
+    _Gimmicks_UI_Show("UI hide", Float) = 0
+    _Rendering_UI_Show("UI hide", Float) = 1
+    _Explosion_UI_Show("UI hide", Float) = 0
+    _Geometry_Scroll_UI_Show("UI hide", Float) = 0
+    _UV_Scroll_UI_Show("UI hide", Float) = 0
+    _Hue_Shift_UI_Show("UI hide", Float) = 0
+    _Hue_Shift_OKLAB_UI_Show("UI hide", Float) = 0
+    _Hue_Shift_HSV_UI_Show("UI hide", Float) = 0
+    _Clones_UI_Show("UI hide", Float) = 0
+    _Mochie_UI_Show("UI hide", Float) = 0
   }
   SubShader
   {
@@ -559,6 +592,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType"="Opaque"
@@ -638,6 +672,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

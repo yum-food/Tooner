@@ -106,12 +106,28 @@ public class ToonerGUI : ShaderGUI {
       SetKeyword("_ROUGHNESS_MAP", bct.textureValue);
   }
 
+  bool AddCollapsibleMenu(string name, string matprop) {
+    MaterialProperty bc = FindProperty(matprop + "_UI_Show");
+    bool enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    var fs_orig = EditorStyles.label.fontStyle;
+    EditorStyles.label.fontStyle = FontStyle.Bold;
+    enabled = EditorGUILayout.Toggle(name, enabled);
+    EditorStyles.label.fontStyle = fs_orig;
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    return enabled;
+  }
+
   enum SamplerMode {
     Repeat,
     Clamp,
   };
   void DoPBR() {
-    GUILayout.Label("PBR", EditorStyles.boldLabel);
+    if (!AddCollapsibleMenu("PBR", "_PBR")) {
+      return;
+    }
     EditorGUI.indentLevel += 1;
     {
       DoBaseColor();
@@ -133,6 +149,11 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoClearcoat() {
+    if (!AddCollapsibleMenu($"Clearcoat", $"_Clearcoat")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc;
     bc = FindProperty("_Clearcoat_Enabled");
     bool enabled = bc.floatValue > 1E-6;
@@ -177,6 +198,7 @@ public class ToonerGUI : ShaderGUI {
           EditorGUI.indentLevel -= 1;
         }
     }
+    EditorGUI.indentLevel -= 1;
   }
 
   enum PbrAlbedoMixMode {
@@ -187,8 +209,14 @@ public class ToonerGUI : ShaderGUI {
   };
 
   void DoPBROverlay() {
+    if (!AddCollapsibleMenu($"PBR overlays", $"_PBR_Overlay")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
     for (int i = 0; i < 4; i++) {
-      GUILayout.Label($"PBR overlay {i}", EditorStyles.boldLabel);
+      if (!AddCollapsibleMenu($"PBR overlay {i}", $"_PBR_Overlay{i}")) {
+        continue;
+      }
       EditorGUI.indentLevel += 1;
 
       MaterialProperty bc = FindProperty($"_PBR_Overlay{i}_Enable");
@@ -357,11 +385,18 @@ public class ToonerGUI : ShaderGUI {
       }
       EditorGUI.indentLevel -= 1;
     }
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoDecal() {
+    if (!AddCollapsibleMenu("Decals", "_Decal")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
     for (int i = 0; i < 4; i++) {
-      GUILayout.Label($"Decal {i}", EditorStyles.boldLabel);
+      if (!AddCollapsibleMenu($"Decal {i}", $"_Decal{i}")) {
+        continue;
+      }
       EditorGUI.indentLevel += 1;
 
       MaterialProperty bc = FindProperty($"_Decal{i}_Enable");
@@ -418,6 +453,11 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoEmission() {
+    if (!AddCollapsibleMenu("Emission", "_Emission")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc;
     MaterialProperty bct;
     for (int i = 0; i < 2; i++) {
@@ -447,6 +487,8 @@ public class ToonerGUI : ShaderGUI {
 
     bc = FindProperty("_Global_Emission_Factor");
     editor.FloatProperty(bc, "Global emissions multiplier");
+
+    EditorGUI.indentLevel -= 1;
   }
 
   enum MatcapMode {
@@ -460,7 +502,9 @@ public class ToonerGUI : ShaderGUI {
 
   void DoMatcap() {
     for (int i = 0; i < 2; i++) {
-      GUILayout.Label($"Matcap {i}", EditorStyles.boldLabel);
+      if (!AddCollapsibleMenu($"Matcap {i}", $"_Matcap{i}")) {
+        continue;
+      }
       EditorGUI.indentLevel += 1;
 
       MaterialProperty bc;
@@ -607,7 +651,9 @@ public class ToonerGUI : ShaderGUI {
 
   void DoRimLighting() {
     for (int i = 0; i < 4; i++) {
-      GUILayout.Label($"Rim lighting {i}", EditorStyles.boldLabel);
+      if (!AddCollapsibleMenu($"Rim lighting {i}", $"_Rim_Lighting{i}")) {
+        continue;
+      }
       EditorGUI.indentLevel += 1;
 
       MaterialProperty bc;
@@ -762,6 +808,25 @@ public class ToonerGUI : ShaderGUI {
     }
   }
 
+  void DoMatcapRL() {
+    if (!AddCollapsibleMenu("Matcaps", "_Matcaps")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
+    MaterialProperty bc = FindProperty($"_MatcapRL_Center_Eye_Correction");
+    bool enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Apply center eye correction", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    DoMatcap();
+    DoRimLighting();
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   enum NormalsMode {
     Flat,
     Spherical,
@@ -770,6 +835,11 @@ public class ToonerGUI : ShaderGUI {
   };
 
   void DoShadingMode() {
+    if (!AddCollapsibleMenu("Shading", "_Shading")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc;
 
     bc = FindProperty($"_Mesh_Normals_Mode");
@@ -788,9 +858,15 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Flattening strength");
     }
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoOKLAB() {
+    if (!AddCollapsibleMenu("OKLAB", "_Hue_Shift_OKLAB")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc;
 
     bc = FindProperty("_OKLAB_Enabled");
@@ -830,9 +906,15 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Hue shift");
     }
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoHSV() {
+    if (!AddCollapsibleMenu("HSV", "_Hue_Shift_HSV")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc;
 
 		for (int i = 0; i < 2; i++) {
@@ -874,9 +956,27 @@ public class ToonerGUI : ShaderGUI {
 						"Value shift");
 			}
 		}
+    EditorGUI.indentLevel -= 1;
+  }
+
+  void DoHueShift() {
+    if (!AddCollapsibleMenu("Hue shift", "_Hue_Shift")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
+    DoOKLAB();
+    DoHSV();
+
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoClones() {
+    if (!AddCollapsibleMenu("Clones", "_Clones")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc;
 
     bc = FindProperty("_Clones_Enabled");
@@ -898,48 +998,59 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "x offset");
     }
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoOutlines() {
-      MaterialProperty bc;
+    if (!AddCollapsibleMenu("Outlines", "_Outlines")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+    MaterialProperty bc;
 
-      bc = FindProperty("_Outline_Width");
+    bc = FindProperty("_Outline_Width");
+    editor.RangeProperty(
+        bc,
+        "Outline width");
+    SetKeyword("_OUTLINES", bc.floatValue > 1E-6);
+
+    if (bc.floatValue > 1E-6) {
+      bc = FindProperty("_Outline_Color");
+      editor.ColorProperty(
+          bc,
+          "Outline color (RGBA)");
+
+      bc = FindProperty("_Outline_Emission_Strength");
       editor.RangeProperty(
           bc,
-          "Outline width");
-      SetKeyword("_OUTLINES", bc.floatValue > 1E-6);
+          "Outline emission strength");
 
-      if (bc.floatValue > 1E-6) {
-        bc = FindProperty("_Outline_Color");
-        editor.ColorProperty(
-            bc,
-            "Outline color (RGBA)");
+      bc = FindProperty("_Outline_Mask");
+      editor.TexturePropertySingleLine(
+          MakeLabel(bc, "Outline mask"),
+          bc);
 
-        bc = FindProperty("_Outline_Emission_Strength");
-        editor.RangeProperty(
-            bc,
-            "Outline emission strength");
+      bc = FindProperty("_Outline_Mask_Invert");
+      bool inverted = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      inverted = EditorGUILayout.Toggle("Invert mask", inverted);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = inverted ? 1.0f : 0.0f;
 
-        bc = FindProperty("_Outline_Mask");
-        editor.TexturePropertySingleLine(
-            MakeLabel(bc, "Outline mask"),
-            bc);
-
-        bc = FindProperty("_Outline_Mask_Invert");
-        bool inverted = bc.floatValue > 1E-6;
-        EditorGUI.BeginChangeCheck();
-        inverted = EditorGUILayout.Toggle("Invert mask", inverted);
-        EditorGUI.EndChangeCheck();
-        bc.floatValue = inverted ? 1.0f : 0.0f;
-
-        bc = FindProperty("_Outline_Width_Multiplier");
-        editor.FloatProperty(
-            bc,
-            "Outline width multiplier");
-      }
+      bc = FindProperty("_Outline_Width_Multiplier");
+      editor.FloatProperty(
+          bc,
+          "Outline width multiplier");
+    }
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoGlitter() {
+    if (!AddCollapsibleMenu("Glitter", "_Glitter")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc = FindProperty("_Glitter_Enabled");
     bool enabled = bc.floatValue > 1E-6;
 
@@ -998,9 +1109,15 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "UV select");
     }
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoExplosion() {
+    if (!AddCollapsibleMenu("Explosion", "_Explosion")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc = FindProperty("_Explode_Toggle");
     bool enabled = bc.floatValue > 1E-6;
 
@@ -1041,9 +1158,15 @@ public class ToonerGUI : ShaderGUI {
       bc.floatValue = (float) UnityEngine.Rendering.CullMode.Front;
     }
     */
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoGeoScroll() {
+    if (!AddCollapsibleMenu("Geometry scroll", "_Geometry_Scroll")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc = FindProperty("_Scroll_Toggle");
     bool enabled = bc.floatValue > 1E-6;
 
@@ -1079,9 +1202,15 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Scroll speed");
     }
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoUVScroll() {
+    if (!AddCollapsibleMenu("UV Scroll", "_UV_Scroll")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc = FindProperty("_UVScroll_Enabled");
     bool enabled = bc.floatValue > 1E-6;
 
@@ -1112,29 +1241,7 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bc, "Alpha"),
           bc);
     }
-  }
-
-  void DoTessellation() {
-    MaterialProperty bc = FindProperty("_Enable_Tessellation");
-    bool enabled = bc.floatValue > 1E-6;
-
-    EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
-    EditorGUI.EndChangeCheck();
-    SetKeyword("_TESSELLATION", enabled);
-    bc.floatValue = enabled ? 1.0f : 0.0f;
-
-    if (enabled) {
-      bc = FindProperty("_Tess_Factor");
-      editor.RangeProperty(
-          bc,
-          "Tessellation factor");
-
-      bc = FindProperty("_Tess_Dist_Cutoff");
-      editor.FloatProperty(
-          bc,
-          "Activation distance (negative=always on)");
-    }
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoGimmickFlatColor()
@@ -1549,6 +1656,11 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoGimmicks() {
+    if (!AddCollapsibleMenu("Gimmicks", "_Gimmicks")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     DoGimmickFlatColor();
     DoGimmickQuantizeLocation();
     DoGimmickShearLocation();
@@ -1561,9 +1673,19 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickFaceMeWorldY();
     DoGimmickRorschach();
     DoGimmickMirrorUVFlip();
+    DoClones();
+    DoExplosion();
+    DoGeoScroll();
+
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoMochieParams() {
+    if (!AddCollapsibleMenu("Mochie", "_Mochie")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc;
 
     bc = FindProperty("_WrappingFactor");
@@ -1576,6 +1698,8 @@ public class ToonerGUI : ShaderGUI {
     editor.FloatProperty(bc, "Use fresnel");
     bc = FindProperty("_ReflectionStrength");
     editor.FloatProperty(bc, "Reflection strength");
+
+    EditorGUI.indentLevel -= 1;
   }
 
   enum RenderingMode {
@@ -1592,6 +1716,11 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoRendering() {
+    if (!AddCollapsibleMenu("Rendering", "_Rendering")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     RenderingMode mode = RenderingMode.Opaque;
     if (target.IsKeywordEnabled("_RENDERING_CUTOUT")) {
       mode = RenderingMode.Cutout;
@@ -1772,9 +1901,15 @@ public class ToonerGUI : ShaderGUI {
       }
       EditorGUI.indentLevel -= 1;
     }
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoLighting() {
+    if (!AddCollapsibleMenu("Lighting", "_Lighting")) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
     MaterialProperty bc;
     bc = FindProperty("_Min_Brightness");
     editor.RangeProperty(
@@ -1904,99 +2039,26 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
 #endif
-  }
 
-  void DoLTCGI() {
+    EditorGUI.indentLevel -= 1;
   }
 
   void DoMain() {
     DoPBR();
     DoPBROverlay();
-
-    GUILayout.Label("Clearcoat", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
     DoClearcoat();
-    EditorGUI.indentLevel -= 1;
-
     DoDecal();
-
-    GUILayout.Label("Lighting", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
-    DoLighting();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Emission", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
     DoEmission();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Shading", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
     DoShadingMode();
-    EditorGUI.indentLevel -= 1;
-
-    DoMatcap();
-    DoRimLighting();
-
-    GUILayout.Label("Outlines", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
+    DoMatcapRL();
     DoOutlines();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Glitter", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
     DoGlitter();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Explosion", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
-    DoExplosion();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Geometry scroll", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
-    DoGeoScroll();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("UV scroll", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
     DoUVScroll();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Tessellation", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
-    DoTessellation();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Hue shift (OKLAB)", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
-    DoOKLAB();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Hue shift (HSV)", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
-    DoHSV();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Clones", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
-    DoClones();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Gimmicks", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
+    DoHueShift();
     DoGimmicks();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Mochie", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
     DoMochieParams();
-    EditorGUI.indentLevel -= 1;
-
-    GUILayout.Label("Rendering", EditorStyles.boldLabel);
-    EditorGUI.indentLevel += 1;
+    DoLighting();
     DoRendering();
-    EditorGUI.indentLevel -= 1;
   }
 }
 

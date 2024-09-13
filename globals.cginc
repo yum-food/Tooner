@@ -374,6 +374,9 @@ float _Matcap1_Overwrite_Rim_Lighting_2;
 float _Matcap1_Overwrite_Rim_Lighting_3;
 #endif
 
+
+float _MatcapRL_Center_Eye_Correction;
+
 #if defined(_RIM_LIGHTING0)
 float _Rim_Lighting0_Enabled;
 float _Rim_Lighting0_Mode;

@@ -3,7 +3,7 @@
 My toon shader for VRChat. I use this on my personal and commercial models.
 It's semi optimized and a little scuffed.
 
-Features:
+Features (maybe out of date):
 * PBR
 * Emissions
 * Outlines
@@ -41,6 +41,9 @@ Disclaimers:
 2. I am not a graphics expert.
 3. Stability is a non-goal. Keywords are likely to change in the interest of
    performance and simplicity.
+
+To use it, import the git repo into your project's Assets folder then select
+the shader `yum_food/Tooner`.
 
 ### Strawman FAQ
 

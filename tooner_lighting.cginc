@@ -30,7 +30,7 @@
 void getVertexLightColor(inout v2f i)
 {
   #if defined(VERTEXLIGHT_ON)
-  float3 view_dir = normalize(i.centerCamPos - i.worldPos);
+  float3 view_dir = normalize(_WorldSPaceCameraPos.xyz - i.worldPos);
   uint normals_mode = round(_Mesh_Normals_Mode);
   bool flat = (normals_mode == 0);
   float3 flat_normal = normalize(
@@ -1244,7 +1244,10 @@ float4 pixellate_color(int2 px_res, float2 uv, float4 c)
 
 float4 effect(inout v2f i)
 {
-  const float3 view_dir = normalize(i.centerCamPos - i.worldPos);
+  const float3 view_dir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
+  const float3 view_dir_c = normalize(i.centerCamPos - i.worldPos);
+#define MATCAP_VIEW_DIR() (_MatcapRL_Center_Eye_Correction == 1 ? view_dir_c : view_dir)
+
   // Not necessarily normalized after interpolation.
   i.normal = normalize(i.normal);
   i.tangent.xyz = normalize(i.tangent.xyz);
@@ -1410,7 +1413,7 @@ float4 effect(inout v2f i)
   float matcap_radius;
   {
     const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
-    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
+    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(MATCAP_VIEW_DIR(), 0)));
     const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
     float m = 2.0 * sqrt(
         cam_refl.x * cam_refl.x +
@@ -1459,7 +1462,7 @@ float4 effect(inout v2f i)
           );
   {
     const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
-    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
+    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(MATCAP_VIEW_DIR(), 0)));
     const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
     float m = 2.0 * sqrt(
         cam_refl.x * cam_refl.x +
@@ -1549,7 +1552,7 @@ float4 effect(inout v2f i)
           );
   {
     const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
-    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
+    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(MATCAP_VIEW_DIR(), 0)));
     const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
     float m = 2.0 * sqrt(
         cam_refl.x * cam_refl.x +
@@ -1620,8 +1623,7 @@ float4 effect(inout v2f i)
 
 #if defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1) || defined(_RIM_LIGHTING2) || defined(_RIM_LIGHTING3)
   {
-    // identity: (a, b, c) and (c, c, -(a +b)) are perpendicular to each other
-    float theta = atan2(length(cross(view_dir, normal)), dot(view_dir, normal));
+    float theta = atan2(length(cross(MATCAP_VIEW_DIR(), normal)), dot(MATCAP_VIEW_DIR(), normal));
 #define PI 3.14159265
 
 #if defined(_RIM_LIGHTING0)
