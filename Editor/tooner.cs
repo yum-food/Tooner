@@ -2026,7 +2026,6 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
 
-#if LTCGI_INCLUDED
     bc = FindProperty("_LTCGI_Enabled");
     enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
@@ -2044,7 +2043,6 @@ public class ToonerGUI : ShaderGUI {
       editor.ColorProperty(bc, "Diffuse color (RGB)");
       EditorGUI.indentLevel -= 1;
     }
-#endif
 
     EditorGUI.indentLevel -= 1;
   }
