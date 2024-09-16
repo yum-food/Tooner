@@ -77,7 +77,7 @@ float3 halo00_calc_normal(float3 p, Halo00Params params)
 void __halo00_march(float3 ro, float3 rd, Halo00Params params, out Halo00PBR result)
 {
   float total_distance_traveled = 0.0;
-  const float MINIMUM_HIT_DISTANCE = 0.001;
+  const float MINIMUM_HIT_DISTANCE = 0.0001;
   const float MAXIMUM_TRACE_DISTANCE = 10.0;
   
   ro -= (1 - (params.count % 2)) * params.period * 0.5;
@@ -123,9 +123,13 @@ Halo00PBR halo00_march(float3 worldPos, float2 uv)
   params.count = 5;
   params.uv = uv;
 
-  float3 camera_position = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos.xyz, 1));
-  float3 ro = camera_position;
-  float3 rd = normalize(mul(unity_WorldToObject, float4(worldPos - _WorldSpaceCameraPos.xyz, 1)));
+#define COORD_SCALE 2
+#define SCALEF4(f4, scale) float4((f4).x * (scale), (f4).y * (scale), (f4).z * (scale), (f4).w)
+#define F42OBJ(f4) mul(unity_WorldToObject, (SCALEF4(f4, COORD_SCALE))).xyz
+  float3 cam_pos = F42OBJ(float4(_WorldSpaceCameraPos, 1)).xyz;
+  float3 mesh_pos = F42OBJ(float4(worldPos, 1)).xyz;
+  float3 ro = cam_pos;
+  float3 rd = normalize((mesh_pos - cam_pos).xyz);
 
   __halo00_march(ro, rd, params, result);
 

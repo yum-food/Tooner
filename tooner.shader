@@ -3,12 +3,12 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 24
+  // Build nonce: 28
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
     _Metallic("Metallic", Range(0, 1)) = 0
-    _Roughness("Roughness", Range(0, 1)) = 1
+    _Roughness("Roughness", Range(0, 4)) = 1
     _Roughness_Invert("Roughness invert", Float) = 0
 
     _Clearcoat_Enabled("Clearcoat enabled", Float) = 0
@@ -592,7 +592,6 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
-    /*
     Pass {
       Tags {
         "RenderType"="Opaque"
@@ -672,7 +671,6 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
-    */
   }
   CustomEditor "ToonerGUI"
 }

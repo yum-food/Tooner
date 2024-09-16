@@ -30,7 +30,7 @@
 void getVertexLightColor(inout v2f i)
 {
   #if defined(VERTEXLIGHT_ON)
-  float3 view_dir = normalize(_WorldSPaceCameraPos.xyz - i.worldPos);
+  float3 view_dir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
   uint normals_mode = round(_Mesh_Normals_Mode);
   bool flat = (normals_mode == 0);
   float3 flat_normal = normalize(
