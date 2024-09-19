@@ -3,7 +3,7 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 28
+  // Build nonce: 29
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)

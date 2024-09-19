@@ -36,6 +36,7 @@ void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output) {
 #endif  // __LTCGI
 
 UNITY_DECLARE_TEXCUBE(_Cubemap);
+half4 _Cubemap_HDR;
 float _Cubemap_Limit_To_Metallic;
 
 float getShadowAttenuation(v2f i)
@@ -146,23 +147,32 @@ float3 getIndirectSpecular(float3 view_dir, float3 normal,
   }
 #endif  // UNITY_SPECCUBE_BLENDING
 
-  // Lifted from poi toon shader (MIT).
-  float horizon = min(1 + dot(reflect_dir, normal), 1);
-  specular *= horizon * horizon;
-
 #if defined(_CUBEMAP)
-  float roughness = GetRoughness(smoothness);
+#if 0
   float3 specular_tmp =
     UNITY_SAMPLE_TEXCUBE_LOD(
         _Cubemap,
         reflect_dir,
         roughness * UNITY_SPECCUBE_LOD_STEPS);
+#else
+  env_data.reflUVW = BoxProjection(
+    reflect_dir, worldPos,
+    unity_SpecCube0_ProbePosition,
+    unity_SpecCube0_BoxMin, unity_SpecCube0_BoxMax
+  );
+  float3 specular_tmp = Unity_GlossyEnvironment(
+      UNITY_PASS_TEXCUBE(_Cubemap), _Cubemap_HDR, env_data);
+#endif
   if (_Cubemap_Limit_To_Metallic) {
     specular = lerp(specular, specular_tmp, metallic);
   } else {
     specular = specular_tmp;
   }
 #endif  // _CUBEMAP
+
+  // Lifted from poi toon shader (MIT).
+  float horizon = min(1 + dot(reflect_dir, normal), 1);
+  specular *= horizon * horizon;
 
 #endif  // FORWARD_BASE_PASS
 
