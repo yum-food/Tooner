@@ -1,15 +1,12 @@
-#ifndef __PBR_INC
-#define __PBR_INC
-
-#include "UnityPBSLighting.cginc"
-#include "AutoLight.cginc"
-
 #include "globals.cginc"
 #include "filament_math.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "MochieStandardBRDF.cginc"
 #include "poi.cginc"
+
+#ifndef __PBR_INC
+#define __PBR_INC
 
 #if defined(_LTCGI)
 #include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI_structs.cginc"

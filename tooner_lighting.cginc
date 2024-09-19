@@ -1,7 +1,6 @@
-#ifndef TOONER_LIGHTING
-#define TOONER_LIGHTING
-
 #include "UnityCG.cginc"
+#include "AutoLight.cginc"
+#include "UnityPBSLighting.cginc"
 
 #include "audiolink.cginc"
 #include "clones.cginc"
@@ -19,6 +18,9 @@
 #include "tooner_scroll.cginc"
 #include "trochoid_math.cginc"
 #include "oklab.cginc"
+
+#ifndef TOONER_LIGHTING
+#define TOONER_LIGHTING
 
 // Hacky parameterizable whiteout blending. Probably some big mistakes but it
 // passes the eyeball test.

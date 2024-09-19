@@ -1,7 +1,7 @@
+#include "pema99.cginc"
+
 #ifndef __IQ_SDF_INC
 #define __IQ_SDF_INC
-
-#include "pema99.cginc"
 
 // The MIT License
 // Copyright © 2019-2021 Inigo Quilez

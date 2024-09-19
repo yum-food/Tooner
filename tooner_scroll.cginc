@@ -1,9 +1,9 @@
-#ifndef __TOONER_SCROLL
-#define __TOONER_SCROLL
-
 #include "globals.cginc"
 #include "math.cginc"
 #include "pema99.cginc"
+
+#ifndef __TOONER_SCROLL
+#define __TOONER_SCROLL
 
 #if 0
 float _Scroll_Toggle;

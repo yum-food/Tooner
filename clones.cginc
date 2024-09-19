@@ -1,10 +1,10 @@
+#include "interpolators.cginc"
+#include "globals.cginc"
+
 #ifndef __CLONES_INC
 #define __CLONES_INC
 
 #if defined(_CLONES)
-
-#include "interpolators.cginc"
-#include "globals.cginc"
 
 void add_clones(in v2f clone_verts[3], inout TriangleStream<v2f> tri_out)
 {
@@ -34,6 +34,5 @@ void add_clones(in v2f clone_verts[3], inout TriangleStream<v2f> tri_out)
 }
 
 #endif  // _CLONES
-
 #endif  // __CLONES_INC
 

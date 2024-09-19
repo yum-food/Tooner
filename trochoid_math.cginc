@@ -1,9 +1,9 @@
+#include "globals.cginc"
+
 #ifndef __TROCHOID_MATH
 #define __TROCHOID_MATH
 
 #if defined(_TROCHOID)
-
-#include "globals.cginc"
 
 #define PI 3.14159265
 #define TAU PI * 2.0

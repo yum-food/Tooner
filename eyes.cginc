@@ -1,9 +1,9 @@
-#ifndef __EYES_INC
-#define __EYES_INC
-
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "iq_sdf.cginc"
+
+#ifndef __EYES_INC
+#define __EYES_INC
 
 #if defined(_GIMMICK_EYES_00)
 

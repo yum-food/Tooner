@@ -1,7 +1,6 @@
-#ifndef __TOONER_OUTLINE_PASS
-#define __TOONER_OUTLINE_PASS
-
-#define _OUTLINE_INTERPOLATORS
+#include "UnityCG.cginc"
+#include "AutoLight.cginc"
+#include "UnityPBSLighting.cginc"
 
 #include "audiolink.cginc"
 #include "clones.cginc"
@@ -13,6 +12,11 @@
 #include "trochoid_math.cginc"
 #include "tooner_scroll.cginc"
 #include "UnityCG.cginc"
+
+#ifndef __TOONER_OUTLINE_PASS
+#define __TOONER_OUTLINE_PASS
+
+#define _OUTLINE_INTERPOLATORS
 
 v2f vert(appdata v)
 {

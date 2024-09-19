@@ -1,7 +1,7 @@
+#include "AutoLight.cginc"
+
 #ifndef __GLOBALS_INC
 #define __GLOBALS_INC
-
-#include "AutoLight.cginc"
 
 SamplerState linear_repeat_s;
 SamplerState linear_clamp_s;

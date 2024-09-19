@@ -1,7 +1,7 @@
+#include "AutoLight.cginc"
+
 #ifndef __INTERPOLATORS_INC
 #define __INTERPOLATORS_INC
-
-#include "AutoLight.cginc"
 
 #if defined(_OUTLINE_INTERPOLATORS)
 
@@ -44,7 +44,7 @@ struct v2f
   UNITY_VERTEX_OUTPUT_STEREO
 };
 
-#else
+#else  // _OUTLINE_INTERPOLATORS
 
 struct appdata
 {
@@ -91,7 +91,7 @@ struct v2f
   UNITY_VERTEX_INPUT_INSTANCE_ID
   UNITY_VERTEX_OUTPUT_STEREO
 };
-#endif
 
+#endif  // _OUTLINE_INTERPOLATORS
 #endif  // __INTERPOLATORS_INC
 

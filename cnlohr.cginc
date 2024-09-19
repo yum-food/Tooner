@@ -1,7 +1,7 @@
+#include "globals.cginc"
+
 #ifndef __CNLOHR_INC
 #define __CNLOHR_INC
-
-#include "globals.cginc"
 
 /*
  * MIT License

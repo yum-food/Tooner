@@ -1,7 +1,7 @@
+#include "pema99.cginc"
+
 #ifndef __MATH_INC
 #define __MATH_INC
-
-#include "pema99.cginc"
 
 float4 qmul(float4 q1, float4 q2)
 {

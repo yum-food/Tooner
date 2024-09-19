@@ -1,9 +1,9 @@
-#ifndef __HALOS_INC
-#define __HALOS_INC
-
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "math.cginc"
+
+#ifndef __HALOS_INC
+#define __HALOS_INC
 
 #if defined(_GIMMICK_HALO_00)
 struct Halo00Params {
