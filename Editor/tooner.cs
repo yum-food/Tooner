@@ -447,11 +447,6 @@ public class ToonerGUI : ShaderGUI {
     }
   }
 
-  void DoBrightness() {
-      MaterialProperty bc;
-
-  }
-
   void DoEmission() {
     if (!AddCollapsibleMenu("Emission", "_Emission")) {
       return;

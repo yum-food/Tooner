@@ -8,7 +8,7 @@ Shader "yum_food/tooner"
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
     _Metallic("Metallic", Range(0, 1)) = 0
-    _Roughness("Roughness", Range(0, 4)) = 1
+    _Roughness("Roughness", Range(0, 4)) = 0.5
     _Roughness_Invert("Roughness invert", Float) = 0
 
     _Clearcoat_Enabled("Clearcoat enabled", Float) = 0
@@ -516,40 +516,40 @@ Shader "yum_food/tooner"
     _Discard_Enable_Static("Enable discard feature (static)", Float) = 0
     _Discard_Enable_Dynamic("Enable discard feature (dynamic)", Float) = 0
 
-    _PBR_UI_Show("UI hide", Float) = 1
-    _PBR_Overlay_UI_Show("UI hide", Float) = 0
-    _PBR_Overlay0_UI_Show("UI hide", Float) = 0
-    _PBR_Overlay1_UI_Show("UI hide", Float) = 0
-    _PBR_Overlay2_UI_Show("UI hide", Float) = 0
-    _PBR_Overlay3_UI_Show("UI hide", Float) = 0
-    _Clearcoat_UI_Show("UI hide", Float) = 0
-    _Decal_UI_Show("UI hide", Float) = 0
-    _Decal0_UI_Show("UI hide", Float) = 0
-    _Decal1_UI_Show("UI hide", Float) = 0
-    _Decal2_UI_Show("UI hide", Float) = 0
-    _Decal3_UI_Show("UI hide", Float) = 0
-    _Lighting_UI_Show("UI hide", Float) = 0
-    _Emission_UI_Show("UI hide", Float) = 0
-    _Shading_UI_Show("UI hide", Float) = 0
-    _Matcaps_UI_Show("UI hide", Float) = 0
-    _Matcap0_UI_Show("UI hide", Float) = 0
-    _Matcap1_UI_Show("UI hide", Float) = 0
-    _Rim_Lighting0_UI_Show("UI hide", Float) = 0
-    _Rim_Lighting1_UI_Show("UI hide", Float) = 0
-    _Rim_Lighting2_UI_Show("UI hide", Float) = 0
-    _Rim_Lighting3_UI_Show("UI hide", Float) = 0
-    _Outlines_UI_Show("UI hide", Float) = 0
-    _Glitter_UI_Show("UI hide", Float) = 0
-    _Gimmicks_UI_Show("UI hide", Float) = 0
-    _Rendering_UI_Show("UI hide", Float) = 0
-    _Explosion_UI_Show("UI hide", Float) = 0
-    _Geometry_Scroll_UI_Show("UI hide", Float) = 0
-    _UV_Scroll_UI_Show("UI hide", Float) = 0
-    _Hue_Shift_UI_Show("UI hide", Float) = 0
-    _Hue_Shift_OKLAB_UI_Show("UI hide", Float) = 0
-    _Hue_Shift_HSV_UI_Show("UI hide", Float) = 0
-    _Clones_UI_Show("UI hide", Float) = 0
-    _Mochie_UI_Show("UI hide", Float) = 0
+    _PBR_UI_Show("UI show", Float) = 1
+    _PBR_Overlay_UI_Show("UI show", Float) = 0
+    _PBR_Overlay0_UI_Show("UI show", Float) = 0
+    _PBR_Overlay1_UI_Show("UI show", Float) = 0
+    _PBR_Overlay2_UI_Show("UI show", Float) = 0
+    _PBR_Overlay3_UI_Show("UI show", Float) = 0
+    _Clearcoat_UI_Show("UI show", Float) = 0
+    _Decal_UI_Show("UI show", Float) = 0
+    _Decal0_UI_Show("UI show", Float) = 0
+    _Decal1_UI_Show("UI show", Float) = 0
+    _Decal2_UI_Show("UI show", Float) = 0
+    _Decal3_UI_Show("UI show", Float) = 0
+    _Lighting_UI_Show("UI show", Float) = 0
+    _Emission_UI_Show("UI show", Float) = 0
+    _Shading_UI_Show("UI show", Float) = 0
+    _Matcaps_UI_Show("UI show", Float) = 0
+    _Matcap0_UI_Show("UI show", Float) = 0
+    _Matcap1_UI_Show("UI show", Float) = 0
+    _Rim_Lighting0_UI_Show("UI show", Float) = 0
+    _Rim_Lighting1_UI_Show("UI show", Float) = 0
+    _Rim_Lighting2_UI_Show("UI show", Float) = 0
+    _Rim_Lighting3_UI_Show("UI show", Float) = 0
+    _Outlines_UI_Show("UI show", Float) = 0
+    _Glitter_UI_Show("UI show", Float) = 0
+    _Gimmicks_UI_Show("UI show", Float) = 0
+    _Rendering_UI_Show("UI show", Float) = 0
+    _Explosion_UI_Show("UI show", Float) = 0
+    _Geometry_Scroll_UI_Show("UI show", Float) = 0
+    _UV_Scroll_UI_Show("UI show", Float) = 0
+    _Hue_Shift_UI_Show("UI show", Float) = 0
+    _Hue_Shift_OKLAB_UI_Show("UI show", Float) = 0
+    _Hue_Shift_HSV_UI_Show("UI show", Float) = 0
+    _Clones_UI_Show("UI show", Float) = 0
+    _Mochie_UI_Show("UI show", Float) = 0
   }
   SubShader
   {
