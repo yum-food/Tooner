@@ -580,45 +580,63 @@ float2 get_uv_by_channel(v2f i, uint which_channel) {
 #define GET_SAMPLER_PBR linear_repeat_s
 #elif defined(_PBR_SAMPLER_CLAMP)
 #define GET_SAMPLER_PBR linear_clamp_s
+#else
+#define GET_SAMPLER_PBR linear_clamp_s
 #endif
 #if defined(_PBR_OVERLAY0_SAMPLER_REPEAT)
 #define GET_SAMPLER_OV0 linear_repeat_s
 #elif defined(_PBR_OVERLAY0_SAMPLER_CLAMP)
+#define GET_SAMPLER_OV0 linear_clamp_s
+#else
 #define GET_SAMPLER_OV0 linear_clamp_s
 #endif
 #if defined(_PBR_OVERLAY1_SAMPLER_REPEAT)
 #define GET_SAMPLER_OV1 linear_repeat_s
 #elif defined(_PBR_OVERLAY1_SAMPLER_CLAMP)
 #define GET_SAMPLER_OV1 linear_clamp_s
+#else
+#define GET_SAMPLER_OV1 linear_clamp_s
 #endif
 #if defined(_PBR_OVERLAY2_SAMPLER_REPEAT)
 #define GET_SAMPLER_OV2 linear_repeat_s
 #elif defined(_PBR_OVERLAY2_SAMPLER_CLAMP)
+#define GET_SAMPLER_OV2 linear_clamp_s
+#else
 #define GET_SAMPLER_OV2 linear_clamp_s
 #endif
 #if defined(_PBR_OVERLAY3_SAMPLER_REPEAT)
 #define GET_SAMPLER_OV3 linear_repeat_s
 #elif defined(_PBR_OVERLAY3_SAMPLER_CLAMP)
 #define GET_SAMPLER_OV3 linear_clamp_s
+#else
+#define GET_SAMPLER_OV3 linear_clamp_s
 #endif
 #if defined(_RIM_LIGHTING0_SAMPLER_REPEAT)
 #define GET_SAMPLER_RL0 linear_repeat_s
 #elif defined(_RIM_LIGHTING0_SAMPLER_CLAMP)
+#define GET_SAMPLER_RL0 linear_clamp_s
+#else
 #define GET_SAMPLER_RL0 linear_clamp_s
 #endif
 #if defined(_RIM_LIGHTING1_SAMPLER_REPEAT)
 #define GET_SAMPLER_RL1 linear_repeat_s
 #elif defined(_RIM_LIGHTING1_SAMPLER_CLAMP)
 #define GET_SAMPLER_RL1 linear_clamp_s
+#else
+#define GET_SAMPLER_RL1 linear_clamp_s
 #endif
 #if defined(_RIM_LIGHTING2_SAMPLER_REPEAT)
 #define GET_SAMPLER_RL2 linear_repeat_s
 #elif defined(_RIM_LIGHTING2_SAMPLER_CLAMP)
 #define GET_SAMPLER_RL2 linear_clamp_s
+#else
+#define GET_SAMPLER_RL2 linear_clamp_s
 #endif
 #if defined(_RIM_LIGHTING3_SAMPLER_REPEAT)
 #define GET_SAMPLER_RL3 linear_repeat_s
 #elif defined(_RIM_LIGHTING3_SAMPLER_CLAMP)
+#define GET_SAMPLER_RL3 linear_clamp_s
+#else
 #define GET_SAMPLER_RL3 linear_clamp_s
 #endif
 

@@ -47,7 +47,11 @@ public class ToonerGUI : ShaderGUI {
     }
   }
 
-  void DoBaseColor() {
+  void DoBaseColorLogic() {
+      MaterialProperty bct = FindProperty("_MainTex");
+      SetKeyword("_BASECOLOR_MAP", bct.textureValue);
+  }
+  void DoBaseColorUI() {
       MaterialProperty bc = FindProperty("_Color");
       MaterialProperty bct = FindProperty("_MainTex");
       editor.TexturePropertySingleLine(
@@ -57,10 +61,13 @@ public class ToonerGUI : ShaderGUI {
       if (bct.textureValue) {
         editor.TextureScaleOffsetProperty(bct);
       }
-      SetKeyword("_BASECOLOR_MAP", bct.textureValue);
   }
 
-  void DoNormal() {
+  void DoNormalLogic() {
+      MaterialProperty bct = FindProperty("_NormalTex");
+      SetKeyword("_NORMAL_MAP", bct.textureValue);
+  }
+  void DoNormalUI() {
       MaterialProperty bct = FindProperty("_NormalTex");
       editor.TexturePropertySingleLine(
           MakeLabel(bct, "Normal"),
@@ -69,10 +76,13 @@ public class ToonerGUI : ShaderGUI {
       if (bct.textureValue) {
         editor.TextureScaleOffsetProperty(bct);
       }
-      SetKeyword("_NORMAL_MAP", bct.textureValue);
   }
 
-  void DoMetallic() {
+  void DoMetallicLogic() {
+      MaterialProperty bct = FindProperty("_MetallicTex");
+      SetKeyword("_METALLIC_MAP", bct.textureValue);
+  }
+  void DoMetallicUI() {
       MaterialProperty bc = FindProperty("_Metallic");
       MaterialProperty bct = FindProperty("_MetallicTex");
       editor.TexturePropertySingleLine(
@@ -82,10 +92,13 @@ public class ToonerGUI : ShaderGUI {
       if (bct.textureValue) {
         editor.TextureScaleOffsetProperty(bct);
       }
-      SetKeyword("_METALLIC_MAP", bct.textureValue);
   }
 
-  void DoRoughness() {
+  void DoRoughnessLogic() {
+      MaterialProperty bct = FindProperty("_RoughnessTex");
+      SetKeyword("_ROUGHNESS_MAP", bct.textureValue);
+  }
+  void DoRoughnessUI() {
       MaterialProperty bc = FindProperty("_Roughness");
       MaterialProperty bct = FindProperty("_RoughnessTex");
       editor.TexturePropertySingleLine(
@@ -102,8 +115,6 @@ public class ToonerGUI : ShaderGUI {
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
       }
-
-      SetKeyword("_ROUGHNESS_MAP", bct.textureValue);
   }
 
   bool AddCollapsibleMenu(string name, string matprop) {
@@ -124,16 +135,27 @@ public class ToonerGUI : ShaderGUI {
     Repeat,
     Clamp,
   };
-  void DoPBR() {
+  void DoPBRLogic() {
+      DoBaseColorLogic();
+      DoNormalLogic();
+      DoMetallicLogic();
+      DoRoughnessLogic();
+
+      MaterialProperty bc = FindProperty($"_PBR_Sampler_Mode");
+      SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
+      SetKeyword($"_PBR_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
+      SetKeyword($"_PBR_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
+  }
+  void DoPBRUI() {
     if (!AddCollapsibleMenu("PBR", "_PBR")) {
       return;
     }
     EditorGUI.indentLevel += 1;
     {
-      DoBaseColor();
-      DoNormal();
-      DoMetallic();
-      DoRoughness();
+      DoBaseColorUI();
+      DoNormalUI();
+      DoMetallicUI();
+      DoRoughnessUI();
 
       EditorGUI.BeginChangeCheck();
       MaterialProperty bc = FindProperty($"_PBR_Sampler_Mode");
@@ -142,10 +164,12 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel("Sampler mode"), sampler_mode);
       EditorGUI.EndChangeCheck();
       bc.floatValue = (int) sampler_mode;
-      SetKeyword($"_PBR_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
-      SetKeyword($"_PBR_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
     }
     EditorGUI.indentLevel -= 1;
+  }
+  void DoPBR() {
+    DoPBRLogic();
+    DoPBRUI();
   }
 
   void DoClearcoat() {
