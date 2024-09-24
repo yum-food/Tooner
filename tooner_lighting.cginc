@@ -183,12 +183,17 @@ v2f vert(appdata v)
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv0 = v.uv0;
   o.uv1 = v.uv1;
+#if defined(_WORLD_INTERPOLATORS)
+  o.uv2 = v.uv2 * unity_LightmapST.xy + unity_LightmapST.zw;
+  UNITY_TRANSFER_LIGHTING(o, v.uv2);
+#else
   o.uv2 = v.uv2;
   o.uv3 = v.uv3;
   o.uv4 = v.uv4;
   o.uv5 = v.uv5;
   o.uv6 = v.uv6;
   o.uv7 = v.uv7;
+#endif
 #if defined(_MIRROR_UV_FLIP)
   if (_Mirror_UV_Flip_Enable_Dynamic) {
     bool in_mirror = isInMirror();
@@ -201,9 +206,6 @@ v2f vert(appdata v)
     o.uv6.x = lerp(o.uv6.x, 1 - o.uv6.x, in_mirror);
     o.uv7.x = lerp(o.uv7.x, 1 - o.uv7.x, in_mirror);
   }
-#endif
-#if defined(LIGHTMAP_ON)
-  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif
 #if defined(SHADOWS_SCREEN)
   TRANSFER_SHADOW(o);
@@ -550,6 +552,7 @@ float2 get_uv_by_channel(v2f i, uint which_channel) {
     case 1:
       return i.uv1;
       break;
+#if !defined(_WORLD_INTERPOLATORS)
     case 2:
       return i.uv2;
       break;
@@ -568,6 +571,7 @@ float2 get_uv_by_channel(v2f i, uint which_channel) {
     case 7:
       return i.uv7;
       break;
+#endif
     default:
       return 0;
       break;
@@ -577,11 +581,11 @@ float2 get_uv_by_channel(v2f i, uint which_channel) {
 #define UV_SCOFF(i, tex_st, which_channel) get_uv_by_channel(i, round(which_channel)) * (tex_st).xy + (tex_st).zw
 
 #if defined(_PBR_SAMPLER_REPEAT)
-#define GET_SAMPLER_PBR linear_repeat_s
+#define GET_SAMPLER_PBR bilinear_repeat_s
 #elif defined(_PBR_SAMPLER_CLAMP)
-#define GET_SAMPLER_PBR linear_clamp_s
+#define GET_SAMPLER_PBR bilinear_clamp_s
 #else
-#define GET_SAMPLER_PBR linear_clamp_s
+#define GET_SAMPLER_PBR bilinear_clamp_s
 #endif
 #if defined(_PBR_OVERLAY0_SAMPLER_REPEAT)
 #define GET_SAMPLER_OV0 linear_repeat_s
@@ -1270,7 +1274,8 @@ float4 effect(inout v2f i)
 
   // Not necessarily normalized after interpolation.
   i.normal = normalize(i.normal);
-  i.tangent.xyz = normalize(i.tangent.xyz);
+  i.tangent.xyz = normalize(i.tangent.xyz - i.normal * dot(i.tangent.xyz, i.normal));
+  //i.tangent.xyz = normalize(i.tangent.xyz);
 
 #if defined(_TROCHOID)
   {
@@ -1350,8 +1355,8 @@ float4 effect(inout v2f i)
   // Use UVs to smoothly blend between fully detailed normals when close up and
   // flat normals when far away. If we don't do this, then we see moire effects
   // on e.g. striped normal maps.
-  float3 raw_normal = UnpackScaleNormal(_NormalTex.SampleBias(GET_SAMPLER_PBR,
-        UV_SCOFF(i, _NormalTex_ST, 0), _Global_Sample_Bias),
+  float3 raw_normal = UnpackScaleNormal(_BumpMap.SampleBias(GET_SAMPLER_PBR,
+        UV_SCOFF(i, _BumpMap_ST, 0), _Global_Sample_Bias),
       _Tex_NormalStr);
 #else
   float3 raw_normal = UnpackNormal(float4(0.5, 0.5, 1, 1));
@@ -1362,8 +1367,8 @@ float4 effect(inout v2f i)
   float3 binormal = CreateBinormal(i.normal, i.tangent.xyz, i.tangent.w);
   // normalize is not necessary; result is already normalized
 	float3 normal = float3(
-		raw_normal.x * i.tangent +
-		raw_normal.y * binormal +
+		raw_normal.x * normalize(i.tangent) +
+		raw_normal.y * normalize(binormal) +
 		raw_normal.z * i.normal
 	);
 
@@ -1387,12 +1392,13 @@ float4 effect(inout v2f i)
 
 #if defined(_METALLIC_MAP)
   float metallic = _MetallicTex.SampleBias(GET_SAMPLER_PBR,
-      UV_SCOFF(i, _MetallicTex_ST, 0), _Global_Sample_Bias);
+      UV_SCOFF(i, _MetallicTex_ST, 0), _Global_Sample_Bias)[round(_MetallicTexChannel)];
 #else
   float metallic = _Metallic;
 #endif
 #if defined(_ROUGHNESS_MAP)
-  float roughness = _RoughnessTex.SampleBias(GET_SAMPLER_PBR, UV_SCOFF(i, _RoughnessTex_ST, 0), _Global_Sample_Bias);
+  float roughness = _RoughnessTex.SampleBias(GET_SAMPLER_PBR,
+      UV_SCOFF(i, _RoughnessTex_ST, 0), _Global_Sample_Bias)[round(_RoughnessTexChannel)];
   if (_Roughness_Invert) {
     roughness = 1 - roughness;
   }
@@ -2087,17 +2093,25 @@ float4 effect(inout v2f i)
 #if defined(_GLITTER)
   result.rgb += glitter_color_unlit * _Glitter_Brightness;
 #endif
+  // This version exists for compatibility with the Bakery lightmapper. We
+  // specifically need to expose _EmissionMap and _EmissionColor.
+#if defined(_EMISSION)
+  {
+    float3 emission = _EmissionMap.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+    result.rgb += emission * _EmissionColor * _Global_Emission_Factor;
+  }
+#endif
 #if defined(_EMISSION0)
   {
-    float emission = _Emission0Tex.SampleBias(linear_repeat_s, get_uv_by_channel(i, round(_Emission0_UV_Select)), _Global_Sample_Bias);
-    result.rgb += albedo.rgb * emission * _Emission0Strength *
+    float3 emission = _Emission0Tex.SampleBias(linear_repeat_s, get_uv_by_channel(i, round(_Emission0_UV_Select)), _Global_Sample_Bias);
+    result.rgb += emission * _Emission0Color *
       _Global_Emission_Factor * _Emission0Multiplier;
   }
 #endif
 #if defined(_EMISSION1)
   {
-    float emission = _Emission1Tex.SampleBias(linear_repeat_s, get_uv_by_channel(i, round(_Emission1_UV_Select)), _Global_Sample_Bias);
-    result.rgb += albedo.rgb * emission * _Emission1Strength *
+    float3 emission = _Emission1Tex.SampleBias(linear_repeat_s, get_uv_by_channel(i, round(_Emission1_UV_Select)), _Global_Sample_Bias);
+    result.rgb += emission * _Emission1Color *
       _Global_Emission_Factor * _Emission1Multiplier;
   }
 #endif
@@ -2123,6 +2137,8 @@ float4 effect(inout v2f i)
 
 fixed4 frag(v2f i) : SV_Target
 {
+  UNITY_APPLY_DITHER_CROSSFADE(i.pos.xy);
+  UNITY_SETUP_INSTANCE_ID(i);
   UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
   return effect(i);
 }

@@ -8,6 +8,7 @@
 #pragma shader_feature_local _ _PBR_SAMPLER_REPEAT
 #pragma shader_feature_local _ _PBR_SAMPLER_CLAMP
 #pragma shader_feature_local _ _CUBEMAP
+#pragma shader_feature_local _ _EMISSION
 #pragma shader_feature_local _ _EMISSION0
 #pragma shader_feature_local _ _EMISSION1
 #pragma shader_feature_local _ _RENDERING_CUTOUT
@@ -152,6 +153,8 @@
 #pragma shader_feature_local _ _CLEARCOAT_MASK2
 #pragma shader_feature_local _ _PROXIMITY_DIMMING
 #pragma shader_feature_local _ _DISCARD
+#pragma shader_feature_local _ _BRIGHTNESS_CLAMP
+#pragma shader_feature_local _ _WORLD_INTERPOLATORS
 
 #endif  // __FEATURE_MACROS_INC
 

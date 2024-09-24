@@ -52,6 +52,36 @@ float GSAARoughness(float3 normal, float roughness){
   return max(roughness, pow(base, 0.333)*_GSAAStrength);
 }
 
+float3 Desaturate(float3 col){
+	return dot(col, float3(0.3, 0.59, 0.11));
+}
+
+float3 GetContrast(float3 col, float contrast){
+    return lerp(float3(0.5,0.5,0.5), col, contrast);
+}
+
+float oetf_sRGB_scalar(float L) {
+	float V = 1.055 * (pow(L, 1.0 / 2.4)) - 0.055;
+	if (L <= 0.0031308)
+		V = L * 12.92;
+	return V;
+}
+
+float3 oetf_sRGB(float3 L) {
+	return float3(oetf_sRGB_scalar(L.r), oetf_sRGB_scalar(L.g), oetf_sRGB_scalar(L.b));
+}
+
+float eotf_sRGB_scalar(float V) {
+	float L = pow((V + 0.055) / 1.055, 2.4);
+	if (V <= oetf_sRGB_scalar(0.0031308))
+		L = V / 12.92;
+	return L;
+}
+
+float3 GetHDR(float3 rgb) {
+	return float3(eotf_sRGB_scalar(rgb.r), eotf_sRGB_scalar(rgb.g), eotf_sRGB_scalar(rgb.b));
+}
+
 half4 BRDF1_Mochie_PBS (
     half3 diffColor, half3 specColor, half oneMinusReflectivity, half smoothness,
     half3 normal, half3 viewDir, half3 worldPos, half2 screenUVs, half4 screenPos,

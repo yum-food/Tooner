@@ -5,6 +5,8 @@
 
 SamplerState linear_repeat_s;
 SamplerState linear_clamp_s;
+SamplerState bilinear_repeat_s;
+SamplerState bilinear_clamp_s;
 
 float4 _Color;
 float _Metallic;
@@ -43,8 +45,12 @@ float _FresnelStrength;
 float _UseFresnel;
 float _ReflectionStrength;
 float3 shadowedReflections;
-float3 _ReflShadows;
-float3 _ReflShadowStrength;
+int _ReflShadows;
+float _ReflShadowStrength;
+float			_BrightnessReflShad;
+float			_ContrastReflShad;
+float			_HDRReflShad;
+float3			_TintReflShad;
 
 float _VRChatMirrorMode;
 float3 _VRChatMirrorCameraPos;
@@ -89,11 +95,13 @@ float _SSRHeight;
 texture2D _MainTex;
 float4 _MainTex_ST;
 #endif
-texture2D _NormalTex;
-float4 _NormalTex_ST;
+texture2D _BumpMap;
+float4 _BumpMap_ST;
 texture2D _MetallicTex;
+float _MetallicTexChannel;
 float4 _MetallicTex_ST;
 texture2D _RoughnessTex;
+float _RoughnessTexChannel;
 float4 _RoughnessTex_ST;
 
 #if defined(_PBR_OVERLAY0)
@@ -257,15 +265,19 @@ float _Decal3_Angle;
 float _Decal3_UV_Select;
 #endif
 
+#if defined(_EMISSION)
+texture2D _EmissionMap;
+float3 _EmissionColor;
+#endif
 #if defined(_EMISSION0)
 texture2D _Emission0Tex;
-float _Emission0Strength;
+float3 _Emission0Color;
 float _Emission0Multiplier;
 float _Emission0_UV_Select;
 #endif
 #if defined(_EMISSION1)
 texture2D _Emission1Tex;
-float _Emission1Strength;
+float3 _Emission1Color;
 float _Emission1Multiplier;
 float _Emission1_UV_Select;
 #endif

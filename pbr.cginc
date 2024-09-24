@@ -82,6 +82,43 @@ float3 getDirectLightColor()
   return _LightColor0.rgb;
 }
 
+#if defined(_WORLD_INTERPOLATORS)
+UnityGI getBakedGI(v2f i, float3 view_dir,
+    UnityLight direct_light, float atten, float ao, float3 normal,
+    float smoothness, float3 specular_tint) {
+  UnityGIInput d;
+  d.light = direct_light;
+  d.worldPos = i.worldPos;
+  d.worldViewDir = view_dir;
+  d.atten = atten;
+
+  d.ambient = 0;
+  d.lightmapUV.xy = i.uv2;
+  d.lightmapUV.zw = 0;
+
+  d.probeHDR[0] = unity_SpecCube0_HDR;
+  d.probeHDR[1] = unity_SpecCube1_HDR;
+#if defined(UNITY_SPECCUBE_BLENDING) || defined(UNITY_SPECCUBE_BOX_PROJECTION)
+  d.boxMin[0] = unity_SpecCube0_BoxMin; // .w holds lerp value for blending
+#endif
+#ifdef UNITY_SPECCUBE_BOX_PROJECTION
+  d.boxMax[0] = unity_SpecCube0_BoxMax;
+  d.probePosition[0] = unity_SpecCube0_ProbePosition;
+  d.boxMax[1] = unity_SpecCube1_BoxMax;
+  d.boxMin[1] = unity_SpecCube1_BoxMin;
+  d.probePosition[1] = unity_SpecCube1_ProbePosition;
+#endif
+
+  Unity_GlossyEnvironmentData g = UnityGlossyEnvironmentSetup(smoothness, -view_dir, normal, specular_tint);
+  // Replace the reflUVW if it has been compute in Vertex shader. Note: the compiler will optimize the calcul in UnityG            lossyEnvironmentSetup itself
+#if UNITY_STANDARD_SIMPLE
+  g.reflUVW = reflUVW;
+#endif
+
+  return UnityGlobalIllumination (d, ao, normal, g);
+}
+#endif  // _WORLD_INTERPOLATORS
+
 float GetRoughness(float smoothness) {
   float r = 1 - smoothness;
   r *= 1.7 - 0.7 * r;
@@ -217,11 +254,7 @@ float4 getLitColor(
 
 	UnityIndirect indirect_light;
   vertexLightColor *= _Vertex_Lighting_Factor;
-  indirect_light.diffuse = getIndirectDiffuse(vertexLightColor, normal);
-  indirect_light.specular = getIndirectSpecular(view_dir, normal, smoothness,
-      metallic, worldPos, uv);
 
-  float attenuation;
   UnityLight direct_light;
   direct_light.dir = getDirectLightDirection(i);
   direct_light.ndotl = DotClamped(normal, direct_light.dir);
@@ -230,6 +263,25 @@ float4 getLitColor(
   direct_light.color = getPoiLightingDirect(normal);
 #else
   direct_light.color = getDirectLightColor();
+#endif
+
+#if defined(_WORLD_INTERPOLATORS)
+  UNITY_LIGHT_ATTENUATION(shadow_attenuation, i, i.worldPos);
+#else
+  float shadow_attenuation = getShadowAttenuation(i);
+#endif
+
+#if defined(_WORLD_INTERPOLATORS)
+  {
+    UnityGI gi = getBakedGI(i, view_dir, direct_light, shadow_attenuation, ao,
+        normal, smoothness, specular_tint);
+    direct_light = gi.light;
+    indirect_light = gi.indirect;
+  }
+#else
+  indirect_light.diffuse = getIndirectDiffuse(vertexLightColor, normal);
+  indirect_light.specular = getIndirectSpecular(view_dir, normal, smoothness,
+      metallic, worldPos, uv);
 #endif
 
   if (normals_mode == 0) {
@@ -268,10 +320,14 @@ float4 getLitColor(
       indirect_light.diffuse[2]);
   // Do this to avoid division by 0. If both light sources are black,
   // sum_brightness could be 0;
+#if defined(_BRIGHTNESS_CLAMP)
   brightnesses = max(brightnesses, min(_Min_Brightness, .001));
+#endif
   float sum_brightness = brightnesses[0] + brightnesses[1];
   float2 brightness_proportions = brightnesses / sum_brightness;
+#if defined(_BRIGHTNESS_CLAMP)
   sum_brightness = clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
+#endif
   direct_light.color[2] = sum_brightness * brightness_proportions[0];
   indirect_light.diffuse[2] = sum_brightness * brightness_proportions[1];
 
@@ -299,7 +355,9 @@ float4 getLitColor(
   indirect_light.diffuse[2] *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
 
   // Specular has to be clamped separately to avoid artifacting.
+#if defined(_BRIGHTNESS_CLAMP)
   indirect_light.specular[2] = clamp(indirect_light.specular[2], _Min_Brightness, _Max_Brightness);
+#endif
 
   direct_light.color = HSVtoRGB(direct_light.color);
   indirect_light.specular = HSVtoRGB(indirect_light.specular);
@@ -310,8 +368,6 @@ float4 getLitColor(
   float3 direct_color = direct_light.color;
   direct_light.color *= ao;
 
-  // Apply shadows
-  float shadow_attenuation = getShadowAttenuation(i);
   direct_light.color *= shadow_attenuation;
 
   float2 screenUVs = 0;
@@ -331,7 +387,7 @@ float4 getLitColor(
       /*thickness=*/1,
       /*ssColor=*/0,
       shadow_attenuation,
-      /*lightmapUV=*/0,
+      i.uv2,
       vertexLightColor,
       direct_light,
       indirect_light);

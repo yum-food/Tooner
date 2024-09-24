@@ -79,16 +79,18 @@ v2f vert(appdata v)
   o.objPos = objPos;
   o.pos = UnityObjectToClipPos(objPos);
   o.normal = UnityObjectToWorldNormal(v.normal);
-  o.uv0 = v.uv0.xy;
+  o.uv0 = v.uv0;
   o.uv1 = v.uv1;
+#if defined(_WORLD_INTERPOLATORS)
+  o.uv2 = v.uv2 * unity_LightmapST.xy + unity_LightmapST.zw;
+  UNITY_TRANSFER_LIGHTING(o, v.uv1);
+#else
   o.uv2 = v.uv2;
   o.uv3 = v.uv3;
   o.uv4 = v.uv4;
   o.uv5 = v.uv5;
   o.uv6 = v.uv6;
   o.uv7 = v.uv7;
-#if defined(LIGHTMAP_ON)
-  o.lmuv = v.uv1 * unity_LightmapST.xy + unity_LightmapST.zw;
 #endif
 
   o.centerCamPos = getCenterCamPos();

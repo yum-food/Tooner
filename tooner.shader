@@ -19,10 +19,12 @@ Shader "yum_food/tooner"
     _Clearcoat_Mask2("Clearcoat mask 2", 2D) = "white" {}
     _Clearcoat_Mask2_Invert("Clearcoat mask 2 invert", Float) = 0
 
-    [NoScaleOffset] _MainTex("Base color", 2D) = "white" {}
-    [NoScaleOffset] _NormalTex("Normal", 2D) = "bump" {}
-    [NoScaleOffset] _MetallicTex("Metallic", 2D) = "white" {}
-    [NoScaleOffset] _RoughnessTex("Roughness", 2D) = "black" {}
+    _MainTex("Base color", 2D) = "white" {}
+    [Normal] _BumpMap("Normal", 2D) = "bump" {}
+    _MetallicTex("Metallic", 2D) = "white" {}
+    _MetallicTexChannel("Metallic", Range(0, 3)) = 2
+    _RoughnessTex("Roughness", 2D) = "black" {}
+    _RoughnessTexChannel("Roughness", Range(0, 3)) = 1
     _PBR_Sampler_Mode("Sampler mode", Range(0,1)) = 0
 
     _PBR_Overlay0_Enable("Enable PBR overlay", Float) = 0.0
@@ -153,12 +155,15 @@ Shader "yum_food/tooner"
     _Decal3_Angle("Emission strength", Range(0,1)) = 0
     _Decal3_UV_Select("UV channel", Range(0,7)) = 0
 
+    [NoScaleOffset] _EmissionMap("Emission map", 2D) = "black" {}
+    _EmissionColor("Emission color", Color) = (0, 0, 0)
+
     [NoScaleOffset] _Emission0Tex("Emission map", 2D) = "black" {}
-    _Emission0Strength("Emission strength", Range(0, 10)) = 0
+    _Emission0Color("Emission color", Color) = (0, 0, 0)
     _Emission0Multiplier("Emission multiplier", Range(0, 2)) = 1
     _Emission0_UV_Select("UV channel", Range(0,7)) = 0
     [NoScaleOffset] _Emission1Tex("Emission map", 2D) = "black" {}
-    _Emission1Strength("Emission strength", Range(0, 10)) = 0
+    _Emission1Color("Emission color", Color) = (0, 0, 0)
     _Emission1Multiplier("Emission multiplier", Range(0, 2)) = 1
     _Emission1_UV_Select("UV channel", Range(0,7)) = 0
     _Global_Emission_Factor("Global emission factor", Float) = 1
@@ -174,6 +179,8 @@ Shader "yum_food/tooner"
     _Indirect_Specular_Lighting_Factor2("Indirect specular lighting factor", Range(0, 5)) = 1
     _Indirect_Diffuse_Lighting_Factor("Indirect diffuse lighting factor", Range(0, 5)) = 1
     _Reflection_Probe_Saturation("Reflection probe saturation", Range(0, 1)) = 1
+    _Enable_World_Interpolators("Enable world interpolators", Float) = 0
+    _Enable_Brightness_Clamp("Enable brightness clamp", Float) = 1
     _Min_Brightness("Min brightness", Range(0, 1)) = 0
     _Max_Brightness("Max brightness", Range(0, 1.5)) = 1
     _Mesh_Normal_Strength("Mesh normal strength", Range(0, 10)) = 1

@@ -64,11 +64,11 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoNormalLogic() {
-      MaterialProperty bct = FindProperty("_NormalTex");
+      MaterialProperty bct = FindProperty("_BumpMap");
       SetKeyword("_NORMAL_MAP", bct.textureValue);
   }
   void DoNormalUI() {
-      MaterialProperty bct = FindProperty("_NormalTex");
+      MaterialProperty bct = FindProperty("_BumpMap");
       editor.TexturePropertySingleLine(
           MakeLabel(bct, "Normal"),
           bct,
@@ -91,6 +91,9 @@ public class ToonerGUI : ShaderGUI {
           bc);
       if (bct.textureValue) {
         editor.TextureScaleOffsetProperty(bct);
+
+        bc = FindProperty("_MetallicTexChannel");
+        editor.RangeProperty(bc, "Channel");
       }
   }
 
@@ -107,6 +110,9 @@ public class ToonerGUI : ShaderGUI {
           bc);
       if (bct.textureValue) {
         editor.TextureScaleOffsetProperty(bct);
+
+        bc = FindProperty("_RoughnessTexChannel");
+        editor.RangeProperty(bc, "Channel");
 
         bc = FindProperty("_Roughness_Invert");
         bool enabled = bc.floatValue > 1E-6;
@@ -479,19 +485,31 @@ public class ToonerGUI : ShaderGUI {
 
     MaterialProperty bc;
     MaterialProperty bct;
+    {
+      EditorGUILayout.LabelField($"Base slot", EditorStyles.boldLabel);
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty($"_EmissionColor");
+      bct = FindProperty($"_EmissionMap");
+      editor.TexturePropertyWithHDRColor(
+          MakeLabel(bct, "Emission (RGB)"),
+          bct, bc, false);
+      SetKeyword($"_EMISSION", bct.textureValue);
+
+      EditorGUI.indentLevel -= 1;
+    }
     for (int i = 0; i < 2; i++) {
-      EditorGUILayout.LabelField($"Slot {i}", EditorStyles.boldLabel);
+      EditorGUILayout.LabelField($"Extra slot {i}", EditorStyles.boldLabel);
       EditorGUI.indentLevel += 1;
       {
-        bc = FindProperty($"_Emission{i}Tex");
-        bct = FindProperty($"_Emission{i}Strength");
-        editor.TexturePropertySingleLine(
-            MakeLabel(bct, "Map"),
-            bc,
-            bct);
-        SetKeyword($"_EMISSION{i}", bc.textureValue);
+        bc = FindProperty($"_Emission{i}Color");
+        bct = FindProperty($"_Emission{i}Tex");
+        editor.TexturePropertyWithHDRColor(
+            MakeLabel(bct, "Emission (RGB)"),
+            bct, bc, false);
+        SetKeyword($"_EMISSION{i}", bct.textureValue);
 
-        if (bc.textureValue) {
+        if (bct.textureValue) {
           bc = FindProperty($"_Emission{i}_UV_Select");
           editor.RangeProperty(
               bc,
@@ -1936,15 +1954,37 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc;
-    bc = FindProperty("_Min_Brightness");
-    editor.RangeProperty(
-        bc,
-        "Min brightness");
 
-    bc = FindProperty("_Max_Brightness");
-    editor.RangeProperty(
-        bc,
-        "Max brightness");
+    bc = FindProperty("_Enable_World_Interpolators");
+    bool world_interp = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    world_interp = EditorGUILayout.Toggle("World interpolators",
+        world_interp);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = world_interp ? 1.0f : 0.0f;
+    SetKeyword("_WORLD_INTERPOLATORS", world_interp);
+
+    bc = FindProperty("_Enable_Brightness_Clamp");
+    bool brightness_clamp_enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    brightness_clamp_enabled = EditorGUILayout.Toggle("Clamp brightness",
+        brightness_clamp_enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = brightness_clamp_enabled ? 1.0f : 0.0f;
+    SetKeyword("_BRIGHTNESS_CLAMP", brightness_clamp_enabled);
+    if (brightness_clamp_enabled) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Min_Brightness");
+      editor.RangeProperty(
+          bc,
+          "Min brightness");
+
+      bc = FindProperty("_Max_Brightness");
+      editor.RangeProperty(
+          bc,
+          "Max brightness");
+      EditorGUI.indentLevel -= 1;
+    }
 
     bc = FindProperty("_Ambient_Occlusion");
     editor.TexturePropertySingleLine(
@@ -2061,6 +2101,15 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty("_LTCGI_DiffuseColor");
       editor.ColorProperty(bc, "Diffuse color (RGB)");
       EditorGUI.indentLevel -= 1;
+    }
+
+    EditorGUI.BeginChangeCheck();
+    editor.LightmapEmissionProperty();
+    if (EditorGUI.EndChangeCheck()) {
+      foreach (Material m in editor.targets) {
+        m.globalIlluminationFlags &=
+          ~MaterialGlobalIlluminationFlags.EmissiveIsBlack;
+      }
     }
 
     EditorGUI.indentLevel -= 1;

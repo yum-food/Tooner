@@ -12,11 +12,15 @@ struct appdata
   float2 uv0 : TEXCOORD0;
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
+#if defined(_WORLD_INTERPOLATORS)
+  UNITY_LIGHTING_COORDS(3, 4)
+#else
   float2 uv3 : TEXCOORD3;
   float2 uv4 : TEXCOORD4;
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
+#endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -27,14 +31,16 @@ struct v2f
   float2 uv0 : TEXCOORD0;
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
+#if defined(_WORLD_INTERPOLATORS)
+  UNITY_LIGHTING_COORDS(2, 3)
+#else
   float2 uv3 : TEXCOORD3;
   float2 uv4 : TEXCOORD4;
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
-  #if defined(LIGHTMAP_ON)
-  float2 lmuv : TEXCOORD8;
-  #endif
+  SHADOW_COORDS(8)
+#endif
   float3 worldPos : TEXCOORD9;
   float3 normal : TEXCOORD10;
   float3 objPos : TEXCOORD11;
@@ -52,11 +58,15 @@ struct appdata
   float2 uv0 : TEXCOORD0;
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
+#if defined(_WORLD_INTERPOLATORS)
+  UNITY_LIGHTING_COORDS(2, 3)
+#else
   float2 uv3 : TEXCOORD3;
   float2 uv4 : TEXCOORD4;
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
+#endif
   float3 normal : NORMAL;
   float4 tangent : TANGENT;
 
@@ -69,23 +79,24 @@ struct v2f
   float2 uv0 : TEXCOORD0;
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
+#if defined(_WORLD_INTERPOLATORS)
+  UNITY_LIGHTING_COORDS(2, 3)
+#else
   float2 uv3 : TEXCOORD3;
   float2 uv4 : TEXCOORD4;
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
-  #if defined(LIGHTMAP_ON)
-  float2 lmuv : TEXCOORD8;
-  #endif
+  SHADOW_COORDS(8)
+#endif
   float3 normal : TEXCOORD9;
   float4 tangent : TEXCOORD10;
   float3 worldPos : TEXCOORD11;
   float3 objPos : TEXCOORD12;
   float3 centerCamPos : TEXCOORD13;
 
-  SHADOW_COORDS(14)
   #if defined(VERTEXLIGHT_ON)
-  float3 vertexLightColor : TEXCOORD15;
+  float3 vertexLightColor : TEXCOORD14;
   #endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID
