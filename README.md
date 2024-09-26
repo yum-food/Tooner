@@ -3,6 +3,8 @@
 My toon shader for VRChat. I use this on my personal and commercial models.
 It's semi optimized and a little scuffed.
 
+![Bistro demo](Textures/bistro_demo.png)
+
 Features (maybe out of date):
 * PBR
 * Emissions
@@ -41,6 +43,8 @@ Disclaimers:
 2. I am not a graphics expert.
 3. Stability is a non-goal. Keywords are likely to change in the interest of
    performance and simplicity.
+4. This is not a supported product. Support is only provided when used in
+   conjunction with one of my commercially available products.
 
 To use it, import the git repo into your project's Assets folder then select
 the shader `yum_food/Tooner`.
@@ -55,25 +59,21 @@ too fucking huge and complicated to fit my needs.
 
 2. Does it work?
 
-I think so?
+Yes.
 
 3. Is it optimized?
 
-Sort of.
+Somewhat.
 
 I use static keywords on every feature, so you don't pay for anything you don't
-use. I use branchless programming wherever appropriate. Dynamic branches are
-only used where I either know they won't cause thread divergence, or where they
-can't be avoided.
+use. I use branchless programming wherever appropriate. I do make extensive use
+of dynamic branching where I know it won't induce thread divergence.
 
-I'd like to strike a balance between performance and readability. Since it's
-mostly for *my* use, I don't feel a need to make it totally optimal.
+The goal is to strike a balance between performance and readability. Golfing
+away nanoseconds is not something I want to spend my limited time on Earth
+doing.
 
 4. Demos?
 
-This avatar uses it: [gumroad](https://yumfood.gumroad.com/l/lychee).
-
-I'm working on a world but haven't published yet.
-
-Will update this section with real demos later.
+TODO. See the screenshot at the top of the page for now.
 
