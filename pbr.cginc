@@ -255,15 +255,6 @@ float4 getLitColor(
 	UnityIndirect indirect_light;
   vertexLightColor *= _Vertex_Lighting_Factor;
 
-  UnityLight direct_light;
-  direct_light.dir = getDirectLightDirection(i);
-  direct_light.ndotl = DotClamped(normal, direct_light.dir);
-#define POI_LIGHTING
-#if defined(POI_LIGHTING)
-  direct_light.color = getPoiLightingDirect(normal);
-#else
-  direct_light.color = getDirectLightColor();
-#endif
 
 #if defined(_WORLD_INTERPOLATORS)
   UNITY_LIGHT_ATTENUATION(shadow_attenuation, i, i.worldPos);
@@ -271,6 +262,10 @@ float4 getLitColor(
   float shadow_attenuation = getShadowAttenuation(i);
 #endif
 
+  UnityLight direct_light;
+  direct_light.dir = getDirectLightDirection(i);
+  direct_light.ndotl = DotClamped(normal, direct_light.dir);
+  direct_light.color = 0;
 #if defined(_WORLD_INTERPOLATORS)
   {
     UnityGI gi = getBakedGI(i, view_dir, direct_light, shadow_attenuation, ao,
@@ -279,10 +274,20 @@ float4 getLitColor(
     indirect_light = gi.indirect;
   }
 #else
-  indirect_light.diffuse = getIndirectDiffuse(vertexLightColor, normal);
-  indirect_light.specular = getIndirectSpecular(view_dir, normal, smoothness,
-      metallic, worldPos, uv);
+  {
+    direct_light.dir = getDirectLightDirection(i);
+    direct_light.ndotl = DotClamped(normal, direct_light.dir);
+#define POI_LIGHTING
+#if defined(POI_LIGHTING)
+    direct_light.color = getPoiLightingDirect(normal);
+#else
+    direct_light.color = getDirectLightColor();
 #endif
+    indirect_light.diffuse = getIndirectDiffuse(vertexLightColor, normal);
+    indirect_light.specular = getIndirectSpecular(view_dir, normal, smoothness,
+        metallic, worldPos, uv);
+  }
+#endif  // _WORLD_INTERPOLATORS
 
   if (normals_mode == 0) {
     float e = 0.8;

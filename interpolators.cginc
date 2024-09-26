@@ -32,7 +32,7 @@ struct v2f
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
 #if defined(_WORLD_INTERPOLATORS)
-  UNITY_LIGHTING_COORDS(2, 3)
+  UNITY_LIGHTING_COORDS(3, 4)
 #else
   float2 uv3 : TEXCOORD3;
   float2 uv4 : TEXCOORD4;
@@ -59,7 +59,7 @@ struct appdata
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
 #if defined(_WORLD_INTERPOLATORS)
-  UNITY_LIGHTING_COORDS(2, 3)
+  UNITY_LIGHTING_COORDS(3, 4)
 #else
   float2 uv3 : TEXCOORD3;
   float2 uv4 : TEXCOORD4;
@@ -80,7 +80,7 @@ struct v2f
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
 #if defined(_WORLD_INTERPOLATORS)
-  UNITY_LIGHTING_COORDS(2, 3)
+  UNITY_LIGHTING_COORDS(3, 4)
 #else
   float2 uv3 : TEXCOORD3;
   float2 uv4 : TEXCOORD4;

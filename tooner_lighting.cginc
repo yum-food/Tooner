@@ -723,9 +723,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY0_MASK)
-  ov.ov0_mask = _PBR_Overlay0_Mask.SampleBias(GET_SAMPLER_OV0,
-      get_uv_by_channel(i, _PBR_Overlay0_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias);
+  ov.ov0_mask = _PBR_Overlay0_Mask.SampleLevel(GET_SAMPLER_OV0,
+      get_uv_by_channel(i, _PBR_Overlay0_UV_Select), 0);
   ov.ov0_mask = ((bool) round(_PBR_Overlay0_Mask_Invert)) ? 1.0 - ov.ov0_mask : ov.ov0_mask;
 #else
   ov.ov0_mask = 1;
@@ -766,9 +765,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY1_MASK)
-  ov.ov1_mask = _PBR_Overlay1_Mask.SampleBias(GET_SAMPLER_OV1,
-      get_uv_by_channel(i, _PBR_Overlay1_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias);
+  ov.ov1_mask = _PBR_Overlay1_Mask.SampleLevel(GET_SAMPLER_OV1,
+      get_uv_by_channel(i, _PBR_Overlay1_UV_Select), 0);
   ov.ov1_mask = ((bool) round(_PBR_Overlay1_Mask_Invert)) ? 1.0 - ov.ov1_mask : ov.ov1_mask;
 #else
   ov.ov1_mask = 1;
@@ -809,9 +807,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY2_MASK)
-  ov.ov2_mask = _PBR_Overlay2_Mask.SampleBias(GET_SAMPLER_OV2,
-      get_uv_by_channel(i, _PBR_Overlay2_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias);
+  ov.ov2_mask = _PBR_Overlay2_Mask.SampleLevel(GET_SAMPLER_OV2,
+      get_uv_by_channel(i, _PBR_Overlay2_UV_Select), 0);
   ov.ov2_mask = ((bool) round(_PBR_Overlay2_Mask_Invert)) ? 1.0 - ov.ov2_mask : ov.ov2_mask;
 #else
   ov.ov2_mask = 1;
@@ -852,9 +849,8 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #endif
 
 #if defined(_PBR_OVERLAY3_MASK)
-  ov.ov3_mask = _PBR_Overlay3_Mask.SampleBias(GET_SAMPLER_OV3,
-      get_uv_by_channel(i, _PBR_Overlay3_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias);
+  ov.ov3_mask = _PBR_Overlay3_Mask.SampleLevel(GET_SAMPLER_OV3,
+      get_uv_by_channel(i, _PBR_Overlay3_UV_Select), 0);
   ov.ov3_mask = ((bool) round(_PBR_Overlay3_Mask_Invert)) ? 1.0 - ov.ov3_mask : ov.ov3_mask;
 #else
   ov.ov3_mask = 1;
