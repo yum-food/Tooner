@@ -1692,6 +1692,105 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+	void DoGimmickLetterGrid() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Letter_Grid_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Letter grid", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_LETTER_GRID", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Letter_Grid_Texture");
+    editor.TexturePropertySingleLine(
+        MakeLabel(bc, "Texture"),
+        bc);
+
+    bc = FindProperty("_Gimmick_Letter_Grid_Tex_Res_X");
+    editor.FloatProperty(bc, "Number of glyphs in texture (X)");
+    bc = FindProperty("_Gimmick_Letter_Grid_Tex_Res_Y");
+    editor.FloatProperty(bc, "Number of glyphs in texture (Y)");
+
+    bc = FindProperty("_Gimmick_Letter_Grid_Res_X");
+    editor.FloatProperty(bc, "Number of glyphs in grid (X)");
+    bc = FindProperty("_Gimmick_Letter_Grid_Res_Y");
+    editor.FloatProperty(bc, "Number of glyphs in grid (Y)");
+
+    bc = FindProperty("_Gimmick_Letter_Grid_UV_Scale_Offset");
+    editor.VectorProperty(bc, "UV scale & offset");
+    bc = FindProperty("_Gimmick_Letter_Grid_Padding");
+    editor.FloatProperty(bc, "Padding");
+
+    bc = FindProperty("_Gimmick_Letter_Grid_Color");
+    editor.ColorProperty(bc, "Color");
+    bc = FindProperty("_Gimmick_Letter_Grid_Metallic");
+    editor.RangeProperty(bc, "Metallic");
+    bc = FindProperty("_Gimmick_Letter_Grid_Roughness");
+    editor.RangeProperty(bc, "Roughness");
+    bc = FindProperty("_Gimmick_Letter_Grid_Emission");
+    editor.FloatProperty(bc, "Emission");
+
+    bc = FindProperty("_Gimmick_Letter_Grid_UV_Select");
+    editor.RangeProperty(
+        bc,
+        "UV channel");
+
+    bc = FindProperty("_Gimmick_Letter_Grid_Color_Wave");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Color waves", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_LETTER_GRID_COLOR_WAVE", enabled);
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Gimmick_Letter_Grid_Color_Wave_Speed");
+      editor.FloatProperty(bc, "Speed");
+      bc = FindProperty("_Gimmick_Letter_Grid_Color_Wave_Frequency");
+      editor.FloatProperty(bc, "Frequency");
+      EditorGUI.indentLevel -= 1;
+    }
+
+    bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Rim lighting", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_LETTER_GRID_RIM_LIGHTING", enabled);
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Power");
+      editor.FloatProperty(bc, "Power");
+      bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Center");
+      editor.FloatProperty(bc, "Center");
+      bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Quantization");
+      editor.FloatProperty(bc, "Quantization");
+      bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Mask");
+      editor.TexturePropertySingleLine(MakeLabel(bc, "Mask"), bc);
+      if (bc.textureValue) {
+        EditorGUI.indentLevel += 1;
+        bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Mask_UV_Select");
+        editor.FloatProperty(bc, "Mask UV Select");
+        bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert");
+        editor.FloatProperty(bc, "Mask invert");
+        EditorGUI.indentLevel -= 1;
+      }
+      EditorGUI.indentLevel -= 1;
+    }
+
+    EditorGUI.indentLevel -= 1;
+	}
+
   void DoGimmicks() {
     if (!AddCollapsibleMenu("Gimmicks", "_Gimmicks")) {
       return;
@@ -1710,6 +1809,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickFaceMeWorldY();
     DoGimmickRorschach();
     DoGimmickMirrorUVFlip();
+    DoGimmickLetterGrid();
     DoClones();
     DoExplosion();
     DoGeoScroll();

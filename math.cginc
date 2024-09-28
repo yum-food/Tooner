@@ -113,5 +113,15 @@ float fbm(float3 p, const int n_octaves, float w)
   return res;
 }
 
+float median(float x, float y, float z)
+{
+  return max(min(x, y), min(max(x, y), z));
+}
+
+float median(float3 x)
+{
+  return median(x.x, x.y, x.z);
+}
+
 #endif  // __MATH_INC
 

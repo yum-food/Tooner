@@ -5,6 +5,7 @@
 #include "audiolink.cginc"
 #include "clones.cginc"
 #include "cnlohr.cginc"
+#include "disinfo.cginc"
 #include "eyes.cginc"
 #include "globals.cginc"
 #include "halos.cginc"
@@ -1402,6 +1403,7 @@ float4 effect(inout v2f i)
 #else
   float roughness = _Roughness;
 #endif
+
 #if defined(VERTEXLIGHT_ON)
   float4 vertex_light_color = float4(i.vertexLightColor, 1);
 #else
@@ -1968,6 +1970,79 @@ float4 effect(inout v2f i)
   }
 #endif  // _RIM_LIGHTING0 || _RIM_LIGHTING1 || _RIM_LIGHTING2 || _RIM_LIGHTING3
 
+#if defined(_GIMMICK_LETTER_GRID)
+  float3 gimmick_letter_grid_emission = 0;
+  {
+    int2 cell_pos;
+    int2 font_res = int2(round(_Gimmick_Letter_Grid_Tex_Res_X), round(_Gimmick_Letter_Grid_Tex_Res_Y)); 
+    int2 grid_res = int2(round(_Gimmick_Letter_Grid_Res_X), round(_Gimmick_Letter_Grid_Res_Y)); 
+    float2 cell_uv;  // uv within each letter cell
+
+    float4 scoff = _Gimmick_Letter_Grid_UV_Scale_Offset;
+    float2 uv = ((get_uv_by_channel(i, _Gimmick_Letter_Grid_UV_Select) - 0.5) - scoff.zw) * scoff.xy + 0.5;
+    bool in_box = getBoxLoc(uv,
+        /*bottom_left=*/0,
+        /*top_right=*/1,
+        /*res=*/grid_res,
+        /*padding=*/_Gimmick_Letter_Grid_Padding,
+        cell_pos, cell_uv);
+
+    float n_glyphs = font_res.x * font_res.y;
+    float cell_rand = rand2(cell_pos);
+    float c = glsl_mod(cell_pos.y * grid_res.x + cell_pos.x + cell_rand * n_glyphs + _Time[3], n_glyphs);
+    float3 msd = renderInBox(c, uv, cell_uv, _Gimmick_Letter_Grid_Texture, font_res).rgb;
+    float sd = median(msd);
+    float px_range = 2;  // determined by msdf-atlas-gen.exe; 2 is default
+    float2 unit_range = px_range / 1024;
+    float2 screen_tex_size = 1 / fwidth(cell_uv);
+    float screen_px_range = max(0.5 * dot(unit_range, screen_tex_size), 1.0);
+    float screen_px_distance = screen_px_range * (sd - 0.5);
+    float op = saturate(screen_px_distance + 0.5);
+    op = saturate(floor(op * 4));
+
+    float4 grid_color = _Gimmick_Letter_Grid_Color;
+
+#if defined(_GIMMICK_LETTER_GRID_COLOR_WAVE)
+    {
+      float2 c = grid_res/2;
+      float d = floor(length(cell_pos - c));
+      d *= _Gimmick_Letter_Grid_Color_Wave_Frequency;
+
+      float3 col = LRGBtoOKLCH(grid_color.rgb);
+      col[2] += d - _Time[3] * _Gimmick_Letter_Grid_Color_Wave_Speed;
+      col = OKLCHtoLRGB(col);
+      grid_color.rgb = col;
+    }
+#endif  // _GIMMICK_LETTER_GRID_COLOR_WAVE
+#if defined(_GIMMICK_LETTER_GRID_RIM_LIGHTING)
+    {
+      float theta = atan2(length(cross(MATCAP_VIEW_DIR(), normal)), dot(MATCAP_VIEW_DIR(), normal));
+      float rl = abs(theta) / PI;  // on [0, 1]
+      rl = pow(2, -_Gimmick_Letter_Grid_Rim_Lighting_Power * abs(rl - _Gimmick_Letter_Grid_Rim_Lighting_Center));
+      float q = _Gimmick_Letter_Grid_Rim_Lighting_Quantization;
+      if (q > 0) {
+        rl = floor(rl * q) / q;
+      }
+
+      float4 matcap_mask_raw = _Gimmick_Letter_Grid_Rim_Lighting_Mask.SampleBias(GET_SAMPLER_RL3,
+          get_uv_by_channel(i, _Gimmick_Letter_Grid_Rim_Lighting_Mask_UV_Select), _Global_Sample_Bias);
+      float matcap_mask = matcap_mask_raw.r;
+      matcap_mask = (bool) round(_Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert) ? 1 - matcap_mask : matcap_mask;
+      matcap_mask *= matcap_mask_raw.a;
+
+      op *= rl * matcap_mask;
+    }
+#endif  // GIMMICK_LETTER_GRID_RIM_LIGHTING
+
+    albedo = lerp(albedo, grid_color, op * in_box);
+    metallic = lerp(metallic, _Gimmick_Letter_Grid_Metallic, op * in_box);
+    //metallic = lerp(metallic, glsl_mod(_Time[3], 1.0), op * in_box);
+    roughness = lerp(roughness, _Gimmick_Letter_Grid_Roughness, op * in_box);
+    gimmick_letter_grid_emission = _Gimmick_Letter_Grid_Color * _Gimmick_Letter_Grid_Emission * op * in_box;
+  }
+#endif  // _GIMMICK_LETTER_GRID
+
+
 #if defined(_OKLAB)
   // Do hue shift in perceptually uniform color space so it doesn't look like
   // shit.
@@ -2074,7 +2149,6 @@ float4 effect(inout v2f i)
 #endif
     albedo.a = 1;
 #endif
-
     return float4(lit.rgb + _Gimmick_Flat_Color_Emission * _Global_Emission_Factor, albedo.a);
   }
 #endif
@@ -2114,6 +2188,10 @@ float4 effect(inout v2f i)
 #if defined(_RORSCHACH)
   result.rgb += rorschach_albedo.rgb * _Rorschach_Emission_Strength;
 #endif
+#if defined(_GIMMICK_LETTER_GRID)
+  result.rgb += gimmick_letter_grid_emission;
+#endif
+
 #if defined(_EXPLODE) && defined(_AUDIOLINK)
   if (AudioLinkIsAvailable() && _Explode_Phase > 1E-6) {
     float4 al_color =

@@ -155,6 +155,9 @@
 #pragma shader_feature_local _ _DISCARD
 #pragma shader_feature_local _ _BRIGHTNESS_CLAMP
 #pragma shader_feature_local _ _WORLD_INTERPOLATORS
+#pragma shader_feature_local _ _GIMMICK_LETTER_GRID
+#pragma shader_feature_local _ _GIMMICK_LETTER_GRID_COLOR_WAVE
+#pragma shader_feature_local _ _GIMMICK_LETTER_GRID_RIM_LIGHTING
 
 #endif  // __FEATURE_MACROS_INC
 

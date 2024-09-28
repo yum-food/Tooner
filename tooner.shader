@@ -209,16 +209,40 @@ Shader "yum_food/tooner"
 
     _Glitter_Enabled("Glitter enabled", Float) = 0
     _Glitter_Mask("Glitter mask", 2D) = "white" {}
-    _Glitter_Color("Glitter mask", Color) = (1, 1, 1, 1)
-    _Glitter_Density("Glitter density", float) = 400
+    _Glitter_Color("Glitter color", Color) = (1, 1, 1, 1)
+    _Glitter_Density("Glitter density", Float) = 400
     _Glitter_Amount("Glitter amount", Range(1, 100)) = 35
-    _Glitter_Speed("Glitter speed", float) = 1
-    _Glitter_Seed("Glitter seed", float) = 1
-    _Glitter_Brightness("Glitter brightness (unlit)", float) = 1
-    _Glitter_Brightness_Lit("Glitter brightness (lit)", float) = 0
+    _Glitter_Speed("Glitter speed", Float) = 1
+    _Glitter_Seed("Glitter seed", Float) = 1
+    _Glitter_Brightness("Glitter brightness (unlit)", Float) = 1
+    _Glitter_Brightness_Lit("Glitter brightness (lit)", Float) = 0
     _Glitter_Angle("Glitter angle", Range(0, 90)) = 90
-    _Glitter_Power("Glitter power", float) = 30
+    _Glitter_Power("Glitter power", Float) = 30
     _Glitter_UV_Select("Glitter UV channel", Range(0, 7)) = 0
+
+    _Gimmick_Letter_Grid_Enable_Static("Enable letter grid (static)", Float) = 0
+    _Gimmick_Letter_Grid_Texture("Letter grid texture", 2D) = "black" {}
+    _Gimmick_Letter_Grid_Tex_Res_X("Texture letter grid X resolution", Float) = 16
+    _Gimmick_Letter_Grid_Tex_Res_Y("Texture letter grid Y resolution", Float) = 8
+    _Gimmick_Letter_Grid_Res_X("Letter grid X resolution", Float) = 8
+    _Gimmick_Letter_Grid_Res_Y("Letter grid Y resolution", Float) = 8
+    _Gimmick_Letter_Grid_UV_Scale_Offset("Letter grid UV bounds", Vector) = (1, 1, 0, 0)
+    _Gimmick_Letter_Grid_Padding("Padding", Float) = 0.02
+    _Gimmick_Letter_Grid_Color("Color", Color) = (1, 1, 1, 1)
+    _Gimmick_Letter_Grid_Metallic("Metallic", Range(0, 1)) = 0
+    _Gimmick_Letter_Grid_Roughness("Roughness", Range(0 ,1)) = 0.5
+    _Gimmick_Letter_Grid_Emission("Emission", Range(0 ,1)) = 0.0
+    _Gimmick_Letter_Grid_UV_Select("Letter grid UV channel", Range(0, 7)) = 0
+    _Gimmick_Letter_Grid_Color_Wave("Letter grid color wave", Float) = 0
+    _Gimmick_Letter_Grid_Color_Wave_Speed("Letter grid color wave", Float) = 1
+    _Gimmick_Letter_Grid_Color_Wave_Frequency("Letter grid color wave", Float) = 1
+    _Gimmick_Letter_Grid_Rim_Lighting("_Gimmick_Letter_Grid_Rim_Lighting", Float) = 0
+    _Gimmick_Letter_Grid_Rim_Lighting_Power("_Gimmick_Letter_Grid_Rim_Lighting_Power", Float) = 5
+    _Gimmick_Letter_Grid_Rim_Lighting_Center("_Gimmick_Letter_Grid_Rim_Lighting_Center", Float) = 0
+    _Gimmick_Letter_Grid_Rim_Lighting_Quantization("_Gimmick_Letter_Grid_Rim_Lighting_Quantization", Float) = -1
+    _Gimmick_Letter_Grid_Rim_Lighting_Mask("Mask", 2D) = "white" {}
+    _Gimmick_Letter_Grid_Rim_Lighting_Mask_UV_Select("_Gimmick_Letter_Grid_Rim_Lighting_Mask_UV_Select", Float) = 0
+    _Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert("_Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert", Float) = 0
 
 		[MaterialToggle] _Explode_Toggle("Explode toggle", Float) = 0
 		_Explode_Phase("Explode phase", Range(0, 1)) = 0

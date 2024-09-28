@@ -636,5 +636,28 @@ float _Rorschach_Mask_Invert;
 float _Mirror_UV_Flip_Enable_Dynamic;
 #endif
 
+#if defined(_GIMMICK_LETTER_GRID)
+texture2D _Gimmick_Letter_Grid_Texture;
+float _Gimmick_Letter_Grid_Res_X;
+float _Gimmick_Letter_Grid_Res_Y;
+float _Gimmick_Letter_Grid_Tex_Res_X;
+float _Gimmick_Letter_Grid_Tex_Res_Y;
+float4 _Gimmick_Letter_Grid_UV_Scale_Offset;
+float _Gimmick_Letter_Grid_Padding;
+float4 _Gimmick_Letter_Grid_Color;
+float _Gimmick_Letter_Grid_Metallic;
+float _Gimmick_Letter_Grid_Roughness;
+float _Gimmick_Letter_Grid_Emission;
+float _Gimmick_Letter_Grid_UV_Select;
+float _Gimmick_Letter_Grid_Color_Wave_Speed;
+float _Gimmick_Letter_Grid_Color_Wave_Frequency;
+float _Gimmick_Letter_Grid_Rim_Lighting_Power;
+float _Gimmick_Letter_Grid_Rim_Lighting_Center;
+float _Gimmick_Letter_Grid_Rim_Lighting_Quantization;
+texture2D _Gimmick_Letter_Grid_Rim_Lighting_Mask;
+float _Gimmick_Letter_Grid_Rim_Lighting_Mask_UV_Select;
+float _Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert;
+#endif
+
 #endif
 
