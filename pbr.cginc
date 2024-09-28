@@ -82,43 +82,6 @@ float3 getDirectLightColor()
   return _LightColor0.rgb;
 }
 
-#if defined(_WORLD_INTERPOLATORS)
-UnityGI getBakedGI(v2f i, float3 view_dir,
-    UnityLight direct_light, float atten, float ao, float3 normal,
-    float smoothness, float3 specular_tint) {
-  UnityGIInput d;
-  d.light = direct_light;
-  d.worldPos = i.worldPos;
-  d.worldViewDir = view_dir;
-  d.atten = atten;
-
-  d.ambient = 0;
-  d.lightmapUV.xy = i.uv2;
-  d.lightmapUV.zw = 0;
-
-  d.probeHDR[0] = unity_SpecCube0_HDR;
-  d.probeHDR[1] = unity_SpecCube1_HDR;
-#if defined(UNITY_SPECCUBE_BLENDING) || defined(UNITY_SPECCUBE_BOX_PROJECTION)
-  d.boxMin[0] = unity_SpecCube0_BoxMin; // .w holds lerp value for blending
-#endif
-#ifdef UNITY_SPECCUBE_BOX_PROJECTION
-  d.boxMax[0] = unity_SpecCube0_BoxMax;
-  d.probePosition[0] = unity_SpecCube0_ProbePosition;
-  d.boxMax[1] = unity_SpecCube1_BoxMax;
-  d.boxMin[1] = unity_SpecCube1_BoxMin;
-  d.probePosition[1] = unity_SpecCube1_ProbePosition;
-#endif
-
-  Unity_GlossyEnvironmentData g = UnityGlossyEnvironmentSetup(smoothness, -view_dir, normal, specular_tint);
-  // Replace the reflUVW if it has been compute in Vertex shader. Note: the compiler will optimize the calcul in UnityG            lossyEnvironmentSetup itself
-#if UNITY_STANDARD_SIMPLE
-  g.reflUVW = reflUVW;
-#endif
-
-  return UnityGlobalIllumination (d, ao, normal, g);
-}
-#endif  // _WORLD_INTERPOLATORS
-
 float GetRoughness(float smoothness) {
   float r = 1 - smoothness;
   r *= 1.7 - 0.7 * r;
@@ -130,27 +93,34 @@ float3 BoxProjection (
 	float4 cubemapPosition, float3 boxMin, float3 boxMax
 ) {
 	#if UNITY_SPECCUBE_BOX_PROJECTION
+		UNITY_BRANCH
 		if (cubemapPosition.w > 0) {
 			float3 factors =
 				((direction > 0 ? boxMax : boxMin) - position) / direction;
 			float scalar = min(min(factors.x, factors.y), factors.z);
-			direction = direction * scalar + (position - cubemapPosition.xyz);
+			direction = direction * scalar + (position - cubemapPosition);
 		}
 	#endif
 	return direction;
 }
 
-float4 getIndirectDiffuse(float4 vertexLightColor, float3 normal) {
+float4 getIndirectDiffuse(v2f i, float4 vertexLightColor, float3 normal) {
   float4 diffuse = vertexLightColor;
+#if defined(FORWARD_BASE_PASS)
+#if defined(LIGHTMAP_ON)
+  diffuse.xyz = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv2));
+#else
   if (_Mesh_Normals_Mode == 3) {  // Toon
     diffuse.xyz += max(0, BetterSH9(float4(0, 0, 0, 1)));
   } else {
     diffuse.xyz += max(0, BetterSH9(float4(normal, 1)));
   }
+#endif
+#endif
   return diffuse;
 }
 
-float3 getIndirectSpecular(float3 view_dir, float3 normal,
+float3 getIndirectSpecular(v2f i, float3 view_dir, float3 normal,
     float smoothness, float metallic, float3 worldPos, float2 uv) {
   float3 specular = 0;
 
@@ -167,7 +137,6 @@ float3 getIndirectSpecular(float3 view_dir, float3 normal,
       UNITY_PASS_TEXCUBE(unity_SpecCube0), unity_SpecCube0_HDR, env_data
       );
   specular = probe0;
-#if UNITY_SPECCUBE_BLENDING
   if (unity_SpecCube0_BoxMin.w < 0.99999) {
     env_data.reflUVW = BoxProjection(
         reflect_dir, worldPos,
@@ -178,8 +147,7 @@ float3 getIndirectSpecular(float3 view_dir, float3 normal,
         unity_SpecCube1_HDR, env_data
         );
     specular = lerp(probe1, probe0, unity_SpecCube0_BoxMin.w);
-  }
-#endif  // UNITY_SPECCUBE_BLENDING
+	}
 
 #if defined(_CUBEMAP)
 #if 0
@@ -256,7 +224,7 @@ float4 getLitColor(
   vertexLightColor *= _Vertex_Lighting_Factor;
 
 
-#if defined(_WORLD_INTERPOLATORS)
+#if defined(LIGHTMAP_ON)
   UNITY_LIGHT_ATTENUATION(shadow_attenuation, i, i.worldPos);
 #else
   float shadow_attenuation = getShadowAttenuation(i);
@@ -266,14 +234,6 @@ float4 getLitColor(
   direct_light.dir = getDirectLightDirection(i);
   direct_light.ndotl = DotClamped(normal, direct_light.dir);
   direct_light.color = 0;
-#if defined(_WORLD_INTERPOLATORS)
-  {
-    UnityGI gi = getBakedGI(i, view_dir, direct_light, shadow_attenuation, ao,
-        normal, smoothness, specular_tint);
-    direct_light = gi.light;
-    indirect_light = gi.indirect;
-  }
-#else
   {
     direct_light.dir = getDirectLightDirection(i);
     direct_light.ndotl = DotClamped(normal, direct_light.dir);
@@ -283,11 +243,10 @@ float4 getLitColor(
 #else
     direct_light.color = getDirectLightColor();
 #endif
-    indirect_light.diffuse = getIndirectDiffuse(vertexLightColor, normal);
-    indirect_light.specular = getIndirectSpecular(view_dir, normal, smoothness,
+    indirect_light.diffuse = getIndirectDiffuse(i, vertexLightColor, normal);
+    indirect_light.specular = getIndirectSpecular(i, view_dir, normal, smoothness,
         metallic, worldPos, uv);
   }
-#endif  // _WORLD_INTERPOLATORS
 
   if (normals_mode == 0) {
     float e = 0.8;

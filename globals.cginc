@@ -285,6 +285,7 @@ float _Global_Emission_Factor;
 
 #if defined(_AMBIENT_OCCLUSION)
 texture2D _Ambient_Occlusion;
+float4 _Ambient_Occlusion_ST;
 float _Ambient_Occlusion_Strength;
 #endif
 

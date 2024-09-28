@@ -2107,7 +2107,9 @@ float4 effect(inout v2f i)
 #endif
 
 #if defined(_AMBIENT_OCCLUSION)
-  float ao = _Ambient_Occlusion.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+  float ao = _Ambient_Occlusion.SampleBias(linear_repeat_s,
+      UV_SCOFF(i, _Ambient_Occlusion_ST, /*uv_channel=*/0),
+      _Global_Sample_Bias);
   ao = 1 - (1 - ao) * _Ambient_Occlusion_Strength;
 #else
   float ao = 1;

@@ -12,15 +12,11 @@ struct appdata
   float2 uv0 : TEXCOORD0;
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
-#if defined(_WORLD_INTERPOLATORS)
-  UNITY_LIGHTING_COORDS(3, 4)
-#else
   float2 uv3 : TEXCOORD3;
   float2 uv4 : TEXCOORD4;
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
-#endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -31,7 +27,7 @@ struct v2f
   float2 uv0 : TEXCOORD0;
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
-#if defined(_WORLD_INTERPOLATORS)
+#if defined(LIGHTMAP_ON)
   UNITY_LIGHTING_COORDS(3, 4)
 #else
   float2 uv3 : TEXCOORD3;
@@ -58,15 +54,11 @@ struct appdata
   float2 uv0 : TEXCOORD0;
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
-#if defined(_WORLD_INTERPOLATORS)
-  UNITY_LIGHTING_COORDS(3, 4)
-#else
   float2 uv3 : TEXCOORD3;
   float2 uv4 : TEXCOORD4;
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
-#endif
   float3 normal : NORMAL;
   float4 tangent : TANGENT;
 
@@ -79,7 +71,7 @@ struct v2f
   float2 uv0 : TEXCOORD0;
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
-#if defined(_WORLD_INTERPOLATORS)
+#if defined(LIGHTMAP_ON)
   UNITY_LIGHTING_COORDS(3, 4)
 #else
   float2 uv3 : TEXCOORD3;

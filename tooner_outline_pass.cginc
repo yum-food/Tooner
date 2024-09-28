@@ -81,7 +81,7 @@ v2f vert(appdata v)
   o.normal = UnityObjectToWorldNormal(v.normal);
   o.uv0 = v.uv0;
   o.uv1 = v.uv1;
-#if defined(_WORLD_INTERPOLATORS)
+#if defined(LIGHTMAP_ON)
   o.uv2 = v.uv2 * unity_LightmapST.xy + unity_LightmapST.zw;
   UNITY_TRANSFER_LIGHTING(o, v.uv1);
 #else

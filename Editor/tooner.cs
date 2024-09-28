@@ -2055,15 +2055,6 @@ public class ToonerGUI : ShaderGUI {
 
     MaterialProperty bc;
 
-    bc = FindProperty("_Enable_World_Interpolators");
-    bool world_interp = bc.floatValue > 1E-6;
-    EditorGUI.BeginChangeCheck();
-    world_interp = EditorGUILayout.Toggle("World interpolators",
-        world_interp);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = world_interp ? 1.0f : 0.0f;
-    SetKeyword("_WORLD_INTERPOLATORS", world_interp);
-
     bc = FindProperty("_Enable_Brightness_Clamp");
     bool brightness_clamp_enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
@@ -2091,6 +2082,9 @@ public class ToonerGUI : ShaderGUI {
         MakeLabel(bc, "Ambient occlusion"),
         bc);
     SetKeyword("_AMBIENT_OCCLUSION", bc.textureValue);
+    if (bc.textureValue) {
+      editor.TextureScaleOffsetProperty(bc);
+    }
 
     if (bc.textureValue) {
       bc = FindProperty("_Ambient_Occlusion_Strength");
