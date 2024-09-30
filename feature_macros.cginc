@@ -141,6 +141,7 @@
 #pragma shader_feature_local _ _GIMMICK_SPHERIZE_LOCATION
 #pragma shader_feature_local _ _GIMMICK_EYES_00
 #pragma shader_feature_local _ _GIMMICK_EYES_01
+#pragma shader_feature_local _ _GIMMICK_EYES_02
 #pragma shader_feature_local _ _GIMMICK_HALO_00
 #pragma shader_feature_local _ _PIXELLATE
 #pragma shader_feature_local _ _TROCHOID

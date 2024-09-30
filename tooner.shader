@@ -167,6 +167,7 @@ Shader "yum_food/tooner"
     _Emission1Multiplier("Emission multiplier", Range(0, 2)) = 1
     _Emission1_UV_Select("UV channel", Range(0,7)) = 0
     _Global_Emission_Factor("Global emission factor", Float) = 1
+    _Global_Emission_Additive_Factor("Global emission additive factor", Float) = 0
 
     [NoScaleOffset] _Tex_NormalStr("Normal texture strength", Range(0, 10)) = 1
 
@@ -485,6 +486,23 @@ Shader "yum_food/tooner"
     _Gimmick_Eyes01_Enable_Static("Enable eyes 01", Float) = 0.0
     _Gimmick_Eyes01_Radius("Radius (meters, obj space)", Float) = 1.0
 
+    _Gimmick_Eyes02_Enable_Static  ("Enable (static)", Float) = 0
+    _Gimmick_Eyes02_N  ("n",  Range(2, 16)) = 5
+    _Gimmick_Eyes02_A0 ("a0", Range(-6, 6)) = 1.5
+    _Gimmick_Eyes02_A1 ("a1", Range(-6, 6)) = -1.75
+    _Gimmick_Eyes02_A2 ("a2", Range(-6, 6)) = .01
+    _Gimmick_Eyes02_A3 ("a3", Range(-2, 2)) = 0
+    _Gimmick_Eyes02_A4 ("a4", Range(-2, 2)) = .5
+    _Gimmick_Eyes02_Animate ("animate", Float) = 0.0
+    _Gimmick_Eyes02_Animate_Strength ("animation strength", Float) = 1.0
+    _Gimmick_Eyes02_Animate_Speed ("animation speed", Float) = 1.0
+    _Gimmick_Eyes02_UV_X_Symmetry ("UV x symmetry", Float) = 1.0
+    _Gimmick_Eyes02_UV_Adjust ("UV scale and center", Vector) = (0.9, 1.1, .753, .675)
+    _Gimmick_Eyes02_Albedo ("Albedo", Color) = (1, 1, 1, 1)
+    _Gimmick_Eyes02_Metallic ("Metallic", Range(0, 1)) = 0
+    _Gimmick_Eyes02_Roughness ("Roughness", Range(0, 1)) = 0.5
+    _Gimmick_Eyes02_Emission ("Emission", Color) = (0, 0, 0, 1)
+
     _Gimmick_Halo00_Enable_Static("Enable halo", Float) = 0.0
 
     _Gimmick_Pixellate_Enable_Static("Enable pixellation", Float) = 0.0
@@ -622,6 +640,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType"="Opaque"
@@ -701,6 +720,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

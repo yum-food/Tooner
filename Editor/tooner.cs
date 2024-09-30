@@ -525,6 +525,9 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Global_Emission_Factor");
     editor.FloatProperty(bc, "Global emissions multiplier");
 
+    bc = FindProperty("_Global_Emission_Additive_Factor");
+    editor.FloatProperty(bc, "Global emissions additive factor");
+
     EditorGUI.indentLevel -= 1;
   }
 
@@ -1454,6 +1457,7 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+
   void DoGimmickEyes00() {
     MaterialProperty bc;
     bc = FindProperty("_Gimmick_Eyes00_Enable_Static");
@@ -1496,6 +1500,73 @@ public class ToonerGUI : ShaderGUI {
 
     bc = FindProperty("_Gimmick_Eyes01_Radius");
     editor.FloatProperty(bc, "Radius (meters, object space)");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
+  void DoGimmickEyes02() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Eyes02_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Eyes 02", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_EYES_02", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Eyes02_N");
+    editor.RangeProperty(bc, "n");
+    bc = FindProperty("_Gimmick_Eyes02_A0");
+    editor.RangeProperty(bc, "a0");
+    bc = FindProperty("_Gimmick_Eyes02_A1");
+    editor.RangeProperty(bc, "a1");
+    bc = FindProperty("_Gimmick_Eyes02_A2");
+    editor.RangeProperty(bc, "a2");
+    bc = FindProperty("_Gimmick_Eyes02_A3");
+    editor.RangeProperty(bc, "a3");
+    bc = FindProperty("_Gimmick_Eyes02_A4");
+    editor.RangeProperty(bc, "a4");
+
+    bc = FindProperty("_Gimmick_Eyes02_Animate");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("Animate", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Gimmick_Eyes02_Animate_Speed");
+      editor.FloatProperty(bc, "Speed");
+
+      bc = FindProperty("_Gimmick_Eyes02_Animate_Strength");
+      editor.FloatProperty(bc, "Strength");
+      EditorGUI.indentLevel -= 1;
+    }
+
+    bc = FindProperty("_Gimmick_Eyes02_UV_X_Symmetry");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = EditorGUILayout.Toggle("UV x symmetry", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    bc = FindProperty("_Gimmick_Eyes02_UV_Adjust");
+    editor.VectorProperty(bc, "UV scale & offset");
+
+    bc = FindProperty("_Gimmick_Eyes02_Albedo");
+    editor.ColorProperty(bc, "Albedo");
+    bc = FindProperty("_Gimmick_Eyes02_Metallic");
+    editor.FloatProperty(bc, "Metallic");
+    bc = FindProperty("_Gimmick_Eyes02_Roughness");
+    editor.FloatProperty(bc, "Roughness");
+    bc = FindProperty("_Gimmick_Eyes02_Emission");
+    editor.ColorProperty(bc, "Emission");
 
     EditorGUI.indentLevel -= 1;
   }
@@ -1803,6 +1874,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickSpherizeLocation();
     DoGimmickEyes00();
     DoGimmickEyes01();
+    DoGimmickEyes02();
     DoGimmickHalo00();
     DoGimmickPixellate();
     DoGimmickTrochoid();

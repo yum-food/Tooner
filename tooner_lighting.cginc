@@ -1430,6 +1430,18 @@ float4 effect(inout v2f i)
   }
 #endif
 
+
+#if defined(_GIMMICK_EYES_02)
+  float3 eyes02_normal = i.normal;
+  bool eyes02_hit = eyes02_march(i.uv0, eyes02_normal);
+  {
+    albedo.rgb += eyes02_hit * _Gimmick_Eyes02_Albedo.rgb;
+    normal = lerp(normal, eyes02_normal, eyes02_hit);
+    roughness = lerp(roughness, _Gimmick_Eyes02_Roughness, eyes02_hit);
+    metallic = lerp(metallic, _Gimmick_Eyes02_Metallic, eyes02_hit);
+  }
+#endif
+
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1) || defined(_RIM_LIGHTING2) || defined(_RIM_LIGHTING3)
   float3 matcap_emission = 0;
   float2 matcap_uv;
@@ -2151,7 +2163,9 @@ float4 effect(inout v2f i)
 #endif
     albedo.a = 1;
 #endif
-    return float4(lit.rgb + _Gimmick_Flat_Color_Emission * _Global_Emission_Factor, albedo.a);
+    return float4(lit.rgb +
+        _Gimmick_Flat_Color_Emission * _Global_Emission_Factor,
+        albedo.a);
   }
 #endif
 
@@ -2207,6 +2221,7 @@ float4 effect(inout v2f i)
   result.rgb *= result.a;
 #endif
   result.rgb += getOverlayEmission(ov, i) * _Global_Emission_Factor;
+  result.rgb += _Global_Emission_Additive_Factor * albedo.rgb;
 
   return result;
 }

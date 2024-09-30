@@ -1,6 +1,7 @@
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "iq_sdf.cginc"
+#include "math.cginc"
 
 #ifndef __EYES_INC
 #define __EYES_INC
@@ -184,6 +185,146 @@ Eyes01PBR eyes01_march(v2f i)
 }
 
 #endif  // _GIMMICK_EYES_01
+
+#if defined(_GIMMICK_EYES_02)
+
+struct chaos_data
+{
+  uint n;  // degrees of symmetry
+  int p;
+  float a0;
+  float a1;
+  float a2;
+  float a3;
+  float a4;
+  complex z;
+};
+
+void iterate0(inout struct chaos_data d)
+{
+  complex z_conj = cconjugate(d.z);
+  complex z_conj_n_1 = cpow(z_conj, d.n);
+  complex z_n = cpow(d.z, d.n);
+
+  complex next =
+    cmul((
+          complex(d.a0, 0) +
+          d.a1 * cmul(d.z, cconjugate(d.z)) +
+          complex(d.a2 * creal(z_n), 0) +
+          complex(0, d.a3)
+         ),
+        d.z) +
+    d.a4 * z_conj_n_1;
+
+  d.z = next;
+}
+
+void iterate1(inout struct chaos_data d)
+{
+  complex z_conj = cconjugate(d.z);
+  complex z_conj_n_1 = cpow(z_conj, d.n - 1);
+  complex z_n = cpow(d.z, d.n);
+
+  complex next =
+    (d.a0 +
+     d.a1 * (d.z.x * d.z.x - d.z.y * d.z.y) +
+     d.a2 * creal(z_n) +
+     d.a3 * creal(cmul(cpow((cdiv(d.z, abs(d.z))), d.n * d.p), abs(d.z)))) *
+    d.z +
+    d.a4 * (z_conj_n_1);
+
+  d.z = next;
+}
+
+// Return a number on (0, inf)
+float get_chaos(in float2 uv, inout chaos_data d)
+{
+  complex z = uv;
+  // Remap onto [-1, 1]
+  float scale = 2.0;
+  z = z * scale * 2 - scale;
+  d.z = z;
+
+  for (int i = 0; i < 6; i++) {
+    iterate0(d);
+  }
+
+  float l = d.z.x * d.z.x - d.z.y * d.z.y;
+  if (l < 1) {
+    float b = .1;
+    return b/l;
+  } else {
+    return 0;
+  }
+}
+
+float3 get_chaos_normal(in float2 uv, inout chaos_data d)
+{
+  float2 small_step = float2(.0001, 0);
+  float dx = get_chaos(uv + small_step.xy, d) - get_chaos(uv, d);
+  float dz = get_chaos(uv + small_step.yx, d) - get_chaos(uv, d);
+  float dy = small_step.x;
+
+  float3 normal = float3(dx, dy, dz);
+  return UnityObjectToWorldNormal(normalize(normal));
+}
+
+bool eyes02_march(float2 uv, inout float3 normal)
+{
+  float2 uv_scale = _Gimmick_Eyes02_UV_Adjust.xy;
+  float2 uv_center = _Gimmick_Eyes02_UV_Adjust.zw;
+  uv -= 0.5;
+
+  if (_Gimmick_Eyes02_UV_X_Symmetry) {
+    uv.x = abs(uv.x);
+  }
+
+  uv -= (uv_center - 0.5);
+  uv /= uv_scale;
+
+  uv += 0.5;
+
+  float t20 = _Time[0] * _Gimmick_Eyes02_Animate_Speed;
+  float t = _Time[1] * _Gimmick_Eyes02_Animate_Speed;
+
+  struct chaos_data d;
+  d.n = _Gimmick_Eyes02_N;
+  d.p = _Gimmick_Eyes02_N;
+  d.a0 = _Gimmick_Eyes02_A0;
+  d.a1 = _Gimmick_Eyes02_A1;
+  d.a2 = _Gimmick_Eyes02_A2;
+  d.a3 = _Gimmick_Eyes02_A3;
+  d.a4 = _Gimmick_Eyes02_A4;
+
+  if (_Gimmick_Eyes02_Animate) {
+    float effect = 1;
+    float e = _Gimmick_Eyes02_Animate_Strength;
+    if (round(effect) == 0) {
+      d.a0 += (sin(t * 1.1) * .01 + sin(t20 * 1.1) * .75) * e;
+      d.a1 += (sin(t * 1.3) * .01 + sin(t20 * 1.3) * .75) * e;
+      d.a2 += (sin(t * 1.7) * .01 + sin(t20 * 1.7) * 1) * e;
+      d.a3 += (sin(t * 1.9) * .01 + sin(t20 * 1.9) * .75) * e;
+      d.a4 += (sin(t * 2.3) * .02 + sin(t20 * 2.3) * .4) * e;
+    } else if (round(effect) == 1) {
+      d.a0 += (sin(t * 1.1) * .01 + sin(t20 * 1.1) * .75) * e;
+      d.a1 += (sin(t * 1.3) * .01 + sin(t20 * 1.3) * .75) * e;
+      d.a2 += (sin(t * 1.7) * .01 + sin(t20 * 1.7) * 1) * e;
+      d.a3 += (sin(t * 1.9) * .0005 + sin(t20 * 1.9) * .05) * e;
+      d.a4 += (sin(t * 2.3) * .02 + sin(t20 * 2.3) * 1) * e;
+    }
+  }
+
+  float c = get_chaos(uv, d);
+  c = exp(-c);
+
+  if (c < 1) {
+    normal = get_chaos_normal(uv, d);
+  }
+  bool is_ray_hit = (c < 1);
+  return is_ray_hit;
+}
+
+#endif  // _GIMMICK_EYES_02
 
 #endif  // __EYES_INC
 

@@ -282,6 +282,7 @@ float _Emission1Multiplier;
 float _Emission1_UV_Select;
 #endif
 float _Global_Emission_Factor;
+float _Global_Emission_Additive_Factor;
 
 #if defined(_AMBIENT_OCCLUSION)
 texture2D _Ambient_Occlusion;
@@ -595,6 +596,24 @@ texture2D _Gimmick_Eyes00_Effect_Mask;
 
 #if defined(_GIMMICK_EYES_01)
 float _Gimmick_Eyes01_Radius;
+#endif
+
+#if defined(_GIMMICK_EYES_02)
+float _Gimmick_Eyes02_N;
+float _Gimmick_Eyes02_A0;
+float _Gimmick_Eyes02_A1;
+float _Gimmick_Eyes02_A2;
+float _Gimmick_Eyes02_A3;
+float _Gimmick_Eyes02_A4;
+float _Gimmick_Eyes02_Animate;
+float _Gimmick_Eyes02_Animate_Strength;
+float _Gimmick_Eyes02_Animate_Speed;
+float _Gimmick_Eyes02_UV_X_Symmetry;
+float4 _Gimmick_Eyes02_UV_Adjust;
+float4 _Gimmick_Eyes02_Albedo;
+float _Gimmick_Eyes02_Metallic;
+float _Gimmick_Eyes02_Roughness;
+float3 _Gimmick_Eyes02_Emission;
 #endif
 
 #if defined(_PIXELLATE)

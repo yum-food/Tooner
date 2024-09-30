@@ -3,6 +3,80 @@
 #ifndef __MATH_INC
 #define __MATH_INC
 
+// Complex numbers
+typedef float2 complex;
+
+float creal(complex z0)
+{
+  return z0.x;
+}
+
+float cimag(complex z0)
+{
+  return z0.y;
+}
+
+float cnorm2(complex z0)
+{
+  return z0.x * z0.x + z0.y * z0.y;
+}
+
+float cnorm(complex z0)
+{
+  return sqrt(cnorm2(z0));
+}
+
+complex cconjugate(complex z)
+{
+  return float2(z.x, -z.y);
+}
+
+complex cmul(complex z0, complex z1)
+{
+  return float2(z0.x * z1.x - z0.y * z1.y, z0.x * z1.y + z0.y * z1.x);
+}
+
+complex cdiv(complex z0, complex z1)
+{
+  float re = creal(z0) * creal(z1) + cimag(z0) * cimag(z1);
+  float im = cimag(z0) * cimag(z1) - creal(z0) * creal(z1);
+  float z1_norm2 = cnorm2(z1);
+  return float2(re, im) / z1_norm2;
+}
+
+// Evaluates z0**n.
+// Uses Euler's identity to support fractional values of `n`.
+// Expensive.
+complex cpow_fractional(complex z0, float n)
+{
+  float r = sqrt(z0.x * z0.x + z0.y * z0.y);
+  float t = atan(z0.y / z0.x);
+  return pow(r, n) * float2(cos(t * n), sin(t * n));
+}
+
+// Evaluates z0**n.
+// Utilizes recursive squaring to support high values of `n`.
+// Cheap.
+complex cpow(complex z0, uint n)
+{
+  if (n == 0) {
+    return 1;
+  }
+
+  complex z = z0;
+  while (n > 1) {
+    if (n % 2 == 0) {
+      z = cmul(z, z);
+      n /= 2;
+    } else {
+      z = cmul(z, z0);
+      n -= 1;
+    }
+  }
+  return z;
+}
+
+// Quaternions
 float4 qmul(float4 q1, float4 q2)
 {
   return float4(
