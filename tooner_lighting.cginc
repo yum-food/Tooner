@@ -1445,8 +1445,6 @@ float4 effect(inout v2f i)
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1) || defined(_RIM_LIGHTING2) || defined(_RIM_LIGHTING3)
   float3 matcap_emission = 0;
   float2 matcap_uv;
-  float matcap_theta;
-  float matcap_radius;
   {
     const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
     const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
@@ -1456,12 +1454,8 @@ float4 effect(inout v2f i)
         cam_refl.y * cam_refl.y +
         (cam_refl.z + 1) * (cam_refl.z + 1));
     matcap_uv = cam_refl.xy / m + 0.5;
-    matcap_radius = length(matcap_uv - 0.5);
-    matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
   }
   float2 matcap_uv_center;
-  float matcap_theta_center;
-  float matcap_radius_center;
   {
     const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
     const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir_c, 0)));
@@ -1471,8 +1465,6 @@ float4 effect(inout v2f i)
         cam_refl.y * cam_refl.y +
         (cam_refl.z + 1) * (cam_refl.z + 1));
     matcap_uv_center = cam_refl.xy / m + 0.5;
-    matcap_radius_center = length(matcap_uv_center - 0.5);
-    matcap_theta_center = atan2(matcap_uv_center.y - 0.5, matcap_uv.x - 0.5);
   }
 #endif
 
@@ -1521,8 +1513,6 @@ float4 effect(inout v2f i)
             cam_refl.y * cam_refl.y +
             (cam_refl.z + 1) * (cam_refl.z + 1));
         matcap_uv = cam_refl.xy / m + 0.5;
-        matcap_radius = length(matcap_uv - 0.5);
-        matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
       }
 #endif
 
@@ -1611,8 +1601,6 @@ float4 effect(inout v2f i)
             cam_refl.y * cam_refl.y +
             (cam_refl.z + 1) * (cam_refl.z + 1));
         matcap_uv = cam_refl.xy / m + 0.5;
-        matcap_radius = length(matcap_uv - 0.5);
-        matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
       }
 #endif
 #if defined(_MATCAP1_DISTORTION0)
@@ -1679,16 +1667,26 @@ float4 effect(inout v2f i)
 
 #if defined(_RIM_LIGHTING0)
     {
-      float rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);
-      float theta = atan2(length(cross(rl_view_dir, normal)), dot(rl_view_dir, normal));
-      float rl = abs(theta) / PI;  // on [0, 1]
+      float3 rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);
+      float2 rl_uv;
+      {
+        const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+        const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(rl_view_dir, 0)));
+        const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
+        float m = 2.0 * sqrt(
+            cam_refl.x * cam_refl.x +
+            cam_refl.y * cam_refl.y +
+            (cam_refl.z + 1) * (cam_refl.z + 1));
+        rl_uv = cam_refl.xy / m + 0.5;
+      }
+      float theta = atan2(rl_uv.y - 0.5, rl_uv.x - 0.5);
+      float rl = length(rl_uv - 0.5);
       rl = pow(2, -_Rim_Lighting0_Power * abs(rl - _Rim_Lighting0_Center));
       float q = _Rim_Lighting0_Quantization;
       if (q > -1) {
         rl = floor(rl * q) / q;
       }
       float3 matcap = rl * _Rim_Lighting0_Color * _Rim_Lighting0_Strength;
-
 #if defined(_RIM_LIGHTING0_MASK)
       float4 matcap_mask_raw = _Rim_Lighting0_Mask.SampleBias(GET_SAMPLER_RL0,
           get_uv_by_channel(i, _Rim_Lighting0_Mask_UV_Select), _Global_Sample_Bias);
@@ -1709,11 +1707,13 @@ float4 effect(inout v2f i)
         }
 #endif
 #if defined(_RIM_LIGHTING0_POLAR_MASK)
-      if (_Rim_Lighting0_PolarMask_Enabled) {
-        float pmask_theta = _Rim_Lighting0_PolarMask_Theta;
-        float pmask_pow = _Rim_Lighting0_PolarMask_Power;
-        matcap_mask *= abs(1.0 / (1.0 + pow(abs(matcap_theta - pmask_theta), pmask_pow)));;
-      }
+        if (_Rim_Lighting0_PolarMask_Enabled) {
+          float pmask_theta = _Rim_Lighting0_PolarMask_Theta;
+          float pmask_pow = _Rim_Lighting0_PolarMask_Power;
+          float d = glsl_mod((theta - pmask_theta) - PI, 2 * PI) - PI;
+          float f = abs(1.0 / (1.0 + pow(abs(d), pmask_pow)));
+          matcap_mask *= floor(f * _Rim_Lighting0_Quantization) / _Rim_Lighting0_Quantization;
+        }
 #endif
 #if defined(_RIM_LIGHTING0_GLITTER)
       float rl_glitter = get_glitter(
@@ -1758,9 +1758,20 @@ float4 effect(inout v2f i)
 #endif  // _RIM_LIGHTING0
 #if defined(_RIM_LIGHTING1)
     {
-      float rl_view_dir = VIEW_DIR(_Rim_Lighting1_Center_Eye_Fix);
-      float theta = atan2(length(cross(rl_view_dir, normal)), dot(rl_view_dir, normal));
-      float rl = abs(theta) / PI;  // on [0, 1]
+      float3 rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);
+      float2 rl_uv;
+      {
+        const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+        const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(rl_view_dir, 0)));
+        const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
+        float m = 2.0 * sqrt(
+            cam_refl.x * cam_refl.x +
+            cam_refl.y * cam_refl.y +
+            (cam_refl.z + 1) * (cam_refl.z + 1));
+        rl_uv = cam_refl.xy / m + 0.5;
+      }
+      float theta = atan2(rl_uv.y - 0.5, rl_uv.x - 0.5);
+      float rl = length(rl_uv - 0.5);
       rl = pow(2, -_Rim_Lighting1_Power * abs(rl - _Rim_Lighting1_Center));
       float q = _Rim_Lighting1_Quantization;
       if (q > 0) {
@@ -1787,15 +1798,13 @@ float4 effect(inout v2f i)
         }
 #endif
 #if defined(_RIM_LIGHTING1_POLAR_MASK)
-      if (_Rim_Lighting1_PolarMask_Enabled) {
-        float pmask_theta = _Rim_Lighting1_PolarMask_Theta;
-        float pmask_pow = _Rim_Lighting1_PolarMask_Power;
-        float filter = abs(1.0 / (1.0 + pow(abs(matcap_theta - pmask_theta), pmask_pow)));;
-        if (q > 0) {
-          filter = floor(filter * q) / q;
+        if (_Rim_Lighting1_PolarMask_Enabled) {
+          float pmask_theta = _Rim_Lighting1_PolarMask_Theta;
+          float pmask_pow = _Rim_Lighting1_PolarMask_Power;
+          float d = glsl_mod((theta - pmask_theta) - PI, 2 * PI) - PI;
+          float f = abs(1.0 / (1.0 + pow(abs(d), pmask_pow)));
+          matcap_mask *= floor(f * _Rim_Lighting1_Quantization) / _Rim_Lighting1_Quantization;
         }
-        matcap_mask *= filter;
-      }
 #endif
 #if defined(_RIM_LIGHTING1_GLITTER)
       float rl_glitter = get_glitter(
@@ -1840,9 +1849,20 @@ float4 effect(inout v2f i)
 #endif  // _RIM_LIGHTING1
 #if defined(_RIM_LIGHTING2)
     {
-      float rl_view_dir = VIEW_DIR(_Rim_Lighting2_Center_Eye_Fix);
-      float theta = atan2(length(cross(rl_view_dir, normal)), dot(rl_view_dir, normal));
-      float rl = abs(theta) / PI;  // on [0, 1]
+      float3 rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);
+      float2 rl_uv;
+      {
+        const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+        const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(rl_view_dir, 0)));
+        const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
+        float m = 2.0 * sqrt(
+            cam_refl.x * cam_refl.x +
+            cam_refl.y * cam_refl.y +
+            (cam_refl.z + 1) * (cam_refl.z + 1));
+        rl_uv = cam_refl.xy / m + 0.5;
+      }
+      float theta = atan2(rl_uv.y - 0.5, rl_uv.x - 0.5);
+      float rl = length(rl_uv - 0.5);
       rl = pow(2, -_Rim_Lighting2_Power * abs(rl - _Rim_Lighting2_Center));
       float q = _Rim_Lighting2_Quantization;
       if (q > 0) {
@@ -1869,15 +1889,13 @@ float4 effect(inout v2f i)
         }
 #endif
 #if defined(_RIM_LIGHTING2_POLAR_MASK)
-      if (_Rim_Lighting2_PolarMask_Enabled) {
-        float pmask_theta = _Rim_Lighting2_PolarMask_Theta;
-        float pmask_pow = _Rim_Lighting2_PolarMask_Power;
-        float filter = abs(1.0 / (1.0 + pow(abs(matcap_theta - pmask_theta), pmask_pow)));;
-        if (q > 0) {
-          filter = floor(filter * q) / q;
+        if (_Rim_Lighting2_PolarMask_Enabled) {
+          float pmask_theta = _Rim_Lighting2_PolarMask_Theta;
+          float pmask_pow = _Rim_Lighting2_PolarMask_Power;
+          float d = glsl_mod((theta - pmask_theta) - PI, 2 * PI) - PI;
+          float f = abs(1.0 / (1.0 + pow(abs(d), pmask_pow)));
+          matcap_mask *= floor(f * _Rim_Lighting2_Quantization) / _Rim_Lighting2_Quantization;
         }
-        matcap_mask *= filter;
-      }
 #endif
 #if defined(_RIM_LIGHTING2_GLITTER)
       float rl_glitter = get_glitter(
@@ -1922,9 +1940,20 @@ float4 effect(inout v2f i)
 #endif  // _RIM_LIGHTING2
 #if defined(_RIM_LIGHTING3)
     {
-      float rl_view_dir = VIEW_DIR(_Rim_Lighting3_Center_Eye_Fix);
-      float theta = atan2(length(cross(rl_view_dir, normal)), dot(rl_view_dir, normal));
-      float rl = abs(theta) / PI;  // on [0, 1]
+      float3 rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);
+      float2 rl_uv;
+      {
+        const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+        const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(rl_view_dir, 0)));
+        const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
+        float m = 2.0 * sqrt(
+            cam_refl.x * cam_refl.x +
+            cam_refl.y * cam_refl.y +
+            (cam_refl.z + 1) * (cam_refl.z + 1));
+        rl_uv = cam_refl.xy / m + 0.5;
+      }
+      float theta = atan2(rl_uv.y - 0.5, rl_uv.x - 0.5);
+      float rl = length(rl_uv - 0.5);
       rl = pow(2, -_Rim_Lighting3_Power * abs(rl - _Rim_Lighting3_Center));
       float q = _Rim_Lighting3_Quantization;
       if (q > 0) {
@@ -1951,15 +1980,14 @@ float4 effect(inout v2f i)
         }
 #endif
 #if defined(_RIM_LIGHTING3_POLAR_MASK)
-      if (_Rim_Lighting3_PolarMask_Enabled) {
-        float pmask_theta = _Rim_Lighting3_PolarMask_Theta;
-        float pmask_pow = _Rim_Lighting3_PolarMask_Power;
-        float filter = abs(1.0 / (1.0 + pow(abs(matcap_theta - pmask_theta), pmask_pow)));;
-        if (q > 0) {
-          filter = floor(filter * q) / q;
+        if (_Rim_Lighting3_PolarMask_Enabled) {
+          float pmask_theta = _Rim_Lighting3_PolarMask_Theta;
+          float pmask_pow = _Rim_Lighting3_PolarMask_Power;
+          float d = glsl_mod((theta - pmask_theta) - PI, 2 * PI) - PI;
+          float d = glsl_mod((theta - pmask_theta) - PI, 2 * PI) - PI;
+          float f = abs(1.0 / (1.0 + pow(abs(d), pmask_pow)));
+          matcap_mask *= floor(f * _Rim_Lighting3_Quantization) / _Rim_Lighting3_Quantization;
         }
-        matcap_mask *= filter;
-      }
 #endif
 #if defined(_RIM_LIGHTING3_GLITTER)
       float rl_glitter = get_glitter(
