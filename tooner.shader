@@ -270,8 +270,6 @@ Shader "yum_food/tooner"
     [HideInInspector] _DstBlend ("_SrcBlend", Float) = 0
     [HideInInspector] _ZWrite ("_ZWrite", Float) = 1
 
-    _MatcapRL_Center_Eye_Correction("Apply center eye correction to matcaps and rim lighting", Float) = 0
-
     _Matcap0("Matcap", 2D) = "black" {}
     _Matcap0_Mask("Matcap mask", 2D) = "white" {}
     _Matcap0_Mask_Invert("Invert mask", Float) = 0.0
@@ -294,6 +292,7 @@ Shader "yum_food/tooner"
     _Matcap0_Overwrite_Rim_Lighting_1("Overwrite RL", Float) = 0
     _Matcap0_Overwrite_Rim_Lighting_2("Overwrite RL", Float) = 0
     _Matcap0_Overwrite_Rim_Lighting_3("Overwrite RL", Float) = 0
+    _Matcap0_Center_Eye_Fix("Enable center eye fix", Float) = 0
 
     _Matcap1("Matcap", 2D) = "black" {}
     _Matcap1_Mask("Matcap mask", 2D) = "white" {}
@@ -317,6 +316,7 @@ Shader "yum_food/tooner"
     _Matcap1_Overwrite_Rim_Lighting_1("Overwrite RL", Float) = 0
     _Matcap1_Overwrite_Rim_Lighting_2("Overwrite RL", Float) = 0
     _Matcap1_Overwrite_Rim_Lighting_3("Overwrite RL", Float) = 0
+    _Matcap1_Center_Eye_Fix("Enable center eye fix", Float) = 0
 
     _Rim_Lighting0_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting0_Mode("Rim lighting mode", Float) = 0
@@ -339,6 +339,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting0_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting0_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
+    _Rim_Lighting0_Center_Eye_Fix("Enable center eye fix", Float) = 0
 
     _Rim_Lighting1_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting1_Mode("Rim lighting mode", Float) = 0
@@ -361,6 +362,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting1_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting1_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
+    _Rim_Lighting1_Center_Eye_Fix("Enable center eye fix", Float) = 0
 
     _Rim_Lighting2_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting2_Mode("Rim lighting mode", Float) = 0
@@ -383,6 +385,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting2_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting2_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting2_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
+    _Rim_Lighting2_Center_Eye_Fix("Enable center eye fix", Float) = 0
 
     _Rim_Lighting3_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting3_Mode("Rim lighting mode", Float) = 0
@@ -405,6 +408,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting3_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting3_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting3_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
+    _Rim_Lighting3_Center_Eye_Fix("Enable center eye fix", Float) = 0
 
     _OKLAB_Enabled("Enable OKLAB", Float) = 0.0
     _OKLAB_Mask("Mask", 2D) = "white" {}
@@ -640,7 +644,6 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
-    /*
     Pass {
       Tags {
         "RenderType"="Opaque"
@@ -720,7 +723,6 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
-    */
   }
   CustomEditor "ToonerGUI"
 }

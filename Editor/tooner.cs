@@ -605,6 +605,13 @@ public class ToonerGUI : ShaderGUI {
         EditorGUI.indentLevel -= 1;
       }
 
+      bc = FindProperty($"_Matcap{i}_Center_Eye_Fix");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = EditorGUILayout.Toggle("Center eye fix", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+
       EditorGUI.BeginChangeCheck();
       bc = FindProperty($"_Matcap{i}Mode");
       MatcapMode mode = (MatcapMode) Math.Round(bc.floatValue);
@@ -734,6 +741,13 @@ public class ToonerGUI : ShaderGUI {
             bc,
             "UV channel");
 
+        bc = FindProperty($"_Rim_Lighting{i}_Center_Eye_Fix");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Center eye fix", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+
         bc = FindProperty($"_Rim_Lighting{i}_Mask_Sampler_Mode");
         SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
         sampler_mode = (SamplerMode) EditorGUILayout.EnumPopup(
@@ -853,13 +867,6 @@ public class ToonerGUI : ShaderGUI {
       return;
     }
     EditorGUI.indentLevel += 1;
-
-    MaterialProperty bc = FindProperty($"_MatcapRL_Center_Eye_Correction");
-    bool enabled = bc.floatValue > 1E-6;
-    EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Apply center eye correction", enabled);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = enabled ? 1.0f : 0.0f;
 
     DoMatcap();
     DoRimLighting();

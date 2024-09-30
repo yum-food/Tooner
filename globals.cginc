@@ -340,6 +340,7 @@ texture2D _Matcap0;
 texture2D _Matcap0_Mask;
 float _Matcap0_Mask_Invert;
 float _Matcap0_Mask_UV_Select;
+float _Matcap0_Center_Eye_Fix;
 texture2D _Matcap0_Mask2;
 float _Matcap0_Mask2_Invert;
 float _Matcap0_Mask2_UV_Select;
@@ -367,6 +368,7 @@ texture2D _Matcap1;
 texture2D _Matcap1_Mask;
 float _Matcap1_Mask_Invert;
 float _Matcap1_Mask_UV_Select;
+float _Matcap1_Center_Eye_Fix;
 texture2D _Matcap1_Mask2;
 float _Matcap1_Mask2_Invert;
 float _Matcap1_Mask2_UV_Select;
@@ -388,9 +390,6 @@ float _Matcap1_Overwrite_Rim_Lighting_2;
 float _Matcap1_Overwrite_Rim_Lighting_3;
 #endif
 
-
-float _MatcapRL_Center_Eye_Correction;
-
 #if defined(_RIM_LIGHTING0)
 float _Rim_Lighting0_Enabled;
 float _Rim_Lighting0_Mode;
@@ -398,6 +397,7 @@ float3 _Rim_Lighting0_Color;
 texture2D _Rim_Lighting0_Mask;
 float _Rim_Lighting0_Mask_Invert;
 float _Rim_Lighting0_Mask_UV_Select;
+float _Rim_Lighting0_Center_Eye_Fix;
 float _Rim_Lighting0_Mask_Sampler_Mode;
 float _Rim_Lighting0_Center;
 float _Rim_Lighting0_Power;
@@ -426,6 +426,7 @@ float3 _Rim_Lighting1_Color;
 texture2D _Rim_Lighting1_Mask;
 float _Rim_Lighting1_Mask_Invert;
 float _Rim_Lighting1_Mask_UV_Select;
+float _Rim_Lighting1_Center_Eye_Fix;
 float _Rim_Lighting1_Mask_Sampler_Mode;
 float _Rim_Lighting1_Center;
 float _Rim_Lighting1_Power;
@@ -454,6 +455,7 @@ float3 _Rim_Lighting2_Color;
 texture2D _Rim_Lighting2_Mask;
 float _Rim_Lighting2_Mask_Invert;
 float _Rim_Lighting2_Mask_UV_Select;
+float _Rim_Lighting2_Center_Eye_Fix;
 float _Rim_Lighting2_Mask_Sampler_Mode;
 float _Rim_Lighting2_Center;
 float _Rim_Lighting2_Power;
@@ -482,6 +484,7 @@ float3 _Rim_Lighting3_Color;
 texture2D _Rim_Lighting3_Mask;
 float _Rim_Lighting3_Mask_Invert;
 float _Rim_Lighting3_Mask_UV_Select;
+float _Rim_Lighting3_Center_Eye_Fix;
 float _Rim_Lighting3_Mask_Sampler_Mode;
 float _Rim_Lighting3_Center;
 float _Rim_Lighting3_Power;

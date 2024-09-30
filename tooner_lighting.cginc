@@ -1267,7 +1267,7 @@ float4 effect(inout v2f i)
 {
   const float3 view_dir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
   const float3 view_dir_c = normalize(i.centerCamPos - i.worldPos);
-#define MATCAP_VIEW_DIR() (_MatcapRL_Center_Eye_Correction == 1 ? view_dir_c : view_dir)
+#define VIEW_DIR(center_eye_fix) (center_eye_fix == 1 ? view_dir_c : view_dir)
 
   // Not necessarily normalized after interpolation.
   i.normal = normalize(i.normal);
@@ -1449,7 +1449,7 @@ float4 effect(inout v2f i)
   float matcap_radius;
   {
     const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
-    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(MATCAP_VIEW_DIR(), 0)));
+    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir, 0)));
     const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
     float m = 2.0 * sqrt(
         cam_refl.x * cam_refl.x +
@@ -1459,7 +1459,23 @@ float4 effect(inout v2f i)
     matcap_radius = length(matcap_uv - 0.5);
     matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
   }
+  float2 matcap_uv_center;
+  float matcap_theta_center;
+  float matcap_radius_center;
+  {
+    const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(view_dir_c, 0)));
+    const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
+    float m = 2.0 * sqrt(
+        cam_refl.x * cam_refl.x +
+        cam_refl.y * cam_refl.y +
+        (cam_refl.z + 1) * (cam_refl.z + 1));
+    matcap_uv_center = cam_refl.xy / m + 0.5;
+    matcap_radius_center = length(matcap_uv_center - 0.5);
+    matcap_theta_center = atan2(matcap_uv_center.y - 0.5, matcap_uv.x - 0.5);
+  }
 #endif
+
   float4 matcap_overwrite_mask = 0;
 #if defined(_MATCAP0) || defined(_MATCAP1)
   {
@@ -1496,18 +1512,18 @@ float4 effect(inout v2f i)
           raw_normal.y * binormal +
           raw_normal.z * i.normal
           );
-  {
-    const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
-    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(MATCAP_VIEW_DIR(), 0)));
-    const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
-    float m = 2.0 * sqrt(
-        cam_refl.x * cam_refl.x +
-        cam_refl.y * cam_refl.y +
-        (cam_refl.z + 1) * (cam_refl.z + 1));
-    matcap_uv = cam_refl.xy / m + 0.5;
-    matcap_radius = length(matcap_uv - 0.5);
-    matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
-  }
+      {
+        const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+        const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(VIEW_DIR(_Matcap0_Center_Eye_Fix), 0)));
+        const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
+        float m = 2.0 * sqrt(
+            cam_refl.x * cam_refl.x +
+            cam_refl.y * cam_refl.y +
+            (cam_refl.z + 1) * (cam_refl.z + 1));
+        matcap_uv = cam_refl.xy / m + 0.5;
+        matcap_radius = length(matcap_uv - 0.5);
+        matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
+      }
 #endif
 
 #if defined(_MATCAP0_DISTORTION0)
@@ -1518,7 +1534,7 @@ float4 effect(inout v2f i)
 
       float q = _Matcap0Quantization;
       if (q > 0) {
-        matcap = ceil(matcap * q) / q;
+        matcap = floor(matcap * q) / q;
       }
 
       int mode = round(_Matcap0Mode);
@@ -1586,18 +1602,18 @@ float4 effect(inout v2f i)
           raw_normal.y * binormal +
           raw_normal.z * i.normal
           );
-  {
-    const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
-    const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(MATCAP_VIEW_DIR(), 0)));
-    const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
-    float m = 2.0 * sqrt(
-        cam_refl.x * cam_refl.x +
-        cam_refl.y * cam_refl.y +
-        (cam_refl.z + 1) * (cam_refl.z + 1));
-    matcap_uv = cam_refl.xy / m + 0.5;
-    matcap_radius = length(matcap_uv - 0.5);
-    matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
-  }
+      {
+        const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+        const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(VIEW_DIR(_Matcap1_Center_Eye_Fix), 0)));
+        const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
+        float m = 2.0 * sqrt(
+            cam_refl.x * cam_refl.x +
+            cam_refl.y * cam_refl.y +
+            (cam_refl.z + 1) * (cam_refl.z + 1));
+        matcap_uv = cam_refl.xy / m + 0.5;
+        matcap_radius = length(matcap_uv - 0.5);
+        matcap_theta = atan2(matcap_uv.y - 0.5, matcap_uv.x - 0.5);
+      }
 #endif
 #if defined(_MATCAP1_DISTORTION0)
       float2 distort_uv = matcap_distortion0(matcap_uv);
@@ -1607,7 +1623,7 @@ float4 effect(inout v2f i)
 
       float q = _Matcap1Quantization;
       if (q > 0) {
-        matcap = ceil(matcap * q) / q;
+        matcap = floor(matcap * q) / q;
       }
 
       matcap_mask *= _Matcap1MixFactor;
@@ -1659,11 +1675,12 @@ float4 effect(inout v2f i)
 
 #if defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1) || defined(_RIM_LIGHTING2) || defined(_RIM_LIGHTING3)
   {
-    float theta = atan2(length(cross(MATCAP_VIEW_DIR(), normal)), dot(MATCAP_VIEW_DIR(), normal));
 #define PI 3.14159265
 
 #if defined(_RIM_LIGHTING0)
     {
+      float rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);
+      float theta = atan2(length(cross(rl_view_dir, normal)), dot(rl_view_dir, normal));
       float rl = abs(theta) / PI;  // on [0, 1]
       rl = pow(2, -_Rim_Lighting0_Power * abs(rl - _Rim_Lighting0_Center));
       float q = _Rim_Lighting0_Quantization;
@@ -1741,6 +1758,8 @@ float4 effect(inout v2f i)
 #endif  // _RIM_LIGHTING0
 #if defined(_RIM_LIGHTING1)
     {
+      float rl_view_dir = VIEW_DIR(_Rim_Lighting1_Center_Eye_Fix);
+      float theta = atan2(length(cross(rl_view_dir, normal)), dot(rl_view_dir, normal));
       float rl = abs(theta) / PI;  // on [0, 1]
       rl = pow(2, -_Rim_Lighting1_Power * abs(rl - _Rim_Lighting1_Center));
       float q = _Rim_Lighting1_Quantization;
@@ -1821,6 +1840,8 @@ float4 effect(inout v2f i)
 #endif  // _RIM_LIGHTING1
 #if defined(_RIM_LIGHTING2)
     {
+      float rl_view_dir = VIEW_DIR(_Rim_Lighting2_Center_Eye_Fix);
+      float theta = atan2(length(cross(rl_view_dir, normal)), dot(rl_view_dir, normal));
       float rl = abs(theta) / PI;  // on [0, 1]
       rl = pow(2, -_Rim_Lighting2_Power * abs(rl - _Rim_Lighting2_Center));
       float q = _Rim_Lighting2_Quantization;
@@ -1901,6 +1922,8 @@ float4 effect(inout v2f i)
 #endif  // _RIM_LIGHTING2
 #if defined(_RIM_LIGHTING3)
     {
+      float rl_view_dir = VIEW_DIR(_Rim_Lighting3_Center_Eye_Fix);
+      float theta = atan2(length(cross(rl_view_dir, normal)), dot(rl_view_dir, normal));
       float rl = abs(theta) / PI;  // on [0, 1]
       rl = pow(2, -_Rim_Lighting3_Power * abs(rl - _Rim_Lighting3_Center));
       float q = _Rim_Lighting3_Quantization;
