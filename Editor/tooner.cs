@@ -387,6 +387,13 @@ public class ToonerGUI : ShaderGUI {
             bc,
             "UV channel");
 
+        bc = FindProperty($"_PBR_Overlay{i}_Mask_Glitter");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = EditorGUILayout.Toggle("Mask glitter", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+
         EditorGUI.BeginChangeCheck();
         bc = FindProperty($"_PBR_Overlay{i}_Sampler_Mode");
         SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);

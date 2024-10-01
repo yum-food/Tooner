@@ -1009,7 +1009,8 @@ void applyDecal(inout float4 albedo,
 
 void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
     inout float roughness, inout float metallic, PbrOverlay ov,
-    float mask) {
+    float mask, out float glitter_mask) {
+  glitter_mask = 1;
   // Calculate alpha masks before we start mutating alpha.
 #if defined(_PBR_OVERLAY0)
   float a0 = saturate(ov.ov0_albedo.a * _PBR_Overlay0_Alpha_Multiplier);
@@ -1020,6 +1021,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
   }
   a0 *= mask;
   a0 *= ov.ov0_mask;
+  glitter_mask *= 1 - a0 * _PBR_Overlay0_Mask_Glitter;
 #endif
 #if defined(_PBR_OVERLAY1)
   float a1 = saturate(ov.ov1_albedo.a * _PBR_Overlay1_Alpha_Multiplier);
@@ -1030,6 +1032,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
   }
   a1 *= mask;
   a1 *= ov.ov1_mask;
+  glitter_mask *= 1 - a1 * _PBR_Overlay1_Mask_Glitter;
 #endif
 #if defined(_PBR_OVERLAY2)
   float a2 = saturate(ov.ov2_albedo.a * _PBR_Overlay2_Alpha_Multiplier);
@@ -1040,6 +1043,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
   }
   a2 *= mask;
   a2 *= ov.ov2_mask;
+  glitter_mask *= 1 - a2 * _PBR_Overlay2_Mask_Glitter;
 #endif
 #if defined(_PBR_OVERLAY3)
   float a3 = saturate(ov.ov3_albedo.a * _PBR_Overlay3_Alpha_Multiplier);
@@ -1050,6 +1054,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
   }
   a3 *= mask;
   a3 *= ov.ov3_mask;
+  glitter_mask *= 1 - a3 * _PBR_Overlay3_Mask_Glitter;
 #endif
 
 #if defined(_PBR_OVERLAY0)
@@ -1654,8 +1659,10 @@ float4 effect(inout v2f i)
 
   // TODO get rid of the pow. It's a hack to make matcap replace mode look
   // better with overlay tattoos.
+  float overlay_glitter_mask;
   mixOverlayAlbedoRoughnessMetallic(albedo, roughness, metallic, ov,
-      1 - pow((1 - min(matcap_overwrite_mask[0], matcap_overwrite_mask[1])), 8));
+      1 - pow((1 - min(matcap_overwrite_mask[0], matcap_overwrite_mask[1])), 8),
+      overlay_glitter_mask);
 #if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
   float3 decal_emission = 0;
   applyDecal(albedo, roughness, metallic, decal_emission, i);
@@ -2187,9 +2194,10 @@ float4 effect(inout v2f i)
 #if defined(_GLITTER)
   float3 glitter_color_unlit;
   {
-
-    float glitter_mask = _Glitter_Mask.SampleLevel(linear_repeat_s, i.uv0, /*lod=*/0);
+    float glitter_mask =
+      _Glitter_Mask.SampleLevel(linear_repeat_s, i.uv0, /*lod=*/0);
     glitter_mask *= min(matcap_overwrite_mask[0], matcap_overwrite_mask[1]);
+    glitter_mask *= overlay_glitter_mask;
     float glitter = get_glitter(
         get_uv_by_channel(i, round(_Glitter_UV_Select)),
         i.worldPos, i.centerCamPos, normal,

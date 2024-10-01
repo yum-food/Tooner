@@ -133,6 +133,7 @@ float _PBR_Overlay0_Alpha_Multiplier;
 float _PBR_Overlay0_UV_Select;
 float _PBR_Overlay0_Sampler_Mode;
 float _PBR_Overlay0_Mip_Bias;
+float _PBR_Overlay0_Mask_Glitter;
 #endif
 
 #if defined(_PBR_OVERLAY1)
@@ -164,6 +165,7 @@ float _PBR_Overlay1_Alpha_Multiplier;
 float _PBR_Overlay1_UV_Select;
 float _PBR_Overlay1_Sampler_Mode;
 float _PBR_Overlay1_Mip_Bias;
+float _PBR_Overlay1_Mask_Glitter;
 #endif
 
 #if defined(_PBR_OVERLAY2)
@@ -195,6 +197,7 @@ float _PBR_Overlay2_Alpha_Multiplier;
 float _PBR_Overlay2_UV_Select;
 float _PBR_Overlay2_Sampler_Mode;
 float _PBR_Overlay2_Mip_Bias;
+float _PBR_Overlay2_Mask_Glitter;
 #endif
 
 #if defined(_PBR_OVERLAY3)
@@ -226,6 +229,7 @@ float _PBR_Overlay3_Alpha_Multiplier;
 float _PBR_Overlay3_UV_Select;
 float _PBR_Overlay3_Sampler_Mode;
 float _PBR_Overlay3_Mip_Bias;
+float _PBR_Overlay3_Mask_Glitter;
 #endif
 
 #if defined(_DECAL0)

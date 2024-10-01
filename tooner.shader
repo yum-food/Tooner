@@ -50,6 +50,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay0_UV_Select("UV channel", Range(0,7)) = 0
     _PBR_Overlay0_Sampler_Mode("Sampler mode", Range(0,1)) = 0
     _PBR_Overlay0_Mip_Bias("Mip bias", Float) = 0.0
+    _PBR_Overlay0_Mask_Glitter("Mask glitter", Float) = 0.0
 
     _PBR_Overlay1_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay1_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -74,6 +75,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay1_UV_Select("UV channel", Range(0,7)) = 0
     _PBR_Overlay1_Sampler_Mode("Sampler mode", Range(0,1)) = 0
     _PBR_Overlay1_Mip_Bias("Mip bias", Float) = 0.0
+    _PBR_Overlay1_Mask_Glitter("Mask glitter", Float) = 0.0
 
     _PBR_Overlay2_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay2_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -98,6 +100,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay2_UV_Select("UV channel", Range(0,7)) = 0
     _PBR_Overlay2_Sampler_Mode("Sampler mode", Range(0,1)) = 0
     _PBR_Overlay2_Mip_Bias("Mip bias", Float) = 0.0
+    _PBR_Overlay2_Mask_Glitter("Mask glitter", Float) = 0.0
 
     _PBR_Overlay3_Enable("Enable PBR overlay", Float) = 0.0
     _PBR_Overlay3_BaseColor("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -122,6 +125,7 @@ Shader "yum_food/tooner"
     _PBR_Overlay3_UV_Select("UV channel", Range(0,7)) = 0
     _PBR_Overlay3_Sampler_Mode("Sampler mode", Range(0,1)) = 0
     _PBR_Overlay3_Mip_Bias("Mip bias", Float) = 0.0
+    _PBR_Overlay3_Mask_Glitter("Mask glitter", Float) = 0.0
 
     _Decal0_Enable("Enable decal", Float) = 0.0
     _Decal0_BaseColor("Base color", 2D) = "white" {}
