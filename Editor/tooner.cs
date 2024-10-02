@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEditor;
@@ -7,6 +8,7 @@ public class ToonerGUI : ShaderGUI {
   Material target;
   MaterialEditor editor;
   MaterialProperty[] properties;
+  List<bool> show_ui;
 
   public override void OnGUI(
       MaterialEditor editor,
@@ -14,7 +16,107 @@ public class ToonerGUI : ShaderGUI {
     this.target = editor.target as Material;
     this.editor = editor;
     this.properties = properties;
+    this.show_ui = new List<bool>();
     DoMain();
+  }
+
+  void TexturePropertySingleLine(GUIContent label, MaterialProperty bct)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    editor.TexturePropertySingleLine(label, bct);
+  }
+  void TexturePropertySingleLine(GUIContent label, MaterialProperty bct, MaterialProperty bc)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    editor.TexturePropertySingleLine(label, bct, bc);
+  }
+  void TexturePropertyWithHDRColor(GUIContent label, MaterialProperty bct, MaterialProperty bc, bool opt)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    editor.TexturePropertyWithHDRColor(label, bct, bc, opt);
+  }
+  void TextureScaleOffsetProperty(MaterialProperty bc)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    editor.TextureScaleOffsetProperty(bc);
+  }
+  void RangeProperty(MaterialProperty bc, string label)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    editor.RangeProperty(bc, label);
+  }
+  void ShaderProperty(MaterialProperty bc, GUIContent label)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    editor.ShaderProperty(bc, label);
+  }
+  void FloatProperty(MaterialProperty bc, string label)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    editor.FloatProperty(bc, label);
+  }
+  void IntegerProperty(MaterialProperty bc, string label)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    editor.IntegerProperty(bc, label);
+  }
+  void VectorProperty(MaterialProperty bc, string label)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    editor.VectorProperty(bc, label);
+  }
+  void ColorProperty(MaterialProperty bc, string label)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    editor.ColorProperty(bc, label);
+  }
+  Enum EnumPopup(GUIContent label, Enum selected)
+  {
+    if (show_ui.Contains(false)) {
+      return selected;
+    }
+    return EditorGUILayout.EnumPopup(label, selected);
+  }
+  bool Toggle(string label, bool v)
+  {
+    if (show_ui.Contains(false)) {
+      return v;
+    }
+    return EditorGUILayout.Toggle(label, v);
+  }
+  void LabelField(string label)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    EditorGUILayout.LabelField(label);
+  }
+  void LabelField(string label, UnityEngine.GUIStyle style)
+  {
+    if (show_ui.Contains(false)) {
+      return;
+    }
+    EditorGUILayout.LabelField(label, style);
   }
 
   static GUIContent staticLabel = new GUIContent();
@@ -47,77 +149,65 @@ public class ToonerGUI : ShaderGUI {
     }
   }
 
-  void DoBaseColorLogic() {
-      MaterialProperty bct = FindProperty("_MainTex");
-      SetKeyword("_BASECOLOR_MAP", bct.textureValue);
-  }
-  void DoBaseColorUI() {
-      MaterialProperty bc = FindProperty("_Color");
-      MaterialProperty bct = FindProperty("_MainTex");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bct, "Base color (RGBA)"),
-          bct,
-          bc);
-      if (bct.textureValue) {
-        editor.TextureScaleOffsetProperty(bct);
-      }
+  void DoBaseColor() {
+    MaterialProperty bc = FindProperty("_Color");
+    MaterialProperty bct = FindProperty("_MainTex");
+    TexturePropertySingleLine(
+        MakeLabel(bct, "Base color (RGBA)"),
+        bct,
+        bc);
+    SetKeyword("_BASECOLOR_MAP", bct.textureValue);
+    if (bct.textureValue) {
+      TextureScaleOffsetProperty(bct);
+    }
   }
 
-  void DoNormalLogic() {
-      MaterialProperty bct = FindProperty("_BumpMap");
-      SetKeyword("_NORMAL_MAP", bct.textureValue);
-  }
-  void DoNormalUI() {
-      MaterialProperty bct = FindProperty("_BumpMap");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bct, "Normal"),
-          bct,
-          FindProperty("_Tex_NormalStr"));
-      if (bct.textureValue) {
-        editor.TextureScaleOffsetProperty(bct);
-      }
+  void DoNormal() {
+    MaterialProperty bct = FindProperty("_BumpMap");
+    TexturePropertySingleLine(
+        MakeLabel(bct, "Normal"),
+        bct,
+        FindProperty("_Tex_NormalStr"));
+    if (bct.textureValue) {
+      TextureScaleOffsetProperty(bct);
+    }
+    SetKeyword("_NORMAL_MAP", bct.textureValue);
   }
 
-  void DoMetallicLogic() {
-      MaterialProperty bct = FindProperty("_MetallicTex");
-      SetKeyword("_METALLIC_MAP", bct.textureValue);
-  }
-  void DoMetallicUI() {
-      MaterialProperty bc = FindProperty("_Metallic");
-      MaterialProperty bct = FindProperty("_MetallicTex");
-      editor.TexturePropertySingleLine(
-          MakeLabel(bct, "Metallic (RGBA)"),
-          bct,
-          bc);
-      if (bct.textureValue) {
-        editor.TextureScaleOffsetProperty(bct);
+  void DoMetallic() {
+    MaterialProperty bc = FindProperty("_Metallic");
+    MaterialProperty bct = FindProperty("_MetallicTex");
+    TexturePropertySingleLine(
+        MakeLabel(bct, "Metallic (RGBA)"),
+        bct,
+        bc);
+    SetKeyword("_METALLIC_MAP", bct.textureValue);
+    if (bct.textureValue) {
+      TextureScaleOffsetProperty(bct);
 
-        bc = FindProperty("_MetallicTexChannel");
-        editor.RangeProperty(bc, "Channel");
-      }
+      bc = FindProperty("_MetallicTexChannel");
+      RangeProperty(bc, "Channel");
+    }
   }
 
-  void DoRoughnessLogic() {
-      MaterialProperty bct = FindProperty("_RoughnessTex");
-      SetKeyword("_ROUGHNESS_MAP", bct.textureValue);
-  }
-  void DoRoughnessUI() {
+  void DoRoughness() {
       MaterialProperty bc = FindProperty("_Roughness");
       MaterialProperty bct = FindProperty("_RoughnessTex");
-      editor.TexturePropertySingleLine(
+      TexturePropertySingleLine(
           MakeLabel(bct, "Roughness (RGBA)"),
           bct,
           bc);
+      SetKeyword("_ROUGHNESS_MAP", bct.textureValue);
       if (bct.textureValue) {
-        editor.TextureScaleOffsetProperty(bct);
+        TextureScaleOffsetProperty(bct);
 
         bc = FindProperty("_RoughnessTexChannel");
-        editor.RangeProperty(bc, "Channel");
+        RangeProperty(bc, "Channel");
 
         bc = FindProperty("_Roughness_Invert");
         bool enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Invert", enabled);
+        enabled = Toggle("Invert", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
       }
@@ -129,7 +219,7 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.BeginChangeCheck();
     var fs_orig = EditorStyles.label.fontStyle;
     EditorStyles.label.fontStyle = FontStyle.Bold;
-    enabled = EditorGUILayout.Toggle(name, enabled);
+    enabled = Toggle(name, enabled);
     EditorStyles.label.fontStyle = fs_orig;
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
@@ -141,65 +231,50 @@ public class ToonerGUI : ShaderGUI {
     Repeat,
     Clamp,
   };
-  void DoPBRLogic() {
-      DoBaseColorLogic();
-      DoNormalLogic();
-      DoMetallicLogic();
-      DoRoughnessLogic();
-
-      MaterialProperty bc = FindProperty($"_PBR_Sampler_Mode");
-      SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
-      SetKeyword($"_PBR_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
-      SetKeyword($"_PBR_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
-  }
-  void DoPBRUI() {
-    if (!AddCollapsibleMenu("PBR", "_PBR")) {
-      return;
-    }
+  void DoPBR() {
+    show_ui.Add(AddCollapsibleMenu("PBR", "_PBR"));
     EditorGUI.indentLevel += 1;
     {
-      DoBaseColorUI();
-      DoNormalUI();
-      DoMetallicUI();
-      DoRoughnessUI();
+      DoBaseColor();
+      DoNormal();
+      DoMetallic();
+      DoRoughness();
 
       EditorGUI.BeginChangeCheck();
       MaterialProperty bc = FindProperty($"_PBR_Sampler_Mode");
       SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
-      sampler_mode = (SamplerMode) EditorGUILayout.EnumPopup(
+      sampler_mode = (SamplerMode) EnumPopup(
           MakeLabel("Sampler mode"), sampler_mode);
       EditorGUI.EndChangeCheck();
       bc.floatValue = (int) sampler_mode;
+
+      SetKeyword($"_PBR_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
+      SetKeyword($"_PBR_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
     }
     EditorGUI.indentLevel -= 1;
-  }
-  void DoPBR() {
-    DoPBRLogic();
-    DoPBRUI();
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoClearcoat() {
-    if (!AddCollapsibleMenu($"Clearcoat", $"_Clearcoat")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu($"Clearcoat", $"_Clearcoat"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc;
     bc = FindProperty("_Clearcoat_Enabled");
     bool enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable clearcoat", enabled);
+    enabled = Toggle("Enable clearcoat", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_CLEARCOAT", enabled);
 
     if (enabled) {
         bc = FindProperty("_Clearcoat_Strength");
-        editor.RangeProperty(bc, "Strength");
+        RangeProperty(bc, "Strength");
         bc = FindProperty("_Clearcoat_Roughness");
-        editor.RangeProperty(bc, "Roughness");
+        RangeProperty(bc, "Roughness");
         bc = FindProperty("_Clearcoat_Mask");
-        editor.TexturePropertySingleLine(MakeLabel(bc, "Mask"), bc);
+        TexturePropertySingleLine(MakeLabel(bc, "Mask"), bc);
         SetKeyword($"_CLEARCOAT_MASK", bc.textureValue);
 
         if (bc.textureValue) {
@@ -207,14 +282,14 @@ public class ToonerGUI : ShaderGUI {
           bc = FindProperty("_Clearcoat_Mask_Invert");
           enabled = bc.floatValue > 1E-6;
           EditorGUI.BeginChangeCheck();
-          enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+          enabled = Toggle("Invert mask", enabled);
           EditorGUI.EndChangeCheck();
           bc.floatValue = enabled ? 1.0f : 0.0f;
           EditorGUI.indentLevel -= 1;
         }
 
         bc = FindProperty("_Clearcoat_Mask2");
-        editor.TexturePropertySingleLine(MakeLabel(bc, "Mask 2"), bc);
+        TexturePropertySingleLine(MakeLabel(bc, "Mask 2"), bc);
         SetKeyword($"_CLEARCOAT_MASK2", bc.textureValue);
 
         if (bc.textureValue) {
@@ -222,13 +297,14 @@ public class ToonerGUI : ShaderGUI {
           bc = FindProperty("_Clearcoat_Mask2_Invert");
           enabled = bc.floatValue > 1E-6;
           EditorGUI.BeginChangeCheck();
-          enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+          enabled = Toggle("Invert mask", enabled);
           EditorGUI.EndChangeCheck();
           bc.floatValue = enabled ? 1.0f : 0.0f;
           EditorGUI.indentLevel -= 1;
         }
     }
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   enum PbrAlbedoMixMode {
@@ -239,20 +315,16 @@ public class ToonerGUI : ShaderGUI {
   };
 
   void DoPBROverlay() {
-    if (!AddCollapsibleMenu($"PBR overlays", $"_PBR_Overlay")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu($"PBR overlays", $"_PBR_Overlay"));
     EditorGUI.indentLevel += 1;
     for (int i = 0; i < 4; i++) {
-      if (!AddCollapsibleMenu($"PBR overlay {i}", $"_PBR_Overlay{i}")) {
-        continue;
-      }
+      show_ui.Add(AddCollapsibleMenu($"PBR overlay {i}", $"_PBR_Overlay{i}"));
       EditorGUI.indentLevel += 1;
 
       MaterialProperty bc = FindProperty($"_PBR_Overlay{i}_Enable");
       bool enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Enable", enabled);
+      enabled = Toggle("Enable", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
       SetKeyword($"_PBR_OVERLAY{i}", enabled);
@@ -260,19 +332,19 @@ public class ToonerGUI : ShaderGUI {
       if (enabled) {
         bc = FindProperty($"_PBR_Overlay{i}_BaseColor");
         MaterialProperty bct = FindProperty($"_PBR_Overlay{i}_BaseColorTex");
-        editor.TexturePropertySingleLine(
+        TexturePropertySingleLine(
             MakeLabel(bct, "Base color (RGBA)"),
             bct,
             bc);
         if (bct.textureValue) {
-          editor.TextureScaleOffsetProperty(bct);
+          TextureScaleOffsetProperty(bct);
         }
         SetKeyword($"_PBR_OVERLAY{i}_BASECOLOR_MAP", bct.textureValue);
 
         EditorGUI.BeginChangeCheck();
         bc = FindProperty($"_PBR_Overlay{i}_Mix");
         PbrAlbedoMixMode mode = (PbrAlbedoMixMode) Math.Round(bc.floatValue);
-        mode = (PbrAlbedoMixMode) EditorGUILayout.EnumPopup(
+        mode = (PbrAlbedoMixMode) EnumPopup(
             MakeLabel("Mix mode"), mode);
         if (EditorGUI.EndChangeCheck()) {
           RecordAction($"PBR overlay mix mode {i}");
@@ -288,45 +360,45 @@ public class ToonerGUI : ShaderGUI {
         bc = FindProperty($"_PBR_Overlay{i}_Constrain_By_Alpha");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Constrain to transparent sections", enabled);
+        enabled = Toggle("Constrain to transparent sections", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
         if (enabled) {
           EditorGUI.indentLevel += 1;
           bc = FindProperty($"_PBR_Overlay{i}_Constrain_By_Alpha_Min");
-          editor.RangeProperty(bc, "Min");
+          RangeProperty(bc, "Min");
           bc = FindProperty($"_PBR_Overlay{i}_Constrain_By_Alpha_Max");
-          editor.RangeProperty(bc, "Max");
+          RangeProperty(bc, "Max");
           EditorGUI.indentLevel -= 1;
         }
         bc = FindProperty($"_PBR_Overlay{i}_Alpha_Multiplier");
-        editor.RangeProperty(bc, "Alpha multiplier");
+        RangeProperty(bc, "Alpha multiplier");
 
         bc = FindProperty($"_PBR_Overlay{i}_Emission");
         bct = FindProperty($"_PBR_Overlay{i}_EmissionTex");
-        editor.TexturePropertySingleLine(
+        TexturePropertySingleLine(
             MakeLabel(bct, "Emission (RGB)"),
             bct,
             bc);
         if (bct.textureValue) {
-          editor.TextureScaleOffsetProperty(bct);
+          TextureScaleOffsetProperty(bct);
         }
         SetKeyword($"_PBR_OVERLAY{i}_EMISSION_MAP", bct.textureValue);
 
         bct = FindProperty($"_PBR_Overlay{i}_NormalTex");
-        editor.TexturePropertySingleLine(
+        TexturePropertySingleLine(
             MakeLabel(bct, "Normal"),
             bct,
             FindProperty($"_PBR_Overlay{i}_Tex_NormalStr"));
         if (bct.textureValue) {
-          editor.TextureScaleOffsetProperty(bct);
+          TextureScaleOffsetProperty(bct);
         }
         SetKeyword($"_PBR_OVERLAY{i}_NORMAL_MAP", bct.textureValue);
 
         bc = FindProperty($"_PBR_Overlay{i}_Metallic_Enable");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Enable metallic", enabled);
+        enabled = Toggle("Enable metallic", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
         SetKeyword($"_PBR_OVERLAY{i}_METALLIC", enabled);
@@ -334,12 +406,12 @@ public class ToonerGUI : ShaderGUI {
         if (enabled) {
           bc = FindProperty($"_PBR_Overlay{i}_Metallic");
           bct = FindProperty($"_PBR_Overlay{i}_MetallicTex");
-          editor.TexturePropertySingleLine(
+          TexturePropertySingleLine(
               MakeLabel(bct, "Metallic (RGBA)"),
               bct,
               bc);
           if (bct.textureValue) {
-            editor.TextureScaleOffsetProperty(bct);
+            TextureScaleOffsetProperty(bct);
           }
           SetKeyword($"_PBR_OVERLAY{i}_METALLIC_MAP", bct.textureValue);
         }
@@ -347,7 +419,7 @@ public class ToonerGUI : ShaderGUI {
         bc = FindProperty($"_PBR_Overlay{i}_Roughness_Enable");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Enable roughness", enabled);
+        enabled = Toggle("Enable roughness", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
         SetKeyword($"_PBR_OVERLAY{i}_ROUGHNESS", enabled);
@@ -356,19 +428,19 @@ public class ToonerGUI : ShaderGUI {
           EditorGUI.indentLevel += 1;
           bc = FindProperty($"_PBR_Overlay{i}_Roughness");
           bct = FindProperty($"_PBR_Overlay{i}_RoughnessTex");
-          editor.TexturePropertySingleLine(
+          TexturePropertySingleLine(
               MakeLabel(bct, "Roughness (RGBA)"),
               bct,
               bc);
           if (bct.textureValue) {
-            editor.TextureScaleOffsetProperty(bct);
+            TextureScaleOffsetProperty(bct);
           }
           SetKeyword($"_PBR_OVERLAY{i}_ROUGHNESS_MAP", bct.textureValue);
           EditorGUI.indentLevel -= 1;
         }
 
         bct = FindProperty($"_PBR_Overlay{i}_Mask");
-        editor.TexturePropertySingleLine(
+        TexturePropertySingleLine(
             MakeLabel(bct, "Mask"),
             bct);
         SetKeyword($"_PBR_OVERLAY{i}_MASK", bct.textureValue);
@@ -377,27 +449,27 @@ public class ToonerGUI : ShaderGUI {
           bc = FindProperty($"_PBR_Overlay{i}_Mask_Invert");
           enabled = bc.floatValue > 1E-6;
           EditorGUI.BeginChangeCheck();
-          enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+          enabled = Toggle("Invert mask", enabled);
           EditorGUI.EndChangeCheck();
           bc.floatValue = enabled ? 1.0f : 0.0f;
         }
 
         bc = FindProperty($"_PBR_Overlay{i}_UV_Select");
-        editor.RangeProperty(
+        RangeProperty(
             bc,
             "UV channel");
 
         bc = FindProperty($"_PBR_Overlay{i}_Mask_Glitter");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Mask glitter", enabled);
+        enabled = Toggle("Mask glitter", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
 
         EditorGUI.BeginChangeCheck();
         bc = FindProperty($"_PBR_Overlay{i}_Sampler_Mode");
         SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
-        sampler_mode = (SamplerMode) EditorGUILayout.EnumPopup(
+        sampler_mode = (SamplerMode) EnumPopup(
             MakeLabel("Sampler mode"), sampler_mode);
         EditorGUI.EndChangeCheck();
         bc.floatValue = (int) sampler_mode;
@@ -405,7 +477,7 @@ public class ToonerGUI : ShaderGUI {
         SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
 
         bc = FindProperty($"_PBR_Overlay{i}_Mip_Bias");
-        editor.FloatProperty(bc, "Mip bias");
+        FloatProperty(bc, "Mip bias");
       } else {
         SetKeyword($"_PBR_OVERLAY{i}_BASECOLOR_MAP", false);
         SetKeyword($"_PBR_OVERLAY{i}_MIX_ALPHA_BLEND", false);
@@ -421,84 +493,82 @@ public class ToonerGUI : ShaderGUI {
         SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_CLAMP", false);
       }
       EditorGUI.indentLevel -= 1;
+      show_ui.RemoveAt(show_ui.Count - 1);
     }
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoDecal() {
-    if (!AddCollapsibleMenu("Decals", "_Decal")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Decals", "_Decal"));
     EditorGUI.indentLevel += 1;
     for (int i = 0; i < 4; i++) {
-      if (!AddCollapsibleMenu($"Decal {i}", $"_Decal{i}")) {
-        continue;
-      }
+      show_ui.Add(AddCollapsibleMenu($"Decal {i}", $"_Decal{i}"));
       EditorGUI.indentLevel += 1;
 
       MaterialProperty bc = FindProperty($"_Decal{i}_Enable");
       bool enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Enable", enabled);
+      enabled = Toggle("Enable", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
       SetKeyword($"_DECAL{i}", enabled);
 
       if (enabled) {
         bc = FindProperty($"_Decal{i}_BaseColor");
-        editor.TexturePropertySingleLine(
+        TexturePropertySingleLine(
             MakeLabel(bc, "Base color (RGBA)"),
             bc);
         if (bc.textureValue) {
-          editor.TextureScaleOffsetProperty(bc);
+          TextureScaleOffsetProperty(bc);
         }
 
         bc = FindProperty($"_Decal{i}_Roughness");
-        editor.TexturePropertySingleLine(
+        TexturePropertySingleLine(
             MakeLabel(bc, "Roughness"),
             bc);
         SetKeyword($"_DECAL{i}_ROUGHNESS", bc.textureValue);
 
         bc = FindProperty($"_Decal{i}_Metallic");
-        editor.TexturePropertySingleLine(
+        TexturePropertySingleLine(
             MakeLabel(bc, "Metallic"),
             bc);
         SetKeyword($"_DECAL{i}_METALLIC", bc.textureValue);
 
         bc = FindProperty($"_Decal{i}_Emission_Strength");
-        editor.FloatProperty(
+        FloatProperty(
             bc,
             "Emission strength");
         bc = FindProperty($"_Decal{i}_Angle");
-        editor.RangeProperty(
+        RangeProperty(
             bc,
             "Angle");
 
         bc = FindProperty($"_Decal{i}_UV_Select");
-        editor.RangeProperty(
+        RangeProperty(
             bc,
             "UV channel");
       }
-
       EditorGUI.indentLevel -= 1;
+      show_ui.RemoveAt(show_ui.Count - 1);
     }
+    EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoEmission() {
-    if (!AddCollapsibleMenu("Emission", "_Emission")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Emission", "_Emission"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc;
     MaterialProperty bct;
     {
-      EditorGUILayout.LabelField($"Base slot", EditorStyles.boldLabel);
+      LabelField($"Base slot", EditorStyles.boldLabel);
       EditorGUI.indentLevel += 1;
 
       bc = FindProperty($"_EmissionColor");
       bct = FindProperty($"_EmissionMap");
-      editor.TexturePropertyWithHDRColor(
+      TexturePropertyWithHDRColor(
           MakeLabel(bct, "Emission (RGB)"),
           bct, bc, false);
       SetKeyword($"_EMISSION", bct.textureValue);
@@ -506,36 +576,37 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
     for (int i = 0; i < 2; i++) {
-      EditorGUILayout.LabelField($"Extra slot {i}", EditorStyles.boldLabel);
+      LabelField($"Extra slot {i}", EditorStyles.boldLabel);
       EditorGUI.indentLevel += 1;
       {
         bc = FindProperty($"_Emission{i}Color");
         bct = FindProperty($"_Emission{i}Tex");
-        editor.TexturePropertyWithHDRColor(
+        TexturePropertyWithHDRColor(
             MakeLabel(bct, "Emission (RGB)"),
             bct, bc, false);
         SetKeyword($"_EMISSION{i}", bct.textureValue);
 
         if (bct.textureValue) {
           bc = FindProperty($"_Emission{i}_UV_Select");
-          editor.RangeProperty(
+          RangeProperty(
               bc,
               "UV channel");
 
           bc = FindProperty($"_Emission{i}Multiplier");
-          editor.RangeProperty(bc, "Multiplier");
+          RangeProperty(bc, "Multiplier");
         }
       }
       EditorGUI.indentLevel -= 1;
     }
 
     bc = FindProperty("_Global_Emission_Factor");
-    editor.FloatProperty(bc, "Global emissions multiplier");
+    FloatProperty(bc, "Global emissions multiplier");
 
     bc = FindProperty("_Global_Emission_Additive_Factor");
-    editor.FloatProperty(bc, "Global emissions additive factor");
+    FloatProperty(bc, "Global emissions additive factor");
 
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   enum MatcapMode {
@@ -549,26 +620,25 @@ public class ToonerGUI : ShaderGUI {
 
   void DoMatcap() {
     for (int i = 0; i < 2; i++) {
-      if (!AddCollapsibleMenu($"Matcap {i}", $"_Matcap{i}")) {
-        continue;
-      }
+      show_ui.Add(AddCollapsibleMenu($"Matcap {i}", $"_Matcap{i}"));
       EditorGUI.indentLevel += 1;
 
       MaterialProperty bc;
 
       bc = FindProperty($"_Matcap{i}");
-      editor.TexturePropertySingleLine(
+      TexturePropertySingleLine(
           MakeLabel(bc, $"Matcap {i}"),
           bc);
       SetKeyword($"_MATCAP{i}", bc.textureValue);
 
       if (!bc.textureValue) {
         EditorGUI.indentLevel -= 1;
+        show_ui.RemoveAt(show_ui.Count - 1);
         continue;
       }
 
       bc = FindProperty($"_Matcap{i}_Mask");
-      editor.TexturePropertySingleLine(
+      TexturePropertySingleLine(
           MakeLabel(bc, "Mask"),
           bc);
       SetKeyword($"_MATCAP{i}_MASK", bc.textureValue);
@@ -579,19 +649,19 @@ public class ToonerGUI : ShaderGUI {
         bc = FindProperty($"_Matcap{i}_Mask_Invert");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+        enabled = Toggle("Invert mask", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
 
         bc = FindProperty($"_Matcap{i}_Mask_UV_Select");
-        editor.RangeProperty(
+        RangeProperty(
             bc,
             "UV channel");
         EditorGUI.indentLevel -= 1;
       }
 
       bc = FindProperty($"_Matcap{i}_Mask2");
-      editor.TexturePropertySingleLine(
+      TexturePropertySingleLine(
           MakeLabel(bc, "Mask"),
           bc);
       SetKeyword($"_MATCAP{i}_MASK2", bc.textureValue);
@@ -601,12 +671,12 @@ public class ToonerGUI : ShaderGUI {
         bc = FindProperty($"_Matcap{i}_Mask2_Invert");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+        enabled = Toggle("Invert mask", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
 
         bc = FindProperty($"_Matcap{i}_Mask2_UV_Select");
-        editor.RangeProperty(
+        RangeProperty(
             bc,
             "UV channel");
         EditorGUI.indentLevel -= 1;
@@ -615,14 +685,14 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty($"_Matcap{i}_Center_Eye_Fix");
       enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Center eye fix", enabled);
+      enabled = Toggle("Center eye fix", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
 
       EditorGUI.BeginChangeCheck();
       bc = FindProperty($"_Matcap{i}Mode");
       MatcapMode mode = (MatcapMode) Math.Round(bc.floatValue);
-      mode = (MatcapMode) EditorGUILayout.EnumPopup(
+      mode = (MatcapMode) EnumPopup(
           MakeLabel("Matcap mode"), mode);
       if (EditorGUI.EndChangeCheck()) {
         RecordAction($"Matcap {i}");
@@ -632,29 +702,29 @@ public class ToonerGUI : ShaderGUI {
       }
 
       bc = FindProperty($"_Matcap{i}Str");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Matcap strength");
 
       bc = FindProperty($"_Matcap{i}MixFactor");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Mix factor");
 
       bc = FindProperty($"_Matcap{i}Emission");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Emission strength");
 
       bc = FindProperty($"_Matcap{i}Quantization");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Quantization");
 
       bc = FindProperty($"_Matcap{i}Normal_Enabled");
       enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Replace normals", enabled);
+      enabled = Toggle("Replace normals", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
       SetKeyword($"_MATCAP{i}_NORMAL", enabled);
@@ -662,22 +732,22 @@ public class ToonerGUI : ShaderGUI {
       if (enabled) {
         EditorGUI.indentLevel += 1;
         bc = FindProperty($"_Matcap{i}Normal");
-        editor.TexturePropertySingleLine(
+        TexturePropertySingleLine(
             MakeLabel(bc, "Normal map"),
             bc);
         if (bc.textureValue) {
-          editor.TextureScaleOffsetProperty(bc);
+          TextureScaleOffsetProperty(bc);
 
           bc = FindProperty($"_Matcap{i}Normal_Str");
-          editor.RangeProperty(bc, "Strength");
+          RangeProperty(bc, "Strength");
 
           bc = FindProperty($"_Matcap{i}Normal_UV_Select");
-          editor.RangeProperty(
+          RangeProperty(
               bc,
               "UV channel");
 
           bc = FindProperty($"_Matcap{i}Normal_Mip_Bias");
-          editor.FloatProperty(bc, "Mip bias");
+          FloatProperty(bc, "Mip bias");
         }
         EditorGUI.indentLevel -= 1;
       }
@@ -685,7 +755,7 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty($"_Matcap{i}Distortion0");
       enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Enable distortion 0", enabled);
+      enabled = Toggle("Enable distortion 0", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
       SetKeyword($"_MATCAP{i}_DISTORTION0", enabled);
@@ -694,20 +764,19 @@ public class ToonerGUI : ShaderGUI {
         bc = FindProperty($"_Matcap{i}_Overwrite_Rim_Lighting_{j}");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle($"Overwrite rim lighting {j}", enabled);
+        enabled = Toggle($"Overwrite rim lighting {j}", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
       }
 
       EditorGUI.indentLevel -= 1;
+      show_ui.RemoveAt(show_ui.Count - 1);
     }
   }
 
   void DoRimLighting() {
     for (int i = 0; i < 4; i++) {
-      if (!AddCollapsibleMenu($"Rim lighting {i}", $"_Rim_Lighting{i}")) {
-        continue;
-      }
+      show_ui.Add(AddCollapsibleMenu($"Rim lighting {i}", $"_Rim_Lighting{i}"));
       EditorGUI.indentLevel += 1;
 
       MaterialProperty bc;
@@ -715,20 +784,22 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty($"_Rim_Lighting{i}_Enabled");
       bool enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Enable", enabled);
+      enabled = Toggle("Enable", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
       SetKeyword($"_RIM_LIGHTING{i}", enabled);
 
       if (!enabled) {
+        EditorGUI.indentLevel -= 1;
+        show_ui.RemoveAt(show_ui.Count - 1);
         continue;
       }
 
       bc = FindProperty($"_Rim_Lighting{i}_Color");
-      editor.ColorProperty(bc, "Color (RGB)");
+      ColorProperty(bc, "Color (RGB)");
 
       bc = FindProperty($"_Rim_Lighting{i}_Mask");
-      editor.TexturePropertySingleLine(
+      TexturePropertySingleLine(
           MakeLabel(bc, "Mask"),
           bc);
       SetKeyword($"_RIM_LIGHTING{i}_MASK", bc.textureValue);
@@ -739,18 +810,18 @@ public class ToonerGUI : ShaderGUI {
         bc = FindProperty($"_Rim_Lighting{i}_Mask_Invert");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Invert mask", enabled);
+        enabled = Toggle("Invert mask", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
 
         bc = FindProperty($"_Rim_Lighting{i}_Mask_UV_Select");
-        editor.RangeProperty(
+        RangeProperty(
             bc,
             "UV channel");
 
         bc = FindProperty($"_Rim_Lighting{i}_Mask_Sampler_Mode");
         SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
-        sampler_mode = (SamplerMode) EditorGUILayout.EnumPopup(
+        sampler_mode = (SamplerMode) EnumPopup(
             MakeLabel("Sampler mode"), sampler_mode);
         EditorGUI.EndChangeCheck();
         bc.floatValue = (int) sampler_mode;
@@ -764,14 +835,14 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty($"_Rim_Lighting{i}_Center_Eye_Fix");
       enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Center eye fix", enabled);
+      enabled = Toggle("Center eye fix", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
 
       EditorGUI.BeginChangeCheck();
       bc = FindProperty($"_Rim_Lighting{i}_Mode");
       MatcapMode mode = (MatcapMode) Math.Round(bc.floatValue);
-      mode = (MatcapMode) EditorGUILayout.EnumPopup(
+      mode = (MatcapMode) EnumPopup(
           MakeLabel("Rim lighting mode"), mode);
       if (EditorGUI.EndChangeCheck()) {
         RecordAction("Rim lighting mode");
@@ -781,34 +852,34 @@ public class ToonerGUI : ShaderGUI {
       }
 
       bc = FindProperty($"_Rim_Lighting{i}_Center");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Center");
 
       bc = FindProperty($"_Rim_Lighting{i}_Power");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Power");
 
       bc = FindProperty($"_Rim_Lighting{i}_Strength");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Strength");
 
       bc = FindProperty($"_Rim_Lighting{i}_Emission");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Emission");
 
       bc = FindProperty($"_Rim_Lighting{i}_Quantization");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Quantization");
 
       bc = FindProperty($"_Rim_Lighting{i}_Glitter_Enabled");
       enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Glitter", enabled);
+      enabled = Toggle("Glitter", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
       SetKeyword($"_RIM_LIGHTING{i}_GLITTER", enabled);
@@ -817,27 +888,27 @@ public class ToonerGUI : ShaderGUI {
         EditorGUI.indentLevel += 1;
 
         bc = FindProperty($"_Rim_Lighting{i}_Glitter_Density");
-        editor.FloatProperty(
+        FloatProperty(
             bc,
             "Density");
 
         bc = FindProperty($"_Rim_Lighting{i}_Glitter_Amount");
-        editor.FloatProperty(
+        FloatProperty(
             bc,
             "Amount");
 
         bc = FindProperty($"_Rim_Lighting{i}_Glitter_Speed");
-        editor.FloatProperty(
+        FloatProperty(
             bc,
             "Speed");
 
         bc = FindProperty($"_Rim_Lighting{i}_Glitter_Quantization");
-        editor.FloatProperty(
+        FloatProperty(
             bc,
             "Quantization");
 
         bc = FindProperty($"_Rim_Lighting{i}_Glitter_UV_Select");
-        editor.RangeProperty(
+        RangeProperty(
             bc,
             "UV channel");
 
@@ -847,7 +918,7 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty($"_Rim_Lighting{i}_PolarMask_Enabled");
       enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Polar mask", enabled);
+      enabled = Toggle("Polar mask", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
       SetKeyword($"_RIM_LIGHTING{i}_POLAR_MASK", enabled);
@@ -855,30 +926,30 @@ public class ToonerGUI : ShaderGUI {
       if (enabled) {
         EditorGUI.indentLevel += 1;
         bc = FindProperty($"_Rim_Lighting{i}_PolarMask_Theta");
-        editor.FloatProperty(
+        FloatProperty(
             bc,
             "Theta");
         bc = FindProperty($"_Rim_Lighting{i}_PolarMask_Power");
-        editor.FloatProperty(
+        FloatProperty(
             bc,
             "Power");
         EditorGUI.indentLevel -= 1;
       }
 
       EditorGUI.indentLevel -= 1;
+      show_ui.RemoveAt(show_ui.Count - 1);
     }
   }
 
   void DoMatcapRL() {
-    if (!AddCollapsibleMenu("Matcaps", "_Matcaps")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Matcaps", "_Matcaps"));
     EditorGUI.indentLevel += 1;
 
     DoMatcap();
     DoRimLighting();
 
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   enum NormalsMode {
@@ -889,9 +960,7 @@ public class ToonerGUI : ShaderGUI {
   };
 
   void DoShadingMode() {
-    if (!AddCollapsibleMenu("Shading", "_Shading")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Shading", "_Shading"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc;
@@ -899,7 +968,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty($"_Mesh_Normals_Mode");
     EditorGUI.BeginChangeCheck();
     NormalsMode mode = (NormalsMode) Math.Round(bc.floatValue, 0);
-    mode = (NormalsMode) EditorGUILayout.EnumPopup(
+    mode = (NormalsMode) EnumPopup(
         MakeLabel("Normals mode"), mode);
     if (EditorGUI.EndChangeCheck()) {
       RecordAction("Rendering mode");
@@ -908,17 +977,16 @@ public class ToonerGUI : ShaderGUI {
 
     if (mode == NormalsMode.Flat) {
       bc = FindProperty("_Flatten_Mesh_Normals_Str");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Flattening strength");
     }
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoOKLAB() {
-    if (!AddCollapsibleMenu("OKLAB", "_Hue_Shift_OKLAB")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("OKLAB", "_Hue_Shift_OKLAB"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc;
@@ -926,7 +994,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_OKLAB_Enabled");
     bool enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
+    enabled = Toggle("Enable", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
@@ -934,7 +1002,7 @@ public class ToonerGUI : ShaderGUI {
 
     if (enabled) {
       bc = FindProperty("_OKLAB_Mask");
-      editor.TexturePropertySingleLine(
+      TexturePropertySingleLine(
           MakeLabel(bc, "Mask"),
           bc);
 
@@ -942,31 +1010,30 @@ public class ToonerGUI : ShaderGUI {
         bc = FindProperty("_OKLAB_Mask_Invert");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = EditorGUILayout.Toggle("Invert", enabled);
+        enabled = Toggle("Invert", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
       }
 
       bc = FindProperty("_OKLAB_Lightness_Shift");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Lightness shift");
       bc = FindProperty("_OKLAB_Chroma_Shift");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Chroma shift");
       bc = FindProperty("_OKLAB_Hue_Shift");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Hue shift");
     }
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoHSV() {
-    if (!AddCollapsibleMenu("HSV", "_Hue_Shift_HSV")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("HSV", "_Hue_Shift_HSV"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc;
@@ -975,7 +1042,7 @@ public class ToonerGUI : ShaderGUI {
 			bc = FindProperty($"_HSV{i}_Enabled");
 			bool enabled = bc.floatValue > 1E-6;
 			EditorGUI.BeginChangeCheck();
-			enabled = EditorGUILayout.Toggle($"Enable slot {i}", enabled);
+			enabled = Toggle($"Enable slot {i}", enabled);
 			EditorGUI.EndChangeCheck();
 			bc.floatValue = enabled ? 1.0f : 0.0f;
 
@@ -983,7 +1050,7 @@ public class ToonerGUI : ShaderGUI {
 
 			if (enabled) {
 				bc = FindProperty($"_HSV{i}_Mask");
-				editor.TexturePropertySingleLine(
+				TexturePropertySingleLine(
 						MakeLabel(bc, "Mask"),
 						bc);
 
@@ -991,44 +1058,42 @@ public class ToonerGUI : ShaderGUI {
 					bc = FindProperty($"_HSV{i}_Mask_Invert");
 					enabled = bc.floatValue > 1E-6;
 					EditorGUI.BeginChangeCheck();
-					enabled = EditorGUILayout.Toggle("Invert", enabled);
+					enabled = Toggle("Invert", enabled);
 					EditorGUI.EndChangeCheck();
 					bc.floatValue = enabled ? 1.0f : 0.0f;
 				}
 
 				bc = FindProperty($"_HSV{i}_Hue_Shift");
-				editor.RangeProperty(
+				RangeProperty(
 						bc,
 						"Hue shift");
 				bc = FindProperty($"_HSV{i}_Sat_Shift");
-				editor.RangeProperty(
+				RangeProperty(
 						bc,
 						"Saturation shift");
 				bc = FindProperty($"_HSV{i}_Val_Shift");
-				editor.RangeProperty(
+				RangeProperty(
 						bc,
 						"Value shift");
 			}
 		}
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoHueShift() {
-    if (!AddCollapsibleMenu("Hue shift", "_Hue_Shift")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Hue shift", "_Hue_Shift"));
     EditorGUI.indentLevel += 1;
 
     DoOKLAB();
     DoHSV();
 
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoClones() {
-    if (!AddCollapsibleMenu("Clones", "_Clones")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Clones", "_Clones"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc;
@@ -1036,7 +1101,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Clones_Enabled");
     bool enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
+    enabled = Toggle("Enable", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
@@ -1044,146 +1109,143 @@ public class ToonerGUI : ShaderGUI {
 
     if (enabled) {
       bc = FindProperty("_Clones_Count");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Number of clones");
       bc = FindProperty("_Clones_dx");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "x offset");
     }
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoOutlines() {
-    if (!AddCollapsibleMenu("Outlines", "_Outlines")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Outlines", "_Outlines"));
     EditorGUI.indentLevel += 1;
     MaterialProperty bc;
 
     bc = FindProperty("_Outline_Width");
-    editor.RangeProperty(
+    RangeProperty(
         bc,
         "Outline width");
     SetKeyword("_OUTLINES", bc.floatValue > 1E-6);
 
     if (bc.floatValue > 1E-6) {
       bc = FindProperty("_Outline_Color");
-      editor.ColorProperty(
+      ColorProperty(
           bc,
           "Outline color (RGBA)");
 
       bc = FindProperty("_Outline_Emission_Strength");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Outline emission strength");
 
       bc = FindProperty("_Outline_Mask");
-      editor.TexturePropertySingleLine(
+      TexturePropertySingleLine(
           MakeLabel(bc, "Outline mask"),
           bc);
 
       bc = FindProperty("_Outline_Mask_Invert");
       bool inverted = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      inverted = EditorGUILayout.Toggle("Invert mask", inverted);
+      inverted = Toggle("Invert mask", inverted);
       EditorGUI.EndChangeCheck();
       bc.floatValue = inverted ? 1.0f : 0.0f;
 
       bc = FindProperty("_Outline_Width_Multiplier");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Outline width multiplier");
     }
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoGlitter() {
-    if (!AddCollapsibleMenu("Glitter", "_Glitter")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Glitter", "_Glitter"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc = FindProperty("_Glitter_Enabled");
     bool enabled = bc.floatValue > 1E-6;
 
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
+    enabled = Toggle("Enable", enabled);
     EditorGUI.EndChangeCheck();
     SetKeyword("_GLITTER", enabled);
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     if (enabled) {
       bc = FindProperty("_Glitter_Mask");
-      editor.TexturePropertySingleLine(
+      TexturePropertySingleLine(
           MakeLabel(bc, "Glitter mask (RGBA)"),
           bc);
 
       bc = FindProperty("_Glitter_Color");
-      editor.ColorProperty(bc, "Color");
+      ColorProperty(bc, "Color");
 
       bc = FindProperty("_Glitter_Density");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Density");
 
       bc = FindProperty("_Glitter_Amount");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Amount");
 
       bc = FindProperty("_Glitter_Speed");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Speed");
 
       bc = FindProperty("_Glitter_Brightness_Lit");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Brightness (lit)");
 
       bc = FindProperty("_Glitter_Brightness");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Brightness (unlit)");
 
       bc = FindProperty("_Glitter_Angle");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Angle");
 
       bc = FindProperty("_Glitter_Power");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Power");
 
       bc = FindProperty("_Glitter_UV_Select");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "UV select");
     }
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoExplosion() {
-    if (!AddCollapsibleMenu("Explosion", "_Explosion")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Explosion", "_Explosion"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc = FindProperty("_Explode_Toggle");
     bool enabled = bc.floatValue > 1E-6;
 
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
+    enabled = Toggle("Enable", enabled);
     EditorGUI.EndChangeCheck();
     SetKeyword("_EXPLODE", enabled);
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     bc = FindProperty("_Explode_Phase");
     if (enabled) {
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Explosion phase");
     } else {
@@ -1195,7 +1257,7 @@ public class ToonerGUI : ShaderGUI {
     /*
     if (enabled) {
       bc = FindProperty("_Explode_Phase");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Explosion phase");
       if (bc.floatValue > 1E-3) {
@@ -1213,89 +1275,88 @@ public class ToonerGUI : ShaderGUI {
     }
     */
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoGeoScroll() {
-    if (!AddCollapsibleMenu("Geometry scroll", "_Geometry_Scroll")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Geometry scroll", "_Geometry_Scroll"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc = FindProperty("_Scroll_Toggle");
     bool enabled = bc.floatValue > 1E-6;
 
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
+    enabled = Toggle("Enable", enabled);
     EditorGUI.EndChangeCheck();
     SetKeyword("_SCROLL", enabled);
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     if (enabled) {
       bc = FindProperty("_Scroll_Top");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Scroll top");
 
       bc = FindProperty("_Scroll_Bottom");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Scroll bottom");
 
       bc = FindProperty("_Scroll_Width");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Scroll width");
 
       bc = FindProperty("_Scroll_Strength");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Scroll strength");
 
       bc = FindProperty("_Scroll_Speed");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Scroll speed");
     }
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoUVScroll() {
-    if (!AddCollapsibleMenu("UV Scroll", "_UV_Scroll")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("UV Scroll", "_UV_Scroll"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc = FindProperty("_UVScroll_Enabled");
     bool enabled = bc.floatValue > 1E-6;
 
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable", enabled);
+    enabled = Toggle("Enable", enabled);
     EditorGUI.EndChangeCheck();
     SetKeyword("_UVSCROLL", enabled);
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     if (enabled) {
       bc = FindProperty("_UVScroll_Mask");
-      editor.TexturePropertySingleLine(
+      TexturePropertySingleLine(
           MakeLabel(bc, "Mask"),
           bc);
 
       bc = FindProperty("_UVScroll_U_Speed");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "U speed");
 
       bc = FindProperty("_UVScroll_V_Speed");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "V speed");
 
       bc = FindProperty("_UVScroll_Alpha");
-      editor.TexturePropertySingleLine(
+      TexturePropertySingleLine(
           MakeLabel(bc, "Alpha"),
           bc);
     }
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoGimmickFlatColor()
@@ -1304,7 +1365,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Flat_Color_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Flat color", enabled);
+    enabled = Toggle("Flat color", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_FLAT_COLOR", enabled);
@@ -1318,14 +1379,14 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Flat_Color_Enable_Dynamic");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    enabled = Toggle("Enable (runtime switch)", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     bc = FindProperty("_Gimmick_Flat_Color_Color");
-    editor.ColorProperty(bc, "Color");
+    ColorProperty(bc, "Color");
     bc = FindProperty("_Gimmick_Flat_Color_Emission");
-    editor.ColorProperty(bc, "Emission");
+    ColorProperty(bc, "Emission");
 
     EditorGUI.indentLevel -= 1;
   }
@@ -1335,7 +1396,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Quantize_Location_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Quantize location", enabled);
+    enabled = Toggle("Quantize location", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_QUANTIZE_LOCATION", enabled);
@@ -1349,25 +1410,25 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Quantize_Location_Enable_Dynamic");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    enabled = Toggle("Enable (runtime switch)", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     bc = FindProperty("_Gimmick_Quantize_Location_Precision");
-    editor.FloatProperty(bc, "Precision");
+    FloatProperty(bc, "Precision");
     bc = FindProperty("_Gimmick_Quantize_Location_Direction");
-    editor.FloatProperty(bc, "Direction");
+    FloatProperty(bc, "Direction");
     bc = FindProperty("_Gimmick_Quantize_Location_Multiplier");
-    editor.RangeProperty(bc, "Multiplier");
+    RangeProperty(bc, "Multiplier");
     bc = FindProperty("_Gimmick_Quantize_Location_Mask");
-    editor.TexturePropertySingleLine(
+    TexturePropertySingleLine(
         MakeLabel(bc, "Mask"),
         bc);
 
     bc = FindProperty("_Gimmick_Quantize_Location_Audiolink_Enable_Static");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Audiolink", enabled);
+    enabled = Toggle("Audiolink", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_QUANTIZE_LOCATION_AUDIOLINK", enabled);
@@ -1378,12 +1439,12 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty("_Gimmick_Quantize_Location_Audiolink_Enable_Dynamic");
       enabled = (bc.floatValue != 0.0);
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+      enabled = Toggle("Enable (runtime switch)", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
 
       bc = FindProperty("_Gimmick_Quantize_Location_Audiolink_Strength");
-      editor.FloatProperty(
+      FloatProperty(
           bc,
           "Strength");
 
@@ -1398,7 +1459,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Shear_Location_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Shear location", enabled);
+    enabled = Toggle("Shear location", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_SHEAR_LOCATION", enabled);
@@ -1412,28 +1473,28 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Shear_Location_Enable_Dynamic");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    enabled = Toggle("Enable (runtime switch)", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     bc = FindProperty("_Gimmick_Shear_Location_Strength");
-    editor.VectorProperty(bc, "Strength");
+    VectorProperty(bc, "Strength");
 
     bc = FindProperty("_Gimmick_Shear_Location_Mesh_Renderer_Fix");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Mesh renderer fix", enabled);
+    enabled = Toggle("Mesh renderer fix", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     if (enabled) {
       EditorGUI.indentLevel += 1;
       bc = FindProperty("_Gimmick_Shear_Location_Mesh_Renderer_Offset");
-      editor.VectorProperty(bc, "Offset");
+      VectorProperty(bc, "Offset");
       bc = FindProperty("_Gimmick_Shear_Location_Mesh_Renderer_Rotation");
-      editor.VectorProperty(bc, "Rotation");
+      VectorProperty(bc, "Rotation");
       bc = FindProperty("_Gimmick_Shear_Location_Mesh_Renderer_Scale");
-      editor.VectorProperty(bc, "Scale");
+      VectorProperty(bc, "Scale");
       EditorGUI.indentLevel -= 1;
     }
 
@@ -1445,7 +1506,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Spherize_Location_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Spherize location", enabled);
+    enabled = Toggle("Spherize location", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_SPHERIZE_LOCATION", enabled);
@@ -1459,14 +1520,14 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Spherize_Location_Enable_Dynamic");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    enabled = Toggle("Enable (runtime switch)", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     bc = FindProperty("_Gimmick_Spherize_Location_Strength");
-    editor.RangeProperty(bc, "Strength");
+    RangeProperty(bc, "Strength");
     bc = FindProperty("_Gimmick_Spherize_Location_Radius");
-    editor.FloatProperty(bc, "Radius");
+    FloatProperty(bc, "Radius");
 
     EditorGUI.indentLevel -= 1;
   }
@@ -1477,7 +1538,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Eyes00_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Eyes 00", enabled);
+    enabled = Toggle("Eyes 00", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_EYES_00", enabled);
@@ -1489,7 +1550,7 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel += 1;
 
     bc = FindProperty("_Gimmick_Eyes00_Effect_Mask");
-    editor.TexturePropertySingleLine(
+    TexturePropertySingleLine(
         MakeLabel(bc, "Effect mask"),
         bc);
 
@@ -1501,7 +1562,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Eyes01_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Eyes 01", enabled);
+    enabled = Toggle("Eyes 01", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_EYES_01", enabled);
@@ -1513,7 +1574,7 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel += 1;
 
     bc = FindProperty("_Gimmick_Eyes01_Radius");
-    editor.FloatProperty(bc, "Radius (meters, object space)");
+    FloatProperty(bc, "Radius (meters, object space)");
 
     EditorGUI.indentLevel -= 1;
   }
@@ -1523,7 +1584,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Eyes02_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Eyes 02", enabled);
+    enabled = Toggle("Eyes 02", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_EYES_02", enabled);
@@ -1535,52 +1596,52 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel += 1;
 
     bc = FindProperty("_Gimmick_Eyes02_N");
-    editor.RangeProperty(bc, "n");
+    RangeProperty(bc, "n");
     bc = FindProperty("_Gimmick_Eyes02_A0");
-    editor.RangeProperty(bc, "a0");
+    RangeProperty(bc, "a0");
     bc = FindProperty("_Gimmick_Eyes02_A1");
-    editor.RangeProperty(bc, "a1");
+    RangeProperty(bc, "a1");
     bc = FindProperty("_Gimmick_Eyes02_A2");
-    editor.RangeProperty(bc, "a2");
+    RangeProperty(bc, "a2");
     bc = FindProperty("_Gimmick_Eyes02_A3");
-    editor.RangeProperty(bc, "a3");
+    RangeProperty(bc, "a3");
     bc = FindProperty("_Gimmick_Eyes02_A4");
-    editor.RangeProperty(bc, "a4");
+    RangeProperty(bc, "a4");
 
     bc = FindProperty("_Gimmick_Eyes02_Animate");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Animate", enabled);
+    enabled = Toggle("Animate", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     if (enabled) {
       EditorGUI.indentLevel += 1;
       bc = FindProperty("_Gimmick_Eyes02_Animate_Speed");
-      editor.FloatProperty(bc, "Speed");
+      FloatProperty(bc, "Speed");
 
       bc = FindProperty("_Gimmick_Eyes02_Animate_Strength");
-      editor.FloatProperty(bc, "Strength");
+      FloatProperty(bc, "Strength");
       EditorGUI.indentLevel -= 1;
     }
 
     bc = FindProperty("_Gimmick_Eyes02_UV_X_Symmetry");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("UV x symmetry", enabled);
+    enabled = Toggle("UV x symmetry", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     bc = FindProperty("_Gimmick_Eyes02_UV_Adjust");
-    editor.VectorProperty(bc, "UV scale & offset");
+    VectorProperty(bc, "UV scale & offset");
 
     bc = FindProperty("_Gimmick_Eyes02_Albedo");
-    editor.ColorProperty(bc, "Albedo");
+    ColorProperty(bc, "Albedo");
     bc = FindProperty("_Gimmick_Eyes02_Metallic");
-    editor.FloatProperty(bc, "Metallic");
+    FloatProperty(bc, "Metallic");
     bc = FindProperty("_Gimmick_Eyes02_Roughness");
-    editor.FloatProperty(bc, "Roughness");
+    FloatProperty(bc, "Roughness");
     bc = FindProperty("_Gimmick_Eyes02_Emission");
-    editor.ColorProperty(bc, "Emission");
+    ColorProperty(bc, "Emission");
 
     EditorGUI.indentLevel -= 1;
   }
@@ -1590,7 +1651,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Halo00_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Halo 00", enabled);
+    enabled = Toggle("Halo 00", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_HALO_00", enabled);
@@ -1609,7 +1670,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Pixellate_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Pixellate", enabled);
+    enabled = Toggle("Pixellate", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_PIXELLATE", enabled);
@@ -1621,11 +1682,11 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel += 1;
 
     bc = FindProperty("_Gimmick_Pixellate_Resolution_U");
-    editor.FloatProperty(bc, "Resolution (U)");
+    FloatProperty(bc, "Resolution (U)");
     bc = FindProperty("_Gimmick_Pixellate_Resolution_V");
-    editor.FloatProperty(bc, "Resolution (V)");
+    FloatProperty(bc, "Resolution (V)");
     bc = FindProperty("_Gimmick_Pixellate_Effect_Mask");
-    editor.TexturePropertySingleLine(
+    TexturePropertySingleLine(
         MakeLabel(bc, "Effect mask"),
         bc);
 
@@ -1637,7 +1698,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Trochoid_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Trochoid", enabled);
+    enabled = Toggle("Trochoid", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_TROCHOID", enabled);
@@ -1649,11 +1710,11 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel += 1;
 
     bc = FindProperty("_Trochoid_R");
-    editor.FloatProperty(bc, "R");
+    FloatProperty(bc, "R");
     bc = FindProperty("_Trochoid_r");
-    editor.FloatProperty(bc, "r");
+    FloatProperty(bc, "r");
     bc = FindProperty("_Trochoid_d");
-    editor.FloatProperty(bc, "d");
+    FloatProperty(bc, "d");
 
     EditorGUI.indentLevel -= 1;
   }
@@ -1663,7 +1724,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_FaceMeWorldY_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("FaceMeWorldY", enabled);
+    enabled = Toggle("FaceMeWorldY", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_FACE_ME_WORLD_Y", enabled);
@@ -1677,16 +1738,16 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_FaceMeWorldY_Enable_Dynamic");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    enabled = Toggle("Enable (runtime switch)", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     bc = FindProperty("_FaceMeWorldY_Enable_X");
-    editor.FloatProperty(bc, "X");
+    FloatProperty(bc, "X");
     bc = FindProperty("_FaceMeWorldY_Enable_Y");
-    editor.FloatProperty(bc, "Y");
+    FloatProperty(bc, "Y");
     bc = FindProperty("_FaceMeWorldY_Enable_Z");
-    editor.FloatProperty(bc, "Z");
+    FloatProperty(bc, "Z");
 
     EditorGUI.indentLevel -= 1;
   }
@@ -1696,7 +1757,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Rorschach_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Rorschach", enabled);
+    enabled = Toggle("Rorschach", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_RORSCHACH", enabled);
@@ -1710,30 +1771,30 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Rorschach_Enable_Dynamic");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    enabled = Toggle("Enable (runtime switch)", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     bc = FindProperty("_Rorschach_Color");
-    editor.ColorProperty(bc, "Color");
+    ColorProperty(bc, "Color");
     bc = FindProperty("_Rorschach_Count_X");
-    editor.FloatProperty(bc, "Count (x)");
+    FloatProperty(bc, "Count (x)");
     bc = FindProperty("_Rorschach_Count_Y");
-    editor.FloatProperty(bc, "Count (y)");
+    FloatProperty(bc, "Count (y)");
     bc = FindProperty("_Rorschach_Center_Randomization");
-    editor.FloatProperty(bc, "Center randomization");
+    FloatProperty(bc, "Center randomization");
     bc = FindProperty("_Rorschach_Radius");
-    editor.FloatProperty(bc, "Radius");
+    FloatProperty(bc, "Radius");
     bc = FindProperty("_Rorschach_Emission_Strength");
-    editor.FloatProperty(bc, "Emission strength");
+    FloatProperty(bc, "Emission strength");
     bc = FindProperty("_Rorschach_Speed");
-    editor.FloatProperty(bc, "Speed");
+    FloatProperty(bc, "Speed");
     bc = FindProperty("_Rorschach_Quantization");
-    editor.FloatProperty(bc, "Quantization");
+    FloatProperty(bc, "Quantization");
     bc = FindProperty("_Rorschach_Alpha_Cutoff");
-    editor.FloatProperty(bc, "Alpha cutoff");
+    FloatProperty(bc, "Alpha cutoff");
     bc = FindProperty("_Rorschach_Mask");
-    editor.TexturePropertySingleLine(
+    TexturePropertySingleLine(
         MakeLabel(bc, "Mask"),
         bc);
     SetKeyword("_RORSCHACH_MASK", bc.textureValue);
@@ -1742,7 +1803,7 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty("_Rorschach_Mask_Invert");
       enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Invert", enabled);
+      enabled = Toggle("Invert", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
       EditorGUI.indentLevel -= 1;
@@ -1756,7 +1817,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Mirror_UV_Flip_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Flip UVs in mirror", enabled);
+    enabled = Toggle("Flip UVs in mirror", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_MIRROR_UV_FLIP", enabled);
@@ -1770,7 +1831,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Mirror_UV_Flip_Enable_Dynamic");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable (runtime switch)", enabled);
+    enabled = Toggle("Enable (runtime switch)", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
@@ -1782,7 +1843,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Letter_Grid_Enable_Static");
     bool enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Letter grid", enabled);
+    enabled = Toggle("Letter grid", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_LETTER_GRID", enabled);
@@ -1794,43 +1855,42 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel += 1;
 
     bc = FindProperty("_Gimmick_Letter_Grid_Texture");
-    editor.TexturePropertySingleLine(
+    TexturePropertySingleLine(
         MakeLabel(bc, "Texture"),
         bc);
 
     bc = FindProperty("_Gimmick_Letter_Grid_Tex_Res_X");
-    editor.FloatProperty(bc, "Number of glyphs in texture (X)");
+    FloatProperty(bc, "Number of glyphs in texture (X)");
     bc = FindProperty("_Gimmick_Letter_Grid_Tex_Res_Y");
-    editor.FloatProperty(bc, "Number of glyphs in texture (Y)");
+    FloatProperty(bc, "Number of glyphs in texture (Y)");
 
     bc = FindProperty("_Gimmick_Letter_Grid_Res_X");
-    editor.FloatProperty(bc, "Number of glyphs in grid (X)");
+    FloatProperty(bc, "Number of glyphs in grid (X)");
     bc = FindProperty("_Gimmick_Letter_Grid_Res_Y");
-    editor.FloatProperty(bc, "Number of glyphs in grid (Y)");
+    FloatProperty(bc, "Number of glyphs in grid (Y)");
 
     bc = FindProperty("_Gimmick_Letter_Grid_UV_Scale_Offset");
-    editor.VectorProperty(bc, "UV scale & offset");
+    VectorProperty(bc, "UV scale & offset");
     bc = FindProperty("_Gimmick_Letter_Grid_Padding");
-    editor.FloatProperty(bc, "Padding");
+    FloatProperty(bc, "Padding");
 
     bc = FindProperty("_Gimmick_Letter_Grid_Color");
-    editor.ColorProperty(bc, "Color");
     bc = FindProperty("_Gimmick_Letter_Grid_Metallic");
-    editor.RangeProperty(bc, "Metallic");
+    RangeProperty(bc, "Metallic");
     bc = FindProperty("_Gimmick_Letter_Grid_Roughness");
-    editor.RangeProperty(bc, "Roughness");
+    RangeProperty(bc, "Roughness");
     bc = FindProperty("_Gimmick_Letter_Grid_Emission");
-    editor.FloatProperty(bc, "Emission");
+    FloatProperty(bc, "Emission");
 
     bc = FindProperty("_Gimmick_Letter_Grid_UV_Select");
-    editor.RangeProperty(
+    RangeProperty(
         bc,
         "UV channel");
 
     bc = FindProperty("_Gimmick_Letter_Grid_Color_Wave");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Color waves", enabled);
+    enabled = Toggle("Color waves", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_LETTER_GRID_COLOR_WAVE", enabled);
@@ -1838,16 +1898,16 @@ public class ToonerGUI : ShaderGUI {
     if (enabled) {
       EditorGUI.indentLevel += 1;
       bc = FindProperty("_Gimmick_Letter_Grid_Color_Wave_Speed");
-      editor.FloatProperty(bc, "Speed");
+      FloatProperty(bc, "Speed");
       bc = FindProperty("_Gimmick_Letter_Grid_Color_Wave_Frequency");
-      editor.FloatProperty(bc, "Frequency");
+      FloatProperty(bc, "Frequency");
       EditorGUI.indentLevel -= 1;
     }
 
     bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting");
     enabled = (bc.floatValue != 0.0);
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Rim lighting", enabled);
+    enabled = Toggle("Rim lighting", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_GIMMICK_LETTER_GRID_RIM_LIGHTING", enabled);
@@ -1855,19 +1915,19 @@ public class ToonerGUI : ShaderGUI {
     if (enabled) {
       EditorGUI.indentLevel += 1;
       bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Power");
-      editor.FloatProperty(bc, "Power");
+      FloatProperty(bc, "Power");
       bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Center");
-      editor.FloatProperty(bc, "Center");
+      FloatProperty(bc, "Center");
       bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Quantization");
-      editor.FloatProperty(bc, "Quantization");
+      FloatProperty(bc, "Quantization");
       bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Mask");
-      editor.TexturePropertySingleLine(MakeLabel(bc, "Mask"), bc);
+      TexturePropertySingleLine(MakeLabel(bc, "Mask"), bc);
       if (bc.textureValue) {
         EditorGUI.indentLevel += 1;
         bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Mask_UV_Select");
-        editor.FloatProperty(bc, "Mask UV Select");
+        FloatProperty(bc, "Mask UV Select");
         bc = FindProperty("_Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert");
-        editor.FloatProperty(bc, "Mask invert");
+        FloatProperty(bc, "Mask invert");
         EditorGUI.indentLevel -= 1;
       }
       EditorGUI.indentLevel -= 1;
@@ -1877,9 +1937,7 @@ public class ToonerGUI : ShaderGUI {
 	}
 
   void DoGimmicks() {
-    if (!AddCollapsibleMenu("Gimmicks", "_Gimmicks")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Gimmicks", "_Gimmicks"));
     EditorGUI.indentLevel += 1;
 
     DoGimmickFlatColor();
@@ -1901,34 +1959,34 @@ public class ToonerGUI : ShaderGUI {
     DoGeoScroll();
 
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoMochieParams() {
-    if (!AddCollapsibleMenu("Mochie", "_Mochie")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Mochie", "_Mochie"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc;
 
     bc = FindProperty("_WrappingFactor");
-    editor.RangeProperty(bc, "Wrapping factor");
+    RangeProperty(bc, "Wrapping factor");
     bc = FindProperty("_SpecularStrength");
-    editor.RangeProperty(bc, "Specular strength");
+    RangeProperty(bc, "Specular strength");
     bc = FindProperty("_FresnelStrength");
-    editor.RangeProperty(bc, "Fresnel strength");
+    RangeProperty(bc, "Fresnel strength");
 
     bc = FindProperty("_UseFresnel");
     bool enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Use fresnel", enabled);
+    enabled = Toggle("Use fresnel", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
     bc = FindProperty("_ReflectionStrength");
-    editor.RangeProperty(bc, "Reflection strength");
+    RangeProperty(bc, "Reflection strength");
 
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   enum RenderingMode {
@@ -1945,9 +2003,7 @@ public class ToonerGUI : ShaderGUI {
   }
 
   void DoRendering() {
-    if (!AddCollapsibleMenu("Rendering", "_Rendering")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Rendering", "_Rendering"));
     EditorGUI.indentLevel += 1;
 
     RenderingMode mode = RenderingMode.Opaque;
@@ -1964,7 +2020,7 @@ public class ToonerGUI : ShaderGUI {
     MaterialProperty bc;
 
     EditorGUI.BeginChangeCheck();
-    mode = (RenderingMode) EditorGUILayout.EnumPopup(
+    mode = (RenderingMode) EnumPopup(
         MakeLabel("Rendering mode"), mode);
     BlendMode src_blend = BlendMode.One;
     BlendMode dst_blend = BlendMode.Zero;
@@ -1973,7 +2029,7 @@ public class ToonerGUI : ShaderGUI {
     RecordAction("Rendering mode");
 
     bc = FindProperty("_Render_Queue_Offset");
-    editor.IntegerProperty(
+    IntegerProperty(
         bc,
         "Render queue offset");
     int queue_offset = bc.intValue;
@@ -2037,7 +2093,7 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.BeginChangeCheck();
       bc = FindProperty("_Cutout_Mode");
       CutoutMode cmode = (CutoutMode) Math.Round(bc.floatValue);
-      cmode = (CutoutMode) EditorGUILayout.EnumPopup(
+      cmode = (CutoutMode) EnumPopup(
           MakeLabel("Cutout mode"), cmode);
       EditorGUI.EndChangeCheck();
       bc.floatValue = (float) cmode;
@@ -2045,14 +2101,14 @@ public class ToonerGUI : ShaderGUI {
 
       if (cmode == CutoutMode.Cutoff) {
         bc = FindProperty("_Alpha_Cutoff");
-        editor.ShaderProperty(bc, MakeLabel(bc));
+        ShaderProperty(bc, MakeLabel(bc));
       }
     }
 
     bc = FindProperty("_Cull");
     UnityEngine.Rendering.CullMode cull_mode = (UnityEngine.Rendering.CullMode) bc.floatValue;
     EditorGUI.BeginChangeCheck();
-    cull_mode = (UnityEngine.Rendering.CullMode) EditorGUILayout.EnumPopup(
+    cull_mode = (UnityEngine.Rendering.CullMode) EnumPopup(
         MakeLabel("Culling mode"), cull_mode);
     if (EditorGUI.EndChangeCheck()) {
       RecordAction("Culling mode");
@@ -2062,7 +2118,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Discard_Enable_Static");
     bool enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Discard", enabled);
+    enabled = Toggle("Discard", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_DISCARD", enabled);
@@ -2071,13 +2127,13 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty("_Discard_Enable_Dynamic");
       enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      enabled = EditorGUILayout.Toggle("Enable", enabled);
+      enabled = Toggle("Enable", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
       EditorGUI.indentLevel -= 1;
     }
 
-    EditorGUILayout.LabelField("Stenciling", EditorStyles.boldLabel);
+    LabelField("Stenciling", EditorStyles.boldLabel);
     for (int i = 0; i < 2; i++) {
       EditorGUI.indentLevel += 1;
 
@@ -2091,18 +2147,18 @@ public class ToonerGUI : ShaderGUI {
           break;
       }
 
-      EditorGUILayout.LabelField($"{pass_str} pass");
+      LabelField($"{pass_str} pass");
       {
         EditorGUI.indentLevel += 1;
         bc = FindProperty($"_Stencil_Ref_{pass_str}");
-        editor.FloatProperty(bc, "Ref");
+        FloatProperty(bc, "Ref");
 
         bc = FindProperty($"_Stencil_Comp_{pass_str}");
         EditorGUI.BeginChangeCheck();
         UnityEngine.Rendering.CompareFunction stencil_comp =
           (UnityEngine.Rendering.CompareFunction) bc.floatValue;
         stencil_comp = (UnityEngine.Rendering.CompareFunction)
-          EditorGUILayout.EnumPopup(MakeLabel("Comp"), stencil_comp);
+          EnumPopup(MakeLabel("Comp"), stencil_comp);
         EditorGUI.EndChangeCheck();
         RecordAction("Rendering mode");
         bc.floatValue = (float) stencil_comp;
@@ -2112,7 +2168,7 @@ public class ToonerGUI : ShaderGUI {
         UnityEngine.Rendering.StencilOp stencil_op =
           (UnityEngine.Rendering.StencilOp) bc.floatValue;
         stencil_op = (UnityEngine.Rendering.StencilOp)
-          EditorGUILayout.EnumPopup(MakeLabel("Pass op"), stencil_op);
+          EnumPopup(MakeLabel("Pass op"), stencil_op);
         EditorGUI.EndChangeCheck();
         RecordAction("Rendering mode");
         bc.floatValue = (float) stencil_op;
@@ -2121,7 +2177,7 @@ public class ToonerGUI : ShaderGUI {
         EditorGUI.BeginChangeCheck();
         stencil_op = (UnityEngine.Rendering.StencilOp) bc.floatValue;
         stencil_op = (UnityEngine.Rendering.StencilOp)
-          EditorGUILayout.EnumPopup(MakeLabel("Fail op"), stencil_op);
+          EnumPopup(MakeLabel("Fail op"), stencil_op);
         EditorGUI.EndChangeCheck();
         RecordAction("Rendering mode");
         bc.floatValue = (float) stencil_op;
@@ -2131,12 +2187,11 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoLighting() {
-    if (!AddCollapsibleMenu("Lighting", "_Lighting")) {
-      return;
-    }
+    show_ui.Add(AddCollapsibleMenu("Lighting", "_Lighting"));
     EditorGUI.indentLevel += 1;
 
     MaterialProperty bc;
@@ -2144,7 +2199,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Enable_Brightness_Clamp");
     bool brightness_clamp_enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
-    brightness_clamp_enabled = EditorGUILayout.Toggle("Clamp brightness",
+    brightness_clamp_enabled = Toggle("Clamp brightness",
         brightness_clamp_enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = brightness_clamp_enabled ? 1.0f : 0.0f;
@@ -2152,33 +2207,33 @@ public class ToonerGUI : ShaderGUI {
     if (brightness_clamp_enabled) {
       EditorGUI.indentLevel += 1;
       bc = FindProperty("_Min_Brightness");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Min brightness");
 
       bc = FindProperty("_Max_Brightness");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Max brightness");
       EditorGUI.indentLevel -= 1;
     }
 
     bc = FindProperty("_Ambient_Occlusion");
-    editor.TexturePropertySingleLine(
+    TexturePropertySingleLine(
         MakeLabel(bc, "Ambient occlusion"),
         bc);
     SetKeyword("_AMBIENT_OCCLUSION", bc.textureValue);
     if (bc.textureValue) {
-      editor.TextureScaleOffsetProperty(bc);
+      TextureScaleOffsetProperty(bc);
     }
 
     if (bc.textureValue) {
       bc = FindProperty("_Ambient_Occlusion_Strength");
-      editor.RangeProperty(bc, "Ambient occlusion strength");
+      RangeProperty(bc, "Ambient occlusion strength");
     }
 
     bc = FindProperty("_Cubemap");
-    editor.TexturePropertySingleLine(
+    TexturePropertySingleLine(
         MakeLabel(bc, "Cubemap"),
         bc);
     SetKeyword("_CUBEMAP", bc.textureValue);
@@ -2187,65 +2242,65 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty("_Cubemap_Limit_To_Metallic");
       bool cube_lim_enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
-      cube_lim_enabled = EditorGUILayout.Toggle("Limit to metallic",
+      cube_lim_enabled = Toggle("Limit to metallic",
           cube_lim_enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = cube_lim_enabled ? 1.0f : 0.0f;
     }
 
     bc = FindProperty("_Lighting_Factor");
-    editor.RangeProperty(
+    RangeProperty(
         bc,
         "Lighting multiplier");
 
     {
       EditorGUI.indentLevel += 1;
       bc = FindProperty("_Direct_Lighting_Factor");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Direct multiplier");
 
       bc = FindProperty("_Vertex_Lighting_Factor");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Vertex light multiplier");
 
       bc = FindProperty("_Indirect_Specular_Lighting_Factor");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Indirect specular multiplier");
 
       bc = FindProperty("_Indirect_Specular_Lighting_Factor2");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Secondary ind. spec. multiplier");
 
       bc = FindProperty("_Indirect_Diffuse_Lighting_Factor");
-      editor.RangeProperty(
+      RangeProperty(
           bc,
           "Indirect diffuse multiplier");
       EditorGUI.indentLevel -= 1;
     }
 
     bc = FindProperty("_Reflection_Probe_Saturation");
-    editor.RangeProperty(
+    RangeProperty(
         bc,
         "Reflection probe saturation");
 
     bc = FindProperty("_Shadow_Strength");
-    editor.RangeProperty(
+    RangeProperty(
         bc,
         "Shadows strength");
 
     bc = FindProperty("_Global_Sample_Bias");
-    editor.FloatProperty(
+    FloatProperty(
         bc,
         "Global mipmap bias");
 
     bc = FindProperty("_Proximity_Dimming_Enable_Static");
     bool enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Proximity dimming", enabled);
+    enabled = Toggle("Proximity dimming", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_PROXIMITY_DIMMING", enabled);
@@ -2254,13 +2309,13 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel += 1;
 
       bc = FindProperty("_Proximity_Dimming_Min_Dist");
-      editor.FloatProperty(bc, "Min distance");
+      FloatProperty(bc, "Min distance");
 
       bc = FindProperty("_Proximity_Dimming_Max_Dist");
-      editor.FloatProperty(bc, "Max distance");
+      FloatProperty(bc, "Max distance");
 
       bc = FindProperty("_Proximity_Dimming_Factor");
-      editor.FloatProperty(bc, "Dimming factor");
+      FloatProperty(bc, "Dimming factor");
 
       EditorGUI.indentLevel -= 1;
     }
@@ -2268,7 +2323,7 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_LTCGI_Enabled");
     enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
-    enabled = EditorGUILayout.Toggle("Enable LTCGI", enabled);
+    enabled = Toggle("Enable LTCGI", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
     SetKeyword("_LTCGI", enabled);
@@ -2276,10 +2331,10 @@ public class ToonerGUI : ShaderGUI {
     if (enabled) {
       EditorGUI.indentLevel += 1;
       bc = FindProperty("_LTCGI_SpecularColor");
-      editor.ColorProperty(bc, "Specular color (RGB)");
+      ColorProperty(bc, "Specular color (RGB)");
 
       bc = FindProperty("_LTCGI_DiffuseColor");
-      editor.ColorProperty(bc, "Diffuse color (RGB)");
+      ColorProperty(bc, "Diffuse color (RGB)");
       EditorGUI.indentLevel -= 1;
     }
 
@@ -2293,6 +2348,7 @@ public class ToonerGUI : ShaderGUI {
     }
 
     EditorGUI.indentLevel -= 1;
+    show_ui.RemoveAt(show_ui.Count - 1);
   }
 
   void DoMain() {
