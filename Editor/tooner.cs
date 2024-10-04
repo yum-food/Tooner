@@ -1936,6 +1936,72 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
 	}
 
+	void DoGimmickAudiolinkChroma00() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_AL_Chroma_00_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Audiolink chroma 00", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_AL_CHROMA_00", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_AL_Chroma_00_Forward_Pass");
+    enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Forward pass", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    if (enabled) {
+      bc = FindProperty("_Gimmick_AL_Chroma_00_Forward_Blend");
+      RangeProperty(bc, "Blend factor");
+    }
+
+    bc = FindProperty("_Gimmick_AL_Chroma_00_Outline_Pass");
+    enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Outline pass", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_AL_Chroma_00_Outline_Blend");
+      RangeProperty(bc, "Blend factor");
+
+      bc = FindProperty("_Gimmick_AL_Chroma_00_Outline_Emission");
+      RangeProperty(bc, "Emission strength");
+      EditorGUI.indentLevel -= 1;
+    }
+
+    bc = FindProperty("_Gimmick_AL_Chroma_00_Hue_Shift_Enable_Static");
+    enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Hue shift", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_AL_CHROMA_00_HUE_SHIFT", enabled);
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_AL_Chroma_00_Hue_Shift_Theta");
+      RangeProperty(bc, "Theta");
+
+      EditorGUI.indentLevel -= 1;
+    }
+
+    EditorGUI.indentLevel -= 1;
+	}
+
   void DoGimmicks() {
     show_ui.Add(AddCollapsibleMenu("Gimmicks", "_Gimmicks"));
     EditorGUI.indentLevel += 1;
@@ -1954,6 +2020,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickRorschach();
     DoGimmickMirrorUVFlip();
     DoGimmickLetterGrid();
+    DoGimmickAudiolinkChroma00();
     DoClones();
     DoExplosion();
     DoGeoScroll();
@@ -1982,8 +2049,12 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
 
+    MaterialProperty bct = FindProperty("_ReflectionStrengthTex");
     bc = FindProperty("_ReflectionStrength");
-    RangeProperty(bc, "Reflection strength");
+    TexturePropertySingleLine(
+        MakeLabel(bct, "Ambient occlusion"),
+        bct, bc);
+    SetKeyword("_REFLECTION_STRENGTH_TEX", bct.textureValue);
 
     EditorGUI.indentLevel -= 1;
     show_ui.RemoveAt(show_ui.Count - 1);

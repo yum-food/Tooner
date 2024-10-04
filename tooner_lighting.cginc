@@ -1668,6 +1668,18 @@ float4 effect(inout v2f i)
   applyDecal(albedo, roughness, metallic, decal_emission, i);
 #endif
 
+#if defined(_GIMMICK_AL_CHROMA_00)
+  if (_Gimmick_AL_Chroma_00_Forward_Pass && AudioLinkIsAvailable()) {
+    float3 c = AudioLinkData(ALPASS_CCSTRIP + uint2(0, 0)).rgb;
+#if defined(_GIMMICK_AL_CHROMA_00_HUE_SHIFT)
+    c = LRGBtoOKLCH(c);
+    c[2] += _Gimmick_AL_Chroma_00_Hue_Shift_Theta * 2.0 * 3.14159265;
+    c = OKLCHtoLRGB(c);
+#endif
+    albedo.rgb = lerp(albedo.rgb, c, _Gimmick_AL_Chroma_00_Forward_Blend);
+  }
+#endif
+
 #if defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1) || defined(_RIM_LIGHTING2) || defined(_RIM_LIGHTING3)
   {
 #define PI 3.14159265

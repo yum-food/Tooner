@@ -337,6 +337,10 @@ float4 getLitColor(
   float2 screenUVs = 0;
   float4 screenPos = 0;
 #if 1
+  float reflection_strength = _ReflectionStrength;
+#if defined(_REFLECTION_STRENGTH_TEX)
+  reflection_strength *= _ReflectionStrengthTex.SampleLevel(linear_repeat_s, i.uv0, 0);
+#endif
   float4 pbr = BRDF1_Mochie_PBS(
       albedo,
       specular_tint,
@@ -354,7 +358,8 @@ float4 getLitColor(
       i.uv2,
       vertexLightColor,
       direct_light,
-      indirect_light);
+      indirect_light,
+      reflection_strength);
 #else
     float3 pbr = UNITY_BRDF_PBS(
         albedo,

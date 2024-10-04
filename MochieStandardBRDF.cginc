@@ -86,7 +86,7 @@ half4 BRDF1_Mochie_PBS (
     half3 diffColor, half3 specColor, half oneMinusReflectivity, half smoothness,
     half3 normal, half3 viewDir, half3 worldPos, half2 screenUVs, half4 screenPos,
     half metallic, half thickness, half3 ssColor, half atten, float2 lightmapUV, float3 vertexColor,
-    UnityLight light, UnityIndirect gi)
+    UnityLight light, UnityIndirect gi, float reflection_strength)
 {
 
   half perceptualRoughness = SmoothnessToPerceptualRoughness(smoothness);
@@ -138,7 +138,7 @@ half4 BRDF1_Mochie_PBS (
   diffCol = diffColor * (gi.diffuse + light.color * lerp(diffuseTerm, wrappedDiffuse, thickness));
 
   half3 specCol = specularTerm * light.color * FresnelTerm (specColor, lh) * _SpecularStrength;
-  half3 reflCol = surfaceReduction * gi.specular * FresnelLerp (specColor, grazingTerm, lerp(1, nv, _FresnelStrength*_UseFresnel)) * _ReflectionStrength;
+  half3 reflCol = surfaceReduction * gi.specular * FresnelLerp (specColor, grazingTerm, lerp(1, nv, _FresnelStrength*_UseFresnel)) * reflection_strength;
 #if SSR_ENABLED
   half4 ssrCol = GetSSR(worldPos, viewDir, reflect(-viewDir, normal), normal, smoothness, diffColor, metallic, screenUVs, screenPos);
   ssrCol.rgb *= _SSRStrength;

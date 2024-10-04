@@ -159,6 +159,9 @@
 #pragma shader_feature_local _ _GIMMICK_LETTER_GRID
 #pragma shader_feature_local _ _GIMMICK_LETTER_GRID_COLOR_WAVE
 #pragma shader_feature_local _ _GIMMICK_LETTER_GRID_RIM_LIGHTING
+#pragma shader_feature_local _ _REFLECTION_STRENGTH_TEX
+#pragma shader_feature_local _ _GIMMICK_AL_CHROMA_00
+#pragma shader_feature_local _ _GIMMICK_AL_CHROMA_00_HUE_SHIFT
 
 #endif  // __FEATURE_MACROS_INC
 

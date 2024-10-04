@@ -47,7 +47,9 @@ Disclaimers:
    conjunction with one of my commercially available products.
 
 To use it, import the git repo into your project's Assets folder then select
-the shader `yum_food/Tooner`.
+the shader `yum_food/tooner_inlined`. To generate a new inlined shader from
+sources, select `Tools/yum_food/Shader Inliner` and point it at your
+Tooner.shader.
 
 ### Strawman FAQ
 

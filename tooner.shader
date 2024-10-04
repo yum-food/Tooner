@@ -518,6 +518,15 @@ Shader "yum_food/tooner"
     _Gimmick_Pixellate_Resolution_V("Resolution (V)", Float) = 64
     _Gimmick_Pixellate_Effect_Mask("Effect mask", 2D) = "white" {}
 
+    _Gimmick_AL_Chroma_00_Enable_Static("Enable AL chroma effect 00", Float) = 0.0
+    _Gimmick_AL_Chroma_00_Forward_Pass("Enable in forward pass", Float) = 0.0
+    _Gimmick_AL_Chroma_00_Forward_Blend("Forward pass blend", Range(0, 1)) = 1.0
+    _Gimmick_AL_Chroma_00_Outline_Pass("Enable in outline pass", Float) = 1.0
+    _Gimmick_AL_Chroma_00_Outline_Emission("Outline emission", Range(0, 1)) = 0
+    _Gimmick_AL_Chroma_00_Outline_Blend("Outline pass blend", Range(0 ,1)) = 1.0
+    _Gimmick_AL_Chroma_00_Hue_Shift_Enable_Static("Enable hue shift", Float) = 0.0
+    _Gimmick_AL_Chroma_00_Hue_Shift_Theta("Hue shift", Range(0, 1)) = 0.0
+
     _Trochoid_Enable_Static("Enable trochoid", Float) = 0.0
     _Trochoid_R("R", Float) = 5.0
     _Trochoid_r("r", Float) = 3.0
@@ -565,6 +574,7 @@ Shader "yum_food/tooner"
     _FresnelStrength("_FresnelStrength", Range(0,1)) = 1
     _UseFresnel("_UseFresnel", Float) = 1
     _ReflectionStrength("_ReflectionStrength", Range(0,1)) = 1
+    _ReflectionStrengthTex("Reflection strength", 2D) = "white" {}
     shadowedReflections("shadowedReflections", Vector) = (0, 0, 0, 0)
     _ReflShadows("_ReflShadows", Vector) = (0, 0, 0, 0)
     _ReflShadowStrength("_ReflShadowStrength", Vector) = (0, 0, 0, 0)

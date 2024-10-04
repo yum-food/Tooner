@@ -44,6 +44,9 @@ float _SpecularStrength;
 float _FresnelStrength;
 float _UseFresnel;
 float _ReflectionStrength;
+#if defined(_REFLECTION_STRENGTH_TEX)
+texture2D _ReflectionStrengthTex;
+#endif
 float3 shadowedReflections;
 int _ReflShadows;
 float _ReflShadowStrength;
@@ -684,6 +687,17 @@ float _Gimmick_Letter_Grid_Rim_Lighting_Quantization;
 texture2D _Gimmick_Letter_Grid_Rim_Lighting_Mask;
 float _Gimmick_Letter_Grid_Rim_Lighting_Mask_UV_Select;
 float _Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert;
+#endif
+
+#if defined(_GIMMICK_AL_CHROMA_00)
+float _Gimmick_AL_Chroma_00_Forward_Pass;
+float _Gimmick_AL_Chroma_00_Forward_Blend;
+float _Gimmick_AL_Chroma_00_Outline_Pass;
+float _Gimmick_AL_Chroma_00_Outline_Blend;
+float _Gimmick_AL_Chroma_00_Outline_Emission;
+#if defined(_GIMMICK_AL_CHROMA_00_HUE_SHIFT)
+float _Gimmick_AL_Chroma_00_Hue_Shift_Theta;
+#endif
 #endif
 
 #endif

@@ -275,10 +275,20 @@ fixed4 frag (v2f i) : SV_Target
   clip(albedo.a - _Alpha_Cutoff);
 #endif
 
-  // TODO FIXME the normals are fucked in pbr pass, causing flickering
-  //return _Outline_Color;
-
   albedo = _Outline_Color;
+
+#if defined(_GIMMICK_AL_CHROMA_00)
+  if (_Gimmick_AL_Chroma_00_Outline_Pass && AudioLinkIsAvailable()) {
+    float3 c = AudioLinkData(ALPASS_CCSTRIP + uint2(0, 0)).rgb;
+#if defined(_GIMMICK_AL_CHROMA_00_HUE_SHIFT)
+    c = LRGBtoOKLCH(c);
+    c[2] += _Gimmick_AL_Chroma_00_Hue_Shift_Theta * 2.0 * 3.14159265;
+    c = OKLCHtoLRGB(c);
+#endif
+    albedo.rgb = lerp(albedo.rgb, c, _Gimmick_AL_Chroma_00_Outline_Blend);
+  }
+#endif
+
 #if defined(_OKLAB)
   // Do hue shift in perceptually uniform color space so it doesn't look like
   // shit.
@@ -306,6 +316,9 @@ fixed4 frag (v2f i) : SV_Target
       i.uv0, ao, /*enable_direct=*/false, i);
 
   result += albedo * _Outline_Emission_Strength;
+#if defined(_GIMMICK_AL_CHROMA_00)
+  result += albedo * _Gimmick_AL_Chroma_00_Outline_Emission;
+#endif
 
 #if defined(_EXPLODE) && defined(_AUDIOLINK)
   if (AudioLinkIsAvailable() && _Explode_Phase > 1E-6) {
