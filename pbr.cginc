@@ -285,7 +285,7 @@ float4 getLitColor(
   // Do this to avoid division by 0. If both light sources are black,
   // sum_brightness could be 0;
 #if defined(_BRIGHTNESS_CLAMP)
-  brightnesses = max(brightnesses, min(_Min_Brightness, .001));
+  brightnesses = max(brightnesses, _Min_Brightness);
 #endif
   float sum_brightness = brightnesses[0] + brightnesses[1];
   float2 brightness_proportions = brightnesses / sum_brightness;
@@ -336,10 +336,23 @@ float4 getLitColor(
 
   float2 screenUVs = 0;
   float4 screenPos = 0;
+  #if SSR_ENABLED
+    screenUVs = i.screenPos.xy / (i.screenPos.w+0.0000000001);
+    #if UNITY_SINGLE_PASS_STEREO || defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED        )
+      screenUVs.x *= 2;
+    #endif
+    screenPos = i.screenPos;
+  #endif
+
 #if 1
   float reflection_strength = _ReflectionStrength;
 #if defined(_REFLECTION_STRENGTH_TEX)
   reflection_strength *= _ReflectionStrengthTex.SampleLevel(linear_repeat_s, i.uv0, 0);
+#endif
+#if defined(SSR_MASK)
+  float ssr_mask = _SSR_Mask.SampleLevel(linear_repeat_s, i.uv0, 0);
+#else
+  float ssr_mask = 1;
 #endif
   float4 pbr = BRDF1_Mochie_PBS(
       albedo,
@@ -359,7 +372,8 @@ float4 getLitColor(
       vertexLightColor,
       direct_light,
       indirect_light,
-      reflection_strength);
+      reflection_strength,
+      ssr_mask);
 #else
     float3 pbr = UNITY_BRDF_PBS(
         albedo,

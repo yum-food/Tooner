@@ -86,7 +86,7 @@ half4 BRDF1_Mochie_PBS (
     half3 diffColor, half3 specColor, half oneMinusReflectivity, half smoothness,
     half3 normal, half3 viewDir, half3 worldPos, half2 screenUVs, half4 screenPos,
     half metallic, half thickness, half3 ssColor, half atten, float2 lightmapUV, float3 vertexColor,
-    UnityLight light, UnityIndirect gi, float reflection_strength)
+    UnityLight light, UnityIndirect gi, float reflection_strength, float ssr_mask)
 {
 
   half perceptualRoughness = SmoothnessToPerceptualRoughness(smoothness);
@@ -144,8 +144,8 @@ half4 BRDF1_Mochie_PBS (
   ssrCol.rgb *= _SSRStrength;
   if (_EdgeFade == 0)
     ssrCol.a = ssrCol.a > 0 ? 1 : 0;
-  reflCol = lerp(reflCol, ssrCol.rgb, ssrCol.a * saturate(_SSRStrength));
-  specCol *= 1-ssrCol.a;
+  reflCol = lerp(reflCol, ssrCol.rgb, ssrCol.a * saturate(_SSRStrength * ssr_mask));
+  specCol *= 1 - ssrCol.a * ssr_mask;
 #endif
 
   half3 subsurfaceCol = 0;

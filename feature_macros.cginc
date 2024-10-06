@@ -162,6 +162,8 @@
 #pragma shader_feature_local _ _REFLECTION_STRENGTH_TEX
 #pragma shader_feature_local _ _GIMMICK_AL_CHROMA_00
 #pragma shader_feature_local _ _GIMMICK_AL_CHROMA_00_HUE_SHIFT
+#pragma shader_feature_local _ SSR_ENABLED
+#pragma shader_feature_local _ SSR_MASK
 
 #endif  // __FEATURE_MACROS_INC
 

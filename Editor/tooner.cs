@@ -2056,6 +2056,33 @@ public class ToonerGUI : ShaderGUI {
         bct, bc);
     SetKeyword("_REFLECTION_STRENGTH_TEX", bct.textureValue);
 
+
+    bc = FindProperty("_Enable_SSR");
+    enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Enable SSR", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("SSR_ENABLED", enabled);
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_SSRStrength");
+      FloatProperty(bc, "Strength");
+
+      bc = FindProperty("_SSRHeight");
+      FloatProperty(bc, "Height");
+
+      bc = FindProperty("_SSR_Mask");
+      TexturePropertySingleLine(
+          MakeLabel(bc, "Mask"),
+          bc);
+      SetKeyword("SSR_MASK", bc.textureValue);
+
+      EditorGUI.indentLevel -= 1;
+    }
+
     EditorGUI.indentLevel -= 1;
     show_ui.RemoveAt(show_ui.Count - 1);
   }

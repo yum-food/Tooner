@@ -42,6 +42,8 @@ struct v2f
   float3 objPos : TEXCOORD11;
   float3 centerCamPos : TEXCOORD12;
 
+  float4 screenPos : TEXCOORD13;
+
   UNITY_VERTEX_INPUT_INSTANCE_ID
   UNITY_VERTEX_OUTPUT_STEREO
 };
@@ -87,8 +89,10 @@ struct v2f
   float3 objPos : TEXCOORD12;
   float3 centerCamPos : TEXCOORD13;
 
+  float4 screenPos : TEXCOORD14;
+
   #if defined(VERTEXLIGHT_ON)
-  float3 vertexLightColor : TEXCOORD14;
+  float3 vertexLightColor : TEXCOORD15;
   #endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID

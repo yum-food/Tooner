@@ -89,8 +89,12 @@ sampler2D _NoiseTexSSR;
 float4 _GrabTexture_TexelSize;
 float4 _NoiseTexSSR_TexelSize;
 float _EdgeFade;
+float _Enable_SSR;
 float _SSRStrength;
 float _SSRHeight;
+#if defined(SSR_MASK)
+texture2D _SSR_Mask;
+#endif
 #endif
 
 

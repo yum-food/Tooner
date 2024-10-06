@@ -556,6 +556,7 @@ Shader "yum_food/tooner"
     _Mirror_UV_Flip_Enable_Dynamic("Enable rorschach gimmick", Float) = 0.0
 
     _Enable_SSR("Enable SSR", Float) = 0
+    _SSR_Mask("SSR mask", 2D) = "white" {}
     _SSRStrength("SSR Strength", Float) = 1
     _SSRHeight("SSR Height", Float) = 0.1
     [HideInInspector]_NoiseTexSSR("SSR Noise Texture", 2D) = "black" {}

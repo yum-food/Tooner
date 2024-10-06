@@ -278,6 +278,7 @@ fixed4 frag (v2f i) : SV_Target
   albedo = _Outline_Color;
 
 #if defined(_GIMMICK_AL_CHROMA_00)
+  float al_chroma_00_emission = 0;
   if (_Gimmick_AL_Chroma_00_Outline_Pass && AudioLinkIsAvailable()) {
     float3 c = AudioLinkData(ALPASS_CCSTRIP + uint2(0, 0)).rgb;
 #if defined(_GIMMICK_AL_CHROMA_00_HUE_SHIFT)
@@ -286,6 +287,7 @@ fixed4 frag (v2f i) : SV_Target
     c = OKLCHtoLRGB(c);
 #endif
     albedo.rgb = lerp(albedo.rgb, c, _Gimmick_AL_Chroma_00_Outline_Blend);
+    al_chroma_00_emission = _Gimmick_AL_Chroma_00_Outline_Emission;
   }
 #endif
 
@@ -317,7 +319,7 @@ fixed4 frag (v2f i) : SV_Target
 
   result += albedo * _Outline_Emission_Strength;
 #if defined(_GIMMICK_AL_CHROMA_00)
-  result += albedo * _Gimmick_AL_Chroma_00_Outline_Emission;
+  result += albedo * al_chroma_00_emission;
 #endif
 
 #if defined(_EXPLODE) && defined(_AUDIOLINK)

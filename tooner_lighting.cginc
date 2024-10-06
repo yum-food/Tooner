@@ -212,7 +212,10 @@ v2f vert(appdata v)
   TRANSFER_SHADOW(o);
 #endif
 
+  o.screenPos = ComputeGrabScreenPos(o.pos);
+
   getVertexLightColor(o);
+
 
   return o;
 }
