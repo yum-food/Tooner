@@ -1276,6 +1276,7 @@ float4 effect(inout v2f i)
   const float3 view_dir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
   const float3 view_dir_c = normalize(i.centerCamPos - i.worldPos);
 #define VIEW_DIR(center_eye_fix) (center_eye_fix == 1 ? view_dir_c : view_dir)
+#define CAM_POS(center_eye_fix) (center_eye_fix == 1 ? i.centerCamPos : _WorldSpaceCameraPos.xyz)
 
   // Not necessarily normalized after interpolation.
   i.normal = normalize(i.normal);
@@ -1740,7 +1741,7 @@ float4 effect(inout v2f i)
 #if defined(_RIM_LIGHTING0_GLITTER)
       float rl_glitter = get_glitter(
           get_uv_by_channel(i, round(_Rim_Lighting0_Glitter_UV_Select)),
-          i.worldPos, i.centerCamPos, normal,
+          i.worldPos, CAM_POS(_Rim_Lighting0_Center_Eye_Fix), normal,
           _Rim_Lighting0_Glitter_Density,
           _Rim_Lighting0_Glitter_Amount, _Rim_Lighting0_Glitter_Speed,
           /*mask=*/1, /*angle=*/91, /*power=*/1);
@@ -1831,7 +1832,7 @@ float4 effect(inout v2f i)
 #if defined(_RIM_LIGHTING1_GLITTER)
       float rl_glitter = get_glitter(
           get_uv_by_channel(i, round(_Rim_Lighting1_Glitter_UV_Select)),
-          i.worldPos, i.centerCamPos, normal,
+          i.worldPos, CAM_POS(_Rim_Lighting1_Center_Eye_Fix), normal,
           _Rim_Lighting1_Glitter_Density,
           _Rim_Lighting1_Glitter_Amount, _Rim_Lighting1_Glitter_Speed,
           /*mask=*/1, /*angle=*/91, /*power=*/1);
@@ -1922,7 +1923,7 @@ float4 effect(inout v2f i)
 #if defined(_RIM_LIGHTING2_GLITTER)
       float rl_glitter = get_glitter(
           get_uv_by_channel(i, round(_Rim_Lighting2_Glitter_UV_Select)),
-          i.worldPos, i.centerCamPos, normal,
+          i.worldPos, CAM_POS(_Rim_Lighting2_Center_Eye_Fix), normal,
           _Rim_Lighting2_Glitter_Density,
           _Rim_Lighting2_Glitter_Amount, _Rim_Lighting2_Glitter_Speed,
           /*mask=*/1, /*angle=*/91, /*power=*/1);
@@ -2014,7 +2015,7 @@ float4 effect(inout v2f i)
 #if defined(_RIM_LIGHTING3_GLITTER)
       float rl_glitter = get_glitter(
           get_uv_by_channel(i, round(_Rim_Lighting3_Glitter_UV_Select)),
-          i.worldPos, i.centerCamPos, normal,
+          i.worldPos, CAM_POS(_Rim_Lighting3_Center_Eye_Fix), normal,
           _Rim_Lighting3_Glitter_Density,
           _Rim_Lighting3_Glitter_Amount, _Rim_Lighting3_Glitter_Speed,
           /*mask=*/1, /*angle=*/91, /*power=*/1);
