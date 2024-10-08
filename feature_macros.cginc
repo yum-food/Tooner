@@ -1,6 +1,8 @@
 #ifndef __FEATURE_MACROS_INC
 #define __FEATURE_MACROS_INC
 
+#define EXPERIMENT__CUSTOM_DEPTH
+
 #pragma shader_feature_local _ _BASECOLOR_MAP
 #pragma shader_feature_local _ _NORMAL_MAP
 #pragma shader_feature_local _ _METALLIC_MAP
@@ -164,6 +166,7 @@
 #pragma shader_feature_local _ _GIMMICK_AL_CHROMA_00_HUE_SHIFT
 #pragma shader_feature_local _ SSR_ENABLED
 #pragma shader_feature_local _ SSR_MASK
+#pragma shader_feature_local _ _GIMMICK_FOG_00
 
 #endif  // __FEATURE_MACROS_INC
 

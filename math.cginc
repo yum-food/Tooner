@@ -197,5 +197,29 @@ float median(float3 x)
   return median(x.x, x.y, x.z);
 }
 
+// Yoinked from here
+//   https://www.scratchapixel.com/lessons/3d-basic-rendering/minimal-ray-tracer-rendering-simple-shapes/ray-sphere-intersection.html
+bool solveQuadratic(float a, float b, float c, out float x0, out float x1)
+{
+  float discriminant = b * b - 4 * a * c;
+  if (discriminant < 0) {
+    return false;
+  } else if (discriminant == 0) {
+    x0 = -0.5 * b / a;
+    x1 = x0;
+  } else {
+    float q = (b > 0) ?
+      -0.5 * (b + sqrt(discriminant)) :
+      -0.5 * (b - sqrt(discriminant));
+    x0 = q/a;
+    x1 = c/q;
+  }
+  float tmp_min = min(x0, x1);
+  float tmp_max = max(x0, x1);
+  x0 = tmp_min;
+  x1 = tmp_max;
+  return true;
+}
+
 #endif  // __MATH_INC
 

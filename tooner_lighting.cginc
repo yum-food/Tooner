@@ -7,6 +7,7 @@
 #include "cnlohr.cginc"
 #include "disinfo.cginc"
 #include "eyes.cginc"
+#include "fog.cginc"
 #include "globals.cginc"
 #include "halos.cginc"
 #include "interpolators.cginc"
@@ -169,10 +170,6 @@ v2f vert(appdata v)
   o.worldPos = mul(unity_ObjectToWorld, v.vertex);
   o.objPos = v.vertex;
 
-#if defined(SSR_ENABLED)
-  o.screenPos = ComputeGrabScreenPos(o.pos);
-#endif
-
 #if defined(_FACE_ME_WORLD_Y)
   if (!_FaceMeWorldY_Enable_Dynamic) {
     o.normal = UnityObjectToWorldNormal(v.normal);
@@ -212,7 +209,8 @@ v2f vert(appdata v)
   TRANSFER_SHADOW(o);
 #endif
 
-  o.screenPos = ComputeGrabScreenPos(o.pos);
+	float2 suv = o.pos * float2(0.5, 0.5 * _ProjectionParams.x);
+  o.screenPos = TransformStereoScreenSpaceTex(suv + 0.5 * o.pos.w, o.pos.w);
 
   getVertexLightColor(o);
 
@@ -1271,8 +1269,14 @@ float4 pixellate_color(int2 px_res, float2 uv, float4 c)
 }
 #endif
 
-float4 effect(inout v2f i)
+float4 effect(inout v2f i, out float depth)
 {
+#if defined(EXPERIMENT__CUSTOM_DEPTH)
+  {
+    float4 clip_pos = mul(UNITY_MATRIX_VP, float4(i.worldPos, 1.0));
+    depth = clip_pos.z / clip_pos.w;
+  }
+#endif
   const float3 view_dir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
   const float3 view_dir_c = normalize(i.centerCamPos - i.worldPos);
 #define VIEW_DIR(center_eye_fix) (center_eye_fix == 1 ? view_dir_c : view_dir)
@@ -1383,6 +1387,15 @@ float4 effect(inout v2f i)
     Halo00PBR pbr = halo00_march(i.worldPos, i.uv0);
     albedo = pbr.albedo;
     normal = pbr.normal;
+  }
+#endif
+
+#if defined(_GIMMICK_FOG_00)
+  {
+    Fog00PBR pbr = getFog00(i);
+    albedo = pbr.albedo;
+    normal = pbr.normal;
+    depth = pbr.depth;
   }
 #endif
 
@@ -2301,12 +2314,19 @@ float4 effect(inout v2f i)
   return result;
 }
 
-fixed4 frag(v2f i) : SV_Target
+fixed4 frag(v2f i
+#if defined(EXPERIMENT__CUSTOM_DEPTH)
+, out float depth: SV_DepthGreaterEqual
+#endif
+    ) : SV_Target
 {
+#if !defined(EXPERIMENT__CUSTOM_DEPTH)
+  float depth;
+#endif
   UNITY_APPLY_DITHER_CROSSFADE(i.pos.xy);
   UNITY_SETUP_INSTANCE_ID(i);
   UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-  return effect(i);
+  return effect(i, depth);
 }
 
 #endif  // TOONER_LIGHTING

@@ -50,4 +50,39 @@ float3 getCenterCamPos() {
 #endif
 }
 
+float GetLinearZFromZDepth_WorksWithMirrors(float zDepthFromMap, float2 screenUV)
+{
+	#if defined(UNITY_REVERSED_Z)
+		zDepthFromMap = 1 - zDepthFromMap;
+
+		// When using a mirror, the far plane is whack.  This just checks for it and aborts.
+		if( zDepthFromMap >= 1.0 ) return _ProjectionParams.z;
+	#endif
+
+	float4 clipPos = float4(screenUV.xy, zDepthFromMap, 1.0);
+	clipPos.xyz = 2.0f * clipPos.xyz - 1.0f;
+	float4 camPos = mul(unity_CameraInvProjection, clipPos);
+	return -camPos.z / camPos.w;
+}
+
+float GetDepthOfWorldPos(float3 worldPos)
+{
+  float3 full_vec_eye_to_geometry = worldPos - _WorldSpaceCameraPos;
+  float3 world_dir = normalize(worldPos - _WorldSpaceCameraPos);
+  float4 objPos = mul(unity_WorldToObject, float4(worldPos, 1));
+  float4 clipPos = UnityObjectToClipPos(objPos);
+
+	float2 suv = clipPos * float2(0.5, 0.5 * _ProjectionParams.x);
+  float2 screenPos = TransformStereoScreenSpaceTex(suv + 0.5 * clipPos.w, clipPos.w);
+
+  float perspective_divide = 1.0 / clipPos.w;
+  float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
+  float2 screen_uv = screenPos.xy * perspective_divide;
+  float eye_depth_world =
+    GetLinearZFromZDepth_WorksWithMirrors(
+        SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_uv),
+        screen_uv) * perspective_factor;
+  return eye_depth_world;
+}
+
 #endif  // __CNLOHR_INC

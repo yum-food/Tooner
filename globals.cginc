@@ -3,6 +3,8 @@
 #ifndef __GLOBALS_INC
 #define __GLOBALS_INC
 
+UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
+
 SamplerState linear_repeat_s;
 SamplerState linear_clamp_s;
 SamplerState bilinear_repeat_s;

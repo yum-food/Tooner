@@ -617,6 +617,8 @@ Shader "yum_food/tooner"
     _Hue_Shift_HSV_UI_Show("UI show", Float) = 0
     _Clones_UI_Show("UI show", Float) = 0
     _Mochie_UI_Show("UI show", Float) = 0
+
+    _Gimmick_Fog_00_Enable_Static("Enable fog 00", Float) = 0
   }
   SubShader
   {

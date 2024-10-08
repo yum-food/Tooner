@@ -2002,6 +2002,25 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
 	}
 
+  void DoGimmickFog0() {
+    MaterialProperty bc;
+
+    bc = FindProperty("_Gimmick_Fog_00_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Fog 00", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_FOG_00", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmicks() {
     show_ui.Add(AddCollapsibleMenu("Gimmicks", "_Gimmicks"));
     EditorGUI.indentLevel += 1;
@@ -2021,6 +2040,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickMirrorUVFlip();
     DoGimmickLetterGrid();
     DoGimmickAudiolinkChroma00();
+    DoGimmickFog0();
     DoClones();
     DoExplosion();
     DoGeoScroll();
