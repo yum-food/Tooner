@@ -460,6 +460,8 @@ float4 getLitColor(
 #endif
 #endif
 
+  UNITY_APPLY_FOG(i.fogCoord, pbr.rgb);
+
   return float4(pbr.rgb, albedo.a);
 }
 

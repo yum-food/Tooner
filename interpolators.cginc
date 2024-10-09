@@ -35,14 +35,15 @@ struct v2f
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
-  SHADOW_COORDS(8)
 #endif
-  float3 worldPos : TEXCOORD9;
-  float3 normal : TEXCOORD10;
-  float3 objPos : TEXCOORD11;
-  float3 centerCamPos : TEXCOORD12;
+  float2 fogCoord: TEXCOORD8;
+  SHADOW_COORDS(9)
+  float3 worldPos : TEXCOORD10;
+  float3 normal : TEXCOORD11;
+  float3 objPos : TEXCOORD12;
+  float3 centerCamPos : TEXCOORD13;
 
-  float2 screenPos : TEXCOORD13;
+  float2 screenPos : TEXCOORD14;
 
   UNITY_VERTEX_INPUT_INSTANCE_ID
   UNITY_VERTEX_OUTPUT_STEREO
@@ -81,18 +82,19 @@ struct v2f
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
-  SHADOW_COORDS(8)
 #endif
-  float3 normal : TEXCOORD9;
-  float4 tangent : TEXCOORD10;
-  float3 worldPos : TEXCOORD11;
-  float3 objPos : TEXCOORD12;
-  float3 centerCamPos : TEXCOORD13;
+  float2 fogCoord: TEXCOORD8;
+  unityShadowCoord4 _ShadowCoord : TEXCOORD9;
+  float3 normal : TEXCOORD10;
+  float4 tangent : TEXCOORD11;
+  float3 worldPos : TEXCOORD12;
+  float3 objPos : TEXCOORD13;
+  float3 centerCamPos : TEXCOORD14;
 
-  float2 screenPos : TEXCOORD14;
+  float2 screenPos : TEXCOORD15;
 
   #if defined(VERTEXLIGHT_ON)
-  float3 vertexLightColor : TEXCOORD15;
+  float3 vertexLightColor : TEXCOORD16;
   #endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID

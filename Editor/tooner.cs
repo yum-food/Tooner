@@ -2018,6 +2018,26 @@ public class ToonerGUI : ShaderGUI {
     }
 
     EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Fog_00_Density");
+    RangeProperty(bc, "Density");
+    bc = FindProperty("_Gimmick_Fog_00_Radius");
+    FloatProperty(bc, "Radius");
+    bc = FindProperty("_Gimmick_Fog_00_Step_Size");
+    FloatProperty(bc, "Step size");
+    bc = FindProperty("_Gimmick_Fog_00_Max_Ray");
+    FloatProperty(bc, "Max ray length (m)");
+    bc = FindProperty("_Gimmick_Fog_00_Noise_Scale");
+    FloatProperty(bc, "Noise scale");
+    bc = FindProperty("_Gimmick_Fog_00_Noise_Exponent");
+    FloatProperty(bc, "Noise exponent");
+    bc = FindProperty("_Gimmick_Fog_00_Normal_Cutoff");
+    RangeProperty(bc, "Normal cutoff");
+    bc = FindProperty("_Gimmick_Fog_00_Albedo_Cutoff");
+    RangeProperty(bc, "Albedo cutoff");
+    bc = FindProperty("_Gimmick_Fog_00_Ray_Origin_Randomization");
+    RangeProperty(bc, "Ray origin randomization");
+
     EditorGUI.indentLevel -= 1;
   }
 

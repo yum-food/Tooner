@@ -24,13 +24,6 @@
 #ifndef TOONER_LIGHTING
 #define TOONER_LIGHTING
 
-// Hacky parameterizable whiteout blending. Probably some big mistakes but it
-// passes the eyeball test.
-// At w=0.5, this looks kinda like whiteout blending.
-// At w=0, this returns n0.
-// At w=1, this returns n1.
-#define MY_BLEND_NORMALS(n0, n1, w) normalize(float3((n0.xy * (1 - w) + n1.xy * w), lerp(1, n0.z, (1-w)) * lerp(1, n1.z, w)))
-
 void getVertexLightColor(inout v2f i)
 {
   #if defined(VERTEXLIGHT_ON)
@@ -213,7 +206,7 @@ v2f vert(appdata v)
   o.screenPos = TransformStereoScreenSpaceTex(suv + 0.5 * o.pos.w, o.pos.w);
 
   getVertexLightColor(o);
-
+  UNITY_TRANSFER_FOG(o, o.pos);
 
   return o;
 }
@@ -1390,15 +1383,6 @@ float4 effect(inout v2f i, out float depth)
   }
 #endif
 
-#if defined(_GIMMICK_FOG_00)
-  {
-    Fog00PBR pbr = getFog00(i);
-    albedo = pbr.albedo;
-    normal = pbr.normal;
-    depth = pbr.depth;
-  }
-#endif
-
 #if defined(_RENDERING_CUTOUT)
 #if defined(_RENDERING_CUTOUT_STOCHASTIC)
   float ar = rand2(i.uv0);
@@ -2212,6 +2196,16 @@ float4 effect(inout v2f i, out float depth)
   ao = 1 - (1 - ao) * _Ambient_Occlusion_Strength;
 #else
   float ao = 1;
+#endif
+
+#if defined(_GIMMICK_FOG_00)
+  {
+    Fog00PBR pbr = getFog00(i);
+    albedo = pbr.albedo;
+    normal = pbr.normal;
+    ao = pbr.ao;
+    depth = pbr.depth;
+  }
 #endif
 
 #if defined(_GIMMICK_FLAT_COLOR)

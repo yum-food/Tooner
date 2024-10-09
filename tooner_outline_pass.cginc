@@ -6,6 +6,7 @@
 #include "clones.cginc"
 #include "cnlohr.cginc"
 #include "globals.cginc"
+#include "interpolators.cginc"
 #include "math.cginc"
 #include "pbr.cginc"
 #include "oklab.cginc"

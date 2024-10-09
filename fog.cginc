@@ -13,28 +13,46 @@ struct Fog00PBR {
   float4 albedo;
   float3 normal;
   float depth;
+  float ao;
 };
 
-#define FOG_MAX_RAY 10
-#define FOG_RADIUS 25
-#define FOG_NOISE_SCALE 2
 float map(float3 p) {
   float density = 0;
-  float t = _Time[1];
-  density += perlin_noise_3d(p * FOG_NOISE_SCALE * 1.0 + t) * saturate(FOG_RADIUS - length(p)) / 2.0;
-  density += perlin_noise_3d(p * FOG_NOISE_SCALE * 1.7 + t) * saturate(FOG_RADIUS - length(p)) / 4.0;
-  density += perlin_noise_3d(p * FOG_NOISE_SCALE * 2.9 + t) * saturate(FOG_RADIUS - length(p)) / 8.0;
-  density += perlin_noise_3d(p * FOG_NOISE_SCALE * 4.3 + t) * saturate(FOG_RADIUS - length(p)) / 16.0;
+  float t = _Time[1] * 0.5;
+  float radius = saturate(_Gimmick_Fog_00_Radius - length(p));
+  float tmp;
+  tmp = perlin_noise_3d(p * _Gimmick_Fog_00_Noise_Scale * 3.1 + t) * radius * 0.5;
+  density += tmp;
+  tmp = perlin_noise_3d(p * _Gimmick_Fog_00_Noise_Scale * 1.7 + t) * radius * 0.5;
+  density *= 0.5;
+  density += tmp;
+  tmp = perlin_noise_3d(p * _Gimmick_Fog_00_Noise_Scale * 1.0 + t) * radius * 0.5;
+  density *= 0.5;
+  density += tmp;
 
-  return density;
+  density = pow(density, _Gimmick_Fog_00_Noise_Exponent);
+
+  // Note: this term annihilates performance by creating large open areas. Long
+  // avgerage view ray = bad perf!
+  #if 1
+  tmp = perlin_noise_3d(p * _Gimmick_Fog_00_Noise_Scale * 0.167 + t/4) * radius - 0.5;
+  tmp *= 0.2;
+  density += tmp;
+  #endif
+
+  return saturate(density);
 }
 
 float3 get_normal(float3 p) {
-  float3 e = float3(0.01, 0, 0);
+  float3 e = float3(0.001, 0, 0);
+  float center = map(p);
+
+  // Prevent NaN
+  float e2 = 1E-9;
   return normalize(float3(
-      map(p + e.xyz) - map(p),
-      map(p + e.yxz) - map(p),
-      map(p + e.zyx) - map(p)));
+      map(p + e.xyz) - center,
+      map(p + e.yxz) - center,
+      map(p + e.zyx) - center) + e2);
 }
 
 Fog00PBR getFog00(v2f i) {
@@ -61,11 +79,11 @@ Fog00PBR getFog00(v2f i) {
   float3 ro = cam_pos;
 
   bool no_intersection = false;
-  if (length(ro) > FOG_RADIUS) {
+  if (length(ro) > _Gimmick_Fog_00_Radius) {
     float3 l = ro;
     float a = 1;
     float b = 2 * dot(rd, l);
-    float c = dot(l, l) - FOG_RADIUS * FOG_RADIUS;
+    float c = dot(l, l) - _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius;
     float t0, t1;
     if (solveQuadratic(a, b, c, t0, t1)) {
       no_intersection = (t0 < 0) * (t1 < 0);
@@ -77,37 +95,54 @@ Fog00PBR getFog00(v2f i) {
 
   // Factor of 10 on `screen_uv*10` eliminates visible striping artifact that
   // is visible with no factor.
-  float dither = rand2(screen_uv*10) - 0.5;
-  ro += rd * (1.0 + dither);
+  float dither = rand2(screen_uv*10) * _Gimmick_Fog_00_Step_Size * _Gimmick_Fog_00_Ray_Origin_Randomization;
+  ro += rd * (0.1 + dither);
 
   float world_pos_depth_hit_l = length(world_pos_depth_hit - ro);
 
   float4 acc = 0;
-  float step_size = 0.5;
   uint step_count = floor(min(
-        FOG_MAX_RAY / step_size,
-        world_pos_depth_hit_l / step_size));
+        _Gimmick_Fog_00_Max_Ray / _Gimmick_Fog_00_Step_Size,
+        world_pos_depth_hit_l / _Gimmick_Fog_00_Step_Size));
   step_count *= (1 - no_intersection);
-  float density = 0.5;
 
-  float3 normal_weighted_sum = 0;
+  float3 normal = i.normal;
+  float ao = 0;
   for (uint ii = 0; ii < step_count; ii++) {
-    float3 p = ro + (rd * step_size) * ii;
+    float3 p = ro + (rd * _Gimmick_Fog_00_Step_Size) * ii;
+
     float4 c = float4(1, 1, 1, map(p));
-#if 1
-    float3 n = get_normal(p);
-    normal_weighted_sum += n * c.a;
-#endif
-    c *= density;
+    c.a = saturate(c.a * _Gimmick_Fog_00_Density * _Gimmick_Fog_00_Step_Size);
+
     acc += c * (1.0 - acc.a);
+
+    const float ao_str = 0.3;
+    float cur_ao = saturate(length(ro) / _Gimmick_Fog_00_Radius) * ao_str + (1.0 - ao_str);
+    ao = cur_ao * (1.0 - acc.a) + acc.a * ao;
+
+    // Performance hack: stop blending normals after enough accumulation.
+    if (acc.a < _Gimmick_Fog_00_Normal_Cutoff) {
+      float3 n = get_normal(p);
+      float n_interp = saturate(c.a * (1.0 - acc.a) * rcp(_Gimmick_Fog_00_Normal_Cutoff));
+      normal = MY_BLEND_NORMALS(normal, n, n_interp);
+    }
+    if (acc.a > _Gimmick_Fog_00_Albedo_Cutoff) {
+      acc /= acc.a;
+      break;
+    }
+    // Performance hack: stop iterating if we go outside of the sphere.
+    if (dot(p, p) > _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius) {
+      break;
+    }
   }
 
   Fog00PBR pbr;
-  pbr.albedo = saturate(acc);
-  pbr.albedo.rgb = saturate(pow(pbr.albedo.rgb, 3.0) * 5);
+  pbr.albedo.rgb = 1;
+  pbr.albedo.a = saturate(acc.a);
+  pbr.ao = ao;
 
-#if 0
-  pbr.normal = normalize(normal_weighted_sum);
+#if 1
+  pbr.normal = normalize(normal);
 #else
   pbr.normal = i.normal;
 #endif

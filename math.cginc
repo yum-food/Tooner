@@ -3,6 +3,13 @@
 #ifndef __MATH_INC
 #define __MATH_INC
 
+// Hacky parameterizable whiteout blending. Probably some big mistakes but it
+// passes the eyeball test.
+// At w=0.5, this looks kinda like whiteout blending.
+// At w=0, this returns n0.
+// At w=1, this returns n1.
+#define MY_BLEND_NORMALS(n0, n1, w) normalize(float3((n0.xy * (1 - w) + n1.xy * w), lerp(1, n0.z, (1-w)) * lerp(1, n1.z, w)))
+
 // Complex numbers
 typedef float2 complex;
 
