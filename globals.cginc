@@ -85,7 +85,6 @@ float _Clearcoat_Mask2_Invert;
 #endif
 
 #if defined(SSR_ENABLED)
-UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 sampler2D _GrabTexture; 
 sampler2D _NoiseTexSSR;
 float4 _GrabTexture_TexelSize;

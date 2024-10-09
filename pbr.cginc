@@ -254,6 +254,21 @@ float4 getLitColor(
     direct_light.color *= (1 - e);
   }
 
+#if defined(_LTCGI)
+  ltcgi_acc acc = (ltcgi_acc) 0;
+  if ((bool) round(_LTCGI_Enabled)) {
+    LTCGI_Contribution(
+        acc,
+        i.worldPos,
+        normal,
+        view_dir,
+        GetRoughness(smoothness),
+        0);
+    indirect_light.diffuse += acc.diffuse;
+    indirect_light.specular += acc.specular;
+  }
+#endif
+
   direct_light.color = RGBtoHSV(direct_light.color);
   indirect_light.specular = RGBtoHSV(indirect_light.specular);
   indirect_light.diffuse = RGBtoHSV(indirect_light.diffuse);
@@ -322,11 +337,12 @@ float4 getLitColor(
   float2 screenUVs = 0;
   float4 screenPos = 0;
   #if SSR_ENABLED
-    screenUVs = i.screenPos.xy / (i.screenPos.w+0.0000000001);
+    float perspective_divide = rcp(i.pos.w+0.0000000001);
+    screenUVs = i.screenPos.xy * perspective_divide;
     #if UNITY_SINGLE_PASS_STEREO || defined(UNITY_STEREO_INSTANCING_ENABLED) || defined(UNITY_STEREO_MULTIVIEW_ENABLED        )
       screenUVs.x *= 2;
     #endif
-    screenPos = i.screenPos;
+    screenPos = float4(i.screenPos, 0, i.pos.w);
   #endif
 
 #if 1
@@ -443,20 +459,6 @@ float4 getLitColor(
         cc_mask * c * _Vertex_Lighting_Factor;
     }
 #endif
-#endif
-
-#if defined(_LTCGI)
-  ltcgi_acc acc = (ltcgi_acc) 0;
-  if ((bool) round(_LTCGI_Enabled)) {
-    LTCGI_Contribution(
-        acc,
-        i.worldPos,
-        normal,
-        view_dir,
-        GetRoughness(smoothness),
-        0);
-    pbr.rgb += acc.diffuse + acc.specular;
-  }
 #endif
 
   UNITY_APPLY_FOG(i.fogCoord, pbr.rgb);
