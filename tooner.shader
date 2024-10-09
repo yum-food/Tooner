@@ -628,6 +628,12 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Normal_Cutoff("Normal cutoff (alpha)", Range(0,1)) = 0.5
     _Gimmick_Fog_00_Albedo_Cutoff("Albedo cutoff (alpha)", Range(0,1)) = 0.9
     _Gimmick_Fog_00_Ray_Origin_Randomization("Enable ray origin randomization", Range(0,1)) = 1
+    _Gimmick_Fog_00_Emitter_Texture("Emitter texture", 2D) = "black" {}
+    _Gimmick_Fog_00_Emitter_Location("fog", Vector) = (0, 0, 0, 0)
+    _Gimmick_Fog_00_Emitter_Normal("fog", Vector) = (-1, 0, 0, 0)
+    _Gimmick_Fog_00_Emitter_Scale_X("fog", Float) = 1
+    _Gimmick_Fog_00_Emitter_Scale_Y("fog", Float) = 1
+    _Gimmick_Fog_00_Emitter_Brightness("fog", Float) = 1
   }
   SubShader
   {

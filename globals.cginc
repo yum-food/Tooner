@@ -716,6 +716,14 @@ float _Gimmick_Fog_00_Density;
 float _Gimmick_Fog_00_Normal_Cutoff;
 float _Gimmick_Fog_00_Albedo_Cutoff;
 float _Gimmick_Fog_00_Ray_Origin_Randomization;
+#if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
+texture2D _Gimmick_Fog_00_Emitter_Texture;
+float3 _Gimmick_Fog_00_Emitter_Location;
+float3 _Gimmick_Fog_00_Emitter_Normal;
+float _Gimmick_Fog_00_Emitter_Scale_X;
+float _Gimmick_Fog_00_Emitter_Scale_Y;
+float _Gimmick_Fog_00_Emitter_Brightness;
+#endif
 #endif
 
 #endif

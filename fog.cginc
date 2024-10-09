@@ -43,9 +43,9 @@ float map(float3 p) {
   return saturate(density);
 }
 
-float3 get_normal(float3 p) {
+float3 get_normal(float3 p, float map_p) {
   float3 e = float3(0.001, 0, 0);
-  float center = map(p);
+  float center = map_p;
 
   // Prevent NaN
   float e2 = 1E-9;
@@ -111,8 +111,37 @@ Fog00PBR getFog00(v2f i) {
   for (uint ii = 0; ii < step_count; ii++) {
     float3 p = ro + (rd * _Gimmick_Fog_00_Step_Size) * ii;
 
-    float4 c = float4(1, 1, 1, map(p));
+    float col_gray = 0.3;
+    const float map_p = map(p);
+    float4 c = float4(col_gray, col_gray, col_gray, map_p);
     c.a = saturate(c.a * _Gimmick_Fog_00_Density * _Gimmick_Fog_00_Step_Size);
+
+#if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
+    // Project onto plane
+    float3 p_to_emitter = p - _Gimmick_Fog_00_Emitter_Location;
+    float3 emitter_normal = normalize(_Gimmick_Fog_00_Emitter_Normal);
+    float2 emitter_scale = float2(_Gimmick_Fog_00_Emitter_Scale_X, _Gimmick_Fog_00_Emitter_Scale_Y);
+
+    float t = dot(p_to_emitter, emitter_normal);
+    float3 p_projected = p - t * emitter_normal;
+
+    p_projected -= _Gimmick_Fog_00_Emitter_Location;
+    bool in_range = (abs(p_projected.x) < emitter_scale.x) * (abs(p_projected.y) < emitter_scale.y) * (t > 0);
+
+    float2 emitter_uv = clamp(p_projected.xy, -emitter_scale, emitter_scale) / emitter_scale;
+    emitter_uv /= 2.0;
+    emitter_uv += 0.5;
+    float3 emitter_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_repeat_s, emitter_uv, 0);
+    emitter_color *= _Gimmick_Fog_00_Emitter_Brightness;
+    float emitter_dist = in_range ? abs(t) : 1000;
+    // Inverse square is physically accurate, but this looks better.
+    float emitter_falloff = min(1, rcp(pow(emitter_dist, 1.0)));
+#if 1
+    c.rgb = lerp(c.rgb, emitter_color, in_range * emitter_falloff);
+#else
+    c.rgb = emitter_color;
+#endif
+#endif
 
     acc += c * (1.0 - acc.a);
 
@@ -122,7 +151,7 @@ Fog00PBR getFog00(v2f i) {
 
     // Performance hack: stop blending normals after enough accumulation.
     if (acc.a < _Gimmick_Fog_00_Normal_Cutoff) {
-      float3 n = get_normal(p);
+      float3 n = get_normal(p, map_p);
       float n_interp = saturate(c.a * (1.0 - acc.a) * rcp(_Gimmick_Fog_00_Normal_Cutoff));
       normal = MY_BLEND_NORMALS(normal, n, n_interp);
     }
@@ -137,7 +166,7 @@ Fog00PBR getFog00(v2f i) {
   }
 
   Fog00PBR pbr;
-  pbr.albedo.rgb = 1;
+  pbr.albedo.rgb = acc.rgb;
   pbr.albedo.a = saturate(acc.a);
   pbr.ao = ao;
 

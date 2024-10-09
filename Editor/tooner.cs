@@ -2038,6 +2038,28 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Fog_00_Ray_Origin_Randomization");
     RangeProperty(bc, "Ray origin randomization");
 
+    bc = FindProperty("_Gimmick_Fog_00_Emitter_Texture");
+    TexturePropertySingleLine(
+        MakeLabel(bc, "Emitter texture"),
+        bc);
+    SetKeyword("_GIMMICK_FOG_00_EMITTER_TEXTURE", bc.textureValue);
+    if (bc.textureValue) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_Fog_00_Emitter_Location");
+      VectorProperty(bc, "Location (world)");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter_Normal");
+      VectorProperty(bc, "Normal (world)");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter_Scale_X");
+      FloatProperty(bc, "Scale (x)");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter_Scale_Y");
+      FloatProperty(bc, "Scale (y)");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter_Brightness");
+      FloatProperty(bc, "Brightness");
+
+      EditorGUI.indentLevel -= 1;
+    }
+
     EditorGUI.indentLevel -= 1;
   }
 
