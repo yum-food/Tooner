@@ -2198,6 +2198,7 @@ float4 effect(inout v2f i, out float depth)
   float ao = 1;
 #endif
 
+  float3 diffuse_contrib = 0;
 #if defined(_GIMMICK_FOG_00)
   {
     Fog00PBR pbr = getFog00(i);
@@ -2205,6 +2206,7 @@ float4 effect(inout v2f i, out float depth)
     normal = pbr.normal;
     ao = pbr.ao;
     depth = pbr.depth;
+    diffuse_contrib += pbr.diffuse;
   }
 #endif
 
@@ -2232,7 +2234,8 @@ float4 effect(inout v2f i, out float depth)
 #endif
 
   float4 lit = getLitColor(vertex_light_color, albedo, i.worldPos, normal,
-      metallic, 1.0 - roughness, i.uv0, ao, /*enable_direct=*/true, i);
+      metallic, 1.0 - roughness, i.uv0, ao, /*enable_direct=*/true,
+      diffuse_contrib, i);
 
 #if defined(_GIMMICK_FLAT_COLOR)
   if (round(_Gimmick_Flat_Color_Enable_Dynamic)) {

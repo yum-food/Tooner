@@ -621,7 +621,7 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Enable_Static("Enable fog 00", Float) = 0
     _Gimmick_Fog_00_Max_Ray("Max ray", Float) = 25
     _Gimmick_Fog_00_Radius("Radius", Float) = 25
-    _Gimmick_Fog_00_Step_Size("Step size (meters)", Float) = 1
+    _Gimmick_Fog_00_Step_Size_Factor("Step size (meters)", Float) = 1
     _Gimmick_Fog_00_Noise_Scale("Noise scale", Float) = 1
     _Gimmick_Fog_00_Noise_Exponent("Noise exponent", Float) = 2.0
     _Gimmick_Fog_00_Density("Density", Range(0,2)) = 1.0

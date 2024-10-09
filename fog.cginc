@@ -12,6 +12,7 @@
 struct Fog00PBR {
   float4 albedo;
   float3 normal;
+  float3 diffuse;
   float depth;
   float ao;
 };
@@ -95,26 +96,28 @@ Fog00PBR getFog00(v2f i) {
 
   // Factor of 10 on `screen_uv*10` eliminates visible striping artifact that
   // is visible with no factor.
-  float dither = rand2(screen_uv*10) * _Gimmick_Fog_00_Step_Size * _Gimmick_Fog_00_Ray_Origin_Randomization;
+  float step_size = rcp(_Gimmick_Fog_00_Density) * _Gimmick_Fog_00_Step_Size_Factor;
+  step_size = clamp(step_size, 1E-2, 10);
+  float dither = rand2(screen_uv*10) * step_size * _Gimmick_Fog_00_Ray_Origin_Randomization;
   ro += rd * (0.1 + dither);
 
   float world_pos_depth_hit_l = length(world_pos_depth_hit - ro);
 
   float4 acc = 0;
   uint step_count = floor(min(
-        _Gimmick_Fog_00_Max_Ray / _Gimmick_Fog_00_Step_Size,
-        world_pos_depth_hit_l / _Gimmick_Fog_00_Step_Size));
+        _Gimmick_Fog_00_Max_Ray / step_size,
+        world_pos_depth_hit_l / step_size));
   step_count *= (1 - no_intersection);
 
   float3 normal = i.normal;
   float ao = 0;
   for (uint ii = 0; ii < step_count; ii++) {
-    float3 p = ro + (rd * _Gimmick_Fog_00_Step_Size) * ii;
+    float3 p = ro + (rd * step_size) * ii;
 
-    float col_gray = 0.3;
+    const float col_gray = 0;
     const float map_p = map(p);
     float4 c = float4(col_gray, col_gray, col_gray, map_p);
-    c.a = saturate(c.a * _Gimmick_Fog_00_Density * _Gimmick_Fog_00_Step_Size);
+    c.a = saturate(c.a * _Gimmick_Fog_00_Density * step_size);
 
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
     // Project onto plane
@@ -150,11 +153,13 @@ Fog00PBR getFog00(v2f i) {
     ao = cur_ao * (1.0 - acc.a) + acc.a * ao;
 
     // Performance hack: stop blending normals after enough accumulation.
+#if 0
     if (acc.a < _Gimmick_Fog_00_Normal_Cutoff) {
       float3 n = get_normal(p, map_p);
       float n_interp = saturate(c.a * (1.0 - acc.a) * rcp(_Gimmick_Fog_00_Normal_Cutoff));
       normal = MY_BLEND_NORMALS(normal, n, n_interp);
     }
+#endif
     if (acc.a > _Gimmick_Fog_00_Albedo_Cutoff) {
       acc /= acc.a;
       break;
@@ -166,9 +171,10 @@ Fog00PBR getFog00(v2f i) {
   }
 
   Fog00PBR pbr;
-  pbr.albedo.rgb = acc.rgb;
+  pbr.albedo.rgb = 1;
   pbr.albedo.a = saturate(acc.a);
   pbr.ao = ao;
+  pbr.diffuse = acc.rgb;
 
 #if 1
   pbr.normal = normalize(normal);

@@ -708,7 +708,7 @@ float _Gimmick_AL_Chroma_00_Hue_Shift_Theta;
 #if defined(_GIMMICK_FOG_00)
 float _Gimmick_Fog_00_Max_Ray;
 float _Gimmick_Fog_00_Radius;
-float _Gimmick_Fog_00_Step_Size;
+float _Gimmick_Fog_00_Step_Size_Factor;
 float _Gimmick_Fog_00_Noise_Scale;
 float _Gimmick_Fog_00_Noise_Exponent;
 float _Gimmick_Fog_00_Density;

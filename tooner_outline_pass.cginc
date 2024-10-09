@@ -316,7 +316,8 @@ fixed4 frag (v2f i) : SV_Target
       vertex_light_color,
       albedo, i.worldPos, i.normal,
       /*metallic=*/0, /*smoothness=*/0,
-      i.uv0, ao, /*enable_direct=*/false, i);
+      i.uv0, ao, /*enable_direct=*/false,
+      /*diffuse_contrib=*/0, i);
 
   result += albedo * _Outline_Emission_Strength;
 #if defined(_GIMMICK_AL_CHROMA_00)

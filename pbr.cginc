@@ -192,6 +192,7 @@ float4 getLitColor(
     float ao,
     // hack while i figure out view-dependent flickering in outlines
     bool enable_direct,
+    float3 diffuse_contrib,
     v2f i)
 {
   float3 specular_tint;
@@ -243,7 +244,7 @@ float4 getLitColor(
 #else
     direct_light.color = getDirectLightColor();
 #endif
-    indirect_light.diffuse = getIndirectDiffuse(i, vertexLightColor, normal);
+    indirect_light.diffuse = getIndirectDiffuse(i, vertexLightColor, normal) + diffuse_contrib;
     indirect_light.specular = getIndirectSpecular(i, view_dir, normal, smoothness,
         metallic, worldPos, uv);
   }

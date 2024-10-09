@@ -2023,8 +2023,8 @@ public class ToonerGUI : ShaderGUI {
     RangeProperty(bc, "Density");
     bc = FindProperty("_Gimmick_Fog_00_Radius");
     FloatProperty(bc, "Radius");
-    bc = FindProperty("_Gimmick_Fog_00_Step_Size");
-    FloatProperty(bc, "Step size");
+    bc = FindProperty("_Gimmick_Fog_00_Step_Size_Factor");
+    FloatProperty(bc, "Step size multiplier");
     bc = FindProperty("_Gimmick_Fog_00_Max_Ray");
     FloatProperty(bc, "Max ray length (m)");
     bc = FindProperty("_Gimmick_Fog_00_Noise_Scale");
