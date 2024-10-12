@@ -619,21 +619,38 @@ Shader "yum_food/tooner"
     _Mochie_UI_Show("UI show", Float) = 0
 
     _Gimmick_Fog_00_Enable_Static("Enable fog 00", Float) = 0
+    _Gimmick_Fog_00_Noise("Noise", 3D) = "black" {}
     _Gimmick_Fog_00_Max_Ray("Max ray", Float) = 25
     _Gimmick_Fog_00_Radius("Radius", Float) = 25
     _Gimmick_Fog_00_Step_Size_Factor("Step size (meters)", Float) = 1
     _Gimmick_Fog_00_Noise_Scale("Noise scale", Float) = 1
     _Gimmick_Fog_00_Noise_Exponent("Noise exponent", Float) = 2.0
-    _Gimmick_Fog_00_Density("Density", Range(0,2)) = 1.0
+    _Gimmick_Fog_00_Density("Density", Range(0,10)) = 1.0
     _Gimmick_Fog_00_Normal_Cutoff("Normal cutoff (alpha)", Range(0,1)) = 0.5
-    _Gimmick_Fog_00_Albedo_Cutoff("Albedo cutoff (alpha)", Range(0,1)) = 0.9
+    _Gimmick_Fog_00_Alpha_Cutoff("Albedo cutoff (alpha)", Range(0,1)) = 0.9
     _Gimmick_Fog_00_Ray_Origin_Randomization("Enable ray origin randomization", Range(0,1)) = 1
+    _Gimmick_Fog_00_Lod_Half_Life("fog", Float) = 5
+
     _Gimmick_Fog_00_Emitter_Texture("Emitter texture", 2D) = "black" {}
-    _Gimmick_Fog_00_Emitter_Location("fog", Vector) = (0, 0, 0, 0)
-    _Gimmick_Fog_00_Emitter_Normal("fog", Vector) = (-1, 0, 0, 0)
-    _Gimmick_Fog_00_Emitter_Scale_X("fog", Float) = 1
-    _Gimmick_Fog_00_Emitter_Scale_Y("fog", Float) = 1
     _Gimmick_Fog_00_Emitter_Brightness("fog", Float) = 1
+    _Gimmick_Fog_00_Emitter_Lod_Half_Life("fog", Float) = 5
+
+    _Gimmick_Fog_00_Emitter0_Location("fog", Vector) = (0, 0, 0, 0)
+    _Gimmick_Fog_00_Emitter0_Normal("fog", Vector) = (-1, 0, 0, 0)
+    _Gimmick_Fog_00_Emitter0_Scale_X("fog", Float) = 1
+    _Gimmick_Fog_00_Emitter0_Scale_Y("fog", Float) = 1
+
+    _Gimmick_Fog_00_Emitter1_Enable_Static("fog", Float) = 0
+    _Gimmick_Fog_00_Emitter1_Location("fog", Vector) = (0, 0, 0, 0)
+    _Gimmick_Fog_00_Emitter1_Normal("fog", Vector) = (-1, 0, 0, 0)
+    _Gimmick_Fog_00_Emitter1_Scale_X("fog", Float) = 1
+    _Gimmick_Fog_00_Emitter1_Scale_Y("fog", Float) = 1
+
+    _Gimmick_Fog_00_Emitter2_Enable_Static("fog", Float) = 0
+    _Gimmick_Fog_00_Emitter2_Location("fog", Vector) = (0, 0, 0, 0)
+    _Gimmick_Fog_00_Emitter2_Normal("fog", Vector) = (-1, 0, 0, 0)
+    _Gimmick_Fog_00_Emitter2_Scale_X("fog", Float) = 1
+    _Gimmick_Fog_00_Emitter2_Scale_Y("fog", Float) = 1
   }
   SubShader
   {

@@ -68,14 +68,13 @@ float GetLinearZFromZDepth_WorksWithMirrors(float zDepthFromMap, float2 screenUV
 float GetDepthOfWorldPos(float3 worldPos)
 {
   float3 full_vec_eye_to_geometry = worldPos - _WorldSpaceCameraPos;
-  float3 world_dir = normalize(worldPos - _WorldSpaceCameraPos);
   float4 objPos = mul(unity_WorldToObject, float4(worldPos, 1));
   float4 clipPos = UnityObjectToClipPos(objPos);
 
 	float2 suv = clipPos * float2(0.5, 0.5 * _ProjectionParams.x);
   float2 screenPos = TransformStereoScreenSpaceTex(suv + 0.5 * clipPos.w, clipPos.w);
 
-  float perspective_divide = 1.0 / clipPos.w;
+  float perspective_divide = rcp(clipPos.w);
   float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
   float2 screen_uv = screenPos.xy * perspective_divide;
   float eye_depth_world =
@@ -83,6 +82,29 @@ float GetDepthOfWorldPos(float3 worldPos)
         SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_uv),
         screen_uv) * perspective_factor;
   return eye_depth_world;
+}
+
+float GetDepthOfWorldPos(
+    float3 full_vec_eye_to_geometry,
+    float3 worldPos)
+{
+  float4 objPos = mul(unity_WorldToObject, float4(worldPos, 1));
+  float4 clipPos = UnityObjectToClipPos(objPos);
+
+	float2 suv = clipPos * float2(0.5, 0.5 * _ProjectionParams.x);
+  bool suv_in_range =
+    (suv.x >= 0) * (suv.x <= 1) *
+    (suv.y >= 0) * (suv.y <= 1);
+  float2 screenPos = TransformStereoScreenSpaceTex(suv + 0.5 * clipPos.w, clipPos.w);
+
+  float perspective_divide = rcp(clipPos.w);
+  float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
+  float2 screen_uv = screenPos.xy * perspective_divide;
+  float eye_depth_world =
+    GetLinearZFromZDepth_WorksWithMirrors(
+        SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_uv),
+        screen_uv) * perspective_factor;
+  return suv_in_range ? eye_depth_world : -1E6;
 }
 
 #endif  // __CNLOHR_INC

@@ -5,6 +5,7 @@
 
 UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 
+SamplerState point_repeat_s;
 SamplerState linear_repeat_s;
 SamplerState linear_clamp_s;
 SamplerState bilinear_repeat_s;
@@ -713,15 +714,31 @@ float _Gimmick_Fog_00_Noise_Scale;
 float _Gimmick_Fog_00_Noise_Exponent;
 float _Gimmick_Fog_00_Density;
 float _Gimmick_Fog_00_Normal_Cutoff;
-float _Gimmick_Fog_00_Albedo_Cutoff;
+float _Gimmick_Fog_00_Alpha_Cutoff;
 float _Gimmick_Fog_00_Ray_Origin_Randomization;
+float _Gimmick_Fog_00_Lod_Half_Life;
+texture3D _Gimmick_Fog_00_Noise;
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
 texture2D _Gimmick_Fog_00_Emitter_Texture;
-float3 _Gimmick_Fog_00_Emitter_Location;
-float3 _Gimmick_Fog_00_Emitter_Normal;
-float _Gimmick_Fog_00_Emitter_Scale_X;
-float _Gimmick_Fog_00_Emitter_Scale_Y;
 float _Gimmick_Fog_00_Emitter_Brightness;
+float _Gimmick_Fog_00_Emitter_Lod_Half_Life;
+
+float3 _Gimmick_Fog_00_Emitter0_Location;
+float3 _Gimmick_Fog_00_Emitter0_Normal;
+float _Gimmick_Fog_00_Emitter0_Scale_X;
+float _Gimmick_Fog_00_Emitter0_Scale_Y;
+#if defined(_GIMMICK_FOG_00_EMITTER_1)
+float3 _Gimmick_Fog_00_Emitter1_Location;
+float3 _Gimmick_Fog_00_Emitter1_Normal;
+float _Gimmick_Fog_00_Emitter1_Scale_X;
+float _Gimmick_Fog_00_Emitter1_Scale_Y;
+#endif
+#if defined(_GIMMICK_FOG_00_EMITTER_2)
+float3 _Gimmick_Fog_00_Emitter2_Location;
+float3 _Gimmick_Fog_00_Emitter2_Normal;
+float _Gimmick_Fog_00_Emitter2_Scale_X;
+float _Gimmick_Fog_00_Emitter2_Scale_Y;
+#endif
 #endif
 #endif
 

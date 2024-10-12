@@ -2033,10 +2033,16 @@ public class ToonerGUI : ShaderGUI {
     FloatProperty(bc, "Noise exponent");
     bc = FindProperty("_Gimmick_Fog_00_Normal_Cutoff");
     RangeProperty(bc, "Normal cutoff");
-    bc = FindProperty("_Gimmick_Fog_00_Albedo_Cutoff");
-    RangeProperty(bc, "Albedo cutoff");
+    bc = FindProperty("_Gimmick_Fog_00_Alpha_Cutoff");
+    RangeProperty(bc, "Alpha cutoff");
     bc = FindProperty("_Gimmick_Fog_00_Ray_Origin_Randomization");
     RangeProperty(bc, "Ray origin randomization");
+    bc = FindProperty("_Gimmick_Fog_00_Lod_Half_Life");
+    FloatProperty(bc, "LOD half life");
+    bc = FindProperty("_Gimmick_Fog_00_Noise");
+    TexturePropertySingleLine(
+        MakeLabel(bc, "Noise"),
+        bc);
 
     bc = FindProperty("_Gimmick_Fog_00_Emitter_Texture");
     TexturePropertySingleLine(
@@ -2046,16 +2052,44 @@ public class ToonerGUI : ShaderGUI {
     if (bc.textureValue) {
       EditorGUI.indentLevel += 1;
 
-      bc = FindProperty("_Gimmick_Fog_00_Emitter_Location");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter0_Location");
       VectorProperty(bc, "Location (world)");
-      bc = FindProperty("_Gimmick_Fog_00_Emitter_Normal");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter0_Normal");
       VectorProperty(bc, "Normal (world)");
-      bc = FindProperty("_Gimmick_Fog_00_Emitter_Scale_X");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter0_Scale_X");
       FloatProperty(bc, "Scale (x)");
-      bc = FindProperty("_Gimmick_Fog_00_Emitter_Scale_Y");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter0_Scale_Y");
       FloatProperty(bc, "Scale (y)");
+
       bc = FindProperty("_Gimmick_Fog_00_Emitter_Brightness");
       FloatProperty(bc, "Brightness");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter_Lod_Half_Life");
+      FloatProperty(bc, "LOD half life");
+
+      for (int i = 0; i < 2; i++) {
+        bc = FindProperty($"_Gimmick_Fog_00_Emitter{i+1}_Enable_Static");
+        enabled = (bc.floatValue != 0.0);
+        EditorGUI.BeginChangeCheck();
+        enabled = Toggle($"Enable emitter {i+1}", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+        SetKeyword($"_GIMMICK_FOG_00_EMITTER_{i+1}", enabled);
+
+        if (enabled) {
+          EditorGUI.indentLevel += 1;
+
+          bc = FindProperty($"_Gimmick_Fog_00_Emitter{i+1}_Location");
+          VectorProperty(bc, "Location (world)");
+          bc = FindProperty($"_Gimmick_Fog_00_Emitter{i+1}_Normal");
+          VectorProperty(bc, "Normal (world)");
+          bc = FindProperty($"_Gimmick_Fog_00_Emitter{i+1}_Scale_X");
+          FloatProperty(bc, "Scale (x)");
+          bc = FindProperty($"_Gimmick_Fog_00_Emitter{i+1}_Scale_Y");
+          FloatProperty(bc, "Scale (y)");
+
+          EditorGUI.indentLevel -= 1;
+        }
+      }
 
       EditorGUI.indentLevel -= 1;
     }
