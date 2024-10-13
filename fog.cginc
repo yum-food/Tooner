@@ -173,7 +173,7 @@ Fog00PBR getFog00(v2f i) {
   float ao = 0;
   for (uint ii = 0; ii < step_count; ii++) {
     const float3 p = ro + (rd * step_size) * ii;
-    const float lod = floor((ii * step_size) / _Gimmick_Fog_00_Lod_Half_Life);
+    const float lod = floor((ii * step_size) / (_Gimmick_Fog_00_Lod_Half_Life * _Gimmick_Fog_00_Density));
 
     const float map_p = map(p, lod);
     float4 c = float4(0, 0, 0, map_p);
