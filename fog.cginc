@@ -35,7 +35,7 @@ float perlin_noise_3d_tex(float3 p)
 }
 
 float map(float3 p, float lod) {
-  float3 t = _Time[1] * 0.5;
+  float3 t = _Time[1] * .5 * FOG_PERLIN_NOISE_SCALE;
 #define RADIUS_TRANS_WIDTH 100
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
   // Try to create a smooth transition without doing any length() or other
