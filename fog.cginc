@@ -17,11 +17,18 @@ struct Fog00PBR {
   float ao;
 };
 
+#define FOG_PERLIN_NOISE_MODE 0
+
+#if FOG_PERLIN_NOISE_MODE == 0
+#define FOG_PERLIN_NOISE perlin_noise_3d
+#define FOG_PERLIN_NOISE_SCALE 1
+#else
+#define FOG_PERLIN_NOISE perlin_noise_3d_tex
+#define FOG_PERLIN_NOISE_SCALE 8
+#endif
+
 float perlin_noise_3d_tex(float3 p)
 {
-  float3 sq = floor(p);
-  float3 sqi = frac(p);
-
   // 1/256 = 0.00390625
   float r_lo = _Gimmick_Fog_00_Noise.SampleLevel(linear_repeat_s, p.xyz * 0.00390625, 0);
 
@@ -30,16 +37,17 @@ float perlin_noise_3d_tex(float3 p)
 
 float map(float3 p, float lod) {
   float3 t = _Time[1] * 0.5;
+  t = 0;
   float radius = saturate(_Gimmick_Fog_00_Radius - length(p));
 
-	float3 pp = p * _Gimmick_Fog_00_Noise_Scale + t;
-  float density = perlin_noise_3d_tex(pp) * radius * 0.7;
+	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE + t;
+  float density = FOG_PERLIN_NOISE(pp) * radius * 0.7;
 
   density = pow(density, _Gimmick_Fog_00_Noise_Exponent);
 
   // This term creates large open areas
   if (lod < 1) {
-    float tmp = perlin_noise_3d_tex(pp * 0.167 + t/4) * radius - 0.5;
+    float tmp = FOG_PERLIN_NOISE(pp * 0.167 + t/4) * radius - 0.5;
     // Aggressively dial down this parameter as density increases. We really
     // need to keep paths short when density is high.
     float density_performance_fix = rcp(_Gimmick_Fog_00_Density);
