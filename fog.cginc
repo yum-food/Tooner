@@ -36,7 +36,6 @@ float perlin_noise_3d_tex(float3 p)
 
 float map(float3 p, float lod) {
   float3 t = _Time[1] * 0.5;
-  t = 0;
 #define RADIUS_TRANS_WIDTH 100
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
   // Try to create a smooth transition without doing any length() or other
@@ -46,12 +45,20 @@ float map(float3 p, float lod) {
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE + t;
   float density = FOG_PERLIN_NOISE(pp) * radius2 * 0.7;
 
+  // Exponentiate to increase contrast.
   density *= density;
+  // density had an expected value of 0.5. We just calculated pow(density, 2),
+  // thus the new expected value is pow(0.5, ^ 2) = 1/4. Scale it to restore
+  // the original EV.
+  density *= 2;
+  density = saturate(density);
 
   // This term creates large open areas.
   // This `if` doesn't actually create any thread divergence. Since all rays
   // shoot out in lock step, they all leave this mode at the same time.
-  if (lod == 0) {
+  // Also, completely disable the term at high densities since those tend to be
+  // slow (more computationally expensive) anyway.
+  if (lod == 0 && _Gimmick_Fog_00_Noise_Scale < 2) {
     float tmp = FOG_PERLIN_NOISE(pp * 0.167 + t/4) * radius2 - 0.5;
     // Aggressively dial down this parameter as density increases. We really
     // need to keep paths short when density is high.
@@ -83,6 +90,9 @@ void getEmitterData(float3 p, float step_size,
   const float3 p_to_emitter = p - em_loc;
   const float t = dot(p_to_emitter, em_normal);
   const float3 p_projected = p - t * em_normal - em_loc;
+
+  // Add some curvature to simulate scattering.
+  //emitter_scale *= 1 + t*t * .002;
 
   bool in_range = (abs(p_projected.x) < emitter_scale.x) * (abs(p_projected.y) < emitter_scale.y) * (t > 0);
 
