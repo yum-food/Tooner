@@ -31,31 +31,35 @@ float perlin_noise_3d_tex(float3 p)
 {
   // 1/256 = 0.00390625
   float r_lo = _Gimmick_Fog_00_Noise.SampleLevel(linear_repeat_s, p.xyz * 0.00390625, 0);
-
   return r_lo;
 }
 
 float map(float3 p, float lod) {
   float3 t = _Time[1] * 0.5;
   t = 0;
-  float radius = saturate(_Gimmick_Fog_00_Radius - length(p));
+#define RADIUS_TRANS_WIDTH 100
+#define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
+  // Try to create a smooth transition without doing any length() or other
+  // transcendental ops.
+  float radius2 = clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p, p), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP;
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE + t;
-  float density = FOG_PERLIN_NOISE(pp) * radius * 0.7;
+  float density = FOG_PERLIN_NOISE(pp) * radius2 * 0.7;
 
-  density = pow(density, _Gimmick_Fog_00_Noise_Exponent);
+  density *= density;
 
-  // This term creates large open areas
-  if (lod < 1) {
-    float tmp = FOG_PERLIN_NOISE(pp * 0.167 + t/4) * radius - 0.5;
+  // This term creates large open areas.
+  // This `if` doesn't actually create any thread divergence. Since all rays
+  // shoot out in lock step, they all leave this mode at the same time.
+  if (lod == 0) {
+    float tmp = FOG_PERLIN_NOISE(pp * 0.167 + t/4) * radius2 - 0.5;
     // Aggressively dial down this parameter as density increases. We really
     // need to keep paths short when density is high.
-    float density_performance_fix = rcp(_Gimmick_Fog_00_Density);
+    float density_performance_fix = 1 / _Gimmick_Fog_00_Density;
     density_performance_fix *= density_performance_fix;
     tmp *= 0.5 * density_performance_fix;
     density += tmp;
   }
-
   return saturate(density);
 }
 
@@ -72,30 +76,32 @@ float3 get_normal(float3 p, float map_p, float lod) {
 }
 
 void getEmitterData(float3 p, float step_size,
-    float3 em_loc, float3 em_normal, float em_scale_x,
-    float em_scale_y, out float3 em_color, out float em_weight,
-    out float3 p_projected)
+    float3 em_loc, float3 em_normal, float2 emitter_scale,
+    out float3 em_color, out float em_weight)
 {
   // Project onto plane
   const float3 p_to_emitter = p - em_loc;
-  const float2 emitter_scale = float2(em_scale_x, em_scale_y);
   const float t = dot(p_to_emitter, em_normal);
-  float emitter_lod = floor(abs(t) / (_Gimmick_Fog_00_Emitter_Lod_Half_Life * step_size));
-  p_projected = p - t * em_normal;
+  const float3 p_projected = p - t * em_normal - em_loc;
 
-  p_projected -= em_loc;
   bool in_range = (abs(p_projected.x) < emitter_scale.x) * (abs(p_projected.y) < emitter_scale.y) * (t > 0);
 
-  float2 emitter_uv = clamp(p_projected.xy, -emitter_scale, emitter_scale) / emitter_scale;
-  emitter_uv /= 2.0;
-  emitter_uv += 0.5;
   // Go up one LOD every 5 meters
   // TODO make this tunable
-  em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_repeat_s, emitter_uv, emitter_lod);
-  em_color *= _Gimmick_Fog_00_Emitter_Brightness;
-  float emitter_dist = in_range ? abs(t) : 1000;
-  float emitter_falloff = min(1, rcp(pow(emitter_dist, 1.4)));
-  em_weight = in_range * emitter_falloff;
+  if (in_range) {
+    float2 emitter_uv = clamp(p_projected.xy, -emitter_scale, emitter_scale) / emitter_scale;
+    emitter_uv /= 2.0;
+    emitter_uv += 0.5;
+    float emitter_lod = floor(abs(t) / (_Gimmick_Fog_00_Emitter_Lod_Half_Life * step_size));
+    em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_repeat_s, emitter_uv, emitter_lod);
+    em_color *= _Gimmick_Fog_00_Emitter_Brightness;
+    float emitter_dist = in_range ? abs(t) : 1000;
+    float emitter_falloff = min(1, rcp(pow(emitter_dist, 1.4)));
+    em_weight = in_range * emitter_falloff;
+  } else {
+    em_color = 0;
+    em_weight = 0;
+  }
 }
 
 Fog00PBR getFog00(v2f i) {
@@ -172,8 +178,7 @@ Fog00PBR getFog00(v2f i) {
 
       float3 em_color;
       float em_weight;
-      float3 em_p;
-      getEmitterData(p, step_size, em_loc, em_normal, em_scale_x, em_scale_y, em_color, em_weight, em_p);
+      getEmitterData(p, step_size, em_loc, em_normal, float2(em_scale_x, em_scale_y), em_color, em_weight);
 #if defined(_GIMMICK_FOG_00_EMITTER_1)
       const float3 em1_loc = _Gimmick_Fog_00_Emitter1_Location;
       const float3 em1_normal = normalize(_Gimmick_Fog_00_Emitter1_Normal);
@@ -181,8 +186,7 @@ Fog00PBR getFog00(v2f i) {
       const float em1_scale_y = _Gimmick_Fog_00_Emitter1_Scale_Y;
       float3 em1_color;
       float em1_weight;
-      float3 em1_p;
-      getEmitterData(p, step_size, em1_loc, em1_normal, em1_scale_x, em1_scale_y, em1_color, em1_weight, em1_p);
+      getEmitterData(p, step_size, em1_loc, em1_normal, float2(em1_scale_x, em1_scale_y), em1_color, em1_weight);
       em_color += em1_color;
       em_weight += em1_weight;
 #endif
@@ -193,8 +197,7 @@ Fog00PBR getFog00(v2f i) {
       const float em2_scale_y = _Gimmick_Fog_00_Emitter2_Scale_Y;
       float3 em2_color;
       float em2_weight;
-      float3 em2_p;
-      getEmitterData(p, step_size, em2_loc, em2_normal, em2_scale_x, em2_scale_y, em2_color, em2_weight, em2_p);
+      getEmitterData(p, step_size, em2_loc, em2_normal, float2(em2_scale_x, em2_scale_y), em2_color, em2_weight);
       em_color += em2_color;
       em_weight += em2_weight;
 #endif
@@ -203,10 +206,6 @@ Fog00PBR getFog00(v2f i) {
 #endif
 
     acc += c * (1.0 - acc.a);
-
-    const float ao_str = 0.3;
-    float cur_ao = saturate(length(ro) / _Gimmick_Fog_00_Radius) * ao_str + (1.0 - ao_str);
-    ao = cur_ao * (1.0 - acc.a) + acc.a * ao;
 
     // Performance hack: stop blending normals after enough accumulation.
 #if 0
@@ -229,7 +228,7 @@ Fog00PBR getFog00(v2f i) {
   Fog00PBR pbr;
   pbr.albedo.rgb = 1;
   pbr.albedo.a = saturate(acc.a);
-  pbr.ao = ao;
+  pbr.ao = 1;
   pbr.diffuse = acc.rgb;
 
 #if 1
