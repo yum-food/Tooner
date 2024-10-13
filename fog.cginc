@@ -17,14 +17,14 @@ struct Fog00PBR {
   float ao;
 };
 
-#define FOG_PERLIN_NOISE_MODE 0
+#define FOG_PERLIN_NOISE_MODE 1
 
 #if FOG_PERLIN_NOISE_MODE == 0
 #define FOG_PERLIN_NOISE perlin_noise_3d
 #define FOG_PERLIN_NOISE_SCALE 1
 #else
 #define FOG_PERLIN_NOISE perlin_noise_3d_tex
-#define FOG_PERLIN_NOISE_SCALE 8
+#define FOG_PERLIN_NOISE_SCALE 32
 #endif
 
 float perlin_noise_3d_tex(float3 p)

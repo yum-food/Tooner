@@ -39,7 +39,7 @@ public class WhiteNoiseTextureGenerator : EditorWindow
 
     private void GenerateWhiteNoiseTexture()
     {
-        Texture3D texture = new Texture3D(textureWidth, textureHeight, textureDepth, TextureFormat.RGBA32, false);
+        Texture3D texture = new Texture3D(textureWidth, textureHeight, textureDepth, TextureFormat.R8, false);
         Color[] colors = new Color[textureWidth * textureHeight * textureDepth];
 
         for (int z = 0; z < textureDepth; z++)
