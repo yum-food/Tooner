@@ -84,7 +84,9 @@ struct v2f
   float2 uv7 : TEXCOORD7;
 #endif
   float2 fogCoord: TEXCOORD8;
+#if !defined(LIGHTMAP_ON)
   unityShadowCoord4 _ShadowCoord : TEXCOORD9;
+#endif
   float3 normal : TEXCOORD10;
   float4 tangent : TEXCOORD11;
   float3 worldPos : TEXCOORD12;

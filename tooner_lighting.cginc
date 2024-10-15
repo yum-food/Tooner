@@ -174,7 +174,7 @@ v2f vert(appdata v)
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv0 = v.uv0;
   o.uv1 = v.uv1;
-#if defined(_WORLD_INTERPOLATORS)
+#if defined(LIGHTMAP_ON)
   o.uv2 = v.uv2 * unity_LightmapST.xy + unity_LightmapST.zw;
   UNITY_TRANSFER_LIGHTING(o, v.uv2);
 #else
@@ -547,7 +547,7 @@ float2 get_uv_by_channel(v2f i, uint which_channel) {
     case 1:
       return i.uv1;
       break;
-#if !defined(_WORLD_INTERPOLATORS)
+#if !defined(LIGHTMAP_ON)
     case 2:
       return i.uv2;
       break;

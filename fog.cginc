@@ -156,7 +156,16 @@ Fog00PBR getFog00(v2f i) {
   // is visible with no factor.
   float step_size = rcp(_Gimmick_Fog_00_Density) * _Gimmick_Fog_00_Step_Size_Factor;
   step_size = clamp(step_size, 1E-2, 10);
-  float dither = rand2(screen_uv*10) * step_size * _Gimmick_Fog_00_Ray_Origin_Randomization;
+  int2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
+  float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
+  // Smoothly vary over time. Use a triangle wave since it distributes points
+  // evenly. A sin wave would bunch points up at boundaries.
+  #if 1
+  dither_seed = frac(dither_seed + _Time[0]*2);
+  dither_seed *= 2;  // Map onto [0, 2]
+  dither_seed = abs(dither_seed - 1);  // Shape into triangle wave ranging from 0 to 1
+  #endif
+  float dither = dither_seed * step_size * _Gimmick_Fog_00_Ray_Origin_Randomization;
   ro += rd * (0.1 + dither);
 
   float world_pos_depth_hit_l = length(world_pos_depth_hit - ro);
