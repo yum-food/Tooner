@@ -70,9 +70,13 @@ float map(float3 p, float lod) {
   return saturate(density);
 }
 
-void getEmitterData(float3 p, float step_size,
-    float3 em_loc, float3 em_normal, float2 emitter_scale,
-    out float3 em_color, out float em_weight)
+// Returns weighted color
+float3 getEmitterData(float3 p,
+    float step_size,
+    float3 em_loc,
+    float3 em_normal,
+    float2 emitter_scale,
+    float2 emitter_scale_rcp)
 {
   // Project onto plane
   const float3 p_to_emitter = p - em_loc;
@@ -83,23 +87,20 @@ void getEmitterData(float3 p, float step_size,
   //emitter_scale *= 1 + t*t * .002;
 
   bool in_range = (abs(p_projected.x) < emitter_scale.x) * (abs(p_projected.y) < emitter_scale.y) * (t > 0);
+  if (!in_range) {
+    return 0;
+  }
 
   // Go up one LOD every 5 meters
-  // TODO make this tunable
-  if (in_range) {
-    float2 emitter_uv = clamp(p_projected.xy, -emitter_scale, emitter_scale) / emitter_scale;
-    emitter_uv /= 2.0;
-    emitter_uv += 0.5;
-    float emitter_lod = floor(abs(t) / (_Gimmick_Fog_00_Emitter_Lod_Half_Life * step_size));
-    em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_repeat_s, emitter_uv, emitter_lod);
-    em_color *= _Gimmick_Fog_00_Emitter_Brightness;
-    float emitter_dist = in_range ? abs(t) : 1000;
-    float emitter_falloff = min(1, rcp(pow(emitter_dist, 1.4)));
-    em_weight = in_range * emitter_falloff;
-  } else {
-    em_color = 0;
-    em_weight = 0;
-  }
+  float2 emitter_uv = clamp(p_projected.xy, -emitter_scale, emitter_scale) * emitter_scale_rcp;
+  emitter_uv *= 0.5;
+  emitter_uv += 0.5;
+  float emitter_lod = floor(abs(t) / (_Gimmick_Fog_00_Emitter_Lod_Half_Life * step_size));
+  float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_repeat_s, emitter_uv, emitter_lod);
+  em_color *= _Gimmick_Fog_00_Emitter_Brightness;
+  float emitter_dist = in_range ? abs(t) : 1000;
+  float emitter_falloff = min(1, rcp(pow(emitter_dist, 1.4)));
+  return in_range * emitter_falloff * em_color;
 }
 
 Fog00PBR getFog00(v2f i) {
@@ -171,37 +172,40 @@ Fog00PBR getFog00(v2f i) {
   const float3 em_normal = normalize(_Gimmick_Fog_00_Emitter0_Normal);
   const float em_scale_x = _Gimmick_Fog_00_Emitter0_Scale_X;
   const float em_scale_y = _Gimmick_Fog_00_Emitter0_Scale_Y;
+  const float2 em_scale = float2(em_scale_x, em_scale_y);
+  const float2 em_scale_rcp = rcp(em_scale);
 #endif
 
   float3 normal = i.normal;
   float ao = 0;
+  const float lod_denom = 1.0 /
+    (_Gimmick_Fog_00_Lod_Half_Life * _Gimmick_Fog_00_Density);
   for (uint ii = 0; ii < step_count; ii++) {
-    const float3 p = ro + (rd * step_size) * ii;
-    const float lod = floor((ii * step_size) / (_Gimmick_Fog_00_Lod_Half_Life * _Gimmick_Fog_00_Density));
+    const float ii_step_size = ii * step_size;
+    const float3 p = ro + rd * ii_step_size;
+    const float lod = floor(ii_step_size * lod_denom);
 
-    const float map_p = map(p, lod);
+    const float map_p =
+      saturate(map(p, lod) * _Gimmick_Fog_00_Density * step_size);
     float4 c = float4(0, 0, 0, map_p);
-    c.a = saturate(c.a * _Gimmick_Fog_00_Density * step_size);
 
+    // Seems that this is basically free.
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
-    {
-      float3 em_color;
-      float em_weight;
-      getEmitterData(p, step_size, em_loc, em_normal, float2(em_scale_x, em_scale_y), em_color, em_weight);
-      c.rgb = lerp(c.rgb, em_color, em_weight);
-    }
+    c.rgb = getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp);
 #endif
 
     acc += c * (1.0 - acc.a);
 
-    if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff) {
-      acc /= acc.a;
+    // For performance, stop if we...
+    //  1. accumulate enough alpha
+    //  2. go outside of the sphere
+    if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff ||
+        dot(p, p) > _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius) {
       break;
     }
-    // Performance hack: stop iterating if we go outside of the sphere.
-    if (dot(p, p) > _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius) {
-      break;
-    }
+  }
+  if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff) {
+    acc /= acc.a;
   }
 
   Fog00PBR pbr;
