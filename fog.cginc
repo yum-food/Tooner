@@ -70,18 +70,6 @@ float map(float3 p, float lod) {
   return saturate(density);
 }
 
-float3 get_normal(float3 p, float map_p, float lod) {
-  float3 e = float3(0.001, 0, 0);
-  float center = map_p;
-
-  // Prevent NaN
-  float e2 = 1E-9;
-  return normalize(float3(
-      map(p + e.xyz, lod) - center,
-      map(p + e.yxz, lod) - center,
-      map(p + e.zyx, lod) - center) + e2);
-}
-
 void getEmitterData(float3 p, float step_size,
     float3 em_loc, float3 em_normal, float2 emitter_scale,
     out float3 em_color, out float em_weight)
@@ -178,6 +166,13 @@ Fog00PBR getFog00(v2f i) {
 #define FOG_MAX_LOOP 128
   step_count = min(step_count, FOG_MAX_LOOP);
 
+#if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
+  const float3 em_loc = _Gimmick_Fog_00_Emitter0_Location;
+  const float3 em_normal = normalize(_Gimmick_Fog_00_Emitter0_Normal);
+  const float em_scale_x = _Gimmick_Fog_00_Emitter0_Scale_X;
+  const float em_scale_y = _Gimmick_Fog_00_Emitter0_Scale_Y;
+#endif
+
   float3 normal = i.normal;
   float ao = 0;
   for (uint ii = 0; ii < step_count; ii++) {
@@ -190,50 +185,15 @@ Fog00PBR getFog00(v2f i) {
 
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
     {
-      const float3 em_loc = _Gimmick_Fog_00_Emitter0_Location;
-      const float3 em_normal = normalize(_Gimmick_Fog_00_Emitter0_Normal);
-      const float em_scale_x = _Gimmick_Fog_00_Emitter0_Scale_X;
-      const float em_scale_y = _Gimmick_Fog_00_Emitter0_Scale_Y;
-
       float3 em_color;
       float em_weight;
       getEmitterData(p, step_size, em_loc, em_normal, float2(em_scale_x, em_scale_y), em_color, em_weight);
-#if defined(_GIMMICK_FOG_00_EMITTER_1)
-      const float3 em1_loc = _Gimmick_Fog_00_Emitter1_Location;
-      const float3 em1_normal = normalize(_Gimmick_Fog_00_Emitter1_Normal);
-      const float em1_scale_x = _Gimmick_Fog_00_Emitter1_Scale_X;
-      const float em1_scale_y = _Gimmick_Fog_00_Emitter1_Scale_Y;
-      float3 em1_color;
-      float em1_weight;
-      getEmitterData(p, step_size, em1_loc, em1_normal, float2(em1_scale_x, em1_scale_y), em1_color, em1_weight);
-      em_color += em1_color;
-      em_weight += em1_weight;
-#endif
-#if defined(_GIMMICK_FOG_00_EMITTER_2)
-      const float3 em2_loc = _Gimmick_Fog_00_Emitter2_Location;
-      const float3 em2_normal = normalize(_Gimmick_Fog_00_Emitter2_Normal);
-      const float em2_scale_x = _Gimmick_Fog_00_Emitter2_Scale_X;
-      const float em2_scale_y = _Gimmick_Fog_00_Emitter2_Scale_Y;
-      float3 em2_color;
-      float em2_weight;
-      getEmitterData(p, step_size, em2_loc, em2_normal, float2(em2_scale_x, em2_scale_y), em2_color, em2_weight);
-      em_color += em2_color;
-      em_weight += em2_weight;
-#endif
       c.rgb = lerp(c.rgb, em_color, em_weight);
     }
 #endif
 
     acc += c * (1.0 - acc.a);
 
-    // Performance hack: stop blending normals after enough accumulation.
-#if 0
-    if (acc.a < _Gimmick_Fog_00_Normal_Cutoff) {
-      float3 n = get_normal(p, map_p);
-      float n_interp = saturate(c.a * (1.0 - acc.a) * rcp(_Gimmick_Fog_00_Normal_Cutoff));
-      normal = MY_BLEND_NORMALS(normal, n, n_interp);
-    }
-#endif
     if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff) {
       acc /= acc.a;
       break;
