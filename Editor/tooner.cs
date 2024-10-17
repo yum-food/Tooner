@@ -2327,6 +2327,14 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
 
+    bc = FindProperty("_Enable_Unity_Fog");
+    enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Enable Unity fog", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_UNITY_FOG", enabled);
+
     LabelField("Stenciling", EditorStyles.boldLabel);
     for (int i = 0; i < 2; i++) {
       EditorGUI.indentLevel += 1;

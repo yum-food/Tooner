@@ -252,6 +252,7 @@ Shader "yum_food/tooner"
 		_Explode_Phase("Explode phase", Range(0, 1)) = 0
     [Enum(UnityEngine.Rendering.CullMode)] _OutlinesCull ("Outlines pass culling mode", Float) = 1
     [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Culling mode", Float) = 2
+    _Enable_Unity_Fog("Enable Unity fog", Float) = 1
 
     _Stencil_Ref_Base("Stencil ref", Float) = 1
     [Enum(UnityEngine.Rendering.CompareFunction)] _Stencil_Comp_Base("Stencil compare", Float) = 0  // Disabled
