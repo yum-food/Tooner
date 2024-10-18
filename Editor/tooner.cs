@@ -2097,6 +2097,24 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickAurora() {
+    MaterialProperty bc;
+
+    bc = FindProperty("_Gimmick_Aurora_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Aurora", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_AURORA", enabled);
+
+    if (!enabled) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmicks() {
     show_ui.Add(AddCollapsibleMenu("Gimmicks", "_Gimmicks"));
     EditorGUI.indentLevel += 1;
@@ -2117,6 +2135,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickLetterGrid();
     DoGimmickAudiolinkChroma00();
     DoGimmickFog0();
+    DoGimmickAurora();
     DoClones();
     DoExplosion();
     DoGeoScroll();

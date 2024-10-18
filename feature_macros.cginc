@@ -171,6 +171,7 @@
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_1
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_2
 #pragma shader_feature_local _ _UNITY_FOG
+#pragma shader_feature_local _ _GIMMICK_AURORA
 
 #endif  // __FEATURE_MACROS_INC
 

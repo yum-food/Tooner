@@ -1,8 +1,8 @@
+#include "cnlohr.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "math.cginc"
 #include "noise.cginc"
-#include "cnlohr.cginc"
 
 #ifndef __FOG_INC
 #define __FOG_INC
@@ -11,10 +11,8 @@
 
 struct Fog00PBR {
   float4 albedo;
-  float3 normal;
   float3 diffuse;
   float depth;
-  float ao;
 };
 
 #define FOG_PERLIN_NOISE_MODE 1
@@ -70,6 +68,7 @@ float map(float3 p, float lod) {
   return saturate(density);
 }
 
+#if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
 // Returns weighted color
 float3 getEmitterData(float3 p,
     float step_size,
@@ -102,6 +101,7 @@ float3 getEmitterData(float3 p,
   float emitter_falloff = min(1, rcp(pow(emitter_dist, 1.4)));
   return in_range * emitter_falloff * em_color;
 }
+#endif  // defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
 
 Fog00PBR getFog00(v2f i) {
 
@@ -176,8 +176,6 @@ Fog00PBR getFog00(v2f i) {
   const float2 em_scale_rcp = rcp(em_scale);
 #endif
 
-  float3 normal = i.normal;
-  float ao = 0;
   const float lod_denom = 1.0 /
     (_Gimmick_Fog_00_Lod_Half_Life * _Gimmick_Fog_00_Density);
   for (uint ii = 0; ii < step_count; ii++) {
@@ -211,14 +209,7 @@ Fog00PBR getFog00(v2f i) {
   Fog00PBR pbr;
   pbr.albedo.rgb = 1;
   pbr.albedo.a = saturate(acc.a);
-  pbr.ao = 1;
   pbr.diffuse = acc.rgb;
-
-#if 1
-  pbr.normal = normalize(normal);
-#else
-  pbr.normal = i.normal;
-#endif
 
   float4 clip_pos = mul(UNITY_MATRIX_VP, float4(ro, 1.0));
   pbr.depth = clip_pos.z / clip_pos.w;

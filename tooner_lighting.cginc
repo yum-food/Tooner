@@ -3,6 +3,7 @@
 #include "UnityPBSLighting.cginc"
 
 #include "audiolink.cginc"
+#include "aurora.cginc"
 #include "clones.cginc"
 #include "cnlohr.cginc"
 #include "disinfo.cginc"
@@ -2203,8 +2204,14 @@ float4 effect(inout v2f i, out float depth)
   {
     Fog00PBR pbr = getFog00(i);
     albedo = pbr.albedo;
-    normal = pbr.normal;
-    ao = pbr.ao;
+    depth = pbr.depth;
+    diffuse_contrib += pbr.diffuse;
+  }
+#endif
+#if defined(_GIMMICK_AURORA)
+  {
+    AuroraPBR pbr = getAurora(i);
+    albedo = pbr.albedo;
     depth = pbr.depth;
     diffuse_contrib += pbr.diffuse;
   }

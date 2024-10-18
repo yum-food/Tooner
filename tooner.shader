@@ -184,7 +184,7 @@ Shader "yum_food/tooner"
     _Indirect_Specular_Lighting_Factor2("Indirect specular lighting factor", Range(0, 5)) = 1
     _Indirect_Diffuse_Lighting_Factor("Indirect diffuse lighting factor", Range(0, 5)) = 1
     _Reflection_Probe_Saturation("Reflection probe saturation", Range(0, 1)) = 1
-    _Enable_Brightness_Clamp("Enable brightness clamp", Float) = 1
+    _Enable_Brightness_Clamp("Enable brightness clamp", Float) = 0
     _Min_Brightness("Min brightness", Range(0, 1)) = 0
     _Max_Brightness("Max brightness", Range(0, 1.5)) = 1
     _Mesh_Normal_Strength("Mesh normal strength", Range(0, 10)) = 1
@@ -652,6 +652,8 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Emitter2_Normal("fog", Vector) = (-1, 0, 0, 0)
     _Gimmick_Fog_00_Emitter2_Scale_X("fog", Float) = 1
     _Gimmick_Fog_00_Emitter2_Scale_Y("fog", Float) = 1
+
+    _Gimmick_Aurora_Enable_Static("Enable aurora", Float) = 0
   }
   SubShader
   {
