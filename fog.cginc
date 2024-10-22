@@ -143,7 +143,7 @@ Fog00PBR getFog00(v2f i) {
 
   // Factor of 10 on `screen_uv*10` eliminates visible striping artifact that
   // is visible with no factor.
-  float step_size = rcp(_Gimmick_Fog_00_Density) * _Gimmick_Fog_00_Step_Size_Factor;
+  float step_size = _Gimmick_Fog_00_Step_Size_Factor;
   step_size = clamp(step_size, 1E-2, 10);
   int2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
   float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
