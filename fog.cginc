@@ -183,8 +183,7 @@ Fog00PBR getFog00(v2f i) {
     const float3 p = ro + rd * ii_step_size;
     const float lod = floor(ii_step_size * lod_denom);
 
-    const float map_p =
-      saturate(map(p, lod) * _Gimmick_Fog_00_Density * step_size);
+    const float map_p = map(p, lod) * _Gimmick_Fog_00_Density * step_size;
     float4 c = float4(0, 0, 0, map_p);
 
     // Seems that this is basically free.
