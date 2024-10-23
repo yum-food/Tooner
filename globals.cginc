@@ -742,5 +742,24 @@ float _Gimmick_Fog_00_Emitter2_Scale_Y;
 #endif
 #endif
 
+#if defined(_GIMMICK_GERSTNER_WATER)
+float _Gimmick_Gerstner_Water_M;
+float _Gimmick_Gerstner_Water_h;
+float _Gimmick_Gerstner_Water_g;
+float3 _Gimmick_Gerstner_Water_Scale;
+float4 _Gimmick_Gerstner_Water_a;
+float4 _Gimmick_Gerstner_Water_p;
+float4 _Gimmick_Gerstner_Water_k_x;
+float4 _Gimmick_Gerstner_Water_k_y;
+float4 _Gimmick_Gerstner_Water_t_f;
+#if defined(_GIMMICK_GERSTNER_WATER_OCTAVE_1)
+float4 _Gimmick_Gerstner_Water_a1;
+float4 _Gimmick_Gerstner_Water_p1;
+float4 _Gimmick_Gerstner_Water_k_x1;
+float4 _Gimmick_Gerstner_Water_k_y1;
+float4 _Gimmick_Gerstner_Water_t_f1;
+#endif
+#endif
+
 #endif
 

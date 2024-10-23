@@ -9,6 +9,7 @@
 #include "disinfo.cginc"
 #include "eyes.cginc"
 #include "fog.cginc"
+#include "gerstner.cginc"
 #include "globals.cginc"
 #include "halos.cginc"
 #include "interpolators.cginc"
@@ -91,8 +92,6 @@ v2f vert(appdata v)
 
 #if defined(_TROCHOID)
   {
-#define PI 3.14159265
-#define TAU PI * 2.0
     float theta = v.uv0.x * TAU;
     float r0 = length(v.vertex.xyz);
     v.vertex.xyz = trochoid_map(theta, r0, v.vertex.z);
@@ -157,6 +156,12 @@ v2f vert(appdata v)
           0, 0, sc.z);
     p = mul(shear_matrix, p);
     v.vertex.xyz = p;
+  }
+#endif
+#if defined(_GIMMICK_GERSTNER_WATER)
+  {
+    GerstnerParams p = getGerstnerParams();
+    v.vertex.xyz = gerstner_vert(v.vertex.xyz, p);
   }
 #endif
 
@@ -1291,6 +1296,12 @@ float4 effect(inout v2f i, out float depth)
     i.objPos.xyz = trochoid_map(theta, r0, z);
   }
 #endif
+#if defined(_GIMMICK_GERSTNER_WATER)
+  {
+    GerstnerParams p = getGerstnerParams();
+    i.normal = UnityObjectToWorldNormal(gerstner_frag(i.objPos.xyz, p));
+  }
+#endif
 
 #if defined(_UVSCROLL)
   float2 orig_uv = i.uv0;
@@ -1684,8 +1695,6 @@ float4 effect(inout v2f i, out float depth)
 
 #if defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1) || defined(_RIM_LIGHTING2) || defined(_RIM_LIGHTING3)
   {
-#define PI 3.14159265
-
 #if defined(_RIM_LIGHTING0)
     {
       float3 rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);

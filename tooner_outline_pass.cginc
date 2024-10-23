@@ -5,6 +5,7 @@
 #include "audiolink.cginc"
 #include "clones.cginc"
 #include "cnlohr.cginc"
+#include "gerstner.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "math.cginc"
@@ -35,7 +36,6 @@ v2f vert(appdata v)
 
 #if defined(_TROCHOID)
   {
-#define PI 3.14159265
 #define TAU PI * 2.0
     float theta = v.uv0.x * TAU;
     float r0 = length(v.vertex.xyz);
@@ -50,9 +50,17 @@ v2f vert(appdata v)
 
   float4 objPos = v.vertex;
 
+#if !defined(_SCROLL) && defined(_GIMMICK_GERSTNER_WATER)
+  {
+    GerstnerParams p = getGerstnerParams();
+    objPos.xyz = gerstner_vert(objPos.xyz, p);
+    v.normal = gerstner_frag(objPos.xyz, p);
+  }
+#endif
+
 #if defined(_OUTLINES)
   float outline_mask = _Outline_Mask.SampleLevel(linear_repeat_s, v.uv0.xy, /*lod=*/0);
-  outline_mask = _Outline_Mask_Invert > 1E-6 ? 1 - outline_mask : outline_mask;
+  outline_mask = _Outline_Mask_Invert > 1E-9 ? 1 - outline_mask : outline_mask;
 
   objPos.xyz += v.normal * _Outline_Width * outline_mask * _Outline_Width_Multiplier;
 #endif

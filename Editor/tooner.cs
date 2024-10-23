@@ -1130,7 +1130,7 @@ public class ToonerGUI : ShaderGUI {
     RangeProperty(
         bc,
         "Outline width");
-    SetKeyword("_OUTLINES", bc.floatValue > 1E-6);
+    SetKeyword("_OUTLINES", bc.floatValue > 1E-9);
 
     if (bc.floatValue > 1E-6) {
       bc = FindProperty("_Outline_Color");
@@ -2115,6 +2115,68 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickGerstnerWater() {
+    MaterialProperty bc;
+
+    bc = FindProperty("_Gimmick_Gerstner_Water_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Water (gerstner)", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_GERSTNER_WATER", enabled);
+
+    if (!enabled) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Gerstner_Water_M");
+    FloatProperty(bc, "M");
+    int num_octaves = (int) Math.Floor((bc.floatValue-1)/4);
+    SetKeyword("_GIMMICK_GERSTNER_WATER_OCTAVE_1", num_octaves >= 1);
+
+    {
+      LabelField("Octave 0", EditorStyles.boldLabel);
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Gimmick_Gerstner_Water_a");
+      VectorProperty(bc, "a");
+      bc = FindProperty("_Gimmick_Gerstner_Water_p");
+      VectorProperty(bc, "p");
+      bc = FindProperty("_Gimmick_Gerstner_Water_k_x");
+      VectorProperty(bc, "k_x");
+      bc = FindProperty("_Gimmick_Gerstner_Water_k_y");
+      VectorProperty(bc, "k_y");
+      bc = FindProperty("_Gimmick_Gerstner_Water_t_f");
+      VectorProperty(bc, "Time speed");
+      EditorGUI.indentLevel -= 1;
+    }
+    if (num_octaves > 0) {
+      LabelField("Octave 1", EditorStyles.boldLabel);
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Gimmick_Gerstner_Water_a1");
+      VectorProperty(bc, "a");
+      bc = FindProperty("_Gimmick_Gerstner_Water_p1");
+      VectorProperty(bc, "p");
+      bc = FindProperty("_Gimmick_Gerstner_Water_k_x1");
+      VectorProperty(bc, "k_x");
+      bc = FindProperty("_Gimmick_Gerstner_Water_k_y1");
+      VectorProperty(bc, "k_y");
+      bc = FindProperty("_Gimmick_Gerstner_Water_t_f1");
+      VectorProperty(bc, "Time speed");
+      EditorGUI.indentLevel -= 1;
+    }
+
+    bc = FindProperty("_Gimmick_Gerstner_Water_h");
+    FloatProperty(bc, "h");
+    bc = FindProperty("_Gimmick_Gerstner_Water_g");
+    FloatProperty(bc, "g");
+    bc = FindProperty("_Gimmick_Gerstner_Water_Scale");
+    VectorProperty(bc, "Scale");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmicks() {
     show_ui.Add(AddCollapsibleMenu("Gimmicks", "_Gimmicks"));
     EditorGUI.indentLevel += 1;
@@ -2136,6 +2198,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickAudiolinkChroma00();
     DoGimmickFog0();
     DoGimmickAurora();
+    DoGimmickGerstnerWater();
     DoClones();
     DoExplosion();
     DoGeoScroll();

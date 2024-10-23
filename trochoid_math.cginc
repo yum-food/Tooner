@@ -1,12 +1,10 @@
 #include "globals.cginc"
+#include "math.cginc"
 
 #ifndef __TROCHOID_MATH
 #define __TROCHOID_MATH
 
 #if defined(_TROCHOID)
-
-#define PI 3.14159265
-#define TAU PI * 2.0
 
 float3 trochoid_map(float theta, float r0, float3 vert_z)
 {

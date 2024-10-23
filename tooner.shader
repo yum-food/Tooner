@@ -654,6 +654,25 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Emitter2_Scale_Y("fog", Float) = 1
 
     _Gimmick_Aurora_Enable_Static("Enable aurora", Float) = 0
+
+    _Gimmick_Gerstner_Water_Enable_Static("Enable water (gerstner)", Float) = 0
+    _Gimmick_Gerstner_Water_M("# of components considered", Float) = 4
+
+    _Gimmick_Gerstner_Water_a("Amplitudes", Vector) = (.001, .0005, .00025, .000125)
+    _Gimmick_Gerstner_Water_p("Phases", Vector) = (0, 0, 0, 0)
+    _Gimmick_Gerstner_Water_k_x("Wavenumbers (x)", Vector) = (1, 1, 1, 1)
+    _Gimmick_Gerstner_Water_k_y("Wavenumbers (y)", Vector) = (1, 1, 1, 1)
+    _Gimmick_Gerstner_Water_t_f("Time factor", Vector) = (1, 1, 1, 1)
+
+    _Gimmick_Gerstner_Water_a1("Amplitudes", Vector) = (0, 0, 0, 0)
+    _Gimmick_Gerstner_Water_p1("Phases", Vector) = (0, 0, 0, 0)
+    _Gimmick_Gerstner_Water_k_x1("Wavenumbers (x)", Vector) = (1, 1, 1, 1)
+    _Gimmick_Gerstner_Water_k_y1("Wavenumbers (y)", Vector) = (1, 1, 1, 1)
+    _Gimmick_Gerstner_Water_t_f1("Time factor", Vector) = (1, 1, 1, 1)
+
+    _Gimmick_Gerstner_Water_h("Mean water depth", Float) = 10
+    _Gimmick_Gerstner_Water_g("Gravity", Float) = 9.8
+    _Gimmick_Gerstner_Water_Scale("Scale", Vector) = (1000, 1000, .1)
   }
   SubShader
   {

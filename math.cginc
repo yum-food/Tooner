@@ -3,6 +3,9 @@
 #ifndef __MATH_INC
 #define __MATH_INC
 
+#define PI 3.14159265
+#define TAU PI * 2.0
+
 // Hacky parameterizable whiteout blending. Probably some big mistakes but it
 // passes the eyeball test.
 // At w=0.5, this looks kinda like whiteout blending.

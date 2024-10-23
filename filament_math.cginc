@@ -1,7 +1,7 @@
+#include "math.cginc"
+
 #ifndef __FILAMENT_MATH_INC
 #define __FILAMENT_MATH_INC
-
-#define PI 3.1415926535897932384626433832795028841971
 
 // THIS SOURCE CODE HAS BEEN MODIFIED!
 // The only modifications are for compatibility with HLSL, for example:
