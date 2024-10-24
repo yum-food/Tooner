@@ -2173,6 +2173,8 @@ public class ToonerGUI : ShaderGUI {
     FloatProperty(bc, "g");
     bc = FindProperty("_Gimmick_Gerstner_Water_Scale");
     VectorProperty(bc, "Scale");
+    bc = FindProperty("_Gimmick_Gerstner_Water_Origin_Damping_Direction");
+    FloatProperty(bc, "Origin damping direction");
 
     EditorGUI.indentLevel -= 1;
   }

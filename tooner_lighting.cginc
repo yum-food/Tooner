@@ -1297,6 +1297,9 @@ float4 effect(inout v2f i, out float depth)
   }
 #endif
 #if defined(_GIMMICK_GERSTNER_WATER)
+#if defined(_EXPLODE)
+  if (_Explode_Phase < 1E-6)
+#endif
   {
     GerstnerParams p = getGerstnerParams();
     i.normal = UnityObjectToWorldNormal(gerstner_frag(i.objPos.xyz, p));

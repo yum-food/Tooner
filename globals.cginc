@@ -752,6 +752,7 @@ float4 _Gimmick_Gerstner_Water_p;
 float4 _Gimmick_Gerstner_Water_k_x;
 float4 _Gimmick_Gerstner_Water_k_y;
 float4 _Gimmick_Gerstner_Water_t_f;
+float _Gimmick_Gerstner_Water_Origin_Damping_Direction;
 #if defined(_GIMMICK_GERSTNER_WATER_OCTAVE_1)
 float4 _Gimmick_Gerstner_Water_a1;
 float4 _Gimmick_Gerstner_Water_p1;

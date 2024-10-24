@@ -673,6 +673,7 @@ Shader "yum_food/tooner"
     _Gimmick_Gerstner_Water_h("Mean water depth", Float) = 10
     _Gimmick_Gerstner_Water_g("Gravity", Float) = 9.8
     _Gimmick_Gerstner_Water_Scale("Scale", Vector) = (1000, 1000, .1)
+    _Gimmick_Gerstner_Water_Origin_Damping_Direction("Origin damping direction", Float) = 1
   }
   SubShader
   {

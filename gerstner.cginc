@@ -102,10 +102,23 @@ float3 compute_gerstner(float3 pp, GerstnerParams p)
   }
 
   const float3 raw_result = float3(g_xi / p.scale.x, g_eta / p.scale.y, g_zeta * p.scale.z);
-  const float origin_damping_factor = 1 - pow(0.5, max(0, length(raw_result)*5000-2));
+  const float3 raw_result_world = mul(unity_ObjectToWorld, float4(raw_result, 1)).xyz;
+  float3 result_world = raw_result_world;
 
-  float3 result = raw_result;
-  result.z *= origin_damping_factor;
+  if (_Gimmick_Gerstner_Water_Origin_Damping_Direction > 0) {
+    result_world.y = max(_Gimmick_Gerstner_Water_Origin_Damping_Direction, result_world.y);
+  } else {
+    result_world.y = min(_Gimmick_Gerstner_Water_Origin_Damping_Direction, result_world.y);
+  }
+
+  result_world.y = lerp(result_world.y, raw_result_world.y,
+      // If within 20m cylindrical distance, apply 100m wide damping.
+      // TODO parameterize this!
+      saturate((length(raw_result_world.xz) - 20) * 0.01) *
+      // Only enable if mesh is on the wrong side of the damping vector.
+      (sign(raw_result_world.y - _Gimmick_Gerstner_Water_Origin_Damping_Direction) != sign(_Gimmick_Gerstner_Water_Origin_Damping_Direction)));
+
+  float3 result = mul(unity_WorldToObject, float4(result_world, 1)).xyz;
   return result;
 }
 
@@ -117,7 +130,7 @@ float3 gerstner_vert(float3 pp, GerstnerParams p)
 float3 gerstner_frag(float3 pp, GerstnerParams p)
 {
   const float3 g0 = compute_gerstner(pp, p);
-  const float3 e = float3(.001, 0, 0);
+  const float3 e = float3(1E-8, 0, 0);
   const float3 g0_da = compute_gerstner(pp + e.xyz, p);
   const float3 g0_db = compute_gerstner(pp + e.yxz, p);
   const float3 ds_da = g0_da - g0;
