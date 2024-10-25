@@ -219,7 +219,7 @@ v2f vert(appdata v)
 
 // maxvertexcount == the number of vertices we create
 #if defined(_CLONES)
-[maxvertexcount(45)]
+[maxvertexcount(15)]
 #else
 [maxvertexcount(3)]
 #endif
@@ -1296,15 +1296,6 @@ float4 effect(inout v2f i, out float depth)
     i.objPos.xyz = trochoid_map(theta, r0, z);
   }
 #endif
-#if defined(_GIMMICK_GERSTNER_WATER)
-#if defined(_EXPLODE)
-  if (_Explode_Phase < 1E-6)
-#endif
-  {
-    GerstnerParams p = getGerstnerParams();
-    i.normal = UnityObjectToWorldNormal(gerstner_frag(i.objPos.xyz, p));
-  }
-#endif
 
 #if defined(_UVSCROLL)
   float2 orig_uv = i.uv0;
@@ -1318,6 +1309,22 @@ float4 effect(inout v2f i, out float depth)
 #else
   float4 albedo = _Color;
 #endif  // _BASECOLOR_MAP
+
+#if defined(_GIMMICK_GERSTNER_WATER)
+#if defined(_EXPLODE)
+  if (_Explode_Phase < 1E-6)
+#endif
+  {
+    GerstnerParams p = getGerstnerParams();
+    GerstnerFragResult r = gerstner_frag(i.objPos.xyz, p);
+    i.normal = UnityObjectToWorldNormal(r.normal);
+    i.tangent = float4(UnityObjectToWorldDir(r.tangent.xyz), r.tangent.w);
+#if defined(_GIMMICK_GERSTNER_WATER_COLOR_RAMP)
+    albedo.xyz *= r.color;
+    albedo.w = 1;
+#endif
+  }
+#endif
 
 #if defined(_UVSCROLL)
   if (uv_scroll_mask) {

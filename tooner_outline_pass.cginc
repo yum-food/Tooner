@@ -50,12 +50,15 @@ v2f vert(appdata v)
 
   float4 objPos = v.vertex;
 
+#if defined(_OUTLINES)
 #if !defined(_SCROLL) && defined(_GIMMICK_GERSTNER_WATER)
   {
     GerstnerParams p = getGerstnerParams();
     objPos.xyz = gerstner_vert(objPos.xyz, p);
-    v.normal = gerstner_frag(objPos.xyz, p);
+    GerstnerFragResult r = gerstner_frag(objPos.xyz, p);
+    v.normal = r.normal;
   }
+#endif
 #endif
 
 #if defined(_OUTLINES)

@@ -1,3 +1,5 @@
+#include "gerstner.cginc"
+
 #ifndef __MOCHIE_SHADOW_CASTER_INC
 #define __MOCHIE_SHADOW_CASTER_INC
 
@@ -53,6 +55,12 @@ v2f vert (appdata v){
 #if defined(_DISCARD)
   if (_Discard_Enable_Dynamic) {
     return (v2f) (0.0 / 0.0);
+  }
+#endif
+#if !defined(_SCROLL) && defined(_GIMMICK_GERSTNER_WATER)
+  {
+    GerstnerParams p = getGerstnerParams();
+    v.vertex.xyz = gerstner_vert(v.vertex.xyz, p);
   }
 #endif
 	v2f o = (v2f)0;

@@ -174,6 +174,7 @@
 #pragma shader_feature_local _ _GIMMICK_AURORA
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER_OCTAVE_1
+#pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER_COLOR_RAMP
 
 #endif  // __FEATURE_MACROS_INC
 

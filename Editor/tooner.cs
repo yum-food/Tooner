@@ -2136,6 +2136,27 @@ public class ToonerGUI : ShaderGUI {
     int num_octaves = (int) Math.Floor((bc.floatValue-1)/4);
     SetKeyword("_GIMMICK_GERSTNER_WATER_OCTAVE_1", num_octaves >= 1);
 
+    bc = FindProperty("_Gimmick_Gerstner_Water_Color_Ramp");
+    TexturePropertySingleLine(
+        MakeLabel(bc, "Color ramp"),
+        bc);
+    SetKeyword("_GIMMICK_GERSTNER_WATER_COLOR_RAMP", bc.textureValue);
+
+    if (bc.textureValue) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_Gerstner_Water_Color_Ramp_Offset");
+      FloatProperty(bc, "Offset");
+      bc = FindProperty("_Gimmick_Gerstner_Water_Color_Ramp_Scale");
+      FloatProperty(bc, "Scale");
+      bc = FindProperty("_Gimmick_Gerstner_Water_Color_Ramp_Mask");
+      VectorProperty(bc, "Mask (octave 0)");
+      bc = FindProperty("_Gimmick_Gerstner_Water_Color_Ramp_Mask1");
+      VectorProperty(bc, "Mask (octave 1)");
+
+      EditorGUI.indentLevel -= 1;
+    }
+
     {
       LabelField("Octave 0", EditorStyles.boldLabel);
       EditorGUI.indentLevel += 1;

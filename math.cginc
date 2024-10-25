@@ -125,6 +125,11 @@ float dabs(float a, float k)
   return log2(exp2(k * a) + exp2(-1.0 * k * a));
 }
 
+float dsaturate(float x, float k)
+{
+  return dmin(dmax(x, 0, k), 1, k);
+}
+
 float rand(uint seed) {
   seed = seed * 747796405 + 2891336453;
   uint result = ((seed >> ((seed >> 28) + 4)) ^ seed) * 277803737;

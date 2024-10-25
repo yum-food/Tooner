@@ -12,10 +12,12 @@ void add_clones(in v2f clone_verts[3], inout TriangleStream<v2f> tri_out)
     return;
   }
 
+#if 0
   float factor = _Tess_Factor;
   if (_Clones_Dist_Cutoff > 0 && length(_WorldSpaceCameraPos - clone_verts[0].worldPos) > _Clones_Dist_Cutoff) {
     factor = 1;
   }
+#endif
 
   uint n_clones = (uint) round(_Clones_Count);
   for (uint i = 0; i < (uint) n_clones; i++) {
@@ -26,7 +28,7 @@ void add_clones(in v2f clone_verts[3], inout TriangleStream<v2f> tri_out)
       offset = ((offset % 2) * 2 - 1) * (((offset) / 2) + 1) * _Clones_dx;
       objPos.x += offset;
       ii.worldPos = mul(unity_ObjectToWorld, float4(objPos, 1)).xyz;
-      ii.clipPos = UnityObjectToClipPos(objPos);
+      ii.pos = UnityObjectToClipPos(objPos);
       tri_out.Append(ii);
     }
     tri_out.RestartStrip();

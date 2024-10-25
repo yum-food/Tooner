@@ -663,17 +663,22 @@ Shader "yum_food/tooner"
     _Gimmick_Gerstner_Water_k_x("Wavenumbers (x)", Vector) = (1, 1, 1, 1)
     _Gimmick_Gerstner_Water_k_y("Wavenumbers (y)", Vector) = (1, 1, 1, 1)
     _Gimmick_Gerstner_Water_t_f("Time factor", Vector) = (1, 1, 1, 1)
+    _Gimmick_Gerstner_Water_Color_Ramp_Mask("Color ramp mask", Vector) = (1, 1, 1, 1)
 
     _Gimmick_Gerstner_Water_a1("Amplitudes", Vector) = (0, 0, 0, 0)
     _Gimmick_Gerstner_Water_p1("Phases", Vector) = (0, 0, 0, 0)
     _Gimmick_Gerstner_Water_k_x1("Wavenumbers (x)", Vector) = (1, 1, 1, 1)
     _Gimmick_Gerstner_Water_k_y1("Wavenumbers (y)", Vector) = (1, 1, 1, 1)
     _Gimmick_Gerstner_Water_t_f1("Time factor", Vector) = (1, 1, 1, 1)
+    _Gimmick_Gerstner_Water_Color_Ramp_Mask1("Color ramp mask", Vector) = (1, 1, 1, 1)
 
     _Gimmick_Gerstner_Water_h("Mean water depth", Float) = 10
     _Gimmick_Gerstner_Water_g("Gravity", Float) = 9.8
     _Gimmick_Gerstner_Water_Scale("Scale", Vector) = (1000, 1000, .1)
     _Gimmick_Gerstner_Water_Origin_Damping_Direction("Origin damping direction", Float) = 1
+    _Gimmick_Gerstner_Water_Color_Ramp("Color ramp", 2D) = "white"
+    _Gimmick_Gerstner_Water_Color_Ramp_Offset("Color ramp offset", Float) = 0.5
+    _Gimmick_Gerstner_Water_Color_Ramp_Scale("Color ramp offset", Float) = 1
   }
   SubShader
   {
