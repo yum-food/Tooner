@@ -1708,10 +1708,18 @@ float4 effect(inout v2f i, out float depth)
 #if defined(_RIM_LIGHTING0)
     {
       float3 rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);
+#if defined(_RIM_LIGHTING0_CUSTOM_VIEW_VECTOR)
+      rl_view_dir.xz = normalize(_Rim_Lighting0_Custom_View_Vector).xz;
+#endif
       float2 rl_uv;
       {
+#if defined(_RIM_LIGHTING0_REFLECT_IN_WORLD)
+        const float3 cam_normal = normal;
+        const float3 cam_view_dir = rl_view_dir;
+#else
         const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
         const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(rl_view_dir, 0)));
+#endif
         const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
         float m = 2.0 * sqrt(
             cam_refl.x * cam_refl.x +
@@ -1723,7 +1731,7 @@ float4 effect(inout v2f i, out float depth)
       float rl = length(rl_uv - 0.5);
       rl = pow(2, -_Rim_Lighting0_Power * abs(rl - _Rim_Lighting0_Center));
       float q = _Rim_Lighting0_Quantization;
-      if (q > -1) {
+      if (q > 0) {
         rl = floor(rl * q) / q;
       }
       float3 matcap = rl * _Rim_Lighting0_Color * _Rim_Lighting0_Strength;
@@ -1798,11 +1806,19 @@ float4 effect(inout v2f i, out float depth)
 #endif  // _RIM_LIGHTING0
 #if defined(_RIM_LIGHTING1)
     {
-      float3 rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);
+      float3 rl_view_dir = VIEW_DIR(_Rim_Lighting1_Center_Eye_Fix);
+#if defined(_RIM_LIGHTING1_CUSTOM_VIEW_VECTOR)
+      rl_view_dir.xz = normalize(_Rim_Lighting1_Custom_View_Vector).xz;
+#endif
       float2 rl_uv;
       {
+#if defined(_RIM_LIGHTING1_REFLECT_IN_WORLD)
+        const float3 cam_normal = normal;
+        const float3 cam_view_dir = rl_view_dir;
+#else
         const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
         const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(rl_view_dir, 0)));
+#endif
         const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
         float m = 2.0 * sqrt(
             cam_refl.x * cam_refl.x +
@@ -1889,11 +1905,19 @@ float4 effect(inout v2f i, out float depth)
 #endif  // _RIM_LIGHTING1
 #if defined(_RIM_LIGHTING2)
     {
-      float3 rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);
+      float3 rl_view_dir = VIEW_DIR(_Rim_Lighting2_Center_Eye_Fix);
+#if defined(_RIM_LIGHTING2_CUSTOM_VIEW_VECTOR)
+      rl_view_dir.xz = normalize(_Rim_Lighting2_Custom_View_Vector).xz;
+#endif
       float2 rl_uv;
       {
+#if defined(_RIM_LIGHTING2_REFLECT_IN_WORLD)
+        const float3 cam_normal = normal;
+        const float3 cam_view_dir = rl_view_dir;
+#else
         const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
         const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(rl_view_dir, 0)));
+#endif
         const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
         float m = 2.0 * sqrt(
             cam_refl.x * cam_refl.x +
@@ -1980,11 +2004,19 @@ float4 effect(inout v2f i, out float depth)
 #endif  // _RIM_LIGHTING2
 #if defined(_RIM_LIGHTING3)
     {
-      float3 rl_view_dir = VIEW_DIR(_Rim_Lighting0_Center_Eye_Fix);
+      float3 rl_view_dir = VIEW_DIR(_Rim_Lighting3_Center_Eye_Fix);
+#if defined(_RIM_LIGHTING3_CUSTOM_VIEW_VECTOR)
+      rl_view_dir.xz = normalize(_Rim_Lighting3_Custom_View_Vector).xz;
+#endif
       float2 rl_uv;
       {
+#if defined(_RIM_LIGHTING3_REFLECT_IN_WORLD)
+        const float3 cam_normal = normal;
+        const float3 cam_view_dir = rl_view_dir;
+#else
         const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
         const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(rl_view_dir, 0)));
+#endif
         const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
         float m = 2.0 * sqrt(
             cam_refl.x * cam_refl.x +

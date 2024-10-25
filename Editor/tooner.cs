@@ -936,6 +936,29 @@ public class ToonerGUI : ShaderGUI {
         EditorGUI.indentLevel -= 1;
       }
 
+      bc = FindProperty($"_Rim_Lighting{i}_Custom_View_Vector_Enabled");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = Toggle("Custom view vector", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      SetKeyword($"_RIM_LIGHTING{i}_CUSTOM_VIEW_VECTOR", enabled);
+
+      if (enabled) {
+        EditorGUI.indentLevel += 1;
+        bc = FindProperty($"_Rim_Lighting{i}_Custom_View_Vector");
+        VectorProperty(bc, "Vector");
+        EditorGUI.indentLevel -= 1;
+      }
+
+      bc = FindProperty($"_Rim_Lighting{i}_Reflect_In_World_Space");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = Toggle("Reflect in world space", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      SetKeyword($"_RIM_LIGHTING{i}_REFLECT_IN_WORLD", enabled);
+
       EditorGUI.indentLevel -= 1;
       show_ui.RemoveAt(show_ui.Count - 1);
     }

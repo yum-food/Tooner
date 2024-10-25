@@ -344,7 +344,10 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting0_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting0_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
+    _Rim_Lighting0_Custom_View_Vector_Enabled("custom view vector", Float) = 0
+    _Rim_Lighting0_Custom_View_Vector("custom view vector", Vector) = (1, 0, 0, 0)
     _Rim_Lighting0_Center_Eye_Fix("Enable center eye fix", Float) = 0
+    _Rim_Lighting0_Reflect_In_World_Space("Reflect in world space", Float) = 0
 
     _Rim_Lighting1_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting1_Mode("Rim lighting mode", Float) = 0
@@ -367,7 +370,10 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting1_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting1_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
+    _Rim_Lighting1_Custom_View_Vector_Enabled("custom view vector", Float) = 0
+    _Rim_Lighting1_Custom_View_Vector("custom view vector", Vector) = (1, 0, 0, 0)
     _Rim_Lighting1_Center_Eye_Fix("Enable center eye fix", Float) = 0
+    _Rim_Lighting1_Reflect_In_World_Space("Reflect in world space", Float) = 0
 
     _Rim_Lighting2_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting2_Mode("Rim lighting mode", Float) = 0
@@ -390,7 +396,10 @@ Shader "yum_food/tooner"
     _Rim_Lighting2_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting2_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting2_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
+    _Rim_Lighting2_Custom_View_Vector_Enabled("custom view vector", Float) = 0
+    _Rim_Lighting2_Custom_View_Vector("custom view vector", Vector) = (1, 0, 0, 0)
     _Rim_Lighting2_Center_Eye_Fix("Enable center eye fix", Float) = 0
+    _Rim_Lighting2_Reflect_In_World_Space("Reflect in world space", Float) = 0
 
     _Rim_Lighting3_Enabled("Enable rim lighting", Float) = 0
     _Rim_Lighting3_Mode("Rim lighting mode", Float) = 0
@@ -413,7 +422,10 @@ Shader "yum_food/tooner"
     _Rim_Lighting3_PolarMask_Enabled("Rim lighting polar mask enabled", Float) = 0
     _Rim_Lighting3_PolarMask_Theta("Rim lighting polar mask - theta", Float) = 0
     _Rim_Lighting3_PolarMask_Power("Rim lighting polar mask - power", Float) = 3
+    _Rim_Lighting3_Custom_View_Vector_Enabled("custom view vector", Float) = 0
+    _Rim_Lighting3_Custom_View_Vector("custom view vector", Vector) = (1, 0, 0, 0)
     _Rim_Lighting3_Center_Eye_Fix("Enable center eye fix", Float) = 0
+    _Rim_Lighting3_Reflect_In_World_Space("Reflect in world space", Float) = 0
 
     _OKLAB_Enabled("Enable OKLAB", Float) = 0.0
     _OKLAB_Mask("Mask", 2D) = "white" {}

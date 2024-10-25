@@ -430,6 +430,9 @@ float _Rim_Lighting0_PolarMask_Enabled;
 float _Rim_Lighting0_PolarMask_Theta;
 float _Rim_Lighting0_PolarMask_Power;
 #endif
+#if defined(_RIM_LIGHTING0_CUSTOM_VIEW_VECTOR)
+float4 _Rim_Lighting0_Custom_View_Vector;
+#endif
 #endif
 
 #if defined(_RIM_LIGHTING1)
@@ -458,6 +461,9 @@ float _Rim_Lighting1_Glitter_UV_Select;
 float _Rim_Lighting1_PolarMask_Enabled;
 float _Rim_Lighting1_PolarMask_Theta;
 float _Rim_Lighting1_PolarMask_Power;
+#endif
+#if defined(_RIM_LIGHTING1_CUSTOM_VIEW_VECTOR)
+float4 _Rim_Lighting1_Custom_View_Vector;
 #endif
 #endif
 
@@ -488,6 +494,9 @@ float _Rim_Lighting2_PolarMask_Enabled;
 float _Rim_Lighting2_PolarMask_Theta;
 float _Rim_Lighting2_PolarMask_Power;
 #endif
+#if defined(_RIM_LIGHTING2_CUSTOM_VIEW_VECTOR)
+float4 _Rim_Lighting2_Custom_View_Vector;
+#endif
 #endif
 
 #if defined(_RIM_LIGHTING3)
@@ -516,6 +525,9 @@ float _Rim_Lighting3_Glitter_UV_Select;
 float _Rim_Lighting3_PolarMask_Enabled;
 float _Rim_Lighting3_PolarMask_Theta;
 float _Rim_Lighting3_PolarMask_Power;
+#endif
+#if defined(_RIM_LIGHTING3_CUSTOM_VIEW_VECTOR)
+float4 _Rim_Lighting3_Custom_View_Vector;
 #endif
 #endif
 
