@@ -148,9 +148,9 @@ GerstnerInternalResult compute_gerstner(float3 pp, GerstnerParams p)
   float3 result_obj = mul(unity_WorldToObject, float4(result_world, 1)).xyz;
 
   result_obj = lerp(result_obj, raw_result,
-      // If within 3m cylindrical distance, apply 100m wide damping.
+      // If within cylindrical distance, apply damping.
       // TODO parameterize this!
-      dsaturate((length(raw_result_world.xz) - 20), 1) *
+      dsaturate((length(raw_result_world.xz) - 15), 1) *
       // Only enable if mesh is on the wrong side of the damping vector.
       // TODO make this differentiable. As is, there's a visible seam.
       dsaturate(-(raw_result_world.y - _Gimmick_Gerstner_Water_Origin_Damping_Direction) * sign(_Gimmick_Gerstner_Water_Origin_Damping_Direction), 1));

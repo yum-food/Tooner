@@ -450,8 +450,11 @@ Shader "yum_food/tooner"
 
     _Clones_Enabled("Enable clones", Float) = 0.0
     _Clones_Count("Clones count", Range(0,16)) = 0.0
-    _Clones_Dist_Cutoff("Clones distance cutoff", Float) = -1.0
-    _Clones_dx("Clones dx", Range(0, 1)) = 1.0
+    _Clones_Dist_Cutoff("distance cutoff", Float) = -1.0
+    _Clones_dx("dx", Range(0, 10)) = 1.0
+    _Clones_dy("dy", Range(0, 10)) = 1.0
+    _Clones_dz("dz", Range(0, 10)) = 1.0
+    _Clones_Scale("scale", Vector) = (1, 1, 1, 1)
 
     _UVScroll_Enabled("Enable UV scrolling", Float) = 0.0
     _UVScroll_Mask("UV scroll mask", 2D) = "white"

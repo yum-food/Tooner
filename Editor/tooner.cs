@@ -1136,9 +1136,13 @@ public class ToonerGUI : ShaderGUI {
           bc,
           "Number of clones");
       bc = FindProperty("_Clones_dx");
-      RangeProperty(
-          bc,
-          "x offset");
+      RangeProperty(bc, "x offset");
+      bc = FindProperty("_Clones_dy");
+      RangeProperty(bc, "y offset");
+      bc = FindProperty("_Clones_dz");
+      RangeProperty(bc, "z offset");
+      bc = FindProperty("_Clones_Scale");
+      VectorProperty(bc, "Scale");
     }
     EditorGUI.indentLevel -= 1;
     show_ui.RemoveAt(show_ui.Count - 1);

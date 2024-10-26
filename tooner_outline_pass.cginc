@@ -127,6 +127,8 @@ void geom(triangle v2f tri_in[3],
   float3 v1_objPos;
   float3 v2_objPos;
 
+  const float pid_rand = rand((int) pid);
+  float explode_phase = 0;
 #if defined(_EXPLODE)
   float3 n = normalize(cross(v1.worldPos - v0.worldPos, v2.worldPos - v0.worldPos));
   float3 avg_pos;
@@ -135,22 +137,21 @@ void geom(triangle v2f tri_in[3],
   float3 n1 = v1.normal;
   float3 n2 = v2.normal;
 
-  float phase = _Explode_Phase;
-  phase = smoothstep(0, 1, phase);
-  phase *= phase;
-  phase *= 4;
-  const float pid_rand = rand((int) pid);
+  explode_phase = _Explode_Phase;
+  explode_phase = smoothstep(0, 1, explode_phase);
+  explode_phase *= explode_phase;
+  explode_phase *= 4;
 
-  if (phase > 1E-6) {
+  if (explode_phase > 1E-6) {
     float3 axis = normalize(float3(
           rand((int) ((v0.uv0.x + v0.uv0.y) * 1E9)) * 2 - 1,
           rand((int) ((v1.uv0.x + v1.uv0.y) * 1E9)) * 2 - 1,
           rand((int) ((v2.uv0.x + v2.uv0.y) * 1E9)) * 2 - 1));
-    float3 np = BlendNormals(n, axis * phase);
+    float3 np = BlendNormals(n, axis * explode_phase);
 
-    v0.worldPos += np * phase * pid_rand;
-    v1.worldPos += np * phase * pid_rand;
-    v2.worldPos += np * phase * pid_rand;
+    v0.worldPos += np * explode_phase * pid_rand;
+    v1.worldPos += np * explode_phase * pid_rand;
+    v2.worldPos += np * explode_phase * pid_rand;
 
     v0_objPos = mul(unity_WorldToObject, float4(v0.worldPos, 1));
     v1_objPos = mul(unity_WorldToObject, float4(v1.worldPos, 1));
@@ -162,16 +163,16 @@ void geom(triangle v2f tri_in[3],
       chrono = (AudioLinkDecodeDataAsUInt( ALPASS_CHRONOTENSITY  + uint2( 2, 1 ) ) % 1000000) / 1000000.0;
     }
 #endif
-    v0.worldPos += n * phase * sin(_Time[2] + length(v0_objPos)*6 + chrono) * .01 + chrono * n * phase * .2;
-    v1.worldPos += n * phase * sin(_Time[2] + length(v1_objPos)*6 + chrono) * .01 + chrono * n * phase * .2;
-    v2.worldPos += n * phase * sin(_Time[2] + length(v2_objPos)*6 + chrono) * .01 + chrono * n * phase * .2;
+    v0.worldPos += n * explode_phase * sin(_Time[2] + length(v0_objPos)*6 + chrono) * .01 + chrono * n * explode_phase * .2;
+    v1.worldPos += n * explode_phase * sin(_Time[2] + length(v1_objPos)*6 + chrono) * .01 + chrono * n * explode_phase * .2;
+    v2.worldPos += n * explode_phase * sin(_Time[2] + length(v2_objPos)*6 + chrono) * .01 + chrono * n * explode_phase * .2;
 
     avg_pos = (v0.worldPos + v1.worldPos + v2.worldPos) / 3;
     v0.worldPos -= avg_pos;
     v1.worldPos -= avg_pos;
     v2.worldPos -= avg_pos;
 
-    float theta = phase * 3.14159 * 4 + phase * (sin(_Time[1] * (1 + pid_rand) / 2.0 + pid_rand) + cos(_Time[1] * (1 + pid_rand) / 6.1 + pid_rand) * 2) * pid_rand * 2;
+    float theta = explode_phase * 3.14159 * 4 + explode_phase * (sin(_Time[1] * (1 + pid_rand) / 2.0 + pid_rand) + cos(_Time[1] * (1 + pid_rand) / 6.1 + pid_rand) * 2) * pid_rand * 2;
     float4 quat = get_quaternion(axis, theta);
     v0.worldPos = rotate_vector(v0.worldPos, quat);
     v1.worldPos = rotate_vector(v1.worldPos, quat);
@@ -261,7 +262,7 @@ void geom(triangle v2f tri_in[3],
 #endif
 #if defined(_CLONES)
   v2f clone_verts[3] = {v0, v1, v2};
-  add_clones(clone_verts, tri_out);
+  add_clones(clone_verts, tri_out, pid_rand, explode_phase);
 #endif  // _CLONES
 
   // Output transformed geometry.

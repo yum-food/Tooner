@@ -562,6 +562,9 @@ float _HSV1_Val_Shift;
 float _Clones_Enabled;
 float _Clones_Count;
 float _Clones_dx;
+float _Clones_dy;
+float _Clones_dz;
+float3 _Clones_Scale;
 float _Clones_Dist_Cutoff;
 #endif
 
