@@ -1,4 +1,6 @@
 #include "AutoLight.cginc"
+#include "feature_macros.cginc"
+#define _OPTIMIZE_INTERPOLATORS
 
 #ifndef __INTERPOLATORS_INC
 #define __INTERPOLATORS_INC
@@ -10,6 +12,7 @@ struct appdata
   float4 vertex : POSITION;
   float3 normal : NORMAL;
   float2 uv0 : TEXCOORD0;
+#if !defined(_OPTIMIZE_INTERPOLATORS)
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
   float2 uv3 : TEXCOORD3;
@@ -17,6 +20,7 @@ struct appdata
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
+#endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID
 };
@@ -25,6 +29,7 @@ struct v2f
 {
   linear noperspective centroid float4 pos : SV_POSITION;
   float2 uv0 : TEXCOORD0;
+#if !defined(_OPTIMIZE_INTERPOLATORS)
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
 #if defined(LIGHTMAP_ON)
@@ -35,6 +40,7 @@ struct v2f
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
+#endif
 #endif
   float2 fogCoord: TEXCOORD8;
   SHADOW_COORDS(9)
@@ -55,6 +61,7 @@ struct appdata
 {
   float4 vertex : POSITION;
   float2 uv0 : TEXCOORD0;
+#if !defined(_OPTIMIZE_INTERPOLATORS)
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
   float2 uv3 : TEXCOORD3;
@@ -62,6 +69,7 @@ struct appdata
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
+#endif
   float3 normal : NORMAL;
   float4 tangent : TANGENT;
 
@@ -72,6 +80,7 @@ struct v2f
 {
   linear noperspective centroid float4 pos : SV_POSITION;
   float2 uv0 : TEXCOORD0;
+#if !defined(_OPTIMIZE_INTERPOLATORS)
   float2 uv1 : TEXCOORD1;
   float2 uv2 : TEXCOORD2;
 #if defined(LIGHTMAP_ON)
@@ -82,6 +91,7 @@ struct v2f
   float2 uv5 : TEXCOORD5;
   float2 uv6 : TEXCOORD6;
   float2 uv7 : TEXCOORD7;
+#endif
 #endif
   float2 fogCoord: TEXCOORD8;
 #if !defined(LIGHTMAP_ON)

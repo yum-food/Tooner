@@ -179,6 +179,7 @@ v2f vert(appdata v)
 
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv0 = v.uv0;
+#if !defined(_OPTIMIZE_INTERPOLATORS)
   o.uv1 = v.uv1;
 #if defined(LIGHTMAP_ON)
   o.uv2 = v.uv2 * unity_LightmapST.xy + unity_LightmapST.zw;
@@ -191,10 +192,12 @@ v2f vert(appdata v)
   o.uv6 = v.uv6;
   o.uv7 = v.uv7;
 #endif
+#endif  // _OPTIMIZE_INTERPOLATORS
 #if defined(_MIRROR_UV_FLIP)
   if (_Mirror_UV_Flip_Enable_Dynamic) {
     bool in_mirror = isInMirror();
     o.uv0.x = lerp(o.uv0.x, 1 - o.uv0.x, in_mirror);
+#if !defined(_OPTIMIZE_INTERPOLATORS)
     o.uv1.x = lerp(o.uv1.x, 1 - o.uv1.x, in_mirror);
     o.uv2.x = lerp(o.uv2.x, 1 - o.uv2.x, in_mirror);
     o.uv3.x = lerp(o.uv3.x, 1 - o.uv3.x, in_mirror);
@@ -202,6 +205,7 @@ v2f vert(appdata v)
     o.uv5.x = lerp(o.uv5.x, 1 - o.uv5.x, in_mirror);
     o.uv6.x = lerp(o.uv6.x, 1 - o.uv6.x, in_mirror);
     o.uv7.x = lerp(o.uv7.x, 1 - o.uv7.x, in_mirror);
+#endif
   }
 #endif
 #if defined(SHADOWS_SCREEN)
@@ -280,6 +284,10 @@ void geom(triangle v2f tri_in[3],
     v0.worldPos -= avg_pos;
     v1.worldPos -= avg_pos;
     v2.worldPos -= avg_pos;
+
+    v0.worldPos *= 1 + 2 * pid_rand;
+    v1.worldPos *= 1 + 2 * pid_rand;
+    v2.worldPos *= 1 + 2 * pid_rand;
 
     float theta = explode_phase * 3.14159 * 4 + explode_phase * (sin(_Time[1] * (1 + pid_rand) / 2.0 + pid_rand) + cos(_Time[1] * (1 + pid_rand) / 6.1 + pid_rand) * 2) * pid_rand * 2;
     float4 quat = get_quaternion(axis, theta);
@@ -552,6 +560,7 @@ float2 get_uv_by_channel(v2f i, uint which_channel) {
     case 0:
       return i.uv0;
       break;
+#if !defined(_OPTIMIZE_INTERPOLATORS)
     case 1:
       return i.uv1;
       break;
@@ -575,6 +584,7 @@ float2 get_uv_by_channel(v2f i, uint which_channel) {
       return i.uv7;
       break;
 #endif
+#endif  // _OPTIMIZE_INTERPOLATORS
     default:
       return 0;
       break;

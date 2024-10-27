@@ -2,6 +2,7 @@
 #define __FEATURE_MACROS_INC
 
 #define EXPERIMENT__CUSTOM_DEPTH
+#define _OPTIMIZE_INTERPOLATORS
 
 #pragma shader_feature_local _ _BASECOLOR_MAP
 #pragma shader_feature_local _ _NORMAL_MAP
