@@ -2,7 +2,6 @@
 #define __FEATURE_MACROS_INC
 
 #define EXPERIMENT__CUSTOM_DEPTH
-#define _OPTIMIZE_INTERPOLATORS
 
 #pragma shader_feature_local _ _BASECOLOR_MAP
 #pragma shader_feature_local _ _NORMAL_MAP
@@ -184,6 +183,7 @@
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER_OCTAVE_1
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER_COLOR_RAMP
+#pragma shader_feature_local _ _OPTIMIZE_INTERPOLATORS
 
 #endif  // __FEATURE_MACROS_INC
 

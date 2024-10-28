@@ -1,6 +1,5 @@
 #include "AutoLight.cginc"
 #include "feature_macros.cginc"
-#define _OPTIMIZE_INTERPOLATORS
 
 #ifndef __INTERPOLATORS_INC
 #define __INTERPOLATORS_INC
