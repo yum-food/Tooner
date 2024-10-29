@@ -227,9 +227,16 @@ public class ToonerGUI : ShaderGUI {
     return enabled;
   }
 
+  // Why do the cartesian product here rather than in C? Easier to do it here
+  // than with C macros!
   enum SamplerMode {
-    Repeat,
-    Clamp,
+    // Why this order? Backwards compatibility when interpolation selection was introduced
+    LinearRepeat,
+    LinearClamp,
+    PointRepeat,
+    PointClamp,
+    BilinearRepeat,
+    BilinearClamp,
   };
   void DoPBR() {
     show_ui.Add(AddCollapsibleMenu("PBR", "_PBR"));
@@ -248,8 +255,12 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.EndChangeCheck();
       bc.floatValue = (int) sampler_mode;
 
-      SetKeyword($"_PBR_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
-      SetKeyword($"_PBR_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
+      SetKeyword($"_PBR_SAMPLER_LINEAR_REPEAT", sampler_mode == SamplerMode.LinearRepeat);
+      SetKeyword($"_PBR_SAMPLER_LINEAR_CLAMP", sampler_mode == SamplerMode.LinearClamp);
+      SetKeyword($"_PBR_SAMPLER_BILINEAR_REPEAT", sampler_mode == SamplerMode.BilinearRepeat);
+      SetKeyword($"_PBR_SAMPLER_BILINEAR_CLAMP", sampler_mode == SamplerMode.BilinearClamp);
+      SetKeyword($"_PBR_SAMPLER_POINT_REPEAT", sampler_mode == SamplerMode.PointRepeat);
+      SetKeyword($"_PBR_SAMPLER_POINT_CLAMP", sampler_mode == SamplerMode.PointClamp);
     }
     EditorGUI.indentLevel -= 1;
     show_ui.RemoveAt(show_ui.Count - 1);
@@ -446,6 +457,8 @@ public class ToonerGUI : ShaderGUI {
         SetKeyword($"_PBR_OVERLAY{i}_MASK", bct.textureValue);
 
         if (bct.textureValue) {
+          TextureScaleOffsetProperty(bct);
+
           bc = FindProperty($"_PBR_Overlay{i}_Mask_Invert");
           enabled = bc.floatValue > 1E-6;
           EditorGUI.BeginChangeCheck();
@@ -470,11 +483,15 @@ public class ToonerGUI : ShaderGUI {
         bc = FindProperty($"_PBR_Overlay{i}_Sampler_Mode");
         SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
         sampler_mode = (SamplerMode) EnumPopup(
-            MakeLabel("Sampler mode"), sampler_mode);
+            MakeLabel("Sampler wrapping mode"), sampler_mode);
         EditorGUI.EndChangeCheck();
         bc.floatValue = (int) sampler_mode;
-        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
-        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
+        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_LINEAR_REPEAT", sampler_mode == SamplerMode.LinearRepeat);
+        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_LINEAR_CLAMP", sampler_mode == SamplerMode.LinearClamp);
+        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_BILINEAR_REPEAT", sampler_mode == SamplerMode.BilinearRepeat);
+        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_BILINEAR_CLAMP", sampler_mode == SamplerMode.BilinearClamp);
+        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_POINT_REPEAT", sampler_mode == SamplerMode.PointRepeat);
+        SetKeyword($"_PBR_OVERLAY{i}_SAMPLER_POINT_CLAMP", sampler_mode == SamplerMode.PointClamp);
 
         bc = FindProperty($"_PBR_Overlay{i}_Mip_Bias");
         FloatProperty(bc, "Mip bias");
@@ -826,8 +843,12 @@ public class ToonerGUI : ShaderGUI {
         EditorGUI.EndChangeCheck();
         bc.floatValue = (int) sampler_mode;
 
-        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_REPEAT", sampler_mode == SamplerMode.Repeat);
-        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_CLAMP", sampler_mode == SamplerMode.Clamp);
+        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_LINEAR_REPEAT", sampler_mode == SamplerMode.LinearRepeat);
+        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_LINEAR_CLAMP", sampler_mode == SamplerMode.LinearClamp);
+        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_BILINEAR_REPEAT", sampler_mode == SamplerMode.BilinearRepeat);
+        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_BILINEAR_CLAMP", sampler_mode == SamplerMode.BilinearClamp);
+        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_POINT_REPEAT", sampler_mode == SamplerMode.PointRepeat);
+        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_POINT_CLAMP", sampler_mode == SamplerMode.PointClamp);
 
         EditorGUI.indentLevel -= 1;
       }
