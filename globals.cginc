@@ -564,6 +564,15 @@ float _HSV1_Sat_Shift;
 float _HSV1_Val_Shift;
 #endif
 
+#if defined(_HSV2)
+float _HSV2_Enabled;
+texture2D _HSV2_Mask;
+float _HSV2_Mask_Invert;
+float _HSV2_Hue_Shift;
+float _HSV2_Sat_Shift;
+float _HSV2_Val_Shift;
+#endif
+
 #if defined(_CLONES)
 float _Clones_Enabled;
 float _Clones_Count;

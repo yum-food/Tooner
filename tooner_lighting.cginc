@@ -2345,6 +2345,27 @@ float4 effect(inout v2f i, out float depth)
  }
 #endif
 
+#if defined(_HSV2)
+ {
+   float hsv_mask = _HSV2_Mask.SampleBias(linear_repeat_s, i.uv0, _Global_Sample_Bias);
+   if (_HSV2_Mask_Invert) {
+     hsv_mask = 1 - hsv_mask;
+   }
+   if (hsv_mask > 0.01 &&
+       (_HSV2_Hue_Shift > 1E-6 ||
+        abs(_HSV2_Sat_Shift) > 1E-6 ||
+        abs(_HSV2_Val_Shift) > 1E-6)) {
+     float3 c = albedo.rgb;
+     c = RGBtoHSV(c);
+     c += float3(_HSV2_Hue_Shift, _HSV2_Sat_Shift, _HSV2_Val_Shift);
+     c.x = glsl_mod(c.x, 1.0);
+     c.yz = saturate(c.yz);
+     c = HSVtoRGB(c);
+     albedo.rgb = c;
+   }
+ }
+#endif
+
 #if defined(_AMBIENT_OCCLUSION)
   float ao = _Ambient_Occlusion.SampleBias(linear_repeat_s,
       UV_SCOFF(i, _Ambient_Occlusion_ST, /*uv_channel=*/0),

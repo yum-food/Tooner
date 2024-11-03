@@ -3,7 +3,7 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 32
+  // Build nonce: 34
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -274,6 +274,7 @@ Shader "yum_food/tooner"
     [HideInInspector] _SrcBlend ("_SrcBlend", Float) = 1
     [HideInInspector] _DstBlend ("_SrcBlend", Float) = 0
     [HideInInspector] _ZWrite ("_ZWrite", Float) = 1
+    [HideInInspector] _ZTest ("_ZTest", Float) = 4  // LEqual
 
     _Matcap0("Matcap", 2D) = "black" {}
     _Matcap0_Mask("Matcap mask", 2D) = "white" {}
@@ -447,6 +448,13 @@ Shader "yum_food/tooner"
     _HSV1_Hue_Shift("HSV hue shift", Range(0.0, 1.0)) = 0.0
     _HSV1_Sat_Shift("HSV saturation shift", Range(-1.0, 1.0)) = 0.0
     _HSV1_Val_Shift("HSV value shift", Range(-1.0, 1.0)) = 0.0
+
+    _HSV2_Enabled("Enable HSV", Float) = 0.0
+    _HSV2_Mask("Mask", 2D) = "white" {}
+    _HSV2_Mask_Invert("Mask invert", Float) = 0.0
+    _HSV2_Hue_Shift("HSV hue shift", Range(0.0, 1.0)) = 0.0
+    _HSV2_Sat_Shift("HSV saturation shift", Range(-1.0, 1.0)) = 0.0
+    _HSV2_Val_Shift("HSV value shift", Range(-1.0, 1.0)) = 0.0
 
     _Clones_Enabled("Enable clones", Float) = 0.0
     _Clones_Count("Clones count", Range(0,16)) = 0.0
@@ -711,7 +719,7 @@ Shader "yum_food/tooner"
       }
       Blend [_SrcBlend] [_DstBlend]
       ZWrite [_ZWrite]
-      ZTest LEqual
+      ZTest [_ZTest]
       Cull [_Cull]
 
       Stencil {
@@ -775,7 +783,7 @@ Shader "yum_food/tooner"
       Cull [_OutlinesCull]
 
       ZWrite [_ZWrite]
-      ZTest LEqual
+      ZTest [_ZTest]
 
       Stencil {
         Ref [_Stencil_Ref_Outline]

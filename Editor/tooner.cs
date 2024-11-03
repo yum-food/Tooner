@@ -1082,7 +1082,7 @@ public class ToonerGUI : ShaderGUI {
 
     MaterialProperty bc;
 
-		for (int i = 0; i < 2; i++) {
+		for (int i = 0; i < 3; i++) {
 			bc = FindProperty($"_HSV{i}_Enabled");
 			bool enabled = bc.floatValue > 1E-6;
 			EditorGUI.BeginChangeCheck();
@@ -2347,6 +2347,8 @@ public class ToonerGUI : ShaderGUI {
       SetKeyword("SSR_MASK", bc.textureValue);
 
       EditorGUI.indentLevel -= 1;
+    } else {
+      SetKeyword("SSR_MASK", false);
     }
 
     EditorGUI.indentLevel -= 1;
@@ -2364,6 +2366,21 @@ public class ToonerGUI : ShaderGUI {
   enum CutoutMode {
     Cutoff,
     Stochastic
+  }
+
+  // unity is made by fucking morons and they don't expose this so i'm
+  // reimplementing it
+  // ref: https://docs.unity3d.com/6000.0/Documentation/Manual/SL-ZTest.html
+  enum ZTestMode {
+    Disabled,
+    Never,
+    Less,
+    Equal,
+    LEqual,
+    Greater,
+    NotEqual,
+    GEqual,
+    Always
   }
 
   void DoRendering() {
@@ -2478,6 +2495,14 @@ public class ToonerGUI : ShaderGUI {
       RecordAction("Culling mode");
       bc.floatValue = (float) cull_mode;
     }
+
+    EditorGUI.BeginChangeCheck();
+    bc = FindProperty("_ZTest");
+    ZTestMode zmode = (ZTestMode) Math.Round(bc.floatValue);
+    zmode = (ZTestMode) EnumPopup(
+        MakeLabel("ZTest"), zmode);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = (float) zmode;
 
     bc = FindProperty("_Discard_Enable_Static");
     bool enabled = bc.floatValue > 1E-6;

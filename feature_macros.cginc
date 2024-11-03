@@ -86,6 +86,7 @@
 #pragma shader_feature_local _ _OKLAB
 #pragma shader_feature_local _ _HSV0
 #pragma shader_feature_local _ _HSV1
+#pragma shader_feature_local _ _HSV2
 #pragma shader_feature_local _ _CLONES
 #pragma shader_feature_local _ _PBR_OVERLAY0
 #pragma shader_feature_local _ _PBR_OVERLAY0_BASECOLOR_MAP

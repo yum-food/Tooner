@@ -138,6 +138,7 @@ half4 BRDF1_Mochie_PBS (
   diffCol = diffColor * (gi.diffuse + light.color * lerp(diffuseTerm, wrappedDiffuse, thickness));
 
   half3 specCol = specularTerm * light.color * FresnelTerm (specColor, lh) * _SpecularStrength;
+
   half3 reflCol = surfaceReduction * gi.specular * FresnelLerp (specColor, grazingTerm, lerp(1, nv, _FresnelStrength*_UseFresnel)) * reflection_strength;
 #if SSR_ENABLED
   half4 ssrCol = GetSSR(worldPos, viewDir, reflect(-viewDir, normal), normal, smoothness, diffColor, metallic, screenUVs, screenPos);

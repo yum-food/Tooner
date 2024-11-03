@@ -233,8 +233,6 @@ float4 getLitColor(
 #endif
 
   UnityLight direct_light;
-  direct_light.dir = getDirectLightDirection(i);
-  direct_light.ndotl = DotClamped(normal, direct_light.dir);
   direct_light.color = 0;
   {
     direct_light.dir = getDirectLightDirection(i);
