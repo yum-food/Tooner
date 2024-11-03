@@ -347,7 +347,7 @@ float4 getLitColor(
     screenPos = float4(i.screenPos, 0, i.pos.w);
   #endif
 
-#if 0
+#if 1
   float reflection_strength = _ReflectionStrength;
 #if defined(_REFLECTION_STRENGTH_TEX)
   reflection_strength *= _ReflectionStrengthTex.SampleLevel(linear_repeat_s, i.uv0, 0);
