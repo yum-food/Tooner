@@ -2142,6 +2142,23 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
 
+    bc = FindProperty("_Gimmick_Fog_00_Ray_March_0_Enable_Static");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Ray march effect 0", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_FOG_00_RAY_MARCH_0", enabled);
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_Fog_00_Ray_March_0_Seed");
+      FloatProperty(bc, "Seed");
+
+      EditorGUI.indentLevel -= 1;
+    }
+
     EditorGUI.indentLevel -= 1;
   }
 

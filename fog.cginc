@@ -4,6 +4,8 @@
 #include "interpolators.cginc"
 #include "math.cginc"
 #include "noise.cginc"
+#include "oklab.cginc"
+#include "poi.cginc"
 
 #ifndef __FOG_INC
 #define __FOG_INC
@@ -29,34 +31,42 @@ struct Fog00PBR {
 float perlin_noise_3d_tex(float3 p)
 {
   // 1/256 = 0.00390625
-  float r_lo = _Gimmick_Fog_00_Noise.SampleLevel(linear_repeat_s, p.xyz * 0.00390625, 0);
+  float r_lo = _Gimmick_Fog_00_Noise.SampleLevel(trilinear_repeat_s, p.xyz * 0.00390625, 0);
   return r_lo;
 }
 
 float map(float3 p, float lod) {
-  float3 t = _Time[1] * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
+  float3 t = _Time[1] * FOG_PERLIN_NOISE_SCALE * .2;
 #define RADIUS_TRANS_WIDTH 100
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
   // Try to create a smooth transition without doing any length() or other
   // transcendental ops.
   float radius2 = clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p, p), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP;
 
-	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE + t;
-  float density = FOG_PERLIN_NOISE(pp) * radius2 * 0.7;
+	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
+  float density = FOG_PERLIN_NOISE(pp+t) * radius2 * 0.7;
+#if 1
+  // Add higher octaves
+  density += FOG_PERLIN_NOISE(pp*4+t*1.5) * radius2 * 0.3;
+  density += FOG_PERLIN_NOISE(pp*16+t*2.0) * radius2 * 0.15;
+#endif
+  density *= density;
+  density *= 2;
 
   // Exponentiate to increase contrast.
-  density *= density;
+  //density *= density;
   // density had an expected value of 0.5. We just calculated pow(density, 2),
   // thus the new expected value is pow(0.5, ^ 2) = 1/4. Scale it to restore
   // the original EV.
-  density *= 2;
-  density = saturate(density);
+  //density *= 2;
+  //density = saturate(density);
 
   // This term creates large open areas.
   // This `if` doesn't actually create any thread divergence. Since all rays
   // shoot out in lock step, they all leave this mode at the same time.
   // Also, completely disable the term at high densities since those tend to be
   // slow (more computationally expensive) anyway.
+#if 0
   if (lod == 0 && _Gimmick_Fog_00_Noise_Scale < 2) {
     float tmp = FOG_PERLIN_NOISE(pp * 0.167 + t/4) * radius2 - 0.5;
     // Aggressively dial down this parameter as density increases. We really
@@ -66,6 +76,7 @@ float map(float3 p, float lod) {
     tmp *= 0.5 * density_performance_fix;
     density += tmp;
   }
+#endif
   return saturate(density);
 }
 
@@ -81,7 +92,7 @@ float3 getEmitterData(float3 p,
   // Project onto plane
   const float3 p_to_emitter = p - em_loc;
   const float t = dot(p_to_emitter, em_normal);
-  const float3 p_projected = p - t * em_normal - em_loc;
+  float3 p_projected = p - t * em_normal - em_loc;
 
   // Add some curvature to simulate scattering.
   //emitter_scale *= 1 + t*t * .002;
@@ -95,6 +106,13 @@ float3 getEmitterData(float3 p,
   float2 emitter_uv = clamp(p_projected.xy, -emitter_scale, emitter_scale) * emitter_scale_rcp;
   emitter_uv *= 0.5;
   emitter_uv += 0.5;
+
+#if 0
+  emitter_uv.y = FOG_PERLIN_NOISE(float3(emitter_uv*100, _Time[2]));
+  emitter_uv.x = FOG_PERLIN_NOISE(p);
+  emitter_uv.y = FOG_PERLIN_NOISE(float3(emitter_uv*100, _Time[2]));
+#endif
+
   float emitter_lod = floor(abs(t) / (_Gimmick_Fog_00_Emitter_Lod_Half_Life * step_size));
   float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_repeat_s, emitter_uv, emitter_lod);
   em_color *= _Gimmick_Fog_00_Emitter_Brightness;
@@ -103,6 +121,65 @@ float3 getEmitterData(float3 p,
   return in_range * emitter_falloff * em_color;
 }
 #endif  // defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
+
+#if defined(_GIMMICK_FOG_00_RAY_MARCH_0)
+float fog00_map(float3 p, float rid_entropy)
+{
+  float sin_term = sin(rid_entropy*2*TAU+_Time[0]*2)+1.0;
+  sin_term *= sin_term;
+  return length(p)+1.5-rid_entropy*2.3*
+    sin_term*.2;
+}
+float fog00_map_dr(
+    float3 p,
+    float3 period,
+    float3 count,
+    float seed,
+    out float3 which
+    )
+{
+  p -= float3(0, period.y * floor(count.y/2) + 1, 0);
+  p -= unity_ObjectToWorld._m03_m13_m23;
+
+  which = round(p / period);
+  // Direction to nearest neighboring cell.
+  float3 min_d = p - period * which;
+  float3 o = sign(min_d);
+
+  float d = 1E9;
+  float3 which_tmp = which;
+#if 0
+  for (uint xi = 0; xi < 1; xi++)
+  for (uint yi = 0; yi < 2; yi++)
+  for (uint zi = 0; zi < 1; zi++)
+#else
+  uint xi = 0;
+  uint yi = 0;
+  uint zi = 0;
+#endif
+  {
+    float3 rid = which + float3(xi, yi, zi) * o;
+    rid = clamp(rid, ceil(-(count)*0.5), floor((count-1)*0.5));
+    float3 r = p - period * rid;
+    float3 rid_entropy = float3(
+        ign(rid.yz+seed),
+        ign(rid.xz+seed),
+        ign(rid.xy+seed));
+    float3 random_dir = normalize(rid_entropy);
+    r +=
+      (sin(_Time[0] * 2 + (rid_entropy.x + rid_entropy.y + rid_entropy.z) * TAU * .6666) * 2 - 1.0) *
+      period * 0.5 *
+      random_dir *
+      float3(.1, .1, .1) * .3;
+    float cur_d = fog00_map(r, rand3((rid+seed)/100));
+    which_tmp = cur_d < d ? rid : which_tmp;
+    d = min(d, cur_d);
+  }
+
+  which = which_tmp;
+  return d;
+}
+#endif
 
 Fog00PBR getFog00(v2f i) {
 
@@ -169,7 +246,7 @@ Fog00PBR getFog00(v2f i) {
   dither_seed = abs(dither_seed - 1);  // Shape into triangle wave ranging from 0 to 1
 #endif
   float dither = dither_seed * step_size * _Gimmick_Fog_00_Ray_Origin_Randomization;
-  ro += rd * (0.1 + dither);
+  ro += rd * (0.03 + dither);
 
   float world_pos_depth_hit_l = length(world_pos_depth_hit - ro);
 
@@ -203,6 +280,33 @@ Fog00PBR getFog00(v2f i) {
     // Seems that this is basically free.
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
     c.rgb = getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp) * step_size;
+#endif
+#if defined(_GIMMICK_FOG_00_RAY_MARCH_0)
+    {
+      float3 period = 3;
+      float3 count = 7;
+      float3 which;
+      float seed = _Gimmick_Fog_00_Ray_March_0_Seed;
+      float d = fog00_map_dr(p, period, count, seed, which);
+      int which_flat =
+        which.x * count.y * count.z +
+        which.y * count.z +
+        which.z;
+      float d_falloff = saturate(rcp(max(pow(d, 16), 1E-6)));
+      float brightness = step_size * .5;
+#if 1
+      float3 cur_c_oklch;
+      cur_c_oklch[0] = 0.3 + FOG_PERLIN_NOISE(which*100 + _Time[3]*2.3) * 0.9;
+      cur_c_oklch[1] = .15;
+      cur_c_oklch[2] = 0;
+      //cur_c_oklch[2] = glsl_mod(ign(which_flat) * TAU + _Time[0], TAU);
+      c.rgb += OKLCHtoLRGB(cur_c_oklch) * d_falloff * brightness;
+#else
+      float3 cur_c_hsv = float3(glsl_mod(ign(which_flat) + _Time[0], 1), .7, 1);
+      c.rgb += HSVtoRGB(cur_c_hsv) * d_falloff * brightness;
+#endif
+      c.a *= saturate(d_falloff);
+    }
 #endif
 
     acc += c * (1.0 - acc.a);

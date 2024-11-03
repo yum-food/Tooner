@@ -5,6 +5,7 @@
 
 #define PI 3.14159265
 #define TAU PI * 2.0
+#define PHI 1.618033989
 
 // Hacky parameterizable whiteout blending. Probably some big mistakes but it
 // passes the eyeball test.

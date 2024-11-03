@@ -10,6 +10,8 @@ SamplerState linear_repeat_s;
 SamplerState linear_clamp_s;
 SamplerState bilinear_repeat_s;
 SamplerState bilinear_clamp_s;
+SamplerState trilinear_repeat_s;
+SamplerState trilinear_clamp_s;
 
 float4 _Color;
 float _Metallic;
@@ -788,6 +790,10 @@ float4 _Gimmick_Gerstner_Water_Color_Ramp_Mask;
 float4 _Gimmick_Gerstner_Water_Color_Ramp_Mask1;
 #endif
 #endif
+#endif
+
+#if defined(_GIMMICK_FOG_00_RAY_MARCH_0)
+float _Gimmick_Fog_00_Ray_March_0_Seed;
 #endif
 
 #endif

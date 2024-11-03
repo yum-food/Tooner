@@ -668,6 +668,9 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Emitter2_Scale_X("fog", Float) = 1
     _Gimmick_Fog_00_Emitter2_Scale_Y("fog", Float) = 1
 
+    _Gimmick_Fog_00_Ray_March_0_Enable_Static("enable ray march effect 0", Float) = 0
+    _Gimmick_Fog_00_Ray_March_0_Seed("seed", Float) = 0
+
     _Gimmick_Aurora_Enable_Static("Enable aurora", Float) = 0
 
     _Gimmick_Gerstner_Water_Enable_Static("Enable water (gerstner)", Float) = 0

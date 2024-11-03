@@ -347,21 +347,6 @@ float4 getLitColor(
     screenPos = float4(i.screenPos, 0, i.pos.w);
   #endif
 
-// TODO optimize this
-// Break up color banding by adding some dithering to direct light.
-{
-  float2 screen_uv;
-  {
-    float3 full_vec_eye_to_geometry = i.worldPos - _WorldSpaceCameraPos;
-    float3 world_dir = normalize(i.worldPos - _WorldSpaceCameraPos);
-    float perspective_divide = 1.0 / i.pos.w;
-    float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
-    screen_uv = i.screenPos.xy * perspective_divide;
-  }
-  uint2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
-  direct_light.color += ign(screen_uv_round) * 0.00390625;
-}
-
 #if 1
   float reflection_strength = _ReflectionStrength;
 #if defined(_REFLECTION_STRENGTH_TEX)
@@ -403,6 +388,23 @@ float4 getLitColor(
         direct_light,
         indirect_light).xyz;
 #endif
+
+  // TODO optimize this and formalize with parameters
+  // Break up color banding by adding some dithering to shaded color.
+  float screen_dither;
+  {
+    float2 screen_uv;
+    {
+      float3 full_vec_eye_to_geometry = i.worldPos - _WorldSpaceCameraPos;
+      float3 world_dir = normalize(i.worldPos - _WorldSpaceCameraPos);
+      float perspective_divide = 1.0 / i.pos.w;
+      float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
+      screen_uv = i.screenPos.xy * perspective_divide;
+    }
+    uint2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
+    screen_dither = ign(screen_uv_round) * 0.00390625;
+  }
+  pbr += screen_dither;
 
 #if defined(_CLEARCOAT)
     // Direct lighting
