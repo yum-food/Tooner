@@ -202,7 +202,7 @@ Fog00PBR getFog00(v2f i) {
 
     // Seems that this is basically free.
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
-    c.rgb = getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp);
+    c.rgb = getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp) * step_size;
 #endif
 
     acc += c * (1.0 - acc.a);
