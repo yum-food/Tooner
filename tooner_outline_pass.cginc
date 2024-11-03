@@ -276,6 +276,16 @@ void geom(triangle v2f tri_in[3],
 
 fixed4 frag (v2f i) : SV_Target
 {
+  ToonerData tdata;
+  {
+    float3 full_vec_eye_to_geometry = i.worldPos - _WorldSpaceCameraPos;
+    float3 world_dir = normalize(i.worldPos - _WorldSpaceCameraPos);
+    float perspective_divide = 1.0 / i.pos.w;
+    float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
+    tdata.screen_uv = i.screenPos.xy * perspective_divide;
+    tdata.screen_uv_round = floor(tdata.screen_uv * _ScreenParams.xy);
+  }
+
   i.normal = -normalize(i.normal);
 
 #if defined(_OUTLINES)
@@ -331,7 +341,7 @@ fixed4 frag (v2f i) : SV_Target
       albedo, i.worldPos, i.normal,
       /*metallic=*/0, /*smoothness=*/0,
       i.uv0, ao, /*enable_direct=*/false,
-      /*diffuse_contrib=*/0, i);
+      /*diffuse_contrib=*/0, i, tdata);
 
   result += albedo * _Outline_Emission_Strength;
 #if defined(_GIMMICK_AL_CHROMA_00)

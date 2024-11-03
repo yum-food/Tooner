@@ -1363,6 +1363,16 @@ float4 pixellate_color(int2 px_res, float2 uv, float4 c)
 
 float4 effect(inout v2f i, out float depth)
 {
+  ToonerData tdata;
+  {
+    float3 full_vec_eye_to_geometry = i.worldPos - _WorldSpaceCameraPos;
+    float3 world_dir = normalize(i.worldPos - _WorldSpaceCameraPos);
+    float perspective_divide = 1.0 / i.pos.w;
+    float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
+    tdata.screen_uv = i.screenPos.xy * perspective_divide;
+    tdata.screen_uv_round = floor(tdata.screen_uv * _ScreenParams.xy);
+  }
+
 #if defined(EXPERIMENT__CUSTOM_DEPTH)
   {
     float4 clip_pos = mul(UNITY_MATRIX_VP, float4(i.worldPos, 1.0));
@@ -1501,6 +1511,9 @@ float4 effect(inout v2f i, out float depth)
 #if defined(_RENDERING_CUTOUT)
 #if defined(_RENDERING_CUTOUT_STOCHASTIC)
   float ar = rand2(i.uv0);
+  clip(albedo.a - ar);
+#elif defined(_RENDERING_CUTOUT_IGN)
+  float ar = ign(tdata.screen_uv_round);
   clip(albedo.a - ar);
 #else
   clip(albedo.a - _Alpha_Cutoff);
@@ -2418,7 +2431,7 @@ float4 effect(inout v2f i, out float depth)
 
   float4 lit = getLitColor(vertex_light_color, albedo, i.worldPos, normal,
       metallic, 1.0 - roughness, i.uv0, ao, /*enable_direct=*/true,
-      diffuse_contrib, i);
+      diffuse_contrib, i, tdata);
 
 #if defined(_GIMMICK_FLAT_COLOR)
   if (round(_Gimmick_Flat_Color_Enable_Dynamic)) {

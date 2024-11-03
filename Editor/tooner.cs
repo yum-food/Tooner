@@ -2365,7 +2365,8 @@ public class ToonerGUI : ShaderGUI {
 
   enum CutoutMode {
     Cutoff,
-    Stochastic
+    Stochastic,
+    InterleavedGradientNoise,
   }
 
   // unity is made by fucking morons and they don't expose this so i'm
@@ -2479,6 +2480,7 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.EndChangeCheck();
       bc.floatValue = (float) cmode;
       SetKeyword("_RENDERING_CUTOUT_STOCHASTIC", cmode == CutoutMode.Stochastic);
+      SetKeyword("_RENDERING_CUTOUT_IGN", cmode == CutoutMode.InterleavedGradientNoise);
 
       if (cmode == CutoutMode.Cutoff) {
         bc = FindProperty("_Alpha_Cutoff");

@@ -194,7 +194,8 @@ float4 getLitColor(
     // hack while i figure out view-dependent flickering in outlines
     bool enable_direct,
     float3 diffuse_contrib,
-    v2f i)
+    v2f i,
+    ToonerData tdata)
 {
   float3 specular_tint;
   float one_minus_reflectivity;
@@ -387,21 +388,9 @@ float4 getLitColor(
         indirect_light).xyz;
 #endif
 
-  // TODO optimize this and formalize with parameters
+  // TODO formalize with parameters
   // Break up color banding by adding some dithering to shaded color.
-  float screen_dither;
-  {
-    float2 screen_uv;
-    {
-      float3 full_vec_eye_to_geometry = i.worldPos - _WorldSpaceCameraPos;
-      float3 world_dir = normalize(i.worldPos - _WorldSpaceCameraPos);
-      float perspective_divide = 1.0 / i.pos.w;
-      float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
-      screen_uv = i.screenPos.xy * perspective_divide;
-    }
-    uint2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
-    screen_dither = ign(screen_uv_round) * 0.00390625;
-  }
+  float screen_dither = ign(tdata.screen_uv_round) * .00390625;
   pbr += screen_dither;
 
 #if defined(_CLEARCOAT)

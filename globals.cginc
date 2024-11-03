@@ -3,6 +3,12 @@
 #ifndef __GLOBALS_INC
 #define __GLOBALS_INC
 
+struct ToonerData
+{
+  float2 screen_uv;
+  uint2 screen_uv_round;
+};
+
 UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 
 SamplerState point_repeat_s;
