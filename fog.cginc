@@ -1,3 +1,4 @@
+#include "atrix256.cginc"
 #include "cnlohr.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
@@ -126,8 +127,10 @@ Fog00PBR getFog00(v2f i) {
   float3 rd = normalize(obj_pos - cam_pos);
   float3 ro = cam_pos;
 
+  const bool inside_sphere = length(ro) < _Gimmick_Fog_00_Radius;
   bool no_intersection = false;
-  if (length(ro) > _Gimmick_Fog_00_Radius) {
+  float distance_to_sphere = 1E6;
+  {
     float3 l = ro;
     float a = 1;
     float b = 2 * dot(rd, l);
@@ -135,25 +138,36 @@ Fog00PBR getFog00(v2f i) {
     float t0, t1;
     if (solveQuadratic(a, b, c, t0, t1)) {
       no_intersection = (t0 < 0) * (t1 < 0);
-      ro += min(max(t0, 0), max(t1, 0)) * rd;
-    } else {
-      no_intersection = true;
+      if (inside_sphere) {
+        distance_to_sphere = no_intersection ? distance_to_sphere : max(t0, t1);
+        distance_to_sphere = min(distance_to_sphere, length(world_pos_depth_hit - ro));
+      } else {
+        distance_to_sphere = no_intersection ? distance_to_sphere : min(max(t0, 0), max(t1, 0));
+        ro += distance_to_sphere * rd;
+        distance_to_sphere = max(distance_to_sphere, length(world_pos_depth_hit - ro));
+      }
     }
   }
 
-  // Factor of 10 on `screen_uv*10` eliminates visible striping artifact that
-  // is visible with no factor.
-  float step_size = _Gimmick_Fog_00_Step_Size_Factor;
+  float density_ss_term = 1 / _Gimmick_Fog_00_Density;
+  density_ss_term = dmin(density_ss_term, 3.00, 5);
+  density_ss_term = dmax(density_ss_term, 0.33, 5);
+  float step_size = _Gimmick_Fog_00_Step_Size_Factor * density_ss_term;
   step_size = clamp(step_size, 1E-2, 10);
-  int2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
+  uint2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
+#if 1
+  float dither_seed = ign(screen_uv_round);
+#else
   float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
+#endif
+#if 0
   // Smoothly vary over time. Use a triangle wave since it distributes points
   // evenly. A sin wave would bunch points up at boundaries.
-  #if 1
+  // TODO over time this integrates to white noise. Should we use blue noise?
   dither_seed = frac(dither_seed + _Time[0]*2);
   dither_seed *= 2;  // Map onto [0, 2]
   dither_seed = abs(dither_seed - 1);  // Shape into triangle wave ranging from 0 to 1
-  #endif
+#endif
   float dither = dither_seed * step_size * _Gimmick_Fog_00_Ray_Origin_Randomization;
   ro += rd * (0.1 + dither);
 
@@ -164,7 +178,7 @@ Fog00PBR getFog00(v2f i) {
         _Gimmick_Fog_00_Max_Ray / step_size,
         world_pos_depth_hit_l / step_size));
   step_count *= (1 - no_intersection);
-#define FOG_MAX_LOOP 128
+#define FOG_MAX_LOOP (128+16)
   step_count = min(step_count, FOG_MAX_LOOP);
 
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
