@@ -137,6 +137,10 @@ half4 BRDF1_Mochie_PBS (
   half3 diffCol = 0;
   diffCol = diffColor * (gi.diffuse + light.color * lerp(diffuseTerm, wrappedDiffuse, thickness));
 
+  // TODO this should probably use its own version of _WrappingFactor
+  specularTerm = saturate((specularTerm + _WrappingFactor) /
+      (1.0f + _WrappingFactor)) * 2 / (2 * (1 + _WrappingFactor));
+
   half3 specCol = specularTerm * light.color * FresnelTerm (specColor, lh) * _SpecularStrength;
 
   half3 reflCol = surfaceReduction * gi.specular * FresnelLerp (specColor, grazingTerm, lerp(1, nv, _FresnelStrength*_UseFresnel)) * reflection_strength;
@@ -201,6 +205,7 @@ half4 BRDF1_Mochie_PBS (
   // 	reflCol *= lerp(1, vertexColor, _ReflVertexColor*_ReflVertexColorStrength);
   // #endif
 
+diffCol = 0;
   return half4(diffCol + specCol + reflCol + subsurfaceCol, 1);
 }
 
