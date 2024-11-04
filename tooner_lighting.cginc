@@ -1508,19 +1508,6 @@ float4 effect(inout v2f i, out float depth)
   }
 #endif
 
-#if defined(_RENDERING_CUTOUT)
-#if defined(_RENDERING_CUTOUT_STOCHASTIC)
-  float ar = rand2(i.uv0);
-  clip(albedo.a - ar);
-#elif defined(_RENDERING_CUTOUT_IGN)
-  float ar = ign(tdata.screen_uv_round);
-  clip(albedo.a - ar);
-#else
-  clip(albedo.a - _Alpha_Cutoff);
-#endif
-  albedo.a = 1;
-#endif
-
 #if defined(_METALLIC_MAP)
   float metallic = _MetallicTex.SampleBias(GET_SAMPLER_PBR,
       UV_SCOFF(i, _MetallicTex_ST, 0), _Global_Sample_Bias)[round(_MetallicTexChannel)];
@@ -1795,6 +1782,23 @@ float4 effect(inout v2f i, out float depth)
 #if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
   float3 decal_emission = 0;
   applyDecal(albedo, roughness, metallic, decal_emission, i);
+#endif
+
+#if defined(_RENDERING_CUTOUT)
+#if defined(_RENDERING_CUTOUT_STOCHASTIC)
+  float ar = rand2(i.uv0);
+  clip(albedo.a - ar);
+#elif defined(_RENDERING_CUTOUT_IGN)
+  float ar = ign_anim(tdata.screen_uv_round);
+  clip(albedo.a - ar);
+#elif defined(_RENDERING_CUTOUT_NOISE_MASK)
+  float ar = _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s, tdata.screen_uv * _ScreenParams.xy * _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0);
+  //return float4(ar, ar, ar, 1);
+  clip(albedo.a - ar);
+#else
+  clip(albedo.a - _Alpha_Cutoff);
+#endif
+  albedo.a = 1;
 #endif
 
 #if defined(_GIMMICK_AL_CHROMA_00)

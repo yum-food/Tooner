@@ -33,5 +33,10 @@ float ign(float2 screen_px) {
         0.00583715 * screen_px.y, 1), 1);
 }
 
+float ign_anim(float2 screen_px) {
+  float frame = frac(_Time[0]*.0005) * 64;
+  return ign(screen_px + frame * 5.588238f);
+}
+
 #endif  // __ATRIX256_INC
 

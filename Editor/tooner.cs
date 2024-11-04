@@ -2367,6 +2367,7 @@ public class ToonerGUI : ShaderGUI {
     Cutoff,
     Stochastic,
     InterleavedGradientNoise,
+    NoiseMask,
   }
 
   // unity is made by fucking morons and they don't expose this so i'm
@@ -2481,11 +2482,19 @@ public class ToonerGUI : ShaderGUI {
       bc.floatValue = (float) cmode;
       SetKeyword("_RENDERING_CUTOUT_STOCHASTIC", cmode == CutoutMode.Stochastic);
       SetKeyword("_RENDERING_CUTOUT_IGN", cmode == CutoutMode.InterleavedGradientNoise);
+      SetKeyword("_RENDERING_CUTOUT_NOISE_MASK", cmode == CutoutMode.NoiseMask);
 
+      EditorGUI.indentLevel += 1;
       if (cmode == CutoutMode.Cutoff) {
         bc = FindProperty("_Alpha_Cutoff");
         ShaderProperty(bc, MakeLabel(bc));
+      } else if (cmode == CutoutMode.NoiseMask) {
+        bc = FindProperty("_Rendering_Cutout_Noise_Mask");
+        TexturePropertySingleLine(
+            MakeLabel(bc, "Noise mask"),
+            bc);
       }
+      EditorGUI.indentLevel -= 1;
     }
 
     bc = FindProperty("_Cull");

@@ -20,6 +20,7 @@
 #pragma shader_feature_local _ _RENDERING_CUTOUT
 #pragma shader_feature_local _ _RENDERING_CUTOUT_STOCHASTIC
 #pragma shader_feature_local _ _RENDERING_CUTOUT_IGN
+#pragma shader_feature_local _ _RENDERING_CUTOUT_NOISE_MASK
 #pragma shader_feature_local _ _RENDERING_FADE
 #pragma shader_feature_local _ _RENDERING_TRANSPARENT
 #pragma shader_feature_local _ _RENDERING_TRANSCLIPPING

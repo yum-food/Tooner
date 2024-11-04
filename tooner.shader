@@ -19,6 +19,8 @@ Shader "yum_food/tooner"
     _Clearcoat_Mask2("Clearcoat mask 2", 2D) = "white" {}
     _Clearcoat_Mask2_Invert("Clearcoat mask 2 invert", Float) = 0
 
+    _Rendering_Cutout_Noise_Mask("Noise mask", 2D) = "white" {}
+
     _MainTex("Base color", 2D) = "white" {}
     [Normal] _BumpMap("Normal", 2D) = "bump" {}
     _MetallicTex("Metallic", 2D) = "white" {}

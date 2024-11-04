@@ -811,5 +811,10 @@ float4 _Gimmick_Gerstner_Water_Color_Ramp_Mask1;
 float _Gimmick_Fog_00_Ray_March_0_Seed;
 #endif
 
+#if defined(_RENDERING_CUTOUT_NOISE_MASK)
+texture2D _Rendering_Cutout_Noise_Mask;
+float4 _Rendering_Cutout_Noise_Mask_TexelSize;
+#endif
+
 #endif
 
