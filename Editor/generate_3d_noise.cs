@@ -3,12 +3,22 @@
 using UnityEngine;
 using UnityEditor;
 
+public enum NoiseType
+{
+    OneDimensional,
+    TwoDimensional,
+    ThreeDimensional,
+    FourDimensional,
+    NormalizedThreeDimensional
+}
+
 public class WhiteNoiseTextureGenerator : EditorWindow
 {
     private int textureWidth = 32;
     private int textureHeight = 32;
     private int textureDepth = 32;
     private string textureName = "WhiteNoiseTexture";
+    private NoiseType noiseType = NoiseType.ThreeDimensional;
 
     [MenuItem("Tools/yum_food/White Noise Texture Generator")]
     public static void ShowWindow()
@@ -24,6 +34,7 @@ public class WhiteNoiseTextureGenerator : EditorWindow
         textureHeight = EditorGUILayout.IntField("Texture Height", textureHeight);
         textureDepth = EditorGUILayout.IntField("Texture Depth", textureDepth);
         textureName = EditorGUILayout.TextField("Texture Name", textureName);
+        noiseType = (NoiseType)EditorGUILayout.EnumPopup("Noise Type", noiseType);
 
         if (GUILayout.Button("Generate Texture"))
         {
@@ -39,7 +50,8 @@ public class WhiteNoiseTextureGenerator : EditorWindow
 
     private void GenerateWhiteNoiseTexture()
     {
-        Texture3D texture = new Texture3D(textureWidth, textureHeight, textureDepth, TextureFormat.R8, false);
+        TextureFormat format = GetTextureFormat();
+        Texture3D texture = new Texture3D(textureWidth, textureHeight, textureDepth, format, false);
         Color[] colors = new Color[textureWidth * textureHeight * textureDepth];
 
         for (int z = 0; z < textureDepth; z++)
@@ -49,7 +61,7 @@ public class WhiteNoiseTextureGenerator : EditorWindow
                 for (int x = 0; x < textureWidth; x++)
                 {
                     int index = x + y * textureWidth + z * textureWidth * textureHeight;
-                    colors[index] = new Color(Random.value, Random.value, Random.value, 1f);
+                    colors[index] = GenerateColor();
                 }
             }
         }
@@ -63,5 +75,43 @@ public class WhiteNoiseTextureGenerator : EditorWindow
         AssetDatabase.Refresh();
 
         EditorUtility.DisplayDialog("Success", $"White noise texture generated and saved at {path}", "OK");
+    }
+
+    private TextureFormat GetTextureFormat()
+    {
+        switch (noiseType)
+        {
+            case NoiseType.OneDimensional:
+                return TextureFormat.R8;
+            case NoiseType.TwoDimensional:
+                return TextureFormat.RG16;
+            case NoiseType.ThreeDimensional:
+            case NoiseType.NormalizedThreeDimensional:
+                return TextureFormat.RGB24;
+            case NoiseType.FourDimensional:
+                return TextureFormat.RGBA32;
+            default:
+                return TextureFormat.RGB24;
+        }
+    }
+
+    private Color GenerateColor()
+    {
+        switch (noiseType)
+        {
+            case NoiseType.OneDimensional:
+                return new Color(Random.value, 0, 0, 1);
+            case NoiseType.TwoDimensional:
+                return new Color(Random.value, Random.value, 0, 1);
+            case NoiseType.ThreeDimensional:
+                return new Color(Random.value, Random.value, Random.value, 1);
+            case NoiseType.FourDimensional:
+                return new Color(Random.value, Random.value, Random.value, Random.value);
+            case NoiseType.NormalizedThreeDimensional:
+                Vector3 normalizedColor = Random.insideUnitSphere.normalized;
+                return new Color(normalizedColor.x * 0.5f + 0.5f, normalizedColor.y * 0.5f + 0.5f, normalizedColor.z * 0.5f + 0.5f, 1);
+            default:
+                return Color.white;
+        }
     }
 }
