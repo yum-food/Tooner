@@ -205,7 +205,6 @@ half4 BRDF1_Mochie_PBS (
   // 	reflCol *= lerp(1, vertexColor, _ReflVertexColor*_ReflVertexColorStrength);
   // #endif
 
-diffCol = 0;
   return half4(diffCol + specCol + reflCol + subsurfaceCol, 1);
 }
 
