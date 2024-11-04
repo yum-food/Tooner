@@ -127,7 +127,8 @@ float fog00_map(float3 p, float rid_entropy)
 {
   float sin_term = sin(rid_entropy*2*TAU+_Time[0]*2)+1.0;
   sin_term *= sin_term;
-  return length(p)+1.5-rid_entropy*2.3*
+  sin_term *= 0.7;
+  return length(p)+0.7-rid_entropy*2.3*
     sin_term*.2;
 }
 float fog00_map_dr(
@@ -148,10 +149,10 @@ float fog00_map_dr(
 
   float d = 1E9;
   float3 which_tmp = which;
-#if 0
-  for (uint xi = 0; xi < 1; xi++)
+#if 1
+  for (uint xi = 0; xi < 2; xi++)
   for (uint yi = 0; yi < 2; yi++)
-  for (uint zi = 0; zi < 1; zi++)
+  for (uint zi = 0; zi < 2; zi++)
 #else
   uint xi = 0;
   uint yi = 0;
@@ -170,8 +171,8 @@ float fog00_map_dr(
       (sin(_Time[0] * 2 + (rid_entropy.x + rid_entropy.y + rid_entropy.z) * TAU * .6666) * 2 - 1.0) *
       period * 0.5 *
       random_dir *
-      float3(.1, .1, .1) * .3;
-    float cur_d = fog00_map(r, rand3((rid+seed)/100));
+      float3(1, 1, 1) * .3;
+    float cur_d = fog00_map(r, FOG_PERLIN_NOISE((rid+seed)*100));
     which_tmp = cur_d < d ? rid : which_tmp;
     d = min(d, cur_d);
   }
@@ -284,7 +285,7 @@ Fog00PBR getFog00(v2f i) {
 #if defined(_GIMMICK_FOG_00_RAY_MARCH_0)
     {
       float3 period = 3;
-      float3 count = 7;
+      float3 count = 9;
       float3 which;
       float seed = _Gimmick_Fog_00_Ray_March_0_Seed;
       float d = fog00_map_dr(p, period, count, seed, which);
@@ -292,7 +293,7 @@ Fog00PBR getFog00(v2f i) {
         which.x * count.y * count.z +
         which.y * count.z +
         which.z;
-      float d_falloff = saturate(rcp(max(pow(d, 16), 1E-6)));
+      float d_falloff = saturate(rcp(max(pow(d, 4), 1E-6)));
       float brightness = step_size * .5;
 #if 1
       float3 cur_c_oklch;

@@ -2091,6 +2091,10 @@ public class ToonerGUI : ShaderGUI {
     TexturePropertySingleLine(
         MakeLabel(bc, "Noise"),
         bc);
+    bc = FindProperty("_Gimmick_Fog_00_Normal_Noise");
+    TexturePropertySingleLine(
+        MakeLabel(bc, "Normal noise"),
+        bc);
 
     bc = FindProperty("_Gimmick_Fog_00_Emitter_Texture");
     TexturePropertySingleLine(
