@@ -1,3 +1,5 @@
+#include "UnityCG.cginc"
+
 #include "atrix256.cginc"
 #include "cnlohr.cginc"
 #include "globals.cginc"
@@ -5,6 +7,7 @@
 #include "math.cginc"
 #include "noise.cginc"
 #include "oklab.cginc"
+#include "pbr.cginc"
 #include "poi.cginc"
 
 #ifndef __FOG_INC
@@ -35,9 +38,23 @@ float perlin_noise_3d_tex(float3 p)
   return r_lo;
 }
 
+float3 light_fog00(
+    float3 albedo,
+    float NoL,
+    float3 direct,
+    float3 diffuse
+    ) {
+  half diffuseTerm = NoL;
+  float wrappedDiffuse = saturate((diffuseTerm + _WrappingFactor) /
+      (1.0f + _WrappingFactor)) * 2 / (2 * (1 + _WrappingFactor));
+  float3 diffCol = albedo * (diffuse + direct * wrappedDiffuse);
+  // TODO try adding LTCGI
+  return diffCol;
+}
+
 float map(float3 p, float lod) {
   float3 t = _Time[1] * FOG_PERLIN_NOISE_SCALE * .2;
-#define RADIUS_TRANS_WIDTH 100
+#define RADIUS_TRANS_WIDTH 800
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
   // Try to create a smooth transition without doing any length() or other
   // transcendental ops.
@@ -45,21 +62,15 @@ float map(float3 p, float lod) {
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
   float density = FOG_PERLIN_NOISE(pp+t) * radius2 * 0.7;
-#if 1
   // Add higher octaves
-  density += FOG_PERLIN_NOISE(pp*4+t*1.5) * radius2 * 0.3;
-  density += FOG_PERLIN_NOISE(pp*16+t*2.0) * radius2 * 0.15;
+#if 1
+  density += FOG_PERLIN_NOISE(pp*2+t*1.5) * radius2 * 0.3;
 #endif
-  density *= density;
-  density *= 2;
 
   // Exponentiate to increase contrast.
-  //density *= density;
-  // density had an expected value of 0.5. We just calculated pow(density, 2),
-  // thus the new expected value is pow(0.5, ^ 2) = 1/4. Scale it to restore
-  // the original EV.
-  //density *= 2;
-  //density = saturate(density);
+  density *= density;
+  // Scale to make expected value remain constant.
+  density *= 2;
 
   // This term creates large open areas.
   // This `if` doesn't actually create any thread divergence. Since all rays
@@ -251,6 +262,17 @@ Fog00PBR getFog00(v2f i) {
 
   float world_pos_depth_hit_l = length(world_pos_depth_hit - ro);
 
+  // Get common lighting data
+  UnityLight direct_light;
+  UnityIndirect indirect_light;
+  direct_light.dir = getDirectLightDirection(i);
+  direct_light.ndotl = 0;  // Not used
+  direct_light.color = getDirectLightColor();
+  // TODO try per-sample baked lighting
+  indirect_light.diffuse = getIndirectDiffuse(i, /*vertex_light_color=*/0);
+  // TODO consider doing specular. At time of writing it seems pointless.
+  indirect_light.specular = 0;
+
   float4 acc = 0;
   uint step_count = floor(min(
         _Gimmick_Fog_00_Max_Ray / step_size,
@@ -268,6 +290,7 @@ Fog00PBR getFog00(v2f i) {
   const float2 em_scale_rcp = rcp(em_scale);
 #endif
 
+  const float noise_scale_rcp = 1.0 / _Gimmick_Fog_00_Noise_Scale;
   const float lod_denom = 1.0 /
     (_Gimmick_Fog_00_Lod_Half_Life * _Gimmick_Fog_00_Density);
   for (uint ii = 0; ii < step_count; ii++) {
@@ -275,12 +298,15 @@ Fog00PBR getFog00(v2f i) {
     const float3 p = ro + rd * ii_step_size;
     const float lod = floor(ii_step_size * lod_denom);
 
-    const float map_p = map(p, lod) * _Gimmick_Fog_00_Density * step_size;
-    float4 c = float4(0, 0, 0, map_p);
+    const float map_p_raw = map(p, lod);
+    const float map_p = map_p_raw * _Gimmick_Fog_00_Density * step_size;
+    float4 c = float4(_Color.rgb, map_p);
+
+    float3 diffuse_light = 0;
 
     // Seems that this is basically free.
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
-    c.rgb = getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp) * step_size;
+    diffuse_light += getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp) * step_size;
 #endif
 #if defined(_GIMMICK_FOG_00_RAY_MARCH_0)
     {
@@ -310,6 +336,18 @@ Fog00PBR getFog00(v2f i) {
     }
 #endif
 
+    // Directional derivative epsilon.
+    // TODO this should scale based on distance
+    float dd_e = 1 * noise_scale_rcp;
+    float NoL = saturate((map(p + dd_e * direct_light.dir, lod) - map_p_raw)/dd_e);
+#if 1
+    c.rgb = light_fog00(
+        c.rgb,
+        NoL, 
+        direct_light.color,
+        indirect_light.diffuse + diffuse_light);
+#endif
+
     acc += c * (1.0 - acc.a);
 
     // For performance, stop if we...
@@ -325,7 +363,7 @@ Fog00PBR getFog00(v2f i) {
   }
 
   Fog00PBR pbr;
-  pbr.albedo.rgb = 1;
+  pbr.albedo.rgb = acc.rgb;
   pbr.albedo.a = saturate(acc.a);
   pbr.diffuse = acc.rgb;
 

@@ -105,6 +105,18 @@ float3 BoxProjection (
 	return direction;
 }
 
+float4 getIndirectDiffuse(v2f i, float4 vertexLightColor) {
+  float4 diffuse = vertexLightColor;
+#if defined(FORWARD_BASE_PASS)
+#if defined(LIGHTMAP_ON)
+  diffuse.xyz = DecodeLightmap(UNITY_SAMPLE_TEX2D(unity_Lightmap, i.uv2));
+#else
+  diffuse.xyz += max(0, BetterSH9(float4(0, 0, 0, 1)));
+#endif
+#endif
+  return diffuse;
+}
+
 float4 getIndirectDiffuse(v2f i, float4 vertexLightColor, float3 normal) {
   float4 diffuse = vertexLightColor;
 #if defined(FORWARD_BASE_PASS)

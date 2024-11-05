@@ -2398,7 +2398,10 @@ float4 effect(inout v2f i, out float depth)
     Fog00PBR pbr = getFog00(i);
     albedo = pbr.albedo;
     depth = pbr.depth;
-    diffuse_contrib += pbr.diffuse;
+#if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)
+    albedo.rgb *= albedo.a;
+#endif
+    return albedo;
   }
 #endif
 #if defined(_GIMMICK_AURORA)
