@@ -215,6 +215,7 @@
 #pragma shader_feature_local _ SSR_MASK
 #pragma shader_feature_local _ _GIMMICK_FOG_00
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_TEXTURE
+#pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_VARIABLE_DENSITY
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_1
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_2
 #pragma shader_feature_local _ _GIMMICK_FOG_00_RAY_MARCH_0

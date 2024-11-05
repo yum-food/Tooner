@@ -659,6 +659,7 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Lod_Half_Life("fog", Float) = 5
 
     _Gimmick_Fog_00_Emitter_Texture("Emitter texture", 2D) = "black" {}
+    _Gimmick_Fog_00_Emitter_Variable_Density("Enable emitter variable density", Float) = 0
     _Gimmick_Fog_00_Emitter_Brightness("fog", Float) = 1
     _Gimmick_Fog_00_Emitter_Lod_Half_Life("fog", Float) = 5
 

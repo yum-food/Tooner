@@ -2104,6 +2104,16 @@ public class ToonerGUI : ShaderGUI {
     if (bc.textureValue) {
       EditorGUI.indentLevel += 1;
 
+      // TODO this is a misnomer, it's actually enabling normal-based
+      // lighting.
+      bc = FindProperty("_Gimmick_Fog_00_Emitter_Variable_Density");
+      enabled = (bc.floatValue != 0.0);
+      EditorGUI.BeginChangeCheck();
+      enabled = Toggle("Enable variable density", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      SetKeyword("_GIMMICK_FOG_00_EMITTER_VARIABLE_DENSITY", enabled);
+
       bc = FindProperty("_Gimmick_Fog_00_Emitter0_Location");
       VectorProperty(bc, "Location (world)");
       bc = FindProperty("_Gimmick_Fog_00_Emitter0_Normal");

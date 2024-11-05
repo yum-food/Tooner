@@ -62,9 +62,9 @@ float map(float3 p, float lod) {
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
   float density = FOG_PERLIN_NOISE(pp+t) * radius2 * 0.7;
-  // Add higher octaves
+  // Add higher octave to create more visual interest
 #if 1
-  density += FOG_PERLIN_NOISE(pp*2+t*1.5) * radius2 * 0.3;
+  density += FOG_PERLIN_NOISE(pp*3+t*1.5) * radius2 * 0.3;
 #endif
 
   // Exponentiate to increase contrast.
@@ -304,8 +304,10 @@ Fog00PBR getFog00(v2f i) {
 
     float3 diffuse_light = 0;
 
-    // Seems that this is basically free.
-#if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
+    // We put the emitter color into diffuse instead of doing a directional
+    // calculation because it looks better and it's cheaper. Less accurate
+    // though!
+#if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE) && !defined(_GIMMICK_FOG_00_EMITTER_VARIABLE_DENSITY)
     diffuse_light += getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp) * step_size;
 #endif
 #if defined(_GIMMICK_FOG_00_RAY_MARCH_0)
@@ -340,13 +342,24 @@ Fog00PBR getFog00(v2f i) {
     // TODO this should scale based on distance
     float dd_e = 1 * noise_scale_rcp;
     float NoL = saturate((map(p + dd_e * direct_light.dir, lod) - map_p_raw)/dd_e);
+    float3 c_lit = 0;
 #if 1
-    c.rgb = light_fog00(
+    c_lit += light_fog00(
         c.rgb,
         NoL, 
-        direct_light.color,
-        indirect_light.diffuse + diffuse_light);
+        direct_light.color * step_size,
+        indirect_light.diffuse * step_size + diffuse_light);
 #endif
+#if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE) && defined(_GIMMICK_FOG_00_EMITTER_VARIABLE_DENSITY)
+    float3 em_c = getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp) * step_size;
+    float em_NoL = saturate((map(p + dd_e * em_normal, lod) - map_p_raw) / dd_e);
+    c_lit += light_fog00(
+        c.rgb,
+        em_NoL, 
+        em_c,
+        0);
+#endif
+    c.rgb = c_lit;
 
     acc += c * (1.0 - acc.a);
 
