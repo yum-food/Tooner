@@ -744,6 +744,7 @@ float _Gimmick_AL_Chroma_00_Hue_Shift_Theta;
 
 #if defined(_GIMMICK_FOG_00)
 float _Gimmick_Fog_00_Max_Ray;
+float _Gimmick_Fog_00_Enable_Area_Lighting;
 float _Gimmick_Fog_00_Radius;
 float _Gimmick_Fog_00_Step_Size_Factor;
 float _Gimmick_Fog_00_Noise_Scale;
@@ -754,6 +755,9 @@ float _Gimmick_Fog_00_Alpha_Cutoff;
 float _Gimmick_Fog_00_Ray_Origin_Randomization;
 float _Gimmick_Fog_00_Lod_Half_Life;
 texture3D _Gimmick_Fog_00_Noise;
+#if defined(_GIMMICK_FOG_00_NOISE_3D_NORMALS)
+texture3D _Gimmick_Fog_00_Noise_Normals;
+#endif
 #if defined(_GIMMICK_FOG_00_NOISE_2D)
 texture2D _Gimmick_Fog_00_Noise_2D;
 float4 _Gimmick_Fog_00_Noise_2D_TexelSize;

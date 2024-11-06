@@ -2,6 +2,7 @@
 
 #include "atrix256.cginc"
 #include "cnlohr.cginc"
+#include "fog_ltcgi.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "math.cginc"
@@ -17,7 +18,6 @@
 
 struct Fog00PBR {
   float4 albedo;
-  float3 diffuse;
   float depth;
 };
 
@@ -34,8 +34,13 @@ struct Fog00PBR {
 float perlin_noise_3d_tex(float3 p)
 {
   // 1/256 = 0.00390625
-  float r_lo = _Gimmick_Fog_00_Noise.SampleLevel(trilinear_repeat_s, p.xyz * 0.00390625, 0);
-  return r_lo;
+  return _Gimmick_Fog_00_Noise.SampleLevel(trilinear_repeat_s, p.xyz * 0.00390625, 0);
+}
+
+float3 perlin_noise_3d_tex_normal(float3 p)
+{
+  // 1/256 = 0.00390625
+  return _Gimmick_Fog_00_Noise_Normals.SampleLevel(trilinear_repeat_s, p.xyz * 0.00390625, 0) * 2 - 1;
 }
 
 float3 light_fog00(
@@ -52,7 +57,7 @@ float3 light_fog00(
   return diffCol;
 }
 
-float map(float3 p) {
+float map(float3 p, out float3 normal) {
   float3 t = _Time[1] * FOG_PERLIN_NOISE_SCALE * .2;
 #define RADIUS_TRANS_WIDTH 800
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
@@ -62,16 +67,15 @@ float map(float3 p) {
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
   float density = FOG_PERLIN_NOISE(pp+t) * radius2 * 0.7;
+  normal = perlin_noise_3d_tex_normal(pp+t) * density;
   // Add higher octave to create more visual interest
 #if 1
-  density += FOG_PERLIN_NOISE(pp*3+t*1.5) * radius2 * 0.3;
+  float cur_density = FOG_PERLIN_NOISE(pp*3+t*1.5) * radius2 * 0.3;
+  density += cur_density;
+  normal += perlin_noise_3d_tex_normal(pp*3+t*1.5) * cur_density;
 #endif
 
-  // Exponentiate to increase contrast.
-  density *= density;
-  // Scale to make expected value remain constant.
-  density *= 2;
-
+  normal = normalize(normal);
   return saturate(density);
 }
 
@@ -110,9 +114,8 @@ float3 getEmitterData(float3 p,
 
   float emitter_lod = floor(abs(t) / (_Gimmick_Fog_00_Emitter_Lod_Half_Life * step_size));
   float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_repeat_s, emitter_uv, emitter_lod);
-  em_color *= _Gimmick_Fog_00_Emitter_Brightness;
   float emitter_dist = in_range ? abs(t) : 1000;
-  float emitter_falloff = min(1, rcp(pow(emitter_dist, 1.4)));
+  float emitter_falloff = min(1, rcp(emitter_dist));
   return in_range * emitter_falloff * em_color;
 }
 #endif  // defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
@@ -223,7 +226,9 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
 
   float density_ss_term = 1 / _Gimmick_Fog_00_Density;
   //density_ss_term = dclamp(density_ss_term, 0.33, 3.00, 5);
-  float step_size = _Gimmick_Fog_00_Step_Size_Factor * density_ss_term;
+  const float step_size = _Gimmick_Fog_00_Step_Size_Factor * density_ss_term;
+  const float step_size_sqrt = sqrt(step_size);
+  const float step_size_sqrt_max1 = max(1, step_size_sqrt);
   //step_size = clamp(step_size, 1E-2, 1E2);
   uint2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
 #if defined(_GIMMICK_FOG_00_NOISE_2D)
@@ -274,7 +279,8 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     float4 c;
     float3 c_lit = 0;
 #if 1
-    const float map_p_raw = map(p);
+    float3 map_normal;
+    const float map_p_raw = map(p, map_normal);
     const float map_p = map_p_raw * _Gimmick_Fog_00_Density * step_size;
     c = float4(_Color.rgb, map_p);
     float3 diffuse_light = 0;
@@ -282,7 +288,9 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     // We put the emitter color into diffuse instead of doing a directional
     // calculation because it looks better and it's cheaper. Less accurate
     // though!
-    diffuse_light += getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp);
+    if (_Gimmick_Fog_00_Enable_Area_Lighting) {
+      diffuse_light += getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp);
+    }
 #endif
 #if defined(_GIMMICK_FOG_00_RAY_MARCH_0)
     {
@@ -314,12 +322,21 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     // Directional derivative epsilon.
     // TODO this should scale based on distance
     float dd_e = 1 * noise_scale_rcp;
-    float NoL = saturate((map(p + dd_e * direct_light.dir) - map_p_raw) / dd_e);
+    float NoL = dot(map_normal, direct_light.dir);
+#if 1
+    if (_Gimmick_Fog_00_Enable_Area_Lighting) {
+      ltcgi_acc acc = (ltcgi_acc) 0;
+      LTCGI_Contribution(acc, p, map_normal, rd, /*roughness=*/0.5, 0);
+      diffuse_light += acc.diffuse;
+    }
+#endif
+    diffuse_light *= _Gimmick_Fog_00_Emitter_Brightness;
+    // Scaling brightness by sqrt(step_size) seems to look more consistent?
     c_lit += light_fog00(
         c.rgb,
         NoL, 
-        direct_light.color * step_size,
-        (indirect_light.diffuse + diffuse_light) * step_size);
+        direct_light.color * step_size_sqrt_max1,
+        (indirect_light.diffuse + diffuse_light) * step_size_sqrt_max1);
 #else
     c_lit = .05 * step_size;
     c.a = 0.1;
@@ -353,9 +370,7 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   }
 
   Fog00PBR pbr;
-  pbr.albedo.rgb = acc.rgb;
-  pbr.albedo.a = saturate(acc.a);
-  pbr.diffuse = acc.rgb;
+  pbr.albedo = saturate(acc);
 
   // Add some dithering to lit color to break up banding
   pbr.albedo.rgb += ign(tdata.screen_uv_round) * .00390625;

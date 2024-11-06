@@ -1,5 +1,6 @@
 #include "atrix256.cginc"
 #include "globals.cginc"
+#include "ltcgi.cginc"
 #include "filament_math.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
@@ -8,30 +9,6 @@
 
 #ifndef __PBR_INC
 #define __PBR_INC
-
-#if defined(_LTCGI)
-#include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI_structs.cginc"
-
-struct ltcgi_acc {
-  float3 diffuse;
-  float3 specular;
-};
-
-void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output);
-void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output);
-
-#define LTCGI_V2_CUSTOM_INPUT ltcgi_acc
-#define LTCGI_V2_DIFFUSE_CALLBACK ltcgi_cb_diffuse
-#define LTCGI_V2_SPECULAR_CALLBACK ltcgi_cb_specular
-
-#include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI.cginc"
-void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output) {
-	acc.diffuse += output.intensity * output.color * _LTCGI_DiffuseColor;
-}
-void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output) {
-	acc.specular += output.intensity * output.color * _LTCGI_SpecularColor;
-}
-#endif  // __LTCGI
 
 UNITY_DECLARE_TEXCUBE(_Cubemap);
 half4 _Cubemap_HDR;
@@ -214,7 +191,7 @@ float4 getLitColor(
   albedo.rgb = DiffuseAndSpecularFromMetallic(
     albedo, metallic, specular_tint, one_minus_reflectivity);
 
-  const float3 view_dir = normalize(i.centerCamPos - worldPos);
+  const float3 view_dir = normalize(_WorldSpaceCameraPos - worldPos);
   uint normals_mode = round(_Mesh_Normals_Mode);
   switch (normals_mode) {
     case 0:
