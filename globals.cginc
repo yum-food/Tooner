@@ -754,7 +754,10 @@ float _Gimmick_Fog_00_Alpha_Cutoff;
 float _Gimmick_Fog_00_Ray_Origin_Randomization;
 float _Gimmick_Fog_00_Lod_Half_Life;
 texture3D _Gimmick_Fog_00_Noise;
-texture3D _Gimmick_Fog_00_Normal_Noise;
+#if defined(_GIMMICK_FOG_00_NOISE_2D)
+texture2D _Gimmick_Fog_00_Noise_2D;
+float4 _Gimmick_Fog_00_Noise_2D_TexelSize;
+#endif
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
 texture2D _Gimmick_Fog_00_Emitter_Texture;
 float _Gimmick_Fog_00_Emitter_Brightness;

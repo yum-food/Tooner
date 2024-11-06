@@ -645,8 +645,8 @@ Shader "yum_food/tooner"
     _Mochie_UI_Show("UI show", Float) = 0
 
     _Gimmick_Fog_00_Enable_Static("Enable fog 00", Float) = 0
-    _Gimmick_Fog_00_Noise("Noise", 3D) = "black" {}
-    _Gimmick_Fog_00_Normal_Noise("Normal noise", 3D) = "white" {}
+    _Gimmick_Fog_00_Noise("3D noise", 3D) = "black" {}
+    _Gimmick_Fog_00_Noise_2D("2D noise", 2D) = "black" {}
     _Gimmick_Fog_00_Max_Ray("Max ray", Float) = 25
     _Gimmick_Fog_00_Radius("Radius", Float) = 25
     _Gimmick_Fog_00_Step_Size_Factor("Step size (meters)", Float) = 1

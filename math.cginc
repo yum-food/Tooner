@@ -136,6 +136,11 @@ float dsaturate(float x, float k)
   return dmin(dmax(x, 0, k), 1, k);
 }
 
+float dclamp(float x, float lo, float hi, float k)
+{
+  return dmin(dmax(x, lo, k), hi, k);
+}
+
 float rand(uint seed) {
   seed = seed * 747796405 + 2891336453;
   uint result = ((seed >> ((seed >> 28) + 4)) ^ seed) * 277803737;

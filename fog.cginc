@@ -52,7 +52,7 @@ float3 light_fog00(
   return diffCol;
 }
 
-float map(float3 p, float lod) {
+float map(float3 p) {
   float3 t = _Time[1] * FOG_PERLIN_NOISE_SCALE * .2;
 #define RADIUS_TRANS_WIDTH 800
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
@@ -72,22 +72,6 @@ float map(float3 p, float lod) {
   // Scale to make expected value remain constant.
   density *= 2;
 
-  // This term creates large open areas.
-  // This `if` doesn't actually create any thread divergence. Since all rays
-  // shoot out in lock step, they all leave this mode at the same time.
-  // Also, completely disable the term at high densities since those tend to be
-  // slow (more computationally expensive) anyway.
-#if 0
-  if (lod == 0 && _Gimmick_Fog_00_Noise_Scale < 2) {
-    float tmp = FOG_PERLIN_NOISE(pp * 0.167 + t/4) * radius2 - 0.5;
-    // Aggressively dial down this parameter as density increases. We really
-    // need to keep paths short when density is high.
-    float density_performance_fix = 1 / _Gimmick_Fog_00_Density;
-    density_performance_fix *= density_performance_fix;
-    tmp *= 0.5 * density_performance_fix;
-    density += tmp;
-  }
-#endif
   return saturate(density);
 }
 
@@ -193,8 +177,7 @@ float fog00_map_dr(
 }
 #endif
 
-Fog00PBR getFog00(v2f i) {
-
+Fog00PBR getFog00(v2f i, ToonerData tdata) {
   float3 cam_pos = _WorldSpaceCameraPos;
   float3 obj_pos = i.worldPos;
 
@@ -208,12 +191,12 @@ Fog00PBR getFog00(v2f i) {
     screen_uv = i.screenPos.xy * perspective_divide;
     float eye_depth_world =
       GetLinearZFromZDepth_WorksWithMirrors(
-          SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screen_uv),
+          SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, tdata.screen_uv),
           screen_uv) * perspective_factor;
     world_pos_depth_hit = _WorldSpaceCameraPos + eye_depth_world * world_dir;
   }
 
-  float3 rd = normalize(obj_pos - cam_pos);
+  const float3 rd = normalize(obj_pos - cam_pos);
   float3 ro = cam_pos;
 
   const bool inside_sphere = length(ro) < _Gimmick_Fog_00_Radius;
@@ -239,28 +222,21 @@ Fog00PBR getFog00(v2f i) {
   }
 
   float density_ss_term = 1 / _Gimmick_Fog_00_Density;
-  density_ss_term = dmin(density_ss_term, 3.00, 5);
-  density_ss_term = dmax(density_ss_term, 0.33, 5);
+  //density_ss_term = dclamp(density_ss_term, 0.33, 3.00, 5);
   float step_size = _Gimmick_Fog_00_Step_Size_Factor * density_ss_term;
-  step_size = clamp(step_size, 1E-2, 10);
+  //step_size = clamp(step_size, 1E-2, 1E2);
   uint2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
-#if 1
-  float dither_seed = ign(screen_uv_round);
+#if defined(_GIMMICK_FOG_00_NOISE_2D)
+  const float dither_seed = _Gimmick_Fog_00_Noise_2D.SampleLevel(point_repeat_s, screen_uv_round * _Gimmick_Fog_00_Noise_2D_TexelSize.xy, 0);
+#elif 1
+  const float dither_seed = ign(screen_uv_round);
 #else
-  float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
-#endif
-#if 0
-  // Smoothly vary over time. Use a triangle wave since it distributes points
-  // evenly. A sin wave would bunch points up at boundaries.
-  // TODO over time this integrates to white noise. Should we use blue noise?
-  dither_seed = frac(dither_seed + _Time[0]*2);
-  dither_seed *= 2;  // Map onto [0, 2]
-  dither_seed = abs(dither_seed - 1);  // Shape into triangle wave ranging from 0 to 1
+  const float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
 #endif
   float dither = dither_seed * step_size * _Gimmick_Fog_00_Ray_Origin_Randomization;
   ro += rd * (0.03 + dither);
 
-  float world_pos_depth_hit_l = length(world_pos_depth_hit - ro);
+  const float world_pos_depth_hit_l = length(world_pos_depth_hit - ro);
 
   // Get common lighting data
   UnityLight direct_light;
@@ -291,24 +267,22 @@ Fog00PBR getFog00(v2f i) {
 #endif
 
   const float noise_scale_rcp = 1.0 / _Gimmick_Fog_00_Noise_Scale;
-  const float lod_denom = 1.0 /
-    (_Gimmick_Fog_00_Lod_Half_Life * _Gimmick_Fog_00_Density);
   for (uint ii = 0; ii < step_count; ii++) {
     const float ii_step_size = ii * step_size;
     const float3 p = ro + rd * ii_step_size;
-    const float lod = floor(ii_step_size * lod_denom);
 
-    const float map_p_raw = map(p, lod);
+    float4 c;
+    float3 c_lit = 0;
+#if 1
+    const float map_p_raw = map(p);
     const float map_p = map_p_raw * _Gimmick_Fog_00_Density * step_size;
-    float4 c = float4(_Color.rgb, map_p);
-
+    c = float4(_Color.rgb, map_p);
     float3 diffuse_light = 0;
-
+#if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE) && !defined(_GIMMICK_FOG_00_EMITTER_VARIABLE_DENSITY)
     // We put the emitter color into diffuse instead of doing a directional
     // calculation because it looks better and it's cheaper. Less accurate
     // though!
-#if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE) && !defined(_GIMMICK_FOG_00_EMITTER_VARIABLE_DENSITY)
-    diffuse_light += getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp) * step_size;
+    diffuse_light += getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp);
 #endif
 #if defined(_GIMMICK_FOG_00_RAY_MARCH_0)
     {
@@ -337,18 +311,18 @@ Fog00PBR getFog00(v2f i) {
       c.a *= saturate(d_falloff);
     }
 #endif
-
     // Directional derivative epsilon.
     // TODO this should scale based on distance
     float dd_e = 1 * noise_scale_rcp;
-    float NoL = saturate((map(p + dd_e * direct_light.dir, lod) - map_p_raw)/dd_e);
-    float3 c_lit = 0;
-#if 1
+    float NoL = saturate((map(p + dd_e * direct_light.dir) - map_p_raw) / dd_e);
     c_lit += light_fog00(
         c.rgb,
         NoL, 
         direct_light.color * step_size,
-        indirect_light.diffuse * step_size + diffuse_light);
+        (indirect_light.diffuse + diffuse_light) * step_size);
+#else
+    c_lit = .05 * step_size;
+    c.a = 0.1;
 #endif
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE) && defined(_GIMMICK_FOG_00_EMITTER_VARIABLE_DENSITY)
     float3 em_c = getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp) * step_size;
@@ -361,8 +335,10 @@ Fog00PBR getFog00(v2f i) {
 #endif
     c.rgb = c_lit;
 
-    acc += c * (1.0 - acc.a);
+    // Intuition: add c scaled by the remaining transparent portion of acc.
+    acc = acc + (1 - acc.a) * c;
 
+#if 1
     // For performance, stop if we...
     //  1. accumulate enough alpha
     //  2. go outside of the sphere
@@ -370,6 +346,7 @@ Fog00PBR getFog00(v2f i) {
         dot(p, p) > _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius) {
       break;
     }
+#endif
   }
   if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff) {
     acc /= acc.a;
@@ -379,6 +356,9 @@ Fog00PBR getFog00(v2f i) {
   pbr.albedo.rgb = acc.rgb;
   pbr.albedo.a = saturate(acc.a);
   pbr.diffuse = acc.rgb;
+
+  // Add some dithering to lit color to break up banding
+  pbr.albedo.rgb += ign(tdata.screen_uv_round) * .00390625;
 
   float4 clip_pos = mul(UNITY_MATRIX_VP, float4(ro, 1.0));
   pbr.depth = clip_pos.z / clip_pos.w;

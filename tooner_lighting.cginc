@@ -2395,7 +2395,7 @@ float4 effect(inout v2f i, out float depth)
   float3 diffuse_contrib = 0;
 #if defined(_GIMMICK_FOG_00)
   {
-    Fog00PBR pbr = getFog00(i);
+    Fog00PBR pbr = getFog00(i, tdata);
     albedo = pbr.albedo;
     depth = pbr.depth;
 #if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)

@@ -2089,12 +2089,13 @@ public class ToonerGUI : ShaderGUI {
     FloatProperty(bc, "LOD half life");
     bc = FindProperty("_Gimmick_Fog_00_Noise");
     TexturePropertySingleLine(
-        MakeLabel(bc, "Noise"),
+        MakeLabel(bc, "3D Noise"),
         bc);
-    bc = FindProperty("_Gimmick_Fog_00_Normal_Noise");
+    bc = FindProperty("_Gimmick_Fog_00_Noise_2D");
     TexturePropertySingleLine(
-        MakeLabel(bc, "Normal noise"),
+        MakeLabel(bc, "2D Noise (optional)"),
         bc);
+    SetKeyword("_GIMMICK_FOG_00_NOISE_2D", bc.textureValue);
 
     bc = FindProperty("_Gimmick_Fog_00_Emitter_Texture");
     TexturePropertySingleLine(

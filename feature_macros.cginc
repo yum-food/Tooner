@@ -214,6 +214,7 @@
 #pragma shader_feature_local _ SSR_ENABLED
 #pragma shader_feature_local _ SSR_MASK
 #pragma shader_feature_local _ _GIMMICK_FOG_00
+#pragma shader_feature_local _ _GIMMICK_FOG_00_NOISE_2D
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_TEXTURE
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_VARIABLE_DENSITY
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_1
