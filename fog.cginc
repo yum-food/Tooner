@@ -21,15 +21,7 @@ struct Fog00PBR {
   float depth;
 };
 
-#define FOG_PERLIN_NOISE_MODE 1
-
-#if FOG_PERLIN_NOISE_MODE == 0
-#define FOG_PERLIN_NOISE perlin_noise_3d
-#define FOG_PERLIN_NOISE_SCALE 1
-#else
-#define FOG_PERLIN_NOISE perlin_noise_3d_tex
 #define FOG_PERLIN_NOISE_SCALE 32
-#endif
 
 float perlin_noise_3d_tex(float3 p)
 {
@@ -37,10 +29,44 @@ float perlin_noise_3d_tex(float3 p)
   return _Gimmick_Fog_00_Noise.SampleLevel(trilinear_repeat_s, p.xyz * 0.00390625, 0);
 }
 
+#define FBM_OCTAVES 4
+
+float perlin_noise_3d_tex_fbm(float3 p)
+{
+  float res = perlin_noise_3d_tex(p);
+  float p_scale = 1;
+  float d_scale = .6666;
+  for (uint i = 1; i < FBM_OCTAVES; i++) {
+    p_scale *= 2;
+    d_scale *= .5;
+    res += perlin_noise_3d_tex(p*p_scale)*d_scale;
+  }
+  return res;
+}
+
 float3 perlin_noise_3d_tex_normal(float3 p)
 {
   // 1/256 = 0.00390625
   return _Gimmick_Fog_00_Noise_Normals.SampleLevel(trilinear_repeat_s, p.xyz * 0.00390625, 0) * 2 - 1;
+}
+
+float3 perlin_noise_3d_tex_normal_fbm(float3 p)
+{
+  float3 res = perlin_noise_3d_tex_normal(p);
+  float p_scale = 1;
+  float d_scale = .6666;
+  for (uint i = 1; i < FBM_OCTAVES; i++) {
+    p_scale *= 2;
+    d_scale *= .5;
+    res += perlin_noise_3d_tex_normal(p*p_scale)*d_scale;
+  }
+  return res;
+}
+
+// idea from here https://iquilezles.org/articles/warp/
+float perlin_noise_3d_tex_warp(float3 p)
+{
+  return perlin_noise_3d_tex_fbm(p + perlin_noise_3d_tex(p) * 500);
 }
 
 float3 light_fog00(
@@ -66,14 +92,8 @@ float map(float3 p, out float3 normal) {
   float radius2 = clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p, p), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP;
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
-  float density = FOG_PERLIN_NOISE(pp+t) * radius2 * 0.7;
+  float density = perlin_noise_3d_tex_warp(pp+t) * radius2;
   normal = perlin_noise_3d_tex_normal(pp+t) * density;
-  // Add higher octave to create more visual interest
-#if 1
-  float cur_density = FOG_PERLIN_NOISE(pp*3+t*1.5) * radius2 * 0.3;
-  density += cur_density;
-  normal += perlin_noise_3d_tex_normal(pp*3+t*1.5) * cur_density;
-#endif
 
   normal = normalize(normal);
   return saturate(density);
