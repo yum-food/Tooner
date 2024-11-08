@@ -2091,11 +2091,6 @@ public class ToonerGUI : ShaderGUI {
     TexturePropertySingleLine(
         MakeLabel(bc, "3D Noise"),
         bc);
-    bc = FindProperty("_Gimmick_Fog_00_Noise_Normals");
-    TexturePropertySingleLine(
-        MakeLabel(bc, "3D Noise (RGB normals)"),
-        bc);
-    SetKeyword("_GIMMICK_FOG_00_NOISE_3D_NORMALS", bc.textureValue);
     bc = FindProperty("_Gimmick_Fog_00_Noise_2D");
     TexturePropertySingleLine(
         MakeLabel(bc, "2D Noise (optional)"),

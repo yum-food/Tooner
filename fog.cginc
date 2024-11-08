@@ -2,7 +2,6 @@
 
 #include "atrix256.cginc"
 #include "cnlohr.cginc"
-#include "fog_ltcgi.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "math.cginc"
@@ -23,7 +22,7 @@ struct Fog00PBR {
 
 #define FOG_PERLIN_NOISE_SCALE 32
 
-float perlin_noise_3d_tex(float3 p)
+float3 perlin_noise_3d_tex(float3 p)
 {
   // 1/256 = 0.00390625
   return _Gimmick_Fog_00_Noise.SampleLevel(trilinear_repeat_s, p.xyz * 0.00390625, 0);
@@ -31,11 +30,12 @@ float perlin_noise_3d_tex(float3 p)
 
 #define FBM_OCTAVES 3
 
-float perlin_noise_3d_tex_fbm(float3 p)
+float3 perlin_noise_3d_tex_fbm(float3 p)
 {
-  float res = perlin_noise_3d_tex(p);
+  float3 res = perlin_noise_3d_tex(p);
   float p_scale = 1;
-  float d_scale = .6666;
+  //float d_scale = .66666;
+  float d_scale = .571428571;
   for (uint i = 1; i < FBM_OCTAVES; i++) {
     p_scale *= 2;
     d_scale *= .5;
@@ -44,29 +44,16 @@ float perlin_noise_3d_tex_fbm(float3 p)
   return res;
 }
 
-float3 perlin_noise_3d_tex_normal(float3 p)
+// idea from here https://iquilezles.org/articles/warp/
+float3 perlin_noise_3d_tex_warp(float3 p)
 {
-  // 1/256 = 0.00390625
-  return _Gimmick_Fog_00_Noise_Normals.SampleLevel(trilinear_repeat_s, p.xyz * 0.00390625, 0) * 2 - 1;
-}
-
-float3 perlin_noise_3d_tex_normal_fbm(float3 p)
-{
-  float3 res = perlin_noise_3d_tex_normal(p);
-  float p_scale = 1;
-  float d_scale = .6666;
-  for (uint i = 1; i < FBM_OCTAVES; i++) {
-    p_scale *= 2;
-    d_scale *= .5;
-    res += perlin_noise_3d_tex_normal(p*p_scale)*d_scale;
-  }
-  return res;
+  return perlin_noise_3d_tex(p + perlin_noise_3d_tex(p + perlin_noise_3d_tex(p)*100) * 500);
 }
 
 // idea from here https://iquilezles.org/articles/warp/
-float perlin_noise_3d_tex_warp(float3 p)
+float3 perlin_noise_3d_tex_fbm_warp(float3 p)
 {
-  return perlin_noise_3d_tex_fbm(p + perlin_noise_3d_tex(p + perlin_noise_3d_tex_fbm(p)*200) * 500);
+  return perlin_noise_3d_tex_fbm(p + perlin_noise_3d_tex_fbm(p + perlin_noise_3d_tex_fbm(p)*100) * 500);
 }
 
 float3 light_fog00(
@@ -87,7 +74,7 @@ float3 light_fog00(
 }
 
 float map(float3 p, out float3 normal) {
-#if 0
+#if 1
   float3 t = _Time[0] * FOG_PERLIN_NOISE_SCALE;
   t.y *= .3;
 #else
@@ -100,11 +87,10 @@ float map(float3 p, out float3 normal) {
   float radius2 = clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p, p), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP;
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
-  float density = perlin_noise_3d_tex_warp(pp+t) * radius2;
-  normal = perlin_noise_3d_tex_normal_fbm(pp+t) * density;
+  normal = normalize(perlin_noise_3d_tex(pp+t) * 2 - 1);
+  float density = perlin_noise_3d_tex_fbm_warp(pp+t) * radius2;
 
-  normal = normalize(normal);
-  return saturate(density);
+  return density;
 }
 
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
@@ -321,11 +307,6 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     }
 #endif
 
-    if (_Gimmick_Fog_00_Enable_Area_Lighting) {
-      ltcgi_acc acc = (ltcgi_acc) 0;
-      LTCGI_Contribution(acc, p, map_normal, rd, /*roughness=*/0.5, 0);
-      diffuse_light += acc.diffuse;
-    }
     diffuse_light *= _Gimmick_Fog_00_Emitter_Brightness;
     // Scaling brightness by sqrt(step_size) seems to look more consistent?
     float NoL = dot(map_normal, direct_light.dir);
