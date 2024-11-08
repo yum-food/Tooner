@@ -131,15 +131,19 @@ void getEmitterData(float3 p,
 
   direct = in_range * emitter_falloff * em_color;
 
-  diffuse = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, emitter_uv, 10);
+#if 1
+  diffuse =
+    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, emitter_uv, 9)+
+    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, emitter_uv, 11);
+  diffuse *= .5;
   em_loc_clamp += em_loc;
-#if 0
-  float diffuse_falloff = min(1, 5 / dot(p - em_loc_clamp, p - em_loc_clamp));
-#else
   // TODO parameterize shaping constants
-  float diffuse_falloff = min(5, 4 / length(p - em_loc_clamp));
-#endif
+  float diffuse_length = length(p - em_loc_clamp);
+  float diffuse_falloff = min(2, 5 / diffuse_length);
   diffuse *= diffuse_falloff;
+#else
+  diffuse = 0;
+#endif
 }
 #endif  // defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
 
