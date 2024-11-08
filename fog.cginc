@@ -47,13 +47,10 @@ float3 perlin_noise_3d_tex_fbm(float3 p)
 // idea from here https://iquilezles.org/articles/warp/
 float3 perlin_noise_3d_tex_warp(float3 p)
 {
-  return perlin_noise_3d_tex(p + perlin_noise_3d_tex(p + perlin_noise_3d_tex(p)*100) * 500);
-}
-
-// idea from here https://iquilezles.org/articles/warp/
-float3 perlin_noise_3d_tex_fbm_warp(float3 p)
-{
-  return perlin_noise_3d_tex_fbm(p + perlin_noise_3d_tex_fbm(p + perlin_noise_3d_tex_fbm(p)*100) * 500);
+  p = perlin_noise_3d_tex(p);
+  p = perlin_noise_3d_tex(p * 255);
+  p = perlin_noise_3d_tex(p * 255);
+  return p;
 }
 
 float3 light_fog00(
@@ -88,19 +85,21 @@ float map(float3 p, out float3 normal) {
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
   normal = normalize(perlin_noise_3d_tex(pp+t) * 2 - 1);
-  float density = perlin_noise_3d_tex_fbm_warp(pp+t) * radius2;
+  float density = perlin_noise_3d_tex_warp(pp+t) * radius2;
 
   return density;
 }
 
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
 // Returns weighted color
-float3 getEmitterData(float3 p,
+void getEmitterData(float3 p,
     float step_size,
     float3 em_loc,
     float3 em_normal,
     float2 emitter_scale,
-    float2 emitter_scale_rcp)
+    float2 emitter_scale_rcp,
+    out float3 diffuse,
+    out float3 direct)
 {
   // Project onto plane
   const float3 p_to_emitter = p - em_loc;
@@ -111,12 +110,11 @@ float3 getEmitterData(float3 p,
   //emitter_scale *= 1 + t*t * .002;
 
   bool in_range = (abs(p_projected.x) < emitter_scale.x) * (abs(p_projected.y) < emitter_scale.y) * (t > 0);
-  if (!in_range) {
-    return 0;
-  }
 
   // Go up one LOD every 5 meters
-  float2 emitter_uv = clamp(p_projected.xy, -emitter_scale, emitter_scale) * emitter_scale_rcp;
+  float3 em_loc_clamp = p_projected;
+  em_loc_clamp.xy = clamp(em_loc_clamp.xy, -emitter_scale, emitter_scale);
+  float2 emitter_uv = em_loc_clamp.xy * emitter_scale_rcp;
   emitter_uv *= 0.5;
   emitter_uv += 0.5;
 
@@ -127,10 +125,21 @@ float3 getEmitterData(float3 p,
 #endif
 
   float emitter_lod = floor(abs(t) / (_Gimmick_Fog_00_Emitter_Lod_Half_Life * step_size));
-  float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_repeat_s, emitter_uv, emitter_lod);
+  float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, emitter_uv, emitter_lod);
   float emitter_dist = in_range ? abs(t) : 1000;
   float emitter_falloff = min(1, rcp(emitter_dist));
-  return in_range * emitter_falloff * em_color;
+
+  direct = in_range * emitter_falloff * em_color;
+
+  diffuse = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, emitter_uv, 10);
+  em_loc_clamp += em_loc;
+#if 0
+  float diffuse_falloff = min(1, 5 / dot(p - em_loc_clamp, p - em_loc_clamp));
+#else
+  // TODO parameterize shaping constants
+  float diffuse_falloff = min(5, 4 / length(p - em_loc_clamp));
+#endif
+  diffuse *= diffuse_falloff;
 }
 #endif  // defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
 
@@ -297,24 +306,30 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     const float map_p_raw = map(p, map_normal);
     const float map_p = map_p_raw * _Gimmick_Fog_00_Density * step_size;
     c = float4(_Color.rgb, map_p);
-    float3 diffuse_light = 0;
+    float3 diffuse = 0;
+    float3 direct = 0;
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE) && !defined(_GIMMICK_FOG_00_EMITTER_VARIABLE_DENSITY)
     // We put the emitter color into diffuse instead of doing a directional
     // calculation because it looks better and it's cheaper. Less accurate
     // though!
     if (_Gimmick_Fog_00_Enable_Area_Lighting) {
-      diffuse_light += getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp);
+      // Note that I'm intentionally passing in `direct` and `diffuse`
+      // backwards. It looks better if the collimated light is immune to normal
+      // dimming, and if the diffuse light is not.
+      getEmitterData(p, step_size, em_loc, em_normal,
+          em_scale, em_scale_rcp, direct, diffuse);
     }
 #endif
 
-    diffuse_light *= _Gimmick_Fog_00_Emitter_Brightness;
-    // Scaling brightness by sqrt(step_size) seems to look more consistent?
+    diffuse *= _Gimmick_Fog_00_Emitter_Brightness;
+    // Scaling brightness by sqrt(step_size) seems to look more consistent as
+    // you vary density. No idea why :(
     float NoL = dot(map_normal, direct_light.dir);
     c_lit += light_fog00(
         c.rgb,
         NoL, 
-        direct_light.color * step_size_sqrt_max1,
-        (indirect_light.diffuse + diffuse_light) * step_size_sqrt_max1);
+        (direct_light.color + direct) * step_size_sqrt_max1,
+        (indirect_light.diffuse + diffuse) * step_size_sqrt_max1);
 #else
     c_lit = .05 * step_size;
     c.a = 0.1;
