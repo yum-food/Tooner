@@ -29,7 +29,7 @@ float perlin_noise_3d_tex(float3 p)
   return _Gimmick_Fog_00_Noise.SampleLevel(trilinear_repeat_s, p.xyz * 0.00390625, 0);
 }
 
-#define FBM_OCTAVES 4
+#define FBM_OCTAVES 3
 
 float perlin_noise_3d_tex_fbm(float3 p)
 {
@@ -66,7 +66,7 @@ float3 perlin_noise_3d_tex_normal_fbm(float3 p)
 // idea from here https://iquilezles.org/articles/warp/
 float perlin_noise_3d_tex_warp(float3 p)
 {
-  return perlin_noise_3d_tex_fbm(p + perlin_noise_3d_tex(p) * 500);
+  return perlin_noise_3d_tex_fbm(p + perlin_noise_3d_tex(p + perlin_noise_3d_tex_fbm(p)*200) * 500);
 }
 
 float3 light_fog00(
@@ -78,13 +78,21 @@ float3 light_fog00(
   half diffuseTerm = NoL;
   float wrappedDiffuse = saturate((diffuseTerm + _WrappingFactor) /
       (1.0f + _WrappingFactor)) * 2 / (2 * (1 + _WrappingFactor));
+#if 0
+  float3 direct_unlit = .01;
+  direct = lerp(direct, direct_unlit, wrappedDiffuse);
+#endif
   float3 diffCol = albedo * (diffuse + direct * wrappedDiffuse);
-  // TODO try adding LTCGI
   return diffCol;
 }
 
 float map(float3 p, out float3 normal) {
-  float3 t = _Time[1] * FOG_PERLIN_NOISE_SCALE * .2;
+#if 0
+  float3 t = _Time[0] * FOG_PERLIN_NOISE_SCALE;
+  t.y *= .3;
+#else
+  float3 t = 0;
+#endif
 #define RADIUS_TRANS_WIDTH 800
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
   // Try to create a smooth transition without doing any length() or other
@@ -93,7 +101,7 @@ float map(float3 p, out float3 normal) {
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
   float density = perlin_noise_3d_tex_warp(pp+t) * radius2;
-  normal = perlin_noise_3d_tex_normal(pp+t) * density;
+  normal = perlin_noise_3d_tex_normal_fbm(pp+t) * density;
 
   normal = normalize(normal);
   return saturate(density);
@@ -259,7 +267,7 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   const float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
 #endif
   float dither = dither_seed * step_size * _Gimmick_Fog_00_Ray_Origin_Randomization;
-  ro += rd * (0.03 + dither);
+  ro += rd * (0.01 + dither);
 
   const float world_pos_depth_hit_l = length(world_pos_depth_hit - ro);
 
@@ -312,46 +320,15 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
       diffuse_light += getEmitterData(p, step_size, em_loc, em_normal, em_scale, em_scale_rcp);
     }
 #endif
-#if defined(_GIMMICK_FOG_00_RAY_MARCH_0)
-    {
-      float3 period = 3;
-      float3 count = 9;
-      float3 which;
-      float seed = _Gimmick_Fog_00_Ray_March_0_Seed;
-      float d = fog00_map_dr(p, period, count, seed, which);
-      int which_flat =
-        which.x * count.y * count.z +
-        which.y * count.z +
-        which.z;
-      float d_falloff = saturate(rcp(max(pow(d, 4), 1E-6)));
-      float brightness = step_size * .5;
-#if 1
-      float3 cur_c_oklch;
-      cur_c_oklch[0] = 0.3 + FOG_PERLIN_NOISE(which*100 + _Time[3]*2.3) * 0.9;
-      cur_c_oklch[1] = .15;
-      cur_c_oklch[2] = 0;
-      //cur_c_oklch[2] = glsl_mod(ign(which_flat) * TAU + _Time[0], TAU);
-      c.rgb += OKLCHtoLRGB(cur_c_oklch) * d_falloff * brightness;
-#else
-      float3 cur_c_hsv = float3(glsl_mod(ign(which_flat) + _Time[0], 1), .7, 1);
-      c.rgb += HSVtoRGB(cur_c_hsv) * d_falloff * brightness;
-#endif
-      c.a *= saturate(d_falloff);
-    }
-#endif
-    // Directional derivative epsilon.
-    // TODO this should scale based on distance
-    float dd_e = 1 * noise_scale_rcp;
-    float NoL = dot(map_normal, direct_light.dir);
-#if 1
+
     if (_Gimmick_Fog_00_Enable_Area_Lighting) {
       ltcgi_acc acc = (ltcgi_acc) 0;
       LTCGI_Contribution(acc, p, map_normal, rd, /*roughness=*/0.5, 0);
       diffuse_light += acc.diffuse;
     }
-#endif
     diffuse_light *= _Gimmick_Fog_00_Emitter_Brightness;
     // Scaling brightness by sqrt(step_size) seems to look more consistent?
+    float NoL = dot(map_normal, direct_light.dir);
     c_lit += light_fog00(
         c.rgb,
         NoL, 

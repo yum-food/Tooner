@@ -16,14 +16,20 @@ struct ltcgi_acc {
 };
 
 void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output);
-void ltcgi_cb_specular(inout ltcgi_acc acc, in ltcgi_output output);
 
 #define LTCGI_V2_CUSTOM_INPUT ltcgi_acc
 #define LTCGI_V2_DIFFUSE_CALLBACK ltcgi_cb_diffuse
 
+// modified exponential impulse from here: https://iquilezles.org/articles/functions/
+float reshape_intensity(float x) {
+  x = saturate(x*4);
+  return (2*x*exp(1-2*x))*.1;
+}
+
 #include "Third_Party/at.pimaker.ltcgi/Shaders/LTCGI.cginc"
 void ltcgi_cb_diffuse(inout ltcgi_acc acc, in ltcgi_output output) {
-	acc.diffuse += output.intensity * output.color;
+  // Intensity varies from 0 to 1.
+	acc.diffuse += reshape_intensity(output.intensity) * output.color;
 }
 #endif  // _GIMMICK_FOG_00
 
