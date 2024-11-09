@@ -246,7 +246,7 @@ float4 getLitColor(
 
 #if defined(_LTCGI)
   ltcgi_acc acc = (ltcgi_acc) 0;
-  if ((bool) round(_LTCGI_Enabled)) {
+  if (_LTCGI_Enabled_Dynamic) {
     LTCGI_Contribution(
         acc,
         i.worldPos,

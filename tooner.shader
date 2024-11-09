@@ -473,6 +473,9 @@ Shader "yum_food/tooner"
     _UVScroll_Alpha("UV scroll alpha", 2D) = "white" {}
 
     _LTCGI_Enabled("LTCGI enabled", Float) = 0.0
+    // This is set to 1 for backwards compatibility. Don't want to have to go
+    // click on like 30 materials....
+    _LTCGI_Enabled_Dynamic("LTCGI enabled (runtime switch)", Float) = 1.0
     _LTCGI_SpecularColor("LTCGI specular color", Color) = (1, 1, 1, 1)
     _LTCGI_DiffuseColor("LTCGI diffuse color", Color) = (1, 1, 1, 1)
 
@@ -661,7 +664,8 @@ Shader "yum_food/tooner"
 
     _Gimmick_Fog_00_Emitter_Texture("Emitter texture", 2D) = "black" {}
     _Gimmick_Fog_00_Emitter_Variable_Density("Enable emitter variable density", Float) = 0
-    _Gimmick_Fog_00_Emitter_Brightness("fog", Float) = 1
+    _Gimmick_Fog_00_Emitter_Brightness_Diffuse("fog", Float) = 1
+    _Gimmick_Fog_00_Emitter_Brightness_Direct("fog", Float) = 1
     _Gimmick_Fog_00_Emitter_Lod_Half_Life("fog", Float) = 5
 
     _Gimmick_Fog_00_Emitter0_Location("fog", Vector) = (0, 0, 0, 0)

@@ -132,14 +132,15 @@ void getEmitterData(float3 p,
   direct = in_range * emitter_falloff * em_color;
 
 #if 1
+  float e = 0.1;
   diffuse =
     _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, emitter_uv, 9)+
-    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, emitter_uv, 11);
+    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, (emitter_uv * (1 - e*2)) + e, 11);
   diffuse *= .5;
   em_loc_clamp += em_loc;
   // TODO parameterize shaping constants
   float diffuse_length = length(p - em_loc_clamp);
-  float diffuse_falloff = min(2, 5 / diffuse_length);
+  float diffuse_falloff = min(2, 10 / diffuse_length);
   diffuse *= diffuse_falloff;
 #else
   diffuse = 0;
@@ -325,7 +326,8 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     }
 #endif
 
-    diffuse *= _Gimmick_Fog_00_Emitter_Brightness;
+    diffuse *= _Gimmick_Fog_00_Emitter_Brightness_Diffuse;
+    direct *= _Gimmick_Fog_00_Emitter_Brightness_Direct;
     // Scaling brightness by sqrt(step_size) seems to look more consistent as
     // you vary density. No idea why :(
     float NoL = dot(map_normal, direct_light.dir);

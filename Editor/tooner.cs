@@ -2124,8 +2124,10 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty("_Gimmick_Fog_00_Emitter0_Scale_Y");
       FloatProperty(bc, "Scale (y)");
 
-      bc = FindProperty("_Gimmick_Fog_00_Emitter_Brightness");
-      FloatProperty(bc, "Brightness");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter_Brightness_Diffuse");
+      FloatProperty(bc, "Brightness (diffuse)");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter_Brightness_Direct");
+      FloatProperty(bc, "Brightness (direct)");
       bc = FindProperty("_Gimmick_Fog_00_Emitter_Lod_Half_Life");
       FloatProperty(bc, "LOD half life");
 
@@ -2753,6 +2755,14 @@ public class ToonerGUI : ShaderGUI {
 
     if (enabled) {
       EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_LTCGI_Enabled_Dynamic");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = Toggle("Enable (runtime switch)", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+
       bc = FindProperty("_LTCGI_SpecularColor");
       ColorProperty(bc, "Specular color (RGB)");
 

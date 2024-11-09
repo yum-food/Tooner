@@ -598,7 +598,7 @@ texture2D _UVScroll_Alpha;
 #endif
 
 #if defined(_LTCGI)
-float _LTCGI_Enabled;
+float _LTCGI_Enabled_Dynamic;
 float4 _LTCGI_SpecularColor;
 float4 _LTCGI_DiffuseColor;
 #endif
@@ -761,7 +761,8 @@ float4 _Gimmick_Fog_00_Noise_2D_TexelSize;
 #endif
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
 texture2D _Gimmick_Fog_00_Emitter_Texture;
-float _Gimmick_Fog_00_Emitter_Brightness;
+float _Gimmick_Fog_00_Emitter_Brightness_Diffuse;
+float _Gimmick_Fog_00_Emitter_Brightness_Direct;
 float _Gimmick_Fog_00_Emitter_Lod_Half_Life;
 
 float3 _Gimmick_Fog_00_Emitter0_Location;
