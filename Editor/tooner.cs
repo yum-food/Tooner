@@ -2510,6 +2510,9 @@ public class ToonerGUI : ShaderGUI {
         TexturePropertySingleLine(
             MakeLabel(bc, "Noise mask"),
             bc);
+      } else if (cmode == CutoutMode.InterleavedGradientNoise) {
+        bc = FindProperty("_Rendering_Cutout_Ign_Seed");
+        FloatProperty(bc, "Seed");
       }
       EditorGUI.indentLevel -= 1;
     }

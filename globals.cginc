@@ -317,6 +317,9 @@ float _Ambient_Occlusion_Strength;
 
 #if defined(_RENDERING_CUTOUT)
 float _Alpha_Cutoff;
+#if defined(_RENDERING_CUTOUT_IGN)
+float _Rendering_Cutout_Ign_Seed;
+#endif
 #endif
 
 #if defined(_OUTLINES)

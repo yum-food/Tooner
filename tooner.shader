@@ -205,6 +205,7 @@ Shader "yum_food/tooner"
     [MaterialToggle] _Confabulate_Normals("Confabulate mesh normals", Float) = 0.0
 
     _Alpha_Cutoff("Alpha cutoff", Range(0, 1)) = 0.5
+    _Rendering_Cutout_Ign_Seed("IGN seed", Float) = 0
 
     _Outline_Width("Outline width", Range(0, 0.1)) = 0.01
     _Outline_Color("Outline color", Color) = (0, 0, 0, 1)
