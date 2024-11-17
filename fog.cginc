@@ -209,6 +209,17 @@ float fog00_map_dr(
 }
 #endif
 
+// https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
+// cc0
+float3 ACES(float3 x) {
+  float a = 2.51f;
+  float b = 0.03f;
+  float c = 2.43f;
+  float d = 0.59f;
+  float e = 0.14f;
+  return saturate((x*(a*x+b))/(x*(c*x+d)+e));
+}
+
 Fog00PBR getFog00(v2f i, ToonerData tdata) {
   float3 cam_pos = _WorldSpaceCameraPos;
   float3 obj_pos = i.worldPos;
@@ -370,7 +381,8 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   }
 
   Fog00PBR pbr;
-  pbr.albedo = saturate(acc);
+  pbr.albedo = acc;
+  pbr.albedo.rgb = ACES(pbr.albedo.rgb);
 
   // Add some dithering to lit color to break up banding
   pbr.albedo.rgb += ign(tdata.screen_uv_round) * .00390625;
