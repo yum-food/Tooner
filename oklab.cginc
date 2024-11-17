@@ -29,7 +29,7 @@
 #ifndef __OKLAB_INC
 #define __OKLAB_INC
 
-#if defined(_OKLAB) || defined(_GIMMICK_LETTER_GRID_COLOR_WAVE) || defined(_GIMMICK_AL_CHROMA_00_HUE_SHIFT) || defined(_GIMMICK_FOG_00_RAY_MARCH_0)
+#if defined(_OKLAB) || defined(_GIMMICK_LETTER_GRID_COLOR_WAVE) || defined(_GIMMICK_AL_CHROMA_00_HUE_SHIFT) || defined(_GIMMICK_FOG_00)
 
 // Utilities relating to the OKLAB color space, as defined here:
 //   https://bottosson.github.io/posts/oklab/

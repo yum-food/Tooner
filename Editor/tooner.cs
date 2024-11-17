@@ -2087,6 +2087,8 @@ public class ToonerGUI : ShaderGUI {
     RangeProperty(bc, "Ray origin randomization");
     bc = FindProperty("_Gimmick_Fog_00_Lod_Half_Life");
     FloatProperty(bc, "LOD half life");
+    bc = FindProperty("_Gimmick_Fog_00_Max_Brightness");
+    RangeProperty(bc, "Max brightness");
     bc = FindProperty("_Gimmick_Fog_00_Noise");
     TexturePropertySingleLine(
         MakeLabel(bc, "3D Noise"),

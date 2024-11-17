@@ -220,6 +220,34 @@ float3 ACES(float3 x) {
   return saturate((x*(a*x+b))/(x*(c*x+d)+e));
 }
 
+// Clamp x to [0, k].
+// Assumes that x is already on [0, 1].
+float3 SmoothClamp(float3 x, float k) {
+  // Derivation of `b` from `k`:
+  //  f(x, b) = b * x / (x + b)
+  //  We want f(1, b) = k.
+  //  In other words, we want the max value the function can take on [0, 1] to
+  //  be k.
+  //   k = f(1, b)
+  //     = b / (1 + b)
+  //   b = k * (1 + b)
+  //     = k + kb
+  //   1 = k/b + k
+  //   1 - k = k/b
+  //   1/(1-k) = b/k
+  //   b = k/(1-k)
+  float e = 1E-4;
+  k = min(1-e, k);
+  float b = k/(1-k);
+  return b * x / (x + b);
+}
+float SmoothClamp(float x, float k) {
+  float e = 1E-4;
+  k = min(1-e, k);
+  float b = k/(1-k);
+  return b * x / (x + b);
+}
+
 Fog00PBR getFog00(v2f i, ToonerData tdata) {
   float3 cam_pos = _WorldSpaceCameraPos;
   float3 obj_pos = i.worldPos;
@@ -382,10 +410,17 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
 
   Fog00PBR pbr;
   pbr.albedo = acc;
-  pbr.albedo.rgb = ACES(pbr.albedo.rgb);
 
   // Add some dithering to lit color to break up banding
-  pbr.albedo.rgb += ign(tdata.screen_uv_round) * .00390625;
+  //pbr.albedo.rgb += ign(tdata.screen_uv_round) * .00390625;
+
+  // Remap onto [0, 1]
+  pbr.albedo.rgb = ACES(pbr.albedo.rgb);
+  // Clamp so max brightness is comfortable. Do it in perceptually uniform
+  // space to avoid affecting saturation.
+  pbr.albedo.rgb = LRGBtoOKLAB(pbr.albedo.rgb);
+  pbr.albedo.x = SmoothClamp(pbr.albedo.x, _Gimmick_Fog_00_Max_Brightness);
+  pbr.albedo.rgb = OKLABtoLRGB(pbr.albedo.rgb);
 
   float4 clip_pos = mul(UNITY_MATRIX_VP, float4(ro, 1.0));
   pbr.depth = clip_pos.z / clip_pos.w;
