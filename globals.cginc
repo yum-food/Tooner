@@ -11,6 +11,7 @@ struct ToonerData
 
 UNITY_DECLARE_DEPTH_TEXTURE(_CameraDepthTexture);
 
+SamplerState point_clamp_s;
 SamplerState point_repeat_s;
 SamplerState linear_repeat_s;
 SamplerState linear_clamp_s;

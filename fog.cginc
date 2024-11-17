@@ -125,7 +125,7 @@ void getEmitterData(float3 p,
 #endif
 
   float emitter_lod = floor(abs(t) / (_Gimmick_Fog_00_Emitter_Lod_Half_Life * step_size));
-  float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, emitter_uv, emitter_lod);
+  float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, emitter_uv, emitter_lod);
   float emitter_dist = in_range ? abs(t) : 1000;
   float emitter_falloff = min(1, rcp(emitter_dist));
 
@@ -133,10 +133,11 @@ void getEmitterData(float3 p,
 
 #if 1
   float e = 0.1;
-  diffuse =
-    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, emitter_uv, 9)+
-    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(linear_clamp_s, (emitter_uv * (1 - e*2)) + e, 11);
-  diffuse *= .5;
+  float2 emitter_uv_inv = 1.0 - emitter_uv;
+  diffuse = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, float2(emitter_uv.x, emitter_uv.y), 16) +
+    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, float2(emitter_uv.x, emitter_uv_inv.y), 16) +
+    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, float2(emitter_uv_inv.x, emitter_uv.y), 16);
+  diffuse *= 0.3333;
   em_loc_clamp += em_loc;
   // TODO parameterize shaping constants
   float diffuse_length = length(p - em_loc_clamp);
