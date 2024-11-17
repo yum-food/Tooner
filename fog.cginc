@@ -211,7 +211,7 @@ float fog00_map_dr(
 
 // https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
 // cc0
-float3 ACES(float3 x) {
+float3 AcesFilmic(float3 x) {
   float a = 2.51f;
   float b = 0.03f;
   float c = 2.43f;
@@ -415,7 +415,7 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   //pbr.albedo.rgb += ign(tdata.screen_uv_round) * .00390625;
 
   // Remap onto [0, 1]
-  pbr.albedo.rgb = ACES(pbr.albedo.rgb);
+  pbr.albedo.rgb = AcesFilmic(pbr.albedo.rgb);
   // Clamp so max brightness is comfortable. Do it in perceptually uniform
   // space to avoid affecting saturation.
   pbr.albedo.rgb = LRGBtoOKLAB(pbr.albedo.rgb);
