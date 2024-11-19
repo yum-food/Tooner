@@ -226,6 +226,7 @@
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER_OCTAVE_1
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER_COLOR_RAMP
 #pragma shader_feature_local _ _OPTIMIZE_INTERPOLATORS
+#pragma shader_feature_local _ _ACES_FILMIC
 
 #endif  // __FEATURE_MACROS_INC
 

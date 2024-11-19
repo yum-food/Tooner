@@ -16,12 +16,13 @@
 #include "iq_sdf.cginc"
 #include "math.cginc"
 #include "motion.cginc"
+#include "oklab.cginc"
 #include "pbr.cginc"
 #include "poi.cginc"
 #include "shear_math.cginc"
+#include "tone.cginc"
 #include "tooner_scroll.cginc"
 #include "trochoid_math.cginc"
-#include "oklab.cginc"
 
 #ifndef TOONER_LIGHTING
 #define TOONER_LIGHTING
@@ -2467,6 +2468,11 @@ float4 effect(inout v2f i, out float depth)
 #if defined(_GLITTER)
   result.rgb += glitter_color_unlit * _Glitter_Brightness;
 #endif
+
+#if defined(_ACES_FILMIC)
+  result.rgb = aces_filmic(max(result.rgb, 0));
+#endif
+
   // This version exists for compatibility with the Bakery lightmapper. We
   // specifically need to expose _EmissionMap and _EmissionColor.
 #if defined(_EMISSION)

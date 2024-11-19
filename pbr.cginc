@@ -6,6 +6,7 @@
 #include "interpolators.cginc"
 #include "MochieStandardBRDF.cginc"
 #include "poi.cginc"
+#include "tone.cginc"
 
 #ifndef __PBR_INC
 #define __PBR_INC
@@ -227,7 +228,7 @@ float4 getLitColor(
   {
     direct_light.dir = getDirectLightDirection(i);
     direct_light.ndotl = DotClamped(normal, direct_light.dir);
-#define POI_LIGHTING
+//#define POI_LIGHTING
 #if defined(POI_LIGHTING)
     direct_light.color = getPoiLightingDirect(normal);
 #else
@@ -275,12 +276,12 @@ float4 getLitColor(
   // Do this to avoid division by 0. If both light sources are black,
   // sum_brightness could be 0;
 #if defined(_BRIGHTNESS_CLAMP)
-  brightnesses = max(brightnesses, _Min_Brightness);
+  brightnesses = smooth_max(brightnesses, _Min_Brightness);
 #endif
   float sum_brightness = brightnesses[0] + brightnesses[1];
   float2 brightness_proportions = brightnesses / sum_brightness;
 #if defined(_BRIGHTNESS_CLAMP)
-  sum_brightness = clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
+  sum_brightness = smooth_clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
 #endif
   direct_light.color[2] = sum_brightness * brightness_proportions[0];
   indirect_light.diffuse[2] = sum_brightness * brightness_proportions[1];
@@ -310,7 +311,7 @@ float4 getLitColor(
 
   // Specular has to be clamped separately to avoid artifacting.
 #if defined(_BRIGHTNESS_CLAMP)
-  indirect_light.specular[2] = clamp(indirect_light.specular[2], _Min_Brightness, _Max_Brightness);
+  indirect_light.specular[2] = smooth_clamp(indirect_light.specular[2], _Min_Brightness, _Max_Brightness);
 #endif
 
   direct_light.color = HSVtoRGB(direct_light.color);

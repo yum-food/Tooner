@@ -2776,6 +2776,14 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
 
+    bc = FindProperty("_Aces_Filmic_Enable_Static");
+    enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Enable ACES filmic", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_ACES_FILMIC", enabled);
+
     EditorGUI.BeginChangeCheck();
     editor.LightmapEmissionProperty();
     if (EditorGUI.EndChangeCheck()) {

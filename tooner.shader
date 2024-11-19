@@ -193,6 +193,7 @@ Shader "yum_food/tooner"
     _NormalStr("Normal strength", Range(0, 10)) = 1
     _Ambient_Occlusion("Ambient occlusion", 2D) = "white" {}
     _Ambient_Occlusion_Strength("Ambient occlusion", Range(0,1)) = 1
+    _Aces_Filmic_Enable_Static("Enable ACES filmic tonemapping", Float) = 0
 
     _Proximity_Dimming_Enable_Static("Enable proximity dimming", Float) = 0
     _Proximity_Dimming_Min_Dist("Proximity dimming min distance", Float) = 0

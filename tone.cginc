@@ -21,7 +21,7 @@ float3 aces_filmic(float3 x) {
 // Nice properties:
 //  1. At x=0, the derivative is 1.
 //  2. No transcendental ops, and branchless.
-float3 smooth_clamp(float3 x, float k) {
+float3 smooth_min(float3 x, float k) {
   // Derivation of `b` from `k`:
   //  f(x, b) = b * x / (x + b)
   //  We want f(1, b) = k.
@@ -40,11 +40,14 @@ float3 smooth_clamp(float3 x, float k) {
   float b = k/(1-k);
   return b * x / (x + b);
 }
-float smooth_clamp(float x, float k) {
+float smooth_min(float x, float k) {
   float e = 1E-4;
   k = min(1-e, k);
   float b = k/(1-k);
   return b * x / (x + b);
+}
+float smooth_clamp(float x, float lo, float hi) {
+  return smooth_max(smooth_min(x, hi), lo);
 }
 
 #endif  // __TONE_INC
