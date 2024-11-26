@@ -37,6 +37,8 @@ float _Reflection_Probe_Saturation;
 float _Min_Brightness;
 float _Max_Brightness;
 
+float _Frame_Counter;
+
 float _Mesh_Normals_Mode;
 float _Flatten_Mesh_Normals_Str;
 float _Confabulate_Normals;
@@ -320,6 +322,7 @@ float _Ambient_Occlusion_Strength;
 float _Alpha_Cutoff;
 #if defined(_RENDERING_CUTOUT_IGN)
 float _Rendering_Cutout_Ign_Seed;
+float _Rendering_Cutout_Ign_Speed;
 #endif
 #endif
 

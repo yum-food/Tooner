@@ -207,6 +207,8 @@ Shader "yum_food/tooner"
 
     _Alpha_Cutoff("Alpha cutoff", Range(0, 1)) = 0.5
     _Rendering_Cutout_Ign_Seed("IGN seed", Float) = 0
+    _Rendering_Cutout_Ign_Speed("IGN speed", Float) = 0.00001
+    _Frame_Counter("Frame counter", Float) = 0
 
     _Outline_Width("Outline width", Range(0, 0.1)) = 0.01
     _Outline_Color("Outline color", Color) = (0, 0, 0, 1)

@@ -2518,9 +2518,14 @@ public class ToonerGUI : ShaderGUI {
       } else if (cmode == CutoutMode.InterleavedGradientNoise) {
         bc = FindProperty("_Rendering_Cutout_Ign_Seed");
         FloatProperty(bc, "Seed");
+        bc = FindProperty("_Rendering_Cutout_Ign_Speed");
+        FloatProperty(bc, "Speed");
       }
       EditorGUI.indentLevel -= 1;
     }
+
+    bc = FindProperty("_Frame_Counter");
+    FloatProperty(bc, "Frame counter");
 
     bc = FindProperty("_Cull");
     UnityEngine.Rendering.CullMode cull_mode = (UnityEngine.Rendering.CullMode) bc.floatValue;
