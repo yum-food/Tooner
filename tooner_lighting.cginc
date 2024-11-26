@@ -1167,6 +1167,8 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
   albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov0_albedo), mask * ov.ov0_mask);
 #elif defined(_PBR_OVERLAY0_MIX_MAX)
   albedo.rgb = max(albedo.rgb, ov.ov0_albedo * mask * ov.ov0_mask);
+#elif defined(_PBR_OVERLAY0_MIX_MULTIPLY)
+  albedo.rgb = lerp(albedo.rgb, albedo.rgb * ov.ov0_albedo, mask * ov.ov0_mask);
 #endif
 #endif
 
@@ -1186,6 +1188,8 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
   albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov1_albedo), mask * ov.ov1_mask);
 #elif defined(_PBR_OVERLAY1_MIX_MAX)
   albedo.rgb = max(albedo.rgb, ov.ov1_albedo * mask * ov.ov1_mask);
+#elif defined(_PBR_OVERLAY1_MIX_MULTIPLY)
+  albedo.rgb = lerp(albedo.rgb, albedo.rgb * ov.ov1_albedo, mask * ov.ov1_mask);
 #endif
 #endif
 
@@ -1205,6 +1209,8 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
   albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov2_albedo), mask * ov.ov2_mask);
 #elif defined(_PBR_OVERLAY2_MIX_MAX)
   albedo.rgb = max(albedo.rgb, ov.ov2_albedo * mask * ov.ov2_mask);
+#elif defined(_PBR_OVERLAY2_MIX_MULTIPLY)
+  albedo.rgb = lerp(albedo.rgb, albedo.rgb * ov.ov2_albedo, mask * ov.ov2_mask);
 #endif
 #endif
 
@@ -1224,6 +1230,8 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
   albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov3_albedo), mask * ov.ov3_mask);
 #elif defined(_PBR_OVERLAY3_MIX_MAX)
   albedo.rgb = max(albedo.rgb, ov.ov3_albedo * mask * ov.ov3_mask);
+#elif defined(_PBR_OVERLAY3_MIX_MULTIPLY)
+  albedo.rgb = lerp(albedo.rgb, albedo.rgb * ov.ov3_albedo, mask * ov.ov3_mask);
 #endif
 #endif
 }

@@ -322,7 +322,8 @@ public class ToonerGUI : ShaderGUI {
     AlphaBlend,
     Add,
     Min,
-    Max
+    Max,
+    Multiply
   };
 
   void DoPBROverlay() {
@@ -367,6 +368,7 @@ public class ToonerGUI : ShaderGUI {
         SetKeyword($"_PBR_OVERLAY{i}_MIX_ADD", mode == PbrAlbedoMixMode.Add);
         SetKeyword($"_PBR_OVERLAY{i}_MIX_MIN", mode == PbrAlbedoMixMode.Min);
         SetKeyword($"_PBR_OVERLAY{i}_MIX_MAX", mode == PbrAlbedoMixMode.Max);
+        SetKeyword($"_PBR_OVERLAY{i}_MIX_MULTIPLY", mode == PbrAlbedoMixMode.Multiply);
 
         bc = FindProperty($"_PBR_Overlay{i}_Constrain_By_Alpha");
         enabled = bc.floatValue > 1E-6;
@@ -501,6 +503,7 @@ public class ToonerGUI : ShaderGUI {
         SetKeyword($"_PBR_OVERLAY{i}_MIX_ADD", false);
         SetKeyword($"_PBR_OVERLAY{i}_MIX_MIN", false);
         SetKeyword($"_PBR_OVERLAY{i}_MIX_MAX", false);
+        SetKeyword($"_PBR_OVERLAY{i}_MIX_MULTIPLY", false);
         SetKeyword($"_PBR_OVERLAY{i}_EMISSION_MAP", false);
         SetKeyword($"_PBR_OVERLAY{i}_NORMAL_MAP", false);
         SetKeyword($"_PBR_OVERLAY{i}_METALLIC_MAP", false);

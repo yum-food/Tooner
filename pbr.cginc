@@ -276,12 +276,14 @@ float4 getLitColor(
   // Do this to avoid division by 0. If both light sources are black,
   // sum_brightness could be 0;
 #if defined(_BRIGHTNESS_CLAMP)
-  brightnesses = smooth_max(brightnesses, _Min_Brightness);
+  //brightnesses = smooth_max(brightnesses, _Min_Brightness);
+  brightnesses = max(brightnesses, _Min_Brightness);
 #endif
   float sum_brightness = brightnesses[0] + brightnesses[1];
   float2 brightness_proportions = brightnesses / sum_brightness;
 #if defined(_BRIGHTNESS_CLAMP)
   sum_brightness = smooth_clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
+  //sum_brightness = clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
 #endif
   direct_light.color[2] = sum_brightness * brightness_proportions[0];
   indirect_light.diffuse[2] = sum_brightness * brightness_proportions[1];
