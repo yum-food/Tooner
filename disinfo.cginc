@@ -87,9 +87,7 @@ float4 renderInBox(int c, float2 uv, float2 cell_uv, texture2D font, int2 font_r
   remapUVBigger(cell_uv, letter_bot_left, letter_top_right, letter_uv);
 
 #if 0
-  float4 font_color = font.SampleGrad(linear_clamp_s, letter_uv,
-      abs(ddx(uv.x)) + abs(ddx(uv.y)),
-      abs(ddy(uv.x)) + abs(ddy(uv.y)));
+  float4 font_color = font.Sample(linear_clamp_s, letter_uv);
 #else
   float4 font_color = font.SampleLevel(linear_clamp_s, letter_uv, 0);
 #endif

@@ -2309,6 +2309,68 @@ float4 effect(inout v2f i, out float depth)
   }
 #endif  // _GIMMICK_LETTER_GRID
 
+#if defined(_GIMMICK_LETTER_GRID_2)
+  float3 gimmick_letter_grid_2_emission = 0;
+#if defined(_GIMMICK_LETTER_GRID_2_MASK)
+  float mask = _Gimmick_Letter_Grid_2_Mask.SampleLevel(linear_repeat_s, get_uv_by_channel(i, 0), 0);
+#else
+  float mask = 1;
+#endif
+  {
+    int2 cell_pos;
+    int2 font_res = int2(round(_Gimmick_Letter_Grid_2_Tex_Res_X), round(_Gimmick_Letter_Grid_2_Tex_Res_Y));
+    int2 grid_res = int2(round(_Gimmick_Letter_Grid_2_Res_X), round(_Gimmick_Letter_Grid_2_Res_Y));
+    float2 cell_uv;  // uv within each letter cell
+
+    float4 scoff = _Gimmick_Letter_Grid_2_UV_Scale_Offset;
+    float2 uv = ((get_uv_by_channel(i, 0) - 0.5) - scoff.zw) * scoff.xy + 0.5;
+
+    bool in_box = getBoxLoc(uv,
+        /*bottom_left=*/0,
+        /*top_right=*/1,
+        /*res=*/grid_res,
+        /*padding=*/_Gimmick_Letter_Grid_2_Padding,
+        cell_pos, cell_uv);
+
+    // Extract char from _Gimmick_Letter_Grid_2_Data_Row_0 et al using cell_pos.
+    cell_pos.y = (grid_res.y - cell_pos.y) - 1;
+    float c = lerp(
+      lerp(
+        _Gimmick_Letter_Grid_2_Data_Row_0[cell_pos.x],
+        _Gimmick_Letter_Grid_2_Data_Row_1[cell_pos.x],
+        cell_pos.y),
+      lerp(
+        _Gimmick_Letter_Grid_2_Data_Row_2[cell_pos.x],
+        _Gimmick_Letter_Grid_2_Data_Row_3[cell_pos.x],
+        cell_pos.y - 2),
+      cell_pos.y/2);
+    c += _Gimmick_Letter_Grid_2_Global_Offset;
+
+    float3 msd = renderInBox(c, uv, cell_uv, _Gimmick_Letter_Grid_2_Texture, font_res).rgb;
+    float sd = median(msd);
+    // screenPxRange()
+    float screen_px_range;
+    {
+      float px_range = 2;  // determined by msdf-atlas-gen.exe; 2 is default
+      float texture_res = 512;
+      // Implementation detail from gen_atlas.
+      float2 real_cell_size = floor(texture_res / grid_res);
+      float2 unit_range = px_range / real_cell_size;
+      float2 screen_tex_size = 1 / fwidth(cell_uv);
+      screen_px_range = max(0.5 * dot(unit_range, screen_tex_size), 2.0);
+    }
+    float screen_px_distance = screen_px_range * (sd - 0.5);
+    float op = saturate(screen_px_distance + 0.5);
+    op *= mask;
+    op = floor(op);
+
+    albedo = lerp(albedo, _Gimmick_Letter_Grid_2_Color, op * in_box);
+    metallic = lerp(metallic, _Gimmick_Letter_Grid_2_Metallic, op * in_box);
+    roughness = lerp(roughness, _Gimmick_Letter_Grid_2_Roughness, op * in_box);
+    gimmick_letter_grid_2_emission = _Gimmick_Letter_Grid_2_Color * _Gimmick_Letter_Grid_2_Emission * op * in_box;
+  }
+#endif  // _GIMMICK_LETTER_GRID
+
 
 #if defined(_OKLAB)
   // Do hue shift in perceptually uniform color space so it doesn't look like
@@ -2510,6 +2572,9 @@ float4 effect(inout v2f i, out float depth)
 #endif
 #if defined(_GIMMICK_LETTER_GRID)
   result.rgb += gimmick_letter_grid_emission;
+#endif
+#if defined(_GIMMICK_LETTER_GRID_2)
+  result.rgb += gimmick_letter_grid_2_emission;
 #endif
 
 #if defined(_EXPLODE) && defined(_AUDIOLINK)

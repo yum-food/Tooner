@@ -1987,6 +1987,67 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
 	}
 
+	void DoGimmickLetterGrid2() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Letter grid 2", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_LETTER_GRID_2", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Texture");
+    TexturePropertySingleLine(
+        MakeLabel(bc, "Texture"),
+        bc);
+
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Tex_Res_X");
+    FloatProperty(bc, "Number of glyphs in texture (X)");
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Tex_Res_Y");
+    FloatProperty(bc, "Number of glyphs in texture (Y)");
+
+    MaterialProperty rows = FindProperty("_Gimmick_Letter_Grid_2_Res_X");
+    RangeProperty(rows, "Number of glyphs in grid (X)");
+    MaterialProperty cols = FindProperty("_Gimmick_Letter_Grid_2_Res_Y");
+    RangeProperty(cols, "Number of glyphs in grid (Y)");
+
+    for (int i = 0; i < rows.floatValue; i++) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty($"_Gimmick_Letter_Grid_2_Data_Row_{i}");
+      VectorProperty(bc, $"Letter grid data row {i}");
+      EditorGUI.indentLevel -= 1;
+    }
+
+    bc = FindProperty("_Gimmick_Letter_Grid_2_UV_Scale_Offset");
+    VectorProperty(bc, "UV scale & offset");
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Padding");
+    FloatProperty(bc, "Padding");
+
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Color");
+    ColorProperty(bc, "Color");
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Metallic");
+    RangeProperty(bc, "Metallic");
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Roughness");
+    RangeProperty(bc, "Roughness");
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Emission");
+    FloatProperty(bc, "Emission");
+
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Mask");
+    TexturePropertySingleLine(MakeLabel(bc, "Mask"), bc);
+
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Global_Offset");
+    FloatProperty(bc, "Global offset");
+
+    EditorGUI.indentLevel -= 1;
+	}
+
 	void DoGimmickAudiolinkChroma00() {
     MaterialProperty bc;
     bc = FindProperty("_Gimmick_AL_Chroma_00_Enable_Static");
@@ -2305,6 +2366,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickRorschach();
     DoGimmickMirrorUVFlip();
     DoGimmickLetterGrid();
+    DoGimmickLetterGrid2();
     DoGimmickAudiolinkChroma00();
     DoGimmickFog0();
     DoGimmickAurora();

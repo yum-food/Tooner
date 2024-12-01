@@ -255,6 +255,25 @@ Shader "yum_food/tooner"
     _Gimmick_Letter_Grid_Rim_Lighting_Mask_UV_Select("_Gimmick_Letter_Grid_Rim_Lighting_Mask_UV_Select", Float) = 0
     _Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert("_Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert", Float) = 0
 
+    _Gimmick_Letter_Grid_2_Enable_Static("Enable letter grid 2 (static)", Float) = 0
+    _Gimmick_Letter_Grid_2_Texture("Letter grid texture", 2D) = "black" {}
+    _Gimmick_Letter_Grid_2_Tex_Res_X("Texture letter grid X resolution", Float) = 16
+    _Gimmick_Letter_Grid_2_Tex_Res_Y("Texture letter grid Y resolution", Float) = 8
+    _Gimmick_Letter_Grid_2_Res_X("Letter grid X resolution", Range(1, 4)) = 1
+    _Gimmick_Letter_Grid_2_Res_Y("Letter grid Y resolution", Range(1, 4)) = 1
+    _Gimmick_Letter_Grid_2_Data_Row_0("Letter grid data row 0", Vector) = (0, 0, 0, 0)
+    _Gimmick_Letter_Grid_2_Data_Row_1("Letter grid data row 1", Vector) = (0, 0, 0, 0)
+    _Gimmick_Letter_Grid_2_Data_Row_2("Letter grid data row 2", Vector) = (0, 0, 0, 0)
+    _Gimmick_Letter_Grid_2_Data_Row_3("Letter grid data row 3", Vector) = (0, 0, 0, 0)
+    _Gimmick_Letter_Grid_2_UV_Scale_Offset("Letter grid UV bounds", Vector) = (1, 1, 0, 0)
+    _Gimmick_Letter_Grid_2_Padding("Padding", Float) = 0.02
+    _Gimmick_Letter_Grid_2_Color("Color", Color) = (1, 1, 1, 1)
+    _Gimmick_Letter_Grid_2_Metallic("Metallic", Range(0, 1)) = 0
+    _Gimmick_Letter_Grid_2_Roughness("Roughness", Range(0 ,1)) = 0.5
+    _Gimmick_Letter_Grid_2_Emission("Emission", Range(0 ,1)) = 0.0
+    _Gimmick_Letter_Grid_2_Mask("Mask", 2D) = "white" {}
+    _Gimmick_Letter_Grid_2_Global_Offset("Global offset", Float) = 0
+
 		[MaterialToggle] _Explode_Toggle("Explode toggle", Float) = 0
 		_Explode_Phase("Explode phase", Range(0, 1)) = 0
     [Enum(UnityEngine.Rendering.CullMode)] _OutlinesCull ("Outlines pass culling mode", Float) = 1

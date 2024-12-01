@@ -739,6 +739,26 @@ float _Gimmick_Letter_Grid_Rim_Lighting_Mask_UV_Select;
 float _Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert;
 #endif
 
+#if defined(_GIMMICK_LETTER_GRID_2)
+texture2D _Gimmick_Letter_Grid_2_Texture;
+float _Gimmick_Letter_Grid_2_Res_X;
+float _Gimmick_Letter_Grid_2_Res_Y;
+float4 _Gimmick_Letter_Grid_2_Data_Row_0;
+float4 _Gimmick_Letter_Grid_2_Data_Row_1;
+float4 _Gimmick_Letter_Grid_2_Data_Row_2;
+float4 _Gimmick_Letter_Grid_2_Data_Row_3;
+float _Gimmick_Letter_Grid_2_Tex_Res_X;
+float _Gimmick_Letter_Grid_2_Tex_Res_Y;
+float4 _Gimmick_Letter_Grid_2_UV_Scale_Offset;
+float _Gimmick_Letter_Grid_2_Padding;
+float4 _Gimmick_Letter_Grid_2_Color;
+float _Gimmick_Letter_Grid_2_Metallic;
+float _Gimmick_Letter_Grid_2_Roughness;
+float _Gimmick_Letter_Grid_2_Emission;
+texture2D _Gimmick_Letter_Grid_2_Mask;
+float _Gimmick_Letter_Grid_2_Global_Offset;
+#endif
+
 #if defined(_GIMMICK_AL_CHROMA_00)
 float _Gimmick_AL_Chroma_00_Forward_Pass;
 float _Gimmick_AL_Chroma_00_Forward_Blend;
