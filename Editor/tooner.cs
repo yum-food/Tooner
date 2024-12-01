@@ -2524,6 +2524,9 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
 
+    bc = FindProperty("_Rendering_Cutout_Noise_Scale");
+    FloatProperty(bc, "Cutout noise scale");
+
     bc = FindProperty("_Frame_Counter");
     FloatProperty(bc, "Frame counter");
 

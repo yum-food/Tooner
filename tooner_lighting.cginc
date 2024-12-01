@@ -1798,7 +1798,8 @@ float4 effect(inout v2f i, out float depth)
   float ar = rand2(i.uv0);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_IGN)
-  float ar = ign_anim(tdata.screen_uv_round + _Rendering_Cutout_Ign_Seed,
+  float ar = ign_anim(
+      floor(tdata.screen_uv_round * _Rendering_Cutout_Noise_Scale) + _Rendering_Cutout_Ign_Seed,
       floor(_Frame_Counter), _Rendering_Cutout_Ign_Speed);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_NOISE_MASK)

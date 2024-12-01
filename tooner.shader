@@ -206,6 +206,7 @@ Shader "yum_food/tooner"
     [MaterialToggle] _Confabulate_Normals("Confabulate mesh normals", Float) = 0.0
 
     _Alpha_Cutoff("Alpha cutoff", Range(0, 1)) = 0.5
+    _Rendering_Cutout_Noise_Scale("Noise scale", Float) = 1
     _Rendering_Cutout_Ign_Seed("IGN seed", Float) = 0
     _Rendering_Cutout_Ign_Speed("IGN speed", Float) = 0.00001
     _Frame_Counter("Frame counter", Float) = 0

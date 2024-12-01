@@ -38,6 +38,7 @@ float _Min_Brightness;
 float _Max_Brightness;
 
 float _Frame_Counter;
+float _Rendering_Cutout_Noise_Scale;
 
 float _Mesh_Normals_Mode;
 float _Flatten_Mesh_Normals_Str;
