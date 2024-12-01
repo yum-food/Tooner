@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+
+import argparse
+import subprocess
+import os
+import json
+from PIL import Image
+
+def calculate_cell_dimensions(total_size, num_cells):
+    """
+    Distribute pixels evenly across cells, handling remainder.
+    Returns a list of cell sizes that add up to total_size.
+    """
+    base_size = total_size // num_cells
+    remainder = total_size % num_cells
+    
+    # Create array of cell sizes
+    cell_sizes = []
+    for i in range(num_cells):
+        # Add an extra pixel to cells until remainder is used up
+        # This distributes remainder pixels evenly across cells
+        extra = 1 if i < remainder else 0
+        cell_sizes.append(base_size + extra)
+    
+    return cell_sizes
+
+def generate_atlas(font_path, resolution):
+    # Calculate cell dimensions for 12x12 grid
+    cell_widths = calculate_cell_dimensions(resolution, 12)
+    cell_heights = calculate_cell_dimensions(resolution, 12)
+    
+    # Use the most common cell size
+    cell_width = max(cell_widths)
+    cell_height = max(cell_heights)
+
+    # Construct the command with explicit glyph range for printable ASCII
+    cmd = [
+        "msdf-atlas-gen/build/bin/Debug/msdf-atlas-gen.exe",
+        "-font", font_path,
+        "-type", "msdf",
+        "-format", "png",
+        "-imageout", "atlas.png",
+        "-json", "atlas.json",
+        "-size", "32",
+        "-pxrange", "2",
+        "-dimensions", str(resolution), str(resolution),
+        "-chars", "[32, 126]",
+        "-uniformgrid",
+        "-uniformcols", "12",
+        "-uniformcell", str(cell_width), str(cell_height),
+        "-uniformorigin", "on"
+    ]
+
+    try:
+        result = subprocess.run(cmd, check=True, capture_output=True, text=True)
+        
+        # Rearrange the atlas to include gaps for non-printable characters
+        rearrange_atlas(resolution, cell_width, cell_height)
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Error generating atlas: {e}")
+        print(f"Error output: {e.stderr}")
+        return False
+
+def rearrange_atlas(resolution, cell_width, cell_height):
+    """Rearrange the atlas to include gaps for non-printable characters"""
+    # Load the original atlas and JSON data
+    original = Image.open("atlas.png")
+    with open("atlas.json", 'r') as f:
+        data = json.load(f)
+    
+    # Create the new atlas image
+    new_atlas = Image.new('RGB', (resolution, resolution), (0, 0, 0))
+    
+    # Calculate exact cell dimensions
+    exact_cell_width = resolution / 12
+    exact_cell_height = resolution / 12
+    
+    for glyph in data['glyphs']:
+        if 'unicode' not in glyph or 'atlasBounds' not in glyph:
+            continue
+            
+        char_code = glyph['unicode']
+        
+        # Calculate grid position using floor division to avoid rounding errors
+        grid_x = (char_code % 12) * resolution // 12
+        grid_y = (char_code // 12) * resolution // 12
+        
+        # Extract original bounds
+        bounds = glyph['atlasBounds']
+        orig_x = round(float(bounds['left']))  # Use round instead of int
+        orig_y = resolution - round(float(bounds['top']))  # Use round instead of int
+        width = round(float(bounds['right']) - float(bounds['left']))
+        height = round(float(bounds['top']) - float(bounds['bottom']))
+        
+        # Extract the glyph from the original atlas
+        glyph_region = original.crop((
+            orig_x,
+            orig_y,
+            orig_x + width,
+            orig_y + height
+        ))
+        
+        # Paste the glyph directly at the grid position
+        new_atlas.paste(glyph_region, (grid_x, grid_y))
+    
+    # Draw grid lines
+    from PIL import ImageDraw
+    draw = ImageDraw.Draw(new_atlas)
+    
+    # Draw vertical lines
+    for x in range(12):
+        line_x = x * resolution // 12  # Use integer division
+        draw.line([(line_x, 0), (line_x, resolution-1)], fill=(255, 0, 0), width=1)
+    
+    # Draw horizontal lines
+    for y in range(12):
+        line_y = y * resolution // 12  # Use integer division
+        draw.line([(0, line_y), (resolution-1, line_y)], fill=(255, 0, 0), width=1)
+    
+    # Draw the final borders
+    draw.line([(resolution-1, 0), (resolution-1, resolution-1)], fill=(255, 0, 0), width=1)
+    draw.line([(0, resolution-1), (resolution-1, resolution-1)], fill=(255, 0, 0), width=1)
+    
+    # Save the rearranged atlas
+    new_atlas.save("atlas_rearranged.png")
+    print("Atlas rearranged successfully!")
+
+def main():
+    parser = argparse.ArgumentParser(description='Generate a font atlas using msdf-atlas-gen')
+    parser.add_argument('font_path', help='Path to the font file (.ttf/.otf)')
+    parser.add_argument('resolution', type=int, help='Total atlas resolution (width=height)')
+    
+    args = parser.parse_args()
+
+    # Verify font file exists
+    if not os.path.isfile(args.font_path):
+        print(f"Error: Font file not found at {args.font_path}")
+        return
+
+    generate_atlas(args.font_path, args.resolution)
+
+if __name__ == "__main__":
+    main()
