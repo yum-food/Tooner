@@ -2045,6 +2045,13 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Letter_Grid_2_Global_Offset");
     FloatProperty(bc, "Global offset");
 
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Screen_Px_Range");
+    FloatProperty(bc, "Screen px range (from msdfgen)");
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Min_Screen_Px_Range");
+    FloatProperty(bc, "Minimum screen px range");
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Blurriness");
+    FloatProperty(bc, "Blurriness");
+
     EditorGUI.indentLevel -= 1;
 	}
 

@@ -10,7 +10,7 @@ from PIL import Image
 CHAR_RANGES = [
     (32, 126),  # Printable ASCII
     # Add more ranges here as needed, e.g.:
-    (160, 255),  # Extended Latin
+    #(160, 255),  # Extended Latin
 ]
 
 def calculate_grid_size(char_ranges):
@@ -35,16 +35,17 @@ def generate_atlas(font_path, resolution, draw_grid=False):
         "-type", "msdf",
         "-format", "png",
         "-imageout", "atlas.png",
-        "-size", "28",
-        "-pxrange", "2",
+        "-size", "72",
+        "-pxrange", "5",
         "-dimensions", str(resolution), str(resolution),
         "-chars", chars_str,
         "-uniformgrid",
         "-uniformcols", str(grid_size),
         "-uniformcell", str(cell_size), str(cell_size),
-#        "-uniformorigin", "on",
-        "-errorcorrection", "auto",
-        "-scanline"
+        "-errorcorrection", "auto-full",
+        "-scanline",
+        #"-angle", "15d",
+        "-edgecoloring", "distance"
     ]
 
     try:
@@ -57,6 +58,7 @@ def generate_atlas(font_path, resolution, draw_grid=False):
             print(result.stdout)
         
         # Rearrange the atlas to include gaps for non-printable characters
+        print("Rearranging atlas...")
         rearrange_atlas(resolution, cell_size, cell_size, draw_grid)
         return True
     except subprocess.CalledProcessError as e:
@@ -91,7 +93,7 @@ def rearrange_atlas(resolution, cell_width, cell_height, draw_grid=False):
     grid_size = calculate_grid_size(CHAR_RANGES)
     cell_size = resolution // grid_size
     
-    # Track current position in the source atlas
+    # Track current position in the source atlas 
     source_index = 0
     
     # Process each character range
@@ -118,9 +120,15 @@ def rearrange_atlas(resolution, cell_width, cell_height, draw_grid=False):
     # Draw the grid lines only if requested
     if draw_grid:
         draw_grid_lines(new_atlas, resolution)
+        
+    # Calculate actual used dimensions
+    used_resolution = cell_size * grid_size
+    # Crop to used dimensions and resize back to requested resolution
+    used_atlas = new_atlas.crop((0, 0, used_resolution, used_resolution))
+    final_atlas = used_atlas.resize((resolution, resolution), Image.LANCZOS)
     
     # Save the rearranged atlas, overwriting the original
-    new_atlas.save("atlas.png")
+    final_atlas.save("atlas.png")
     print("Atlas rearranged successfully!")
 
 def main():

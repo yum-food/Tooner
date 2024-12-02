@@ -741,6 +741,7 @@ float _Gimmick_Letter_Grid_Rim_Lighting_Mask_Invert;
 
 #if defined(_GIMMICK_LETTER_GRID_2)
 texture2D _Gimmick_Letter_Grid_2_Texture;
+float4 _Gimmick_Letter_Grid_2_Texture_TexelSize;
 float _Gimmick_Letter_Grid_2_Res_X;
 float _Gimmick_Letter_Grid_2_Res_Y;
 float4 _Gimmick_Letter_Grid_2_Data_Row_0;
@@ -757,6 +758,9 @@ float _Gimmick_Letter_Grid_2_Roughness;
 float _Gimmick_Letter_Grid_2_Emission;
 texture2D _Gimmick_Letter_Grid_2_Mask;
 float _Gimmick_Letter_Grid_2_Global_Offset;
+float _Gimmick_Letter_Grid_2_Screen_Px_Range;
+float _Gimmick_Letter_Grid_2_Min_Screen_Px_Range;
+float _Gimmick_Letter_Grid_2_Blurriness;
 #endif
 
 #if defined(_GIMMICK_AL_CHROMA_00)

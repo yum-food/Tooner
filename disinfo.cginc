@@ -89,7 +89,7 @@ float4 renderInBox(int c, float2 uv, float2 cell_uv, texture2D font, int2 font_r
 #if 0
   float4 font_color = font.Sample(linear_clamp_s, letter_uv);
 #else
-  float4 font_color = font.SampleLevel(linear_clamp_s, letter_uv, 0);
+  float4 font_color = font.SampleLevel(linear_repeat_s, letter_uv, 0);
 #endif
   return font_color;
 }

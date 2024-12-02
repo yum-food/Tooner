@@ -2351,18 +2351,38 @@ float4 effect(inout v2f i, out float depth)
     // screenPxRange()
     float screen_px_range;
     {
-      float px_range = 2;  // determined by msdf-atlas-gen.exe; 2 is default
-      float texture_res = 512;
-      // Implementation detail from gen_atlas.
-      float2 real_cell_size = floor(texture_res / grid_res);
-      float2 unit_range = px_range / real_cell_size;
+      float2 tex_size = float2(_Gimmick_Letter_Grid_2_Texture_TexelSize.zw);
+      float2 real_cell_size = floor(tex_size / grid_res);  // size of cell in texels
+      float2 unit_range = _Gimmick_Letter_Grid_2_Screen_Px_Range / real_cell_size;
+      // fwidth(x) = abs(abs(ddx(x)) + abs(ddy(x)))
+      // 1 / fwidth(cell_uv)
+      //   = 1 / abs(abs(ddx(cell_uv)) + abs(ddy(cell_uv)))
+      // This is just the manhattan length of the triangle with edges
+      //   ddx(cell_uv.x) and ddy(cell_uv.x).
+      // In other words, an approximation of the gradient of cell_uv.x.
+      #if 1
+      // fwidth is an approximation showing how much cell_uv changes per pixel.
+      // By inverting it, we get an approximation of how many pixels are
+      // spanned by the whole texture, if it was rendered with this pixel's
+      // properties.
       float2 screen_tex_size = 1 / fwidth(cell_uv);
-      screen_px_range = max(0.5 * dot(unit_range, screen_tex_size), 2.0);
+      #else
+      float2 cell_uv_x = float2(ddx(cell_uv.x), ddy(cell_uv.x));
+      float2 cell_uv_y = float2(ddx(cell_uv.y), ddy(cell_uv.y));
+      float2 screen_tex_size = float2(
+        1 / length(cell_uv_x),
+        1 / length(cell_uv_y)
+      );
+      #endif
+      screen_px_range = max(0.5 * dot(unit_range, screen_tex_size), _Gimmick_Letter_Grid_2_Min_Screen_Px_Range);
     }
     float screen_px_distance = screen_px_range * (sd - 0.5);
-    float op = saturate(screen_px_distance + 0.5);
+
+    // Calculate smoothstep range based on screen size
+    float smooth_range = (length(grid_res) / sqrt(screen_px_range)) * _Gimmick_Letter_Grid_2_Blurriness;
+    float op = smoothstep(-smooth_range, smooth_range, screen_px_distance);
     op *= mask;
-    op = floor(op);
+    //op = floor(op);
 
     albedo = lerp(albedo, _Gimmick_Letter_Grid_2_Color, op * in_box);
     metallic = lerp(metallic, _Gimmick_Letter_Grid_2_Metallic, op * in_box);

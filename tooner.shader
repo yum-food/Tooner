@@ -273,6 +273,9 @@ Shader "yum_food/tooner"
     _Gimmick_Letter_Grid_2_Emission("Emission", Range(0 ,1)) = 0.0
     _Gimmick_Letter_Grid_2_Mask("Mask", 2D) = "white" {}
     _Gimmick_Letter_Grid_2_Global_Offset("Global offset", Float) = 0
+    _Gimmick_Letter_Grid_2_Screen_Px_Range("Screen px range (from msdfgen)", Float) = 10
+    _Gimmick_Letter_Grid_2_Min_Screen_Px_Range("Minimum screen px range", Float) = 1
+    _Gimmick_Letter_Grid_2_Blurriness("Blurriness", Float) = 0.5
 
 		[MaterialToggle] _Explode_Toggle("Explode toggle", Float) = 0
 		_Explode_Phase("Explode phase", Range(0, 1)) = 0
