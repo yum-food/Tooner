@@ -691,7 +691,14 @@ public class ToonerGUI : ShaderGUI {
         bc = FindProperty($"_Matcap{i}_Mask2_Invert");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = Toggle("Invert mask", enabled);
+        enabled = Toggle("Invert mask colors", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+
+        bc = FindProperty($"_Matcap{i}_Mask2_Invert_Alpha");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = Toggle("Invert mask alpha", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
 
@@ -823,7 +830,6 @@ public class ToonerGUI : ShaderGUI {
           MakeLabel(bc, "Mask"),
           bc);
       SetKeyword($"_RIM_LIGHTING{i}_MASK", bc.textureValue);
-
       if (bc.textureValue) {
         EditorGUI.indentLevel += 1;
 
@@ -835,26 +841,52 @@ public class ToonerGUI : ShaderGUI {
         bc.floatValue = enabled ? 1.0f : 0.0f;
 
         bc = FindProperty($"_Rim_Lighting{i}_Mask_UV_Select");
-        RangeProperty(
-            bc,
-            "UV channel");
-
-        bc = FindProperty($"_Rim_Lighting{i}_Mask_Sampler_Mode");
-        SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
-        sampler_mode = (SamplerMode) EnumPopup(
-            MakeLabel("Sampler mode"), sampler_mode);
-        EditorGUI.EndChangeCheck();
-        bc.floatValue = (int) sampler_mode;
-
-        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_LINEAR_REPEAT", sampler_mode == SamplerMode.LinearRepeat);
-        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_LINEAR_CLAMP", sampler_mode == SamplerMode.LinearClamp);
-        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_BILINEAR_REPEAT", sampler_mode == SamplerMode.BilinearRepeat);
-        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_BILINEAR_CLAMP", sampler_mode == SamplerMode.BilinearClamp);
-        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_POINT_REPEAT", sampler_mode == SamplerMode.PointRepeat);
-        SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_POINT_CLAMP", sampler_mode == SamplerMode.PointClamp);
+        RangeProperty(bc, "UV channel");
 
         EditorGUI.indentLevel -= 1;
       }
+
+      bc = FindProperty($"_Rim_Lighting{i}_Mask2");
+      TexturePropertySingleLine(
+          MakeLabel(bc, "Mask 2"),
+          bc);
+      SetKeyword($"_RIM_LIGHTING{i}_MASK2", bc.textureValue);
+      if (bc.textureValue) {
+        EditorGUI.indentLevel += 1;
+
+        bc = FindProperty($"_Rim_Lighting{i}_Mask2_Invert_Colors");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = Toggle("Invert mask colors", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+
+        bc = FindProperty($"_Rim_Lighting{i}_Mask2_Invert_Alpha");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = Toggle("Invert mask alpha", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+
+        bc = FindProperty($"_Rim_Lighting{i}_Mask2_UV_Select");
+        RangeProperty(bc, "UV channel");
+
+        EditorGUI.indentLevel -= 1;
+      }
+
+      bc = FindProperty($"_Rim_Lighting{i}_Mask_Sampler_Mode");
+      SamplerMode sampler_mode = (SamplerMode) Math.Round(bc.floatValue);
+      sampler_mode = (SamplerMode) EnumPopup(
+          MakeLabel("Sampler mode"), sampler_mode);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = (int) sampler_mode;
+
+      SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_LINEAR_REPEAT", sampler_mode == SamplerMode.LinearRepeat);
+      SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_LINEAR_CLAMP", sampler_mode == SamplerMode.LinearClamp);
+      SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_BILINEAR_REPEAT", sampler_mode == SamplerMode.BilinearRepeat);
+      SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_BILINEAR_CLAMP", sampler_mode == SamplerMode.BilinearClamp);
+      SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_POINT_REPEAT", sampler_mode == SamplerMode.PointRepeat);
+      SetKeyword($"_RIM_LIGHTING{i}_SAMPLER_POINT_CLAMP", sampler_mode == SamplerMode.PointClamp);
 
       bc = FindProperty($"_Rim_Lighting{i}_Center_Eye_Fix");
       enabled = bc.floatValue > 1E-6;
@@ -2051,6 +2083,8 @@ public class ToonerGUI : ShaderGUI {
     FloatProperty(bc, "Minimum screen px range");
     bc = FindProperty("_Gimmick_Letter_Grid_2_Blurriness");
     FloatProperty(bc, "Blurriness");
+    bc = FindProperty("_Gimmick_Letter_Grid_2_Alpha_Threshold");
+    RangeProperty(bc, "Alpha threshold");
 
     EditorGUI.indentLevel -= 1;
 	}

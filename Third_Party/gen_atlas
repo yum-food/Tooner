@@ -5,6 +5,7 @@ import subprocess
 import os
 import json
 from PIL import Image
+import random
 
 # Define the character ranges we want to include
 CHAR_RANGES = [
@@ -21,22 +22,70 @@ def calculate_grid_size(char_ranges):
         grid_size += 1
     return grid_size
 
-def generate_atlas(font_path, resolution, draw_grid=False):
+ATLAS_TYPES = [
+    "hardmask",  # binary image
+    "softmask",  # anti-aliased image
+    "sdf",       # signed distance field
+    "psdf",      # perpendicular distance field
+    "msdf",      # multi-channel signed distance field
+    "mtsdf"      # combined MSDF and true SDF
+]
+
+def calculate_font_size(resolution, base_size=None):
+    """Calculate the font size based on resolution, scaling from 512 resolution"""
+    if base_size is None:
+        base_size = 32  # Default size at 512 resolution
+    return (base_size * resolution) // 512
+
+def generate_atlas(font_path, resolution, draw_grid=False, type="msdf", font_size=None):
+    """Generates a font atlas using various distance field techniques.
+
+    This function creates a font atlas using msdf-atlas-gen, then rearranges the
+    characters to include gaps for non-printable characters. The output is saved
+    as 'atlas.png' in the current directory.
+
+    Args:
+        font_path (str): Path to the input font file (.ttf/.otf)
+        resolution (int): Width and height of the output atlas in pixels
+        draw_grid (bool, optional): If True, draws red grid lines on the output. 
+            Defaults to False.
+        type (str, optional): Atlas type to generate. See ATLAS_TYPES.
+        font_size (int, optional): Base font size in pixels at 512 resolution. 
+            Will be scaled for other resolutions.
+
+    Returns:
+        bool: True if atlas generation succeeded, False if an error occurred.
+
+    Raises:
+        subprocess.CalledProcessError: If msdf-atlas-gen fails to execute.
+    """
+    # Get font name from path
+    font_name = os.path.splitext(os.path.basename(font_path))[0]
+    
     # Calculate grid size based on character ranges
     grid_size = calculate_grid_size(CHAR_RANGES)
     cell_size = resolution // grid_size
     
+    # Calculate font size if not specified, scaling from 512 resolution
+    if font_size is None:
+        font_size = calculate_font_size(resolution)
+    else:
+        font_size = calculate_font_size(resolution, font_size)
+    
     # Convert character ranges to command-line format
     chars_str = ", ".join(f"[{start}, {end}]" for start, end in CHAR_RANGES)
+    
+    # Update the output filename to include resolution
+    output_filename = f"atlas_{font_name}_{resolution}_{type}"
     
     cmd = [
         "msdf-atlas-gen/build/bin/Debug/msdf-atlas-gen.exe",
         "-font", font_path,
-        "-type", "msdf",
+        "-type", type,
         "-format", "png",
-        "-imageout", "atlas.png",
-        "-size", "72",
-        "-pxrange", "5",
+        "-imageout", f"{output_filename}.png",
+        "-size", str(font_size),
+        "-pxrange", "4",
         "-dimensions", str(resolution), str(resolution),
         "-chars", chars_str,
         "-uniformgrid",
@@ -50,6 +99,13 @@ def generate_atlas(font_path, resolution, draw_grid=False):
 
     try:
         print("Running msdf-atlas-gen...")
+        print("Command:", end=" ")
+        for arg in cmd:
+            if arg.startswith('-'):
+                print(f"\n    {arg}", end=" ")
+            else:
+                print(arg, end=" ")
+        print()
         result = subprocess.run(cmd, check=True, capture_output=True, text=True)
         
         # Print the output
@@ -59,7 +115,10 @@ def generate_atlas(font_path, resolution, draw_grid=False):
         
         # Rearrange the atlas to include gaps for non-printable characters
         print("Rearranging atlas...")
-        rearrange_atlas(resolution, cell_size, cell_size, draw_grid)
+        rearrange_atlas(resolution, cell_size, cell_size, draw_grid, type, font_name)
+        
+        # Generate or update Unity meta file
+        generate_unity_meta(output_filename, resolution)
         return True
     except subprocess.CalledProcessError as e:
         print(f"Error generating atlas: {e}")
@@ -85,10 +144,12 @@ def draw_grid_lines(image, resolution):
     draw.line([(resolution-1, 0), (resolution-1, resolution-1)], fill=(255, 0, 0), width=1)
     draw.line([(0, resolution-1), (resolution-1, resolution-1)], fill=(255, 0, 0), width=1)
 
-def rearrange_atlas(resolution, cell_width, cell_height, draw_grid=False):
+def rearrange_atlas(resolution, cell_width, cell_height, draw_grid=False, type="msdf", font_name=""):
     """Rearrange the atlas to include gaps for non-printable characters"""
-    original = Image.open("atlas.png")
-    new_atlas = Image.new('RGB', (resolution, resolution), (0, 0, 0))
+    # Update input and output filenames to match generate_atlas format
+    input_filename = f"atlas_{font_name}_{resolution}_{type}.png"
+    original = Image.open(input_filename)
+    new_atlas = Image.new('RGBA', (resolution, resolution), (0, 0, 0, 255))
     
     grid_size = calculate_grid_size(CHAR_RANGES)
     cell_size = resolution // grid_size
@@ -127,16 +188,166 @@ def rearrange_atlas(resolution, cell_width, cell_height, draw_grid=False):
     used_atlas = new_atlas.crop((0, 0, used_resolution, used_resolution))
     final_atlas = used_atlas.resize((resolution, resolution), Image.LANCZOS)
     
-    # Save the rearranged atlas, overwriting the original
-    final_atlas.save("atlas.png")
+    # Save with the same filename format (no change needed since input/output are the same)
+    final_atlas.save(input_filename)
     print("Atlas rearranged successfully!")
+
+def generate_unity_meta(basename, resolution):
+    """Generate or update Unity meta file for the atlas texture."""
+    meta_path = f"{basename}.png.meta"
+    existing_guid = None
+    
+    # Try to read existing GUID if meta file exists
+    if os.path.exists(meta_path):
+        with open(meta_path, 'r') as f:
+            for line in f:
+                if 'guid: ' in line:
+                    existing_guid = line.split('guid: ')[1].strip()
+                    break
+    
+    # Generate new GUID if none exists
+    guid = existing_guid or ''.join('%x' % random.randrange(16) for _ in range(32))
+    
+    meta_template = f'''fileFormatVersion: 2
+guid: {guid}
+TextureImporter:
+  internalIDToNameTable: []
+  externalObjects: {{}}
+  serializedVersion: 12
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: {resolution}
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 1
+    aniso: 1
+    mipBias: 0
+    wrapU: 0
+    wrapV: 0
+    wrapW: 0
+  nPOTScale: 1
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 0
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {{x: 0.5, y: 0.5}}
+  spritePixelsToUnits: 100
+  spriteBorder: {{x: 0, y: 0, z: 0, w: 0}}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 0
+  spriteTessellationDetail: -1
+  textureType: 0
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 3
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: {resolution}
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 2
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Standalone
+    maxTextureSize: {resolution}
+    resizeAlgorithm: 0
+    textureFormat: 3
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 1
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 3
+    buildTarget: Android
+    maxTextureSize: {resolution}
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites: []
+    outline: []
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    nameFileIdTable: {{}}
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+'''
+    
+    with open(meta_path, 'w') as f:
+        f.write(meta_template)
 
 def main():
     parser = argparse.ArgumentParser(description='Generate a font atlas using msdf-atlas-gen')
     parser.add_argument('font_path', help='Path to the font file (.ttf/.otf)')
     parser.add_argument('resolution', type=int, help='Total atlas resolution (width=height)')
-    parser.add_argument('--grid', action='store_true', help='Draw grid lines on the output atlas')
-    
+    parser.add_argument('--grid', type=bool, default=False, help='Draw grid lines on the output atlas')
+    parser.add_argument('--type', type=str, default="msdf", choices=ATLAS_TYPES, 
+                       help='Type of atlas to generate')
+    parser.add_argument('--font-size', type=int, help='Base font size in pixels at 512 resolution. Will be scaled for other resolutions.')
     args = parser.parse_args()
 
     # Verify font file exists
@@ -144,7 +355,7 @@ def main():
         print(f"Error: Font file not found at {args.font_path}")
         return
 
-    generate_atlas(args.font_path, args.resolution, args.grid)
+    generate_atlas(args.font_path, args.resolution, draw_grid=args.grid, type=args.type, font_size=args.font_size)
 
 if __name__ == "__main__":
     main()

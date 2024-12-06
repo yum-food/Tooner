@@ -1195,7 +1195,7 @@ void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
 
 #if defined(_PBR_OVERLAY2)
 #if defined(_PBR_OVERLAY2_MIX_ALPHA_BLEND)
-  albedo.rgb = lerp(albedo.rgb, ov.ov2_albedo.rgb, ov.ov2_albedo.a);
+  albedo.rgb = lerp(albedo.rgb, ov.ov2_albedo.rgb, a2);
 #if defined(_PBR_OVERLAY2_ROUGHNESS)
   roughness = lerp(roughness, ov.ov2_roughness, a2);
 #endif
@@ -1617,8 +1617,8 @@ float4 effect(inout v2f i, out float depth)
         float4 matcap_mask2_raw = _Matcap0_Mask2.SampleLevel(linear_repeat_s,
             get_uv_by_channel(i, _Matcap0_Mask2_UV_Select), 0);
         float matcap_mask2 = matcap_mask2_raw.r;
-        matcap_mask2 = (bool) round(_Matcap0_Mask2_Invert) ? 1 - matcap_mask2 : matcap_mask2;
-        matcap_mask2 *= matcap_mask2_raw.a;
+        matcap_mask2 = _Matcap0_Mask2_Invert_Colors ? 1 - matcap_mask2 : matcap_mask2;
+        matcap_mask2 *= _Matcap0_Mask2_Invert_Alpha ? 1 - matcap_mask2_raw.a : matcap_mask2_raw.a;
         matcap_mask *= matcap_mask2;
       }
 #endif
@@ -1705,8 +1705,8 @@ float4 effect(inout v2f i, out float depth)
         float4 matcap_mask2_raw = _Matcap1_Mask2.SampleLevel(linear_repeat_s,
             get_uv_by_channel(i, _Matcap1_Mask2_UV_Select), 0);
         float matcap_mask2 = matcap_mask2_raw.r;
-        matcap_mask2 = (bool) round(_Matcap1_Mask2_Invert) ? 1 - matcap_mask2 : matcap_mask2;
-        matcap_mask2 *= matcap_mask2_raw.a;
+        matcap_mask2 = _Matcap1_Mask2_Invert_Colors ? 1 - matcap_mask2 : matcap_mask2;
+        matcap_mask2 *= _Matcap1_Mask2_Invert_Alpha ? 1 - matcap_mask2_raw.a : matcap_mask2_raw.a;
         matcap_mask *= matcap_mask2;
       }
 #endif
@@ -1864,6 +1864,14 @@ float4 effect(inout v2f i, out float depth)
 #else
       float matcap_mask = 1;
 #endif
+#if defined(_RIM_LIGHTING0_MASK2)
+      float4 matcap_mask2_raw = _Rim_Lighting0_Mask2.SampleBias(GET_SAMPLER_RL0,
+          get_uv_by_channel(i, _Rim_Lighting0_Mask2_UV_Select), _Global_Sample_Bias);
+      float matcap_mask2 = matcap_mask2_raw.r;
+      matcap_mask2 = _Rim_Lighting0_Mask2_Invert_Colors ? 1 - matcap_mask2 : matcap_mask2;
+      matcap_mask2 *= _Rim_Lighting0_Mask2_Invert_Alpha ? 1 - matcap_mask2_raw.a : matcap_mask2_raw.a;
+      matcap_mask *= matcap_mask2;
+#endif
 #if defined(_MATCAP0)
         if (_Matcap0_Overwrite_Rim_Lighting_0) {
           matcap_mask *= matcap_overwrite_mask[0];
@@ -1965,6 +1973,14 @@ float4 effect(inout v2f i, out float depth)
       matcap_mask *= matcap_mask_raw.a;
 #else
       float matcap_mask = 1;
+#endif
+#if defined(_RIM_LIGHTING1_MASK2)
+      float4 matcap_mask2_raw = _Rim_Lighting1_Mask2.SampleBias(GET_SAMPLER_RL1,
+          get_uv_by_channel(i, _Rim_Lighting1_Mask2_UV_Select), _Global_Sample_Bias);
+      float matcap_mask2 = matcap_mask2_raw.r;
+      matcap_mask2 = _Rim_Lighting1_Mask2_Invert_Colors ? 1 - matcap_mask2 : matcap_mask2;
+      matcap_mask2 *= _Rim_Lighting1_Mask2_Invert_Alpha ? 1 - matcap_mask2_raw.a : matcap_mask2_raw.a;
+      matcap_mask *= matcap_mask2;
 #endif
 #if defined(_MATCAP0)
         if (_Matcap0_Overwrite_Rim_Lighting_1) {
@@ -2068,6 +2084,14 @@ float4 effect(inout v2f i, out float depth)
 #else
       float matcap_mask = 1;
 #endif
+#if defined(_RIM_LIGHTING2_MASK2)
+      float4 matcap_mask2_raw = _Rim_Lighting2_Mask2.SampleBias(GET_SAMPLER_RL2,
+          get_uv_by_channel(i, _Rim_Lighting2_Mask2_UV_Select), _Global_Sample_Bias);
+      float matcap_mask2 = matcap_mask2_raw.r;
+      matcap_mask2 = _Rim_Lighting2_Mask2_Invert_Colors ? 1 - matcap_mask2 : matcap_mask2;
+      matcap_mask2 *= _Rim_Lighting2_Mask2_Invert_Alpha ? 1 - matcap_mask2_raw.a : matcap_mask2_raw.a;
+      matcap_mask *= matcap_mask2;
+#endif
 #if defined(_MATCAP0)
         if (_Matcap0_Overwrite_Rim_Lighting_2) {
           matcap_mask *= matcap_overwrite_mask[0];
@@ -2169,6 +2193,14 @@ float4 effect(inout v2f i, out float depth)
       matcap_mask *= matcap_mask_raw.a;
 #else
       float matcap_mask = 1;
+#endif
+#if defined(_RIM_LIGHTING3_MASK2)
+      float4 matcap_mask2_raw = _Rim_Lighting3_Mask2.SampleBias(GET_SAMPLER_RL3,
+          get_uv_by_channel(i, _Rim_Lighting3_Mask2_UV_Select), _Global_Sample_Bias);
+      float matcap_mask2 = matcap_mask2_raw.r;
+      matcap_mask2 = _Rim_Lighting3_Mask2_Invert_Colors ? 1 - matcap_mask2 : matcap_mask2;
+      matcap_mask2 *= _Rim_Lighting3_Mask2_Invert_Alpha ? 1 - matcap_mask2_raw.a : matcap_mask2_raw.a;
+      matcap_mask *= matcap_mask2;
 #endif
 #if defined(_MATCAP0)
         if (_Matcap0_Overwrite_Rim_Lighting_3) {
@@ -2376,9 +2408,7 @@ float4 effect(inout v2f i, out float depth)
       #endif
       screen_px_range = max(0.5 * dot(unit_range, screen_tex_size), _Gimmick_Letter_Grid_2_Min_Screen_Px_Range);
     }
-    float screen_px_distance = screen_px_range * (sd - 0.5);
-
-    // Calculate smoothstep range based on screen size
+    float screen_px_distance = screen_px_range * (sd - _Gimmick_Letter_Grid_2_Alpha_Threshold);
     float smooth_range = (length(grid_res) / sqrt(screen_px_range)) * _Gimmick_Letter_Grid_2_Blurriness;
     float op = smoothstep(-smooth_range, smooth_range, screen_px_distance);
     op *= mask;

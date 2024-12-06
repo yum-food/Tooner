@@ -276,6 +276,7 @@ Shader "yum_food/tooner"
     _Gimmick_Letter_Grid_2_Screen_Px_Range("Screen px range (from msdfgen)", Float) = 10
     _Gimmick_Letter_Grid_2_Min_Screen_Px_Range("Minimum screen px range", Float) = 1
     _Gimmick_Letter_Grid_2_Blurriness("Blurriness", Float) = 0.5
+    _Gimmick_Letter_Grid_2_Alpha_Threshold("Alpha threshold", Range(0, 1)) = 0.5
 
 		[MaterialToggle] _Explode_Toggle("Explode toggle", Float) = 0
 		_Explode_Phase("Explode phase", Range(0, 1)) = 0
@@ -310,7 +311,8 @@ Shader "yum_food/tooner"
     _Matcap0_Mask_Invert("Invert mask", Float) = 0.0
     _Matcap0_Mask_UV_Select("Matcap mask UV select", Range(0, 7)) = 0
     _Matcap0_Mask2("Matcap mask 2", 2D) = "white" {}
-    _Matcap0_Mask2_Invert("Invert mask", Float) = 0.0
+    _Matcap0_Mask2_Invert_Colors("Invert mask", Float) = 0.0
+    _Matcap0_Mask2_Invert_Alpha("Invert mask", Float) = 0.0
     _Matcap0_Mask2_UV_Select("Matcap mask UV select", Range(0, 7)) = 0
     _Matcap0Mode("Matcap mode", Float) = 0
     _Matcap0Str("Matcap strength", Float) = 1
@@ -334,7 +336,8 @@ Shader "yum_food/tooner"
     _Matcap1_Mask_Invert("Invert mask", Float) = 0.0
     _Matcap1_Mask_UV_Select("Matcap mask UV select", Range(0, 7)) = 0
     _Matcap1_Mask2("Matcap mask 2", 2D) = "white" {}
-    _Matcap1_Mask2_Invert("Invert mask", Float) = 0.0
+    _Matcap1_Mask2_Invert_Colors("Invert mask", Float) = 0.0
+    _Matcap1_Mask2_Invert_Alpha("Invert mask", Float) = 0.0
     _Matcap1_Mask2_UV_Select("Matcap mask UV select", Range(0, 7)) = 0
     _Matcap1Mode("Matcap mode", Float) = 0
     _Matcap1Str("Matcap strength", Float) = 1
@@ -359,6 +362,10 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_Mask_Invert("Invert rim lighting mask", Float) = 0.0
     _Rim_Lighting0_Mask_UV_Select("mask UV select", Range(0, 7)) = 0.0
     _Rim_Lighting0_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
+    _Rim_Lighting0_Mask2("Rim lighting mask 2", 2D) = "white" {}
+    _Rim_Lighting0_Mask2_Invert_Colors("Invert rim lighting mask 2", Float) = 0.0
+    _Rim_Lighting0_Mask2_Invert_Alpha("Invert rim lighting mask 2", Float) = 0.0
+    _Rim_Lighting0_Mask2_UV_Select("mask 2 UV select", Range(0, 7)) = 0.0
     _Rim_Lighting0_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting0_Center("Rim lighting center", Float) = 0.5
     _Rim_Lighting0_Power("Rim lighting power", Float) = 2.0
@@ -385,6 +392,10 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_Mask_Invert("Invert rim lighting mask", Float) = 0.0
     _Rim_Lighting1_Mask_UV_Select("mask UV select", Range(0, 7)) = 0.0
     _Rim_Lighting1_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
+    _Rim_Lighting1_Mask2("Rim lighting mask 2", 2D) = "white" {}
+    _Rim_Lighting1_Mask2_Invert_Colors("Invert rim lighting mask 2", Float) = 0.0
+    _Rim_Lighting1_Mask2_Invert_Alpha("Invert rim lighting mask 2", Float) = 0.0
+    _Rim_Lighting1_Mask2_UV_Select("mask 2 UV select", Range(0, 7)) = 0.0
     _Rim_Lighting1_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting1_Center("Rim lighting center", Float) = 0.5
     _Rim_Lighting1_Power("Rim lighting power", Float) = 2.0
@@ -411,6 +422,10 @@ Shader "yum_food/tooner"
     _Rim_Lighting2_Mask_Invert("Invert rim lighting mask", Float) = 0.0
     _Rim_Lighting2_Mask_UV_Select("mask UV select", Range(0, 7)) = 0.0
     _Rim_Lighting2_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
+    _Rim_Lighting2_Mask2("Rim lighting mask 2", 2D) = "white" {}
+    _Rim_Lighting2_Mask2_Invert_Colors("Invert rim lighting mask 2", Float) = 0.0
+    _Rim_Lighting2_Mask2_Invert_Alpha("Invert rim lighting mask 2", Float) = 0.0
+    _Rim_Lighting2_Mask2_UV_Select("mask 2 UV select", Range(0, 7)) = 0.0
     _Rim_Lighting2_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting2_Center("Rim lighting center", Float) = 0.5
     _Rim_Lighting2_Power("Rim lighting power", Float) = 2.0
@@ -437,6 +452,10 @@ Shader "yum_food/tooner"
     _Rim_Lighting3_Mask_Invert("Invert rim lighting mask", Float) = 0.0
     _Rim_Lighting3_Mask_UV_Select("mask UV select", Range(0, 7)) = 0.0
     _Rim_Lighting3_Mask_Sampler_Mode("mask sampler mode", Range(0, 1)) = 0.0
+    _Rim_Lighting3_Mask2("Rim lighting mask 2", 2D) = "white" {}
+    _Rim_Lighting3_Mask2_Invert_Colors("Invert rim lighting mask 2", Float) = 0.0
+    _Rim_Lighting3_Mask2_Invert_Alpha("Invert rim lighting mask 2", Float) = 0.0
+    _Rim_Lighting3_Mask2_UV_Select("mask 2 UV select", Range(0, 7)) = 0.0
     _Rim_Lighting3_Color("Rim lighting color", Color) = (1, 1, 1, 1)
     _Rim_Lighting3_Center("Rim lighting center", Float) = 0.5
     _Rim_Lighting3_Power("Rim lighting power", Float) = 2.0
