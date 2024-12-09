@@ -130,36 +130,184 @@ Shader "yum_food/tooner"
     _PBR_Overlay3_Mask_Glitter("Mask glitter", Float) = 0.0
 
     _Decal0_Enable("Enable decal", Float) = 0.0
+    _Decal0_Color("Base color", Color) = (1, 1, 1, 1)
     _Decal0_BaseColor("Base color", 2D) = "white" {}
+    _Decal0_BaseColor_Mode("Base color mode", Float) = 0
+    _Decal0_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal0_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
+    _Decal0_SDF_Px_Range("SDF px range", Float) = 2
     _Decal0_Roughness("Roughness", 2D) = "white" {}
     _Decal0_Metallic("Metallic", 2D) = "black" {}
     _Decal0_Emission_Strength("Emission strength", Float) = 0
     _Decal0_Angle("Emission strength", Range(0,1)) = 0
+    _Decal0_Alpha_Multiplier("Alpha multiplier", Range(0, 1)) = 1
+    _Decal0_Round_Alpha_Multiplier("Round alpha multiplier", Float) = 0
+    _Decal0_Mask("Mask", 2D) = "white" {}
+    _Decal0_Mask_Invert("Mask invert", Float) = 0.0
+    _Decal0_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal0_UV_Select("UV channel", Range(0,7)) = 0
 
     _Decal1_Enable("Enable decal", Float) = 0.0
+    _Decal1_Color("Base color", Color) = (1, 1, 1, 1)
     _Decal1_BaseColor("Base color", 2D) = "white" {}
+    _Decal1_BaseColor_Mode("Base color mode", Float) = 0
+    _Decal1_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal1_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
+    _Decal1_SDF_Px_Range("SDF px range", Float) = 2
     _Decal1_Roughness("Roughness", 2D) = "white" {}
     _Decal1_Metallic("Metallic", 2D) = "black" {}
     _Decal1_Emission_Strength("Emission strength", Float) = 0
     _Decal1_Angle("Emission strength", Range(0,1)) = 0
+    _Decal1_Alpha_Multiplier("Alpha multiplier", Range(0, 1)) = 1
+    _Decal1_Round_Alpha_Multiplier("Round alpha multiplier", Float) = 0
+    _Decal1_Mask("Mask", 2D) = "white" {}
+    _Decal1_Mask_Invert("Mask invert", Float) = 0.0
+    _Decal1_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal1_UV_Select("UV channel", Range(0,7)) = 0
 
     _Decal2_Enable("Enable decal", Float) = 0.0
+    _Decal2_Color("Base color", Color) = (1, 1, 1, 1)
     _Decal2_BaseColor("Base color", 2D) = "white" {}
+    _Decal2_BaseColor_Mode("Base color mode", Float) = 0
+    _Decal2_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal2_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
+    _Decal2_SDF_Px_Range("SDF px range", Float) = 2
     _Decal2_Roughness("Roughness", 2D) = "white" {}
     _Decal2_Metallic("Metallic", 2D) = "black" {}
     _Decal2_Emission_Strength("Emission strength", Float) = 0
     _Decal2_Angle("Emission strength", Range(0,1)) = 0
+    _Decal2_Alpha_Multiplier("Alpha multiplier", Range(0, 1)) = 1
+    _Decal2_Round_Alpha_Multiplier("Round alpha multiplier", Float) = 0
+    _Decal2_Mask("Mask", 2D) = "white" {}
+    _Decal2_Mask_Invert("Mask invert", Float) = 0.0
+    _Decal2_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal2_UV_Select("UV channel", Range(0,7)) = 0
 
     _Decal3_Enable("Enable decal", Float) = 0.0
+    _Decal3_Color("Base color", Color) = (1, 1, 1, 1)
     _Decal3_BaseColor("Base color", 2D) = "white" {}
+    _Decal3_BaseColor_Mode("Base color mode", Float) = 0
+    _Decal3_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal3_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
+    _Decal3_SDF_Px_Range("SDF px range", Float) = 2
     _Decal3_Roughness("Roughness", 2D) = "white" {}
     _Decal3_Metallic("Metallic", 2D) = "black" {}
     _Decal3_Emission_Strength("Emission strength", Float) = 0
     _Decal3_Angle("Emission strength", Range(0,1)) = 0
+    _Decal3_Alpha_Multiplier("Alpha multiplier", Range(0, 1)) = 1
+    _Decal3_Round_Alpha_Multiplier("Round alpha multiplier", Float) = 0
+    _Decal3_Mask("Mask", 2D) = "white" {}
+    _Decal3_Mask_Invert("Mask invert", Float) = 0.0
+    _Decal3_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal3_UV_Select("UV channel", Range(0,7)) = 0
+
+    _Decal4_Enable("Enable decal", Float) = 0.0
+    _Decal4_Color("Base color", Color) = (1, 1, 1, 1)
+    _Decal4_BaseColor("Base color", 2D) = "white" {}
+    _Decal4_BaseColor_Mode("Base color mode", Float) = 0
+    _Decal4_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal4_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
+    _Decal4_SDF_Px_Range("SDF px range", Float) = 2
+    _Decal4_Roughness("Roughness", 2D) = "white" {}
+    _Decal4_Metallic("Metallic", 2D) = "black" {}
+    _Decal4_Emission_Strength("Emission strength", Float) = 0
+    _Decal4_Angle("Emission strength", Range(0,1)) = 0
+    _Decal4_Alpha_Multiplier("Alpha multiplier", Range(0, 1)) = 1
+    _Decal4_Round_Alpha_Multiplier("Round alpha multiplier", Float) = 0
+    _Decal4_Mask("Mask", 2D) = "white" {}
+    _Decal4_Mask_Invert("Mask invert", Float) = 0.0
+    _Decal4_Tiling_Mode("Tiling mode", Range(0,1)) = 0
+    _Decal4_UV_Select("UV channel", Range(0,7)) = 0
+
+    _Decal5_Enable("Enable decal", Float) = 0.0
+    _Decal5_Color("Base color", Color) = (1, 1, 1, 1)
+    _Decal5_BaseColor("Base color", 2D) = "white" {}
+    _Decal5_BaseColor_Mode("Base color mode", Float) = 0
+    _Decal5_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal5_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
+    _Decal5_SDF_Px_Range("SDF px range", Float) = 2
+    _Decal5_Roughness("Roughness", 2D) = "white" {}
+    _Decal5_Metallic("Metallic", 2D) = "black" {}
+    _Decal5_Emission_Strength("Emission strength", Float) = 0
+    _Decal5_Angle("Emission strength", Range(0,1)) = 0
+    _Decal5_Alpha_Multiplier("Alpha multiplier", Range(0, 1)) = 1
+    _Decal5_Round_Alpha_Multiplier("Round alpha multiplier", Float) = 0
+    _Decal5_Mask("Mask", 2D) = "white" {}
+    _Decal5_Mask_Invert("Mask invert", Float) = 0.0
+    _Decal5_Tiling_Mode("Tiling mode", Range(0,1)) = 0
+    _Decal5_UV_Select("UV channel", Range(0,7)) = 0
+
+    _Decal6_Enable("Enable decal", Float) = 0.0
+    _Decal6_Color("Base color", Color) = (1, 1, 1, 1)
+    _Decal6_BaseColor("Base color", 2D) = "white" {}
+    _Decal6_BaseColor_Mode("Base color mode", Float) = 0
+    _Decal6_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal6_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
+    _Decal6_SDF_Px_Range("SDF px range", Float) = 2
+    _Decal6_Roughness("Roughness", 2D) = "white" {}
+    _Decal6_Metallic("Metallic", 2D) = "black" {}
+    _Decal6_Emission_Strength("Emission strength", Float) = 0
+    _Decal6_Angle("Emission strength", Range(0,1)) = 0
+    _Decal6_Alpha_Multiplier("Alpha multiplier", Range(0, 1)) = 1
+    _Decal6_Round_Alpha_Multiplier("Round alpha multiplier", Float) = 0
+    _Decal6_Mask("Mask", 2D) = "white" {}
+    _Decal6_Mask_Invert("Mask invert", Float) = 0.0
+    _Decal6_Tiling_Mode("Tiling mode", Range(0,1)) = 0
+    _Decal6_UV_Select("UV channel", Range(0,7)) = 0
+
+    _Decal7_Enable("Enable decal", Float) = 0.0
+    _Decal7_Color("Base color", Color) = (1, 1, 1, 1)
+    _Decal7_BaseColor("Base color", 2D) = "white" {}
+    _Decal7_BaseColor_Mode("Base color mode", Float) = 0
+    _Decal7_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal7_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
+    _Decal7_SDF_Px_Range("SDF px range", Float) = 2
+    _Decal7_Roughness("Roughness", 2D) = "white" {}
+    _Decal7_Metallic("Metallic", 2D) = "black" {}
+    _Decal7_Emission_Strength("Emission strength", Float) = 0
+    _Decal7_Angle("Emission strength", Range(0,1)) = 0
+    _Decal7_Alpha_Multiplier("Alpha multiplier", Range(0, 1)) = 1
+    _Decal7_Round_Alpha_Multiplier("Round alpha multiplier", Float) = 0
+    _Decal7_Mask("Mask", 2D) = "white" {}
+    _Decal7_Mask_Invert("Mask invert", Float) = 0.0
+    _Decal7_Tiling_Mode("Tiling mode", Range(0,1)) = 0
+    _Decal7_UV_Select("UV channel", Range(0,7)) = 0
+
+    _Decal8_Enable("Enable decal", Float) = 0.0
+    _Decal8_Color("Base color", Color) = (1, 1, 1, 1)
+    _Decal8_BaseColor("Base color", 2D) = "white" {}
+    _Decal8_BaseColor_Mode("Base color mode", Float) = 0
+    _Decal8_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal8_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
+    _Decal8_SDF_Px_Range("SDF px range", Float) = 2
+    _Decal8_Roughness("Roughness", 2D) = "white" {}
+    _Decal8_Metallic("Metallic", 2D) = "black" {}
+    _Decal8_Emission_Strength("Emission strength", Float) = 0
+    _Decal8_Angle("Emission strength", Range(0,1)) = 0
+    _Decal8_Alpha_Multiplier("Alpha multiplier", Range(0, 1)) = 1
+    _Decal8_Round_Alpha_Multiplier("Round alpha multiplier", Float) = 0
+    _Decal8_Mask("Mask", 2D) = "white" {}
+    _Decal8_Mask_Invert("Mask invert", Float) = 0.0
+    _Decal8_Tiling_Mode("Tiling mode", Range(0,1)) = 0
+    _Decal8_UV_Select("UV channel", Range(0,7)) = 0
+
+    _Decal9_Enable("Enable decal", Float) = 0.0
+    _Decal9_Color("Base color", Color) = (1, 1, 1, 1)
+    _Decal9_BaseColor("Base color", 2D) = "white" {}
+    _Decal9_BaseColor_Mode("Base color mode", Float) = 0
+    _Decal9_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal9_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
+    _Decal9_SDF_Px_Range("SDF px range", Float) = 2
+    _Decal9_Roughness("Roughness", 2D) = "white" {}
+    _Decal9_Metallic("Metallic", 2D) = "black" {}
+    _Decal9_Emission_Strength("Emission strength", Float) = 0
+    _Decal9_Angle("Emission strength", Range(0,1)) = 0
+    _Decal9_Alpha_Multiplier("Alpha multiplier", Range(0, 1)) = 1
+    _Decal9_Round_Alpha_Multiplier("Round alpha multiplier", Float) = 0
+    _Decal9_Mask("Mask", 2D) = "white" {}
+    _Decal9_Mask_Invert("Mask invert", Float) = 0.0
+    _Decal9_Tiling_Mode("Tiling mode", Range(0,1)) = 0
+    _Decal9_UV_Select("UV channel", Range(0,7)) = 0
 
     [NoScaleOffset] _EmissionMap("Emission map", 2D) = "black" {}
     _EmissionColor("Emission color", Color) = (0, 0, 0)
@@ -670,6 +818,12 @@ Shader "yum_food/tooner"
     _Decal1_UI_Show("UI show", Float) = 0
     _Decal2_UI_Show("UI show", Float) = 0
     _Decal3_UI_Show("UI show", Float) = 0
+    _Decal4_UI_Show("UI show", Float) = 0
+    _Decal5_UI_Show("UI show", Float) = 0
+    _Decal6_UI_Show("UI show", Float) = 0
+    _Decal7_UI_Show("UI show", Float) = 0
+    _Decal8_UI_Show("UI show", Float) = 0
+    _Decal9_UI_Show("UI show", Float) = 0
     _Lighting_UI_Show("UI show", Float) = 0
     _Emission_UI_Show("UI show", Float) = 0
     _Shading_UI_Show("UI show", Float) = 0
@@ -804,6 +958,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType"="Opaque"
@@ -884,6 +1039,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

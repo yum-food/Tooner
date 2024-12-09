@@ -519,10 +519,18 @@ public class ToonerGUI : ShaderGUI {
     show_ui.RemoveAt(show_ui.Count - 1);
   }
 
+  enum TilingMode {
+    Clamp,
+    Repeat,
+  }
+  enum BaseColorMode {
+    Color,
+    SDF,
+  }
   void DoDecal() {
     show_ui.Add(AddCollapsibleMenu("Decals", "_Decal"));
     EditorGUI.indentLevel += 1;
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < 10; i++) {
       show_ui.Add(AddCollapsibleMenu($"Decal {i}", $"_Decal{i}"));
       EditorGUI.indentLevel += 1;
 
@@ -535,12 +543,27 @@ public class ToonerGUI : ShaderGUI {
       SetKeyword($"_DECAL{i}", enabled);
 
       if (enabled) {
-        bc = FindProperty($"_Decal{i}_BaseColor");
-        TexturePropertySingleLine(
-            MakeLabel(bc, "Base color (RGBA)"),
-            bc);
-        if (bc.textureValue) {
-          TextureScaleOffsetProperty(bc);
+        MaterialProperty bct;
+        bc = FindProperty($"_Decal{i}_Color");
+        bct = FindProperty($"_Decal{i}_BaseColor");
+        TexturePropertySingleLine(MakeLabel(bct, "Base color (RGBA)"), bct, bc);
+        // Unconditionally drive scale + offset because it affects all textures.
+        TextureScaleOffsetProperty(bct);
+
+        bc = FindProperty($"_Decal{i}_BaseColor_Mode");
+        BaseColorMode base_color_mode = (BaseColorMode) Math.Round(bc.floatValue);
+        base_color_mode = (BaseColorMode) EnumPopup(MakeLabel("Base color mode"), base_color_mode);
+        bc.floatValue = (int) base_color_mode;
+
+        if (base_color_mode == BaseColorMode.SDF) {
+          bc = FindProperty($"_Decal{i}_SDF_Threshold");
+          RangeProperty(bc, "SDF threshold");
+
+          bc = FindProperty($"_Decal{i}_SDF_Softness");
+          RangeProperty(bc, "SDF softness");
+
+          bc = FindProperty($"_Decal{i}_SDF_Px_Range");
+          FloatProperty(bc, "SDF px range");
         }
 
         bc = FindProperty($"_Decal{i}_Roughness");
@@ -563,6 +586,30 @@ public class ToonerGUI : ShaderGUI {
         RangeProperty(
             bc,
             "Angle");
+
+        bc = FindProperty($"_Decal{i}_Alpha_Multiplier");
+        RangeProperty(bc, "Alpha multiplier");
+
+        bc = FindProperty($"_Decal{i}_Round_Alpha_Multiplier");
+
+        bct = FindProperty($"_Decal{i}_Mask");
+        TexturePropertySingleLine(MakeLabel(bct, "Mask"), bct);
+        SetKeyword($"_DECAL{i}_MASK", bct.textureValue);
+
+        if (bct.textureValue) {
+          bc = FindProperty($"_Decal{i}_Mask_Invert");
+          enabled = bc.floatValue > 1E-6;
+          EditorGUI.BeginChangeCheck();
+          enabled = Toggle("Invert mask", enabled);
+          EditorGUI.EndChangeCheck();
+          bc.floatValue = enabled ? 1.0f : 0.0f;
+        }
+
+        bc = FindProperty($"_Decal{i}_Tiling_Mode");
+        TilingMode tiling_mode = (TilingMode) Math.Round(bc.floatValue);
+        tiling_mode = (TilingMode) EnumPopup(
+            MakeLabel("Tiling mode"), tiling_mode);
+        bc.floatValue = (int) tiling_mode;
 
         bc = FindProperty($"_Decal{i}_UV_Select");
         RangeProperty(
@@ -688,7 +735,7 @@ public class ToonerGUI : ShaderGUI {
 
       if (bc.textureValue) {
         EditorGUI.indentLevel += 1;
-        bc = FindProperty($"_Matcap{i}_Mask2_Invert");
+        bc = FindProperty($"_Matcap{i}_Mask2_Invert_Colors");
         enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
         enabled = Toggle("Invert mask colors", enabled);

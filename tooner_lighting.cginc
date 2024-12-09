@@ -14,6 +14,7 @@
 #include "halos.cginc"
 #include "interpolators.cginc"
 #include "iq_sdf.cginc"
+#include "macros.cginc"
 #include "math.cginc"
 #include "motion.cginc"
 #include "oklab.cginc"
@@ -954,56 +955,135 @@ void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
 #endif  // _PBR_OVERLAY3
 }
 
+struct DecalParams {
+    float4 color;
+    texture2D tex;
+    float4 tex_texelsize;
+    float4 tex_st;
+    texture2D roughness_tex;
+    texture2D metallic_tex;
+    float emission_strength;
+    float angle;
+    bool do_roughness;
+    bool do_metallic;
+    float alpha_multiplier;
+    float round_alpha_multiplier;
+    float mask;
+    float uv_select;
+    float tiling_mode;
+    float base_color_mode;
+    float sdf_threshold;
+    float sdf_softness;
+    float sdf_px_range;
+};
+
 void applyDecalImpl(
     inout float4 albedo,
     inout float3 decal_emission,
     inout float roughness,
     inout float metallic,
     v2f i,
-    texture2D tex,
-    float4 tex_st,
-    texture2D roughness_tex,
-    texture2D metallic_tex,
-    float emission_strength,
-    float angle,
-    bool do_roughness,
-    bool do_metallic,
-    float which_uv)
+    DecalParams p)
 {
-  float2 d0_uv = ((get_uv_by_channel(i, which_uv) - 0.5) - tex_st.zw) * tex_st.xy + 0.5;
+  float2 d0_uv =
+      ((get_uv_by_channel(i, p.uv_select) - 0.5) - p.tex_st.zw) * p.tex_st.xy + 0.5;
 
-  if (abs(angle) > 1E-6) {
-    float theta = angle * 2.0 * 3.14159265;
+  if (abs(p.angle) > 1E-6) {
+    float theta = p.angle * 2.0 * 3.14159265;
     float2x2 rot = float2x2(
         cos(theta), -sin(theta),
         sin(theta), cos(theta));
     d0_uv = mul(rot, d0_uv - 0.5) + 0.5;
   }
+  d0_uv = (p.tiling_mode == 0) ? saturate(d0_uv) : d0_uv;
 
-  float4 d0_c = tex.SampleBias(linear_clamp_s, saturate(d0_uv), _Global_Sample_Bias);
+  float4 d0_c = 0;
+  if (p.base_color_mode == 0) {
+    d0_c = p.tex.SampleBias(
+        linear_repeat_s,
+        d0_uv, _Global_Sample_Bias);
+  } else if (p.base_color_mode == 1) {
+    float sd = p.tex.SampleLevel(linear_repeat_s, d0_uv, 0);
 
+    float2 screen_tex_size = 1 / fwidth(d0_uv);
+    float2 cell_size_texels = p.tex_texelsize.zw;
+    float2 unit_range = p.sdf_px_range / cell_size_texels;
+    float screen_px_range = max(0.5 * dot(unit_range, screen_tex_size), p.sdf_px_range);
+
+    float screen_px_distance = screen_px_range * (sd - p.sdf_threshold);
+    float2 grid_res = p.tex_st.xy;
+    float smooth_range = (sqrt(2) / sqrt(screen_px_range)) * p.sdf_softness;
+    float op = smoothstep(-smooth_range, smooth_range, screen_px_distance);
+    d0_c = saturate(op);
+    // TODO mip-like filtering?
+  }
+
+  d0_c *= p.color;
+  d0_c.a *= p.round_alpha_multiplier ? round(p.alpha_multiplier) : p.alpha_multiplier;
+  // Manually apply tiling/clamping correction.
   float d0_in_range = 1;
   d0_in_range *= d0_uv.x > 0;
   d0_in_range *= d0_uv.x < 1;
   d0_in_range *= d0_uv.y > 0;
   d0_in_range *= d0_uv.y < 1;
+  d0_in_range = (p.tiling_mode == 0) ? d0_in_range : 1;
   d0_c *= d0_in_range;
+  d0_c *= p.mask;
 
   albedo.rgb = lerp(albedo.rgb, d0_c.rgb, d0_c.a);
   albedo.a = max(albedo.a, d0_c.a);
-  decal_emission += d0_c.rgb * emission_strength;
+  decal_emission += d0_c.rgb * p.emission_strength * d0_c.a;
 
-  if (do_roughness) {
-    float4 d0_r = roughness_tex.SampleBias(linear_clamp_s, saturate(d0_uv), _Global_Sample_Bias);
+  if (p.do_roughness) {
+    float4 d0_r = p.roughness_tex.SampleBias(linear_clamp_s, saturate(d0_uv), _Global_Sample_Bias);
     d0_r *= d0_in_range;
     roughness = lerp(roughness, d0_r, d0_r.a);
   }
-  if (do_metallic) {
-    float4 d0_m = metallic_tex.SampleBias(linear_clamp_s, saturate(d0_uv), _Global_Sample_Bias);
+  if (p.do_metallic) {
+    float4 d0_m = p.metallic_tex.SampleBias(linear_clamp_s, saturate(d0_uv), _Global_Sample_Bias);
     d0_m *= d0_in_range;
     metallic = lerp(metallic, d0_m, d0_m.a);
   }
 }
+
+#define DECAL_PARAMS(n) \
+  MERGE(d,n,_params).do_roughness = false; \
+  MERGE(d,n,_params).do_metallic = false; \
+  MERGE(d,n,_params).mask = 1; \
+  MERGE(d,n,_params).color = MERGE(_Decal, n,_Color); \
+  MERGE(d,n,_params).tex = MERGE(_Decal, n,_BaseColor); \
+  MERGE(d,n,_params).tex_texelsize = MERGE(_Decal, n,_BaseColor_TexelSize); \
+  MERGE(d,n,_params).tex_st = MERGE(_Decal, n,_BaseColor_ST); \
+  MERGE(d,n,_params).roughness_tex = MERGE(_Decal, n,_Roughness); \
+  MERGE(d,n,_params).metallic_tex = MERGE(_Decal, n,_Metallic); \
+  MERGE(d,n,_params).emission_strength = MERGE(_Decal, n,_Emission_Strength); \
+  MERGE(d,n,_params).angle = MERGE(_Decal, n,_Angle); \
+  MERGE(d,n,_params).alpha_multiplier = MERGE(_Decal, n,_Alpha_Multiplier); \
+  MERGE(d,n,_params).round_alpha_multiplier = MERGE(_Decal, n,_Round_Alpha_Multiplier); \
+  MERGE(d,n,_params).uv_select = MERGE(_Decal, n,_UV_Select); \
+  MERGE(d,n,_params).tiling_mode = MERGE(_Decal, n,_Tiling_Mode); \
+  MERGE(d,n,_params).base_color_mode = MERGE(_Decal, n,_BaseColor_Mode); \
+  MERGE(d,n,_params).sdf_threshold = MERGE(_Decal, n,_SDF_Threshold); \
+  MERGE(d,n,_params).sdf_softness = MERGE(_Decal, n,_SDF_Softness); \
+  MERGE(d,n,_params).sdf_px_range = MERGE(_Decal, n,_SDF_Px_Range);
+
+#define SETUP_DECAL_BASE(n) \
+  DecalParams MERGE(d,n,_params); \
+  DECAL_PARAMS(n)
+
+#define SETUP_DECAL_ROUGHNESS(n) \
+  MERGE(d,n,_params).do_roughness = true;
+
+#define SETUP_DECAL_METALLIC(n) \
+  MERGE(d,n,_params).do_metallic = true;
+
+#define SETUP_DECAL_MASK(n) \
+  MERGE(d,n,_params).mask = MERGE(_Decal, n,_Mask).SampleLevel(linear_repeat_s, \
+      get_uv_by_channel(i, MERGE(_Decal, n,_UV_Select)), 0); \
+  MERGE(d,n,_params).mask = MERGE(_Decal, n,_Mask_Invert) ? 1.0 - MERGE(d,n,_params).mask : MERGE(d,n,_params).mask;
+
+#define SETUP_DECAL_FINISH(n) \
+  applyDecalImpl(albedo, decal_emission, roughness, metallic, i, MERGE(d,n,_params));
 
 void applyDecal(inout float4 albedo,
     inout float roughness,
@@ -1012,93 +1092,144 @@ void applyDecal(inout float4 albedo,
     v2f i)
 {
 #if defined(_DECAL0)
-#if defined(_DECAL0_ROUGHNESS)
-  bool d0_do_roughness = true;
-#else
-  bool d0_do_roughness = false;
+    SETUP_DECAL_BASE(0)
+    #if defined(_DECAL0_ROUGHNESS)
+        SETUP_DECAL_ROUGHNESS(0)
+    #endif
+    #if defined(_DECAL0_METALLIC)
+        SETUP_DECAL_METALLIC(0)
+    #endif
+    #if defined(_DECAL0_MASK)
+        SETUP_DECAL_MASK(0)
+    #endif
+    SETUP_DECAL_FINISH(0)
 #endif
-#if defined(_DECAL0_METALLIC)
-  bool d0_do_metallic = true;
-#else
-  bool d0_do_metallic = false;
-#endif
-  applyDecalImpl(albedo, decal_emission, roughness, metallic, i,
-      _Decal0_BaseColor,
-      _Decal0_BaseColor_ST,
-      _Decal0_Roughness,
-      _Decal0_Metallic,
-      _Decal0_Emission_Strength,
-      _Decal0_Angle,
-      d0_do_roughness,
-      d0_do_metallic,
-      _Decal0_UV_Select);
-#endif  // _DECAL0
+
 #if defined(_DECAL1)
-#if defined(_DECAL1_ROUGHNESS)
-  bool d1_do_roughness = true;
-#else
-  bool d1_do_roughness = false;
+    SETUP_DECAL_BASE(1)
+    #if defined(_DECAL1_ROUGHNESS)
+        SETUP_DECAL_ROUGHNESS(1)
+    #endif
+    #if defined(_DECAL1_METALLIC)
+        SETUP_DECAL_METALLIC(1)
+    #endif
+    #if defined(_DECAL1_MASK)
+        SETUP_DECAL_MASK(1)
+    #endif
+    SETUP_DECAL_FINISH(1)
 #endif
-#if defined(_DECAL1_METALLIC)
-  bool d1_do_metallic = true;
-#else
-  bool d1_do_metallic = false;
-#endif
-  applyDecalImpl(albedo, decal_emission, roughness, metallic, i,
-      _Decal1_BaseColor,
-      _Decal1_BaseColor_ST,
-      _Decal1_Roughness,
-      _Decal1_Metallic,
-      _Decal1_Emission_Strength,
-      _Decal1_Angle,
-      d1_do_roughness,
-      d1_do_metallic,
-      _Decal1_UV_Select);
-#endif  // _DECAL1
+
 #if defined(_DECAL2)
-#if defined(_DECAL2_ROUGHNESS)
-  bool d2_do_roughness = true;
-#else
-  bool d2_do_roughness = false;
+    SETUP_DECAL_BASE(2)
+    #if defined(_DECAL2_ROUGHNESS)
+        SETUP_DECAL_ROUGHNESS(2)
+    #endif
+    #if defined(_DECAL2_METALLIC)
+        SETUP_DECAL_METALLIC(2)
+    #endif
+    #if defined(_DECAL2_MASK)
+        SETUP_DECAL_MASK(2)
+    #endif
+    SETUP_DECAL_FINISH(2)
 #endif
-#if defined(_DECAL2_METALLIC)
-  bool d2_do_metallic = true;
-#else
-  bool d2_do_metallic = false;
-#endif
-  applyDecalImpl(albedo, decal_emission, roughness, metallic, i,
-      _Decal2_BaseColor,
-      _Decal2_BaseColor_ST,
-      _Decal2_Roughness,
-      _Decal2_Metallic,
-      _Decal2_Emission_Strength,
-      _Decal2_Angle,
-      d2_do_roughness,
-      d2_do_metallic,
-      _Decal2_UV_Select);
-#endif  // _DECAL2
+
 #if defined(_DECAL3)
-#if defined(_DECAL3_ROUGHNESS)
-  bool d3_do_roughness = true;
-#else
-  bool d3_do_roughness = false;
+    SETUP_DECAL_BASE(3)
+    #if defined(_DECAL3_ROUGHNESS)
+        SETUP_DECAL_ROUGHNESS(3)
+    #endif
+    #if defined(_DECAL3_METALLIC)
+        SETUP_DECAL_METALLIC(3)
+    #endif
+    #if defined(_DECAL3_MASK)
+        SETUP_DECAL_MASK(3)
+    #endif
+    SETUP_DECAL_FINISH(3)
 #endif
-#if defined(_DECAL3_METALLIC)
-  bool d3_do_metallic = true;
-#else
-  bool d3_do_metallic = false;
+
+#if defined(_DECAL4)
+    SETUP_DECAL_BASE(4)
+    #if defined(_DECAL4_ROUGHNESS)
+        SETUP_DECAL_ROUGHNESS(4)
+    #endif
+    #if defined(_DECAL4_METALLIC)
+        SETUP_DECAL_METALLIC(4)
+    #endif
+    #if defined(_DECAL4_MASK)
+        SETUP_DECAL_MASK(4)
+    #endif
+    SETUP_DECAL_FINISH(4)
 #endif
-  applyDecalImpl(albedo, decal_emission, roughness, metallic, i,
-      _Decal3_BaseColor,
-      _Decal3_BaseColor_ST,
-      _Decal3_Roughness,
-      _Decal3_Metallic,
-      _Decal3_Emission_Strength,
-      _Decal3_Angle,
-      d3_do_roughness,
-      d3_do_metallic,
-      _Decal3_UV_Select);
-#endif  // _DECAL3
+
+#if defined(_DECAL5)
+    SETUP_DECAL_BASE(5)
+    #if defined(_DECAL5_ROUGHNESS)
+        SETUP_DECAL_ROUGHNESS(5)
+    #endif
+    #if defined(_DECAL5_METALLIC)
+        SETUP_DECAL_METALLIC(5)
+    #endif
+    #if defined(_DECAL5_MASK)
+        SETUP_DECAL_MASK(5)
+    #endif
+    SETUP_DECAL_FINISH(5)
+#endif
+
+#if defined(_DECAL6)
+    SETUP_DECAL_BASE(6)
+    #if defined(_DECAL6_ROUGHNESS)
+        SETUP_DECAL_ROUGHNESS(6)
+    #endif
+    #if defined(_DECAL6_METALLIC)
+        SETUP_DECAL_METALLIC(6)
+    #endif
+    #if defined(_DECAL6_MASK)
+        SETUP_DECAL_MASK(6)
+    #endif
+    SETUP_DECAL_FINISH(6)
+#endif
+
+#if defined(_DECAL7)
+    SETUP_DECAL_BASE(7)
+    #if defined(_DECAL7_ROUGHNESS)
+        SETUP_DECAL_ROUGHNESS(7)
+    #endif
+    #if defined(_DECAL7_METALLIC)
+        SETUP_DECAL_METALLIC(7)
+    #endif
+    #if defined(_DECAL7_MASK)
+        SETUP_DECAL_MASK(7)
+    #endif
+    SETUP_DECAL_FINISH(7)
+#endif
+
+#if defined(_DECAL8)
+    SETUP_DECAL_BASE(8)
+    #if defined(_DECAL8_ROUGHNESS)
+        SETUP_DECAL_ROUGHNESS(8)
+    #endif
+    #if defined(_DECAL8_METALLIC)
+        SETUP_DECAL_METALLIC(8)
+    #endif
+    #if defined(_DECAL8_MASK)
+        SETUP_DECAL_MASK(8)
+    #endif
+    SETUP_DECAL_FINISH(8)
+#endif
+
+#if defined(_DECAL9)
+    SETUP_DECAL_BASE(9)
+    #if defined(_DECAL9_ROUGHNESS)
+        SETUP_DECAL_ROUGHNESS(9)
+    #endif
+    #if defined(_DECAL9_METALLIC)
+        SETUP_DECAL_METALLIC(9)
+    #endif
+    #if defined(_DECAL9_MASK)
+        SETUP_DECAL_MASK(9)
+    #endif
+    SETUP_DECAL_FINISH(9)
+#endif
 }
 
 void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
@@ -1788,7 +1919,7 @@ float4 effect(inout v2f i, out float depth)
   mixOverlayAlbedoRoughnessMetallic(albedo, roughness, metallic, ov,
       1 - pow((1 - min(matcap_overwrite_mask[0], matcap_overwrite_mask[1])), 8),
       overlay_glitter_mask);
-#if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
+#if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3) || defined(_DECAL4) || defined(_DECAL5) || defined(_DECAL6) || defined(_DECAL7) || defined(_DECAL8) || defined(_DECAL9)
   float3 decal_emission = 0;
   applyDecal(albedo, roughness, metallic, decal_emission, i);
 #endif
@@ -2392,20 +2523,13 @@ float4 effect(inout v2f i, out float depth)
       // This is just the manhattan length of the triangle with edges
       //   ddx(cell_uv.x) and ddy(cell_uv.x).
       // In other words, an approximation of the gradient of cell_uv.x.
-      #if 1
+
       // fwidth is an approximation showing how much cell_uv changes per pixel.
       // By inverting it, we get an approximation of how many pixels are
       // spanned by the whole texture, if it was rendered with this pixel's
       // properties.
       float2 screen_tex_size = 1 / fwidth(cell_uv);
-      #else
-      float2 cell_uv_x = float2(ddx(cell_uv.x), ddy(cell_uv.x));
-      float2 cell_uv_y = float2(ddx(cell_uv.y), ddy(cell_uv.y));
-      float2 screen_tex_size = float2(
-        1 / length(cell_uv_x),
-        1 / length(cell_uv_y)
-      );
-      #endif
+
       screen_px_range = max(0.5 * dot(unit_range, screen_tex_size), _Gimmick_Letter_Grid_2_Min_Screen_Px_Range);
     }
     float screen_px_distance = screen_px_range * (sd - _Gimmick_Letter_Grid_2_Alpha_Threshold);
@@ -2584,7 +2708,7 @@ float4 effect(inout v2f i, out float depth)
 #if defined(_MATCAP0) || defined(_MATCAP1) || defined(_RIM_LIGHTING0) || defined(_RIM_LIGHTING1)
   result.rgb += matcap_emission * _Global_Emission_Factor;
 #endif
-#if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3)
+#if defined(_DECAL0) || defined(_DECAL1) || defined(_DECAL2) || defined(_DECAL3) || defined(_DECAL4) || defined(_DECAL5) || defined(_DECAL6) || defined(_DECAL7) || defined(_DECAL8) || defined(_DECAL9)
   result.rgb += decal_emission * _Global_Emission_Factor;
 #endif
 #if defined(_GLITTER)

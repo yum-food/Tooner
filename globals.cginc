@@ -1,4 +1,5 @@
 #include "AutoLight.cginc"
+#include "macros.cginc"
 
 #ifndef __GLOBALS_INC
 #define __GLOBALS_INC
@@ -257,41 +258,96 @@ float _PBR_Overlay3_Mip_Bias;
 float _PBR_Overlay3_Mask_Glitter;
 #endif
 
+#define DECAL_PROPERTIES(n) \
+float4 MERGE(_Decal,n,_Color); \
+texture2D MERGE(_Decal,n,_BaseColor); \
+float4 MERGE(_Decal,n,_BaseColor_TexelSize); \
+float4 MERGE(_Decal,n,_BaseColor_ST); \
+float MERGE(_Decal,n,_BaseColor_Mode); \
+texture2D MERGE(_Decal,n,_Roughness); \
+texture2D MERGE(_Decal,n,_Metallic); \
+float MERGE(_Decal,n,_Emission_Strength); \
+float MERGE(_Decal,n,_Angle); \
+float MERGE(_Decal,n,_Alpha_Multiplier); \
+float MERGE(_Decal,n,_Round_Alpha_Multiplier); \
+float MERGE(_Decal,n,_SDF_Threshold); \
+float MERGE(_Decal,n,_SDF_Softness); \
+float MERGE(_Decal,n,_SDF_Px_Range); \
+float MERGE(_Decal,n,_Tiling_Mode); \
+float MERGE(_Decal,n,_UV_Select);
+
+#define DECAL_MASK_PROPERTIES(n) \
+texture2D MERGE(_Decal,n,_Mask); \
+float MERGE(_Decal,n,_Mask_Invert);
+
 #if defined(_DECAL0)
-texture2D _Decal0_BaseColor;
-float4 _Decal0_BaseColor_ST;
-texture2D _Decal0_Roughness;
-texture2D _Decal0_Metallic;
-float _Decal0_Emission_Strength;
-float _Decal0_Angle;
-float _Decal0_UV_Select;
+DECAL_PROPERTIES(0)
+#if defined(_DECAL0_MASK)
+DECAL_MASK_PROPERTIES(0)
+#endif
+
 #endif
 #if defined(_DECAL1)
-texture2D _Decal1_BaseColor;
-float4 _Decal1_BaseColor_ST;
-texture2D _Decal1_Roughness;
-texture2D _Decal1_Metallic;
-float _Decal1_Emission_Strength;
-float _Decal1_Angle;
-float _Decal1_UV_Select;
+DECAL_PROPERTIES(1)
+#if defined(_DECAL1_MASK)
+DECAL_MASK_PROPERTIES(1)
 #endif
+#endif
+
 #if defined(_DECAL2)
-texture2D _Decal2_BaseColor;
-float4 _Decal2_BaseColor_ST;
-texture2D _Decal2_Roughness;
-texture2D _Decal2_Metallic;
-float _Decal2_Emission_Strength;
-float _Decal2_Angle;
-float _Decal2_UV_Select;
+DECAL_PROPERTIES(2)
+#if defined(_DECAL2_MASK)
+DECAL_MASK_PROPERTIES(2)
 #endif
+#endif
+
 #if defined(_DECAL3)
-texture2D _Decal3_BaseColor;
-float4 _Decal3_BaseColor_ST;
-texture2D _Decal3_Roughness;
-texture2D _Decal3_Metallic;
-float _Decal3_Emission_Strength;
-float _Decal3_Angle;
-float _Decal3_UV_Select;
+DECAL_PROPERTIES(3)
+#if defined(_DECAL3_MASK)
+DECAL_MASK_PROPERTIES(3)
+#endif
+#endif
+
+#if defined(_DECAL4)
+DECAL_PROPERTIES(4)
+#if defined(_DECAL4_MASK)
+DECAL_MASK_PROPERTIES(4)
+#endif
+#endif
+
+#if defined(_DECAL5)
+DECAL_PROPERTIES(5)
+#if defined(_DECAL5_MASK)
+DECAL_MASK_PROPERTIES(5)
+#endif
+#endif
+
+#if defined(_DECAL6)
+DECAL_PROPERTIES(6)
+#if defined(_DECAL6_MASK)
+DECAL_MASK_PROPERTIES(6)
+#endif
+#endif
+
+#if defined(_DECAL7)
+DECAL_PROPERTIES(7)
+#if defined(_DECAL7_MASK)
+DECAL_MASK_PROPERTIES(7)
+#endif
+#endif
+
+#if defined(_DECAL8)
+DECAL_PROPERTIES(8)
+#if defined(_DECAL8_MASK)
+DECAL_MASK_PROPERTIES(8)
+#endif
+#endif
+
+#if defined(_DECAL9)
+DECAL_PROPERTIES(9)
+#if defined(_DECAL9_MASK)
+DECAL_MASK_PROPERTIES(9)
+#endif
 #endif
 
 #if defined(_EMISSION)
