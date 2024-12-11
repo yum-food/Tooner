@@ -283,7 +283,6 @@ float4 getLitColor(
   float2 brightness_proportions = brightnesses / sum_brightness;
 #if defined(_BRIGHTNESS_CLAMP)
   sum_brightness = smooth_clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
-  //sum_brightness = clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
 #endif
   direct_light.color[2] = sum_brightness * brightness_proportions[0];
   indirect_light.diffuse[2] = sum_brightness * brightness_proportions[1];
