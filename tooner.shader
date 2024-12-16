@@ -146,6 +146,12 @@ Shader "yum_food/tooner"
     _Decal0_Mask_Invert("Mask invert", Float) = 0.0
     _Decal0_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal0_UV_Select("UV channel", Range(0,7)) = 0
+    _Decal0_Domain_Warping_Enable_Static("Enable domain warping", Float) = 0
+    _Decal0_Domain_Warping_Noise("Domain warping noise", 2D) = "black" {}
+    _Decal0_Domain_Warping_Strength("Domain warping noise strength", Float) = 0.05
+    _Decal0_Domain_Warping_Speed("Domain warping noise speed", Float) = .1
+    _Decal0_Domain_Warping_Octaves("Domain warping octaves", Float) = 5
+    _Decal0_Domain_Warping_Scale("Domain warping scale", Float) = .1
 
     _Decal1_Enable("Enable decal", Float) = 0.0
     _Decal1_Color("Base color", Color) = (1, 1, 1, 1)
@@ -164,6 +170,12 @@ Shader "yum_food/tooner"
     _Decal1_Mask_Invert("Mask invert", Float) = 0.0
     _Decal1_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal1_UV_Select("UV channel", Range(0,7)) = 0
+    _Decal1_Domain_Warping_Enable_Static("Enable domain warping", Float) = 0
+    _Decal1_Domain_Warping_Noise("Domain warping noise", 2D) = "black" {}
+    _Decal1_Domain_Warping_Strength("Domain warping noise strength", Float) = 0.05
+    _Decal1_Domain_Warping_Speed("Domain warping noise speed", Float) = .1
+    _Decal1_Domain_Warping_Octaves("Domain warping octaves", Float) = 5
+    _Decal1_Domain_Warping_Scale("Domain warping scale", Float) = .1
 
     _Decal2_Enable("Enable decal", Float) = 0.0
     _Decal2_Color("Base color", Color) = (1, 1, 1, 1)
@@ -182,6 +194,12 @@ Shader "yum_food/tooner"
     _Decal2_Mask_Invert("Mask invert", Float) = 0.0
     _Decal2_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal2_UV_Select("UV channel", Range(0,7)) = 0
+    _Decal2_Domain_Warping_Enable_Static("Enable domain warping", Float) = 0
+    _Decal2_Domain_Warping_Noise("Domain warping noise", 2D) = "black" {}
+    _Decal2_Domain_Warping_Strength("Domain warping noise strength", Float) = 0.05
+    _Decal2_Domain_Warping_Speed("Domain warping noise speed", Float) = .1
+    _Decal2_Domain_Warping_Octaves("Domain warping octaves", Float) = 5
+    _Decal2_Domain_Warping_Scale("Domain warping scale", Float) = .1
 
     _Decal3_Enable("Enable decal", Float) = 0.0
     _Decal3_Color("Base color", Color) = (1, 1, 1, 1)
@@ -200,6 +218,12 @@ Shader "yum_food/tooner"
     _Decal3_Mask_Invert("Mask invert", Float) = 0.0
     _Decal3_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal3_UV_Select("UV channel", Range(0,7)) = 0
+    _Decal3_Domain_Warping_Enable_Static("Enable domain warping", Float) = 0
+    _Decal3_Domain_Warping_Noise("Domain warping noise", 2D) = "black" {}
+    _Decal3_Domain_Warping_Strength("Domain warping noise strength", Float) = 0.05
+    _Decal3_Domain_Warping_Speed("Domain warping noise speed", Float) = .1
+    _Decal3_Domain_Warping_Octaves("Domain warping octaves", Float) = 5
+    _Decal3_Domain_Warping_Scale("Domain warping scale", Float) = .1
 
     _Decal4_Enable("Enable decal", Float) = 0.0
     _Decal4_Color("Base color", Color) = (1, 1, 1, 1)
@@ -218,6 +242,12 @@ Shader "yum_food/tooner"
     _Decal4_Mask_Invert("Mask invert", Float) = 0.0
     _Decal4_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal4_UV_Select("UV channel", Range(0,7)) = 0
+    _Decal4_Domain_Warping_Enable_Static("Enable domain warping", Float) = 0
+    _Decal4_Domain_Warping_Noise("Domain warping noise", 2D) = "black" {}
+    _Decal4_Domain_Warping_Strength("Domain warping noise strength", Float) = 0.05
+    _Decal4_Domain_Warping_Speed("Domain warping noise speed", Float) = .1
+    _Decal4_Domain_Warping_Octaves("Domain warping octaves", Float) = 5
+    _Decal4_Domain_Warping_Scale("Domain warping scale", Float) = .1
 
     _Decal5_Enable("Enable decal", Float) = 0.0
     _Decal5_Color("Base color", Color) = (1, 1, 1, 1)
@@ -236,6 +266,12 @@ Shader "yum_food/tooner"
     _Decal5_Mask_Invert("Mask invert", Float) = 0.0
     _Decal5_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal5_UV_Select("UV channel", Range(0,7)) = 0
+    _Decal5_Domain_Warping_Enable_Static("Enable domain warping", Float) = 0
+    _Decal5_Domain_Warping_Noise("Domain warping noise", 2D) = "black" {}
+    _Decal5_Domain_Warping_Strength("Domain warping noise strength", Float) = 0.05
+    _Decal5_Domain_Warping_Speed("Domain warping noise speed", Float) = .1
+    _Decal5_Domain_Warping_Octaves("Domain warping octaves", Float) = 5
+    _Decal5_Domain_Warping_Scale("Domain warping scale", Float) = .1
 
     _Decal6_Enable("Enable decal", Float) = 0.0
     _Decal6_Color("Base color", Color) = (1, 1, 1, 1)
@@ -254,6 +290,12 @@ Shader "yum_food/tooner"
     _Decal6_Mask_Invert("Mask invert", Float) = 0.0
     _Decal6_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal6_UV_Select("UV channel", Range(0,7)) = 0
+    _Decal6_Domain_Warping_Enable_Static("Enable domain warping", Float) = 0
+    _Decal6_Domain_Warping_Noise("Domain warping noise", 2D) = "black" {}
+    _Decal6_Domain_Warping_Strength("Domain warping noise strength", Float) = 0.05
+    _Decal6_Domain_Warping_Speed("Domain warping noise speed", Float) = .1
+    _Decal6_Domain_Warping_Octaves("Domain warping octaves", Float) = 5
+    _Decal6_Domain_Warping_Scale("Domain warping scale", Float) = .1
 
     _Decal7_Enable("Enable decal", Float) = 0.0
     _Decal7_Color("Base color", Color) = (1, 1, 1, 1)
@@ -272,6 +314,12 @@ Shader "yum_food/tooner"
     _Decal7_Mask_Invert("Mask invert", Float) = 0.0
     _Decal7_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal7_UV_Select("UV channel", Range(0,7)) = 0
+    _Decal7_Domain_Warping_Enable_Static("Enable domain warping", Float) = 0
+    _Decal7_Domain_Warping_Noise("Domain warping noise", 2D) = "black" {}
+    _Decal7_Domain_Warping_Strength("Domain warping noise strength", Float) = 0.05
+    _Decal7_Domain_Warping_Speed("Domain warping noise speed", Float) = .1
+    _Decal7_Domain_Warping_Octaves("Domain warping octaves", Float) = 5
+    _Decal7_Domain_Warping_Scale("Domain warping scale", Float) = .1
 
     _Decal8_Enable("Enable decal", Float) = 0.0
     _Decal8_Color("Base color", Color) = (1, 1, 1, 1)
@@ -290,6 +338,12 @@ Shader "yum_food/tooner"
     _Decal8_Mask_Invert("Mask invert", Float) = 0.0
     _Decal8_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal8_UV_Select("UV channel", Range(0,7)) = 0
+    _Decal8_Domain_Warping_Enable_Static("Enable domain warping", Float) = 0
+    _Decal8_Domain_Warping_Noise("Domain warping noise", 2D) = "black" {}
+    _Decal8_Domain_Warping_Strength("Domain warping noise strength", Float) = 0.05
+    _Decal8_Domain_Warping_Speed("Domain warping noise speed", Float) = .1
+    _Decal8_Domain_Warping_Octaves("Domain warping octaves", Float) = 5
+    _Decal8_Domain_Warping_Scale("Domain warping scale", Float) = .1
 
     _Decal9_Enable("Enable decal", Float) = 0.0
     _Decal9_Color("Base color", Color) = (1, 1, 1, 1)
@@ -308,6 +362,12 @@ Shader "yum_food/tooner"
     _Decal9_Mask_Invert("Mask invert", Float) = 0.0
     _Decal9_Tiling_Mode("Tiling mode", Range(0,1)) = 0
     _Decal9_UV_Select("UV channel", Range(0,7)) = 0
+    _Decal9_Domain_Warping_Enable_Static("Enable domain warping", Float) = 0
+    _Decal9_Domain_Warping_Noise("Domain warping noise", 2D) = "black" {}
+    _Decal9_Domain_Warping_Strength("Domain warping strength", Float) = 0.05
+    _Decal9_Domain_Warping_Speed("Domain warping speed", Float) = .1
+    _Decal9_Domain_Warping_Octaves("Domain warping octaves", Float) = 5
+    _Decal9_Domain_Warping_Scale("Domain warping scale", Float) = .1
 
     [NoScaleOffset] _EmissionMap("Emission map", 2D) = "black" {}
     _EmissionColor("Emission color", Color) = (0, 0, 0)
@@ -958,6 +1018,7 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
+    /*
     Pass {
       Tags {
         "RenderType"="Opaque"
@@ -1038,6 +1099,7 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
+    */
   }
   CustomEditor "ToonerGUI"
 }

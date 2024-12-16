@@ -274,7 +274,13 @@ float MERGE(_Decal,n,_SDF_Threshold); \
 float MERGE(_Decal,n,_SDF_Softness); \
 float MERGE(_Decal,n,_SDF_Px_Range); \
 float MERGE(_Decal,n,_Tiling_Mode); \
-float MERGE(_Decal,n,_UV_Select);
+float MERGE(_Decal,n,_UV_Select); \
+float MERGE(_Decal,n,_Domain_Warping_Enable_Static); \
+texture2D MERGE(_Decal,n,_Domain_Warping_Noise); \
+float MERGE(_Decal,n,_Domain_Warping_Strength); \
+float MERGE(_Decal,n,_Domain_Warping_Speed); \
+float MERGE(_Decal,n,_Domain_Warping_Octaves); \
+float MERGE(_Decal,n,_Domain_Warping_Scale);
 
 #define DECAL_MASK_PROPERTIES(n) \
 texture2D MERGE(_Decal,n,_Mask); \

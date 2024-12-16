@@ -591,6 +591,11 @@ public class ToonerGUI : ShaderGUI {
         RangeProperty(bc, "Alpha multiplier");
 
         bc = FindProperty($"_Decal{i}_Round_Alpha_Multiplier");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = Toggle("Round alpha multiplier", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
 
         bct = FindProperty($"_Decal{i}_Mask");
         TexturePropertySingleLine(MakeLabel(bct, "Mask"), bct);
@@ -615,6 +620,27 @@ public class ToonerGUI : ShaderGUI {
         RangeProperty(
             bc,
             "UV channel");
+
+        bc = FindProperty($"_Decal{i}_Domain_Warping_Enable_Static");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = Toggle("Enable domain warping", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
+        SetKeyword($"_DECAL{i}_DOMAIN_WARPING", enabled);
+
+        if (enabled) {
+          bc = FindProperty($"_Decal{i}_Domain_Warping_Noise");
+          TexturePropertySingleLine(MakeLabel(bc, "Domain warping noise"), bc);
+          bc = FindProperty($"_Decal{i}_Domain_Warping_Strength");
+          FloatProperty(bc, "Domain warping noise strength");
+          bc = FindProperty($"_Decal{i}_Domain_Warping_Speed");
+          FloatProperty(bc, "Domain warping noise speed");
+          bc = FindProperty($"_Decal{i}_Domain_Warping_Octaves");
+          FloatProperty(bc, "Domain warping octaves");
+          bc = FindProperty($"_Decal{i}_Domain_Warping_Scale");
+          FloatProperty(bc, "Domain warping scale");
+        }
       }
       EditorGUI.indentLevel -= 1;
       show_ui.RemoveAt(show_ui.Count - 1);

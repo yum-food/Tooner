@@ -975,6 +975,12 @@ struct DecalParams {
     float sdf_threshold;
     float sdf_softness;
     float sdf_px_range;
+    bool domain_warping;
+    texture2D domain_warping_noise;
+    float domain_warping_strength;
+    float domain_warping_speed;
+    float domain_warping_octaves;
+    float domain_warping_scale;
 };
 
 void applyDecalImpl(
@@ -996,6 +1002,17 @@ void applyDecalImpl(
     d0_uv = mul(rot, d0_uv - 0.5) + 0.5;
   }
   d0_uv = (p.tiling_mode == 0) ? saturate(d0_uv) : d0_uv;
+
+  float d0_uv_fwidth = -1;
+  if (p.domain_warping) {
+    p.domain_warping_octaves = min(p.domain_warping_octaves, 10);
+    for (uint ii = 0; ii < p.domain_warping_octaves; ii++) {
+      float2 warping_speed_vector = normalize(float2(97, 101));
+      float2 noise = p.domain_warping_noise.SampleLevel(linear_repeat_s, d0_uv * p.domain_warping_scale + _Time[0] * p.domain_warping_speed * warping_speed_vector, 0);
+      d0_uv += noise * p.domain_warping_strength;
+    }
+    d0_uv_fwidth = length(fwidth(d0_uv));
+  }
 
   float4 d0_c = 0;
   if (p.base_color_mode == 0) {
@@ -1050,22 +1067,28 @@ void applyDecalImpl(
   MERGE(d,n,_params).do_roughness = false; \
   MERGE(d,n,_params).do_metallic = false; \
   MERGE(d,n,_params).mask = 1; \
-  MERGE(d,n,_params).color = MERGE(_Decal, n,_Color); \
-  MERGE(d,n,_params).tex = MERGE(_Decal, n,_BaseColor); \
-  MERGE(d,n,_params).tex_texelsize = MERGE(_Decal, n,_BaseColor_TexelSize); \
-  MERGE(d,n,_params).tex_st = MERGE(_Decal, n,_BaseColor_ST); \
-  MERGE(d,n,_params).roughness_tex = MERGE(_Decal, n,_Roughness); \
-  MERGE(d,n,_params).metallic_tex = MERGE(_Decal, n,_Metallic); \
-  MERGE(d,n,_params).emission_strength = MERGE(_Decal, n,_Emission_Strength); \
-  MERGE(d,n,_params).angle = MERGE(_Decal, n,_Angle); \
-  MERGE(d,n,_params).alpha_multiplier = MERGE(_Decal, n,_Alpha_Multiplier); \
-  MERGE(d,n,_params).round_alpha_multiplier = MERGE(_Decal, n,_Round_Alpha_Multiplier); \
-  MERGE(d,n,_params).uv_select = MERGE(_Decal, n,_UV_Select); \
-  MERGE(d,n,_params).tiling_mode = MERGE(_Decal, n,_Tiling_Mode); \
-  MERGE(d,n,_params).base_color_mode = MERGE(_Decal, n,_BaseColor_Mode); \
-  MERGE(d,n,_params).sdf_threshold = MERGE(_Decal, n,_SDF_Threshold); \
-  MERGE(d,n,_params).sdf_softness = MERGE(_Decal, n,_SDF_Softness); \
-  MERGE(d,n,_params).sdf_px_range = MERGE(_Decal, n,_SDF_Px_Range);
+  MERGE(d,n,_params).color = MERGE(_Decal,n,_Color); \
+  MERGE(d,n,_params).tex = MERGE(_Decal,n,_BaseColor); \
+  MERGE(d,n,_params).tex_texelsize = MERGE(_Decal,n,_BaseColor_TexelSize); \
+  MERGE(d,n,_params).tex_st = MERGE(_Decal,n,_BaseColor_ST); \
+  MERGE(d,n,_params).roughness_tex = MERGE(_Decal,n,_Roughness); \
+  MERGE(d,n,_params).metallic_tex = MERGE(_Decal,n,_Metallic); \
+  MERGE(d,n,_params).emission_strength = MERGE(_Decal,n,_Emission_Strength); \
+  MERGE(d,n,_params).angle = MERGE(_Decal,n,_Angle); \
+  MERGE(d,n,_params).alpha_multiplier = MERGE(_Decal,n,_Alpha_Multiplier); \
+  MERGE(d,n,_params).round_alpha_multiplier = MERGE(_Decal,n,_Round_Alpha_Multiplier); \
+  MERGE(d,n,_params).uv_select = MERGE(_Decal,n,_UV_Select); \
+  MERGE(d,n,_params).tiling_mode = MERGE(_Decal,n,_Tiling_Mode); \
+  MERGE(d,n,_params).base_color_mode = MERGE(_Decal,n,_BaseColor_Mode); \
+  MERGE(d,n,_params).sdf_threshold = MERGE(_Decal,n,_SDF_Threshold); \
+  MERGE(d,n,_params).sdf_softness = MERGE(_Decal,n,_SDF_Softness); \
+  MERGE(d,n,_params).sdf_px_range = MERGE(_Decal,n,_SDF_Px_Range); \
+  MERGE(d,n,_params).domain_warping = MERGE(_Decal,n,_Domain_Warping_Enable_Static); \
+  MERGE(d,n,_params).domain_warping_noise = MERGE(_Decal,n,_Domain_Warping_Noise); \
+  MERGE(d,n,_params).domain_warping_strength = MERGE(_Decal,n,_Domain_Warping_Strength); \
+  MERGE(d,n,_params).domain_warping_speed = MERGE(_Decal,n,_Domain_Warping_Speed); \
+  MERGE(d,n,_params).domain_warping_octaves = MERGE(_Decal,n,_Domain_Warping_Octaves); \
+  MERGE(d,n,_params).domain_warping_scale = MERGE(_Decal,n,_Domain_Warping_Scale);
 
 #define SETUP_DECAL_BASE(n) \
   DecalParams MERGE(d,n,_params); \
@@ -1078,9 +1101,9 @@ void applyDecalImpl(
   MERGE(d,n,_params).do_metallic = true;
 
 #define SETUP_DECAL_MASK(n) \
-  MERGE(d,n,_params).mask = MERGE(_Decal, n,_Mask).SampleLevel(linear_repeat_s, \
-      get_uv_by_channel(i, MERGE(_Decal, n,_UV_Select)), 0); \
-  MERGE(d,n,_params).mask = MERGE(_Decal, n,_Mask_Invert) ? 1.0 - MERGE(d,n,_params).mask : MERGE(d,n,_params).mask;
+  MERGE(d,n,_params).mask = MERGE(_Decal,n,_Mask).SampleLevel(linear_repeat_s, \
+      get_uv_by_channel(i, MERGE(_Decal,n,_UV_Select)), 0); \
+  MERGE(d,n,_params).mask = MERGE(_Decal,n,_Mask_Invert) ? 1.0 - MERGE(d,n,_params).mask : MERGE(d,n,_params).mask;
 
 #define SETUP_DECAL_FINISH(n) \
   applyDecalImpl(albedo, decal_emission, roughness, metallic, i, MERGE(d,n,_params));
