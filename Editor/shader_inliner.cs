@@ -55,7 +55,7 @@ public class ShaderInliner : EditorWindow
 		File.WriteAllText(outputShaderPath, inlinedShader);
 
 		AssetDatabase.Refresh();
-		EditorUtility.DisplayDialog("Success", $"Inlined shader saved to:\n{outputShaderPath}", "OK");
+		//EditorUtility.DisplayDialog("Success", $"Inlined shader saved to:\n{outputShaderPath}", "OK");
 	}
 
 	private string ProcessShader(string content, string basePath)

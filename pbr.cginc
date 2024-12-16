@@ -403,59 +403,24 @@ float4 getLitColor(
     cc_mask *= cc_mask2_tmp;
 #endif
     {
-      float3 cc_L = direct_light.dir;
-      half3 cc_H = Unity_SafeNormalize(cc_L + view_dir);
-      half cc_LoH = saturate(dot(direct_light.dir, cc_H));
-      float3 cc_N = normalize(i.normal);
-      half cc_NoH = saturate(dot(i.normal, cc_H));
-      float clearcoat = FilamentClearcoat(
-          _Clearcoat_Roughness,
-          _Clearcoat_Strength,
-          cc_NoH,
-          cc_LoH,
-          cc_H);
-      pbr.rgb += clearcoat * saturate(dot(i.normal, cc_L)) *
-        cc_mask * direct_color * _Direct_Lighting_Factor;
-    }
-    // Indirect specular lighting
-#if 1
-    {
-      float3 in_L = normalize(reflect(-view_dir, i.normal));
-      half3 in_H = i.normal;
-      half in_LoH = saturate(dot(in_L, in_H));
-      half in_NoH = 1;
-      float clearcoat = FilamentClearcoat(
-          _Clearcoat_Roughness,
-          _Clearcoat_Strength,
-          in_NoH,
-          in_LoH,
-          in_H);
-      pbr.rgb += clearcoat * saturate(dot(i.normal, in_L)) *
-        cc_mask * indirect_light.specular * _Indirect_Specular_Lighting_Factor;
-    }
-#endif
-#if defined(VERTEXLIGHT_ON)
-    // Vertex lights
-    for (uint ii = 0; ii < 4; ii++) {
-      float3 vpos = float3(unity_4LightPosX0[ii], unity_4LightPosY0[ii],
-          unity_4LightPosZ0[ii]);
-      float3 vl = normalize(vpos - i.worldPos);
-      float3 c = unity_LightColor[0].rgb;
+      // TODO fold this into the full BRDF and apply the brightness corrections
+      // described in the filament whitepaper:
+      // https://google.github.io/filament/Filament.html
+      metallic = 0;
+      smoothness = 1.0 - _Clearcoat_Roughness;
+      indirect_light.specular = getIndirectSpecular(i, view_dir, normal, smoothness,
+          metallic, worldPos, uv);
 
-      half3 vhalf = Unity_SafeNormalize(half3(vl) + view_dir);
-      half vlh = saturate(dot(vl, vhalf));
-      half cc_vnh = saturate(dot(i.normal, vhalf));
-
-      float clearcoat = FilamentClearcoat(
+      float Fc;
+      float cc_term = FilamentClearcoat(
           _Clearcoat_Roughness,
           _Clearcoat_Strength,
-          cc_vnh,
-          vlh,
-          vhalf);
-      pbr.rgb += clearcoat * saturate(dot(i.normal, vl)) *
-        cc_mask * c * _Vertex_Lighting_Factor;
+          1,
+          dot(view_dir, normal),
+          normal,
+          Fc);
+      pbr.rgb += cc_term * indirect_light.specular;
     }
-#endif
 #endif
 
 #if defined(_UNITY_FOG)

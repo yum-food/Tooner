@@ -255,10 +255,11 @@ float FilamentClearcoat(
     float strength,
     float NoH,
     float LoH,
-    float3 h) {
+    float3 h,
+    out float Fc) {
   float Dc = D_GGX(roughness, NoH, h);
   float Vc = V_Kelemen(LoH);
-  float Fc = F_Schlick(0.04, LoH) * strength;
+  Fc = F_Schlick(0.04, LoH) * strength;
   return (Dc * Vc) * Fc;
 }
 
