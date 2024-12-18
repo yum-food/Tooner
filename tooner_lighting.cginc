@@ -28,6 +28,47 @@
 #ifndef TOONER_LIGHTING
 #define TOONER_LIGHTING
 
+float3 Shade4PointLightsWrapped(
+    float4 lightPosX, float4 lightPosY, float4 lightPosZ,
+    float3 lightColor0, float3 lightColor1, float3 lightColor2, float3 lightColor3,
+    float4 lightAttenSq,
+    float3 pos, float3 normal,
+    float wrapFactor)
+{
+    // Compute the difference between the vertex position and light positions
+    float4 toLightX = lightPosX - pos.x;
+    float4 toLightY = lightPosY - pos.y;
+    float4 toLightZ = lightPosZ - pos.z;
+
+    float4 lengthSq = 0;
+    lengthSq += toLightX * toLightX;
+    lengthSq += toLightY * toLightY;
+    lengthSq += toLightZ * toLightZ;
+
+    float4 ndotl = 0;
+    ndotl += toLightX * normal.x;
+    ndotl += toLightY * normal.y;
+    ndotl += toLightZ * normal.z;
+    
+    // Apply wrapped lighting correction
+		// https://www.iro.umontreal.ca/~derek/files/jgt_wrap_final.pdf
+    //float4 wrapped = (ndotl + 1) * (ndotl + 1) * .25;
+    float4 wrapped = pow(max(1E-4, (ndotl + wrapFactor) / (1 + wrapFactor)), 1 + wrapFactor);
+    //float4 wrapped = pow((ndotl + 1) / (2), 2);
+    float4 corr = rsqrt(lengthSq);
+    ndotl = max(0, wrapped) * corr;
+
+    // Compute attenuation
+    float4 atten = 1.0 / (1.0 + lengthSq * lightAttenSq);
+    float4 diff = ndotl * atten;
+
+    // Compute final color
+    return diff.x * lightColor0 +
+      diff.y * lightColor1 +
+      diff.z * lightColor2 +
+      diff.w * lightColor3;
+}
+
 void getVertexLightColor(inout v2f i)
 {
   #if defined(VERTEXLIGHT_ON)
@@ -37,13 +78,14 @@ void getVertexLightColor(inout v2f i)
   float3 flat_normal = normalize(
     (1.0 / _Flatten_Mesh_Normals_Str) * i.normal +
     _Flatten_Mesh_Normals_Str * view_dir);
-  i.vertexLightColor = Shade4PointLights(
+  i.vertexLightColor = Shade4PointLightsWrapped(
     unity_4LightPosX0, unity_4LightPosY0, unity_4LightPosZ0,
     unity_LightColor[0].rgb,
     unity_LightColor[1].rgb,
     unity_LightColor[2].rgb,
     unity_LightColor[3].rgb,
-    unity_4LightAtten0, i.worldPos, flat ? flat_normal : i.normal
+    unity_4LightAtten0, i.worldPos, flat ? flat_normal : i.normal,
+		1
   );
   #endif
 }

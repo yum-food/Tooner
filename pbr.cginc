@@ -402,6 +402,8 @@ float4 getLitColor(
     }
     cc_mask *= cc_mask2_tmp;
 #endif
+    // Diffuse specular
+    const float cc_roughness = max(1E-4, _Clearcoat_Roughness);
     {
       // TODO fold this into the full BRDF and apply the brightness corrections
       // described in the filament whitepaper:
@@ -411,15 +413,37 @@ float4 getLitColor(
       indirect_light.specular = getIndirectSpecular(i, view_dir, normal, smoothness,
           metallic, worldPos, uv);
 
+      const float3 l = reflect(-view_dir, normal);
+      const float3 h = normalize(l + view_dir);
+      const float NoH = dot(normal, h);
+      const float LoH = dot(l, h);
+
       float Fc;
       float cc_term = FilamentClearcoat(
-          _Clearcoat_Roughness,
+          cc_roughness,
           _Clearcoat_Strength,
-          1,
-          dot(view_dir, normal),
-          normal,
+          NoH,
+          LoH,
+          h,
           Fc);
-      pbr.rgb += cc_term * indirect_light.specular;
+      pbr.rgb += cc_term * indirect_light.specular * cc_mask;
+    }
+    // Direct
+    {
+      const float3 l = direct_light.dir;
+      const float3 h = normalize(l + view_dir);
+      const float NoH = dot(normal, h);
+      const float LoH = dot(direct_light.dir, h);
+
+      float Fc;
+      float cc_term = FilamentClearcoat(
+          cc_roughness,
+          _Clearcoat_Strength,
+          NoH,
+          LoH,
+          h,
+          Fc);
+      pbr.rgb += cc_term * direct_light.color * cc_mask;
     }
 #endif
 
