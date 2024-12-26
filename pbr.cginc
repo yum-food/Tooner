@@ -245,7 +245,7 @@ float4 getLitColor(
     direct_light.color *= (1 - e);
   }
 
-#if defined(_LTCGI)
+#if 0 && defined(_LTCGI)
   ltcgi_acc acc = (ltcgi_acc) 0;
   if (_LTCGI_Enabled_Dynamic) {
     LTCGI_Contribution(
@@ -377,6 +377,21 @@ float4 getLitColor(
         view_dir,
         direct_light,
         indirect_light).xyz;
+#endif
+
+
+#if 1 && defined(_LTCGI)
+  ltcgi_acc acc = (ltcgi_acc) 0;
+  if (_LTCGI_Enabled_Dynamic) {
+    LTCGI_Contribution(
+        acc,
+        i.worldPos,
+        normal,
+        view_dir,
+        1.0 - smoothness,
+        0);
+    pbr.rgb += acc.diffuse * pbr.rgb + acc.specular;
+  }
 #endif
 
   // TODO formalize with parameters
