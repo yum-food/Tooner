@@ -4,6 +4,7 @@
 #include "filament_math.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
+#include "math.cginc"
 #include "MochieStandardBRDF.cginc"
 #include "poi.cginc"
 #include "tone.cginc"
@@ -432,6 +433,7 @@ float4 getLitColor(
         /*smoothness=*/1 - cc_roughness,
         /*metallic=*/0,
         worldPos);
+    // Indirect specular
     {
       // TODO fold this into the full BRDF and apply the brightness corrections
       // described in the filament whitepaper:
@@ -449,7 +451,7 @@ float4 getLitColor(
           LoH,
           h,
           Fc);
-      pbr.rgb += cc_term * cc_indirect_specular * cc_mask;
+      pbr.rgb += cc_term * (indirect_light.specular + indirect_light.diffuse) * cc_mask;
     }
     // Direct
     {

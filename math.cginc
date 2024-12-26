@@ -300,5 +300,12 @@ uint gcd(uint a, uint b)
     return 1;
 }
 
+float wrapNoL(float NoL, float factor) {
+    // Apply wrapped lighting correction
+		// https://www.iro.umontreal.ca/~derek/files/jgt_wrap_final.pdf
+    //float4 wrapped = (NoL + 1) * (NoL + 1) * .25;
+    return pow(max(1E-4, (NoL + factor) / (1 + factor)), 1 + factor);
+}
+
 #endif  // __MATH_INC
 

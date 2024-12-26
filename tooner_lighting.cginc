@@ -37,7 +37,6 @@ float3 Shade4PointLightsWrapped(
     float3 pos, float3 normal,
     float wrapFactor)
 {
-    // Compute the difference between the vertex position and light positions
     float4 toLightX = lightPosX - pos.x;
     float4 toLightY = lightPosY - pos.y;
     float4 toLightZ = lightPosZ - pos.z;
@@ -53,18 +52,13 @@ float3 Shade4PointLightsWrapped(
     ndotl += toLightZ * normal.z;
     
     // Apply wrapped lighting correction
-		// https://www.iro.umontreal.ca/~derek/files/jgt_wrap_final.pdf
-    //float4 wrapped = (ndotl + 1) * (ndotl + 1) * .25;
-    float4 wrapped = pow(max(1E-4, (ndotl + wrapFactor) / (1 + wrapFactor)), 1 + wrapFactor);
-    //float4 wrapped = pow((ndotl + 1) / (2), 2);
+    float4 wrapped = wrapNoL(ndotl, wrapFactor);
     float4 corr = rsqrt(lengthSq);
     ndotl = max(0, wrapped) * corr;
 
-    // Compute attenuation
     float4 atten = 1.0 / (1.0 + lengthSq * lightAttenSq);
     float4 diff = ndotl * atten;
 
-    // Compute final color
     return diff.x * lightColor0 +
       diff.y * lightColor1 +
       diff.z * lightColor2 +
