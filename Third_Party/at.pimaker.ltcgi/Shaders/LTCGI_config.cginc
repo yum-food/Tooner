@@ -20,9 +20,8 @@
 /// a bit more with global screen color data. Slight performance cost.
 //#define LTCGI_BLENDED_DIFFUSE_SAMPLING
 
-/// Slightly simplified and thus faster sampling for reflections at the cost of quality.
-/// Consider using this if your scene looks about the same with this enabled.
-//#define LTCGI_FAST_SAMPLING
+/// Disable extra specular detail LUT, saves a sampler.
+//#define LTCGI_DISABLE_LUT2
 
 /// Use bicubic filtering for LTCGI lightmap. Recommended on.
 #define LTCGI_BICUBIC_LIGHTMAP
@@ -50,12 +49,7 @@
 ///
 
 
-// Allow statically textured lights.
-// (deprecated: doesn't really cause any improvement when disabled...)
-#define LTCGI_STATIC_TEXTURES
-
-
-// keep in sync with LTCGI_Controller.cs
+// automatically kept in sync with LTCGI_Controller.cs
 #define MAX_SOURCES 16
 
 // set according to the LUT specified on CONTROLLER
@@ -63,13 +57,13 @@
 static float LUT_SCALE = (LUT_SIZE - 1.0)/LUT_SIZE;
 const float LUT_BIAS = 0.5/LUT_SIZE;
 
-// will be set automatically if audiolink is available
+// will be set automatically if audiolink is available and in use
 //#define LTCGI_AUDIOLINK
 
 #ifdef LTCGI_AUDIOLINK
 #ifndef AUDIOLINK_WIDTH
 #ifndef AUDIOLINK_CGINC_INCLUDED
-#include "Packages/com.llealloo.audiolink/Runtime/Shaders/AudioLink.cginc"
+#include "Packages/at.pimaker.ltcgi/Shaders/LTCGI_AudioLinkNoOp.cginc"
 #define AUDIOLINK_CGINC_INCLUDED
 #endif
 #endif
@@ -78,10 +72,16 @@ const float LUT_BIAS = 0.5/LUT_SIZE;
 // Bake screen data into texture for better performance. Disables moveable screens.
 #define LTCGI_STATIC_UNIFORMS
 
+// Allow statically textured lights.
+//#define LTCGI_STATIC_TEXTURES
+
 // Enable support for cylindrical screens.
-#define LTCGI_CYLINDER
+//#define LTCGI_CYLINDER
 
 // Activate avatar mode, which overrides certain configs from above.
-#define LTCGI_AVATAR_MODE
+//#define LTCGI_AVATAR_MODE
+
+// Slightly simplified and thus faster sampling for reflections at the cost of quality.
+//#define LTCGI_FAST_SAMPLING
 
 #endif

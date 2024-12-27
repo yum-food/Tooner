@@ -583,9 +583,8 @@ float get_glitter(float2 uv, float3 worldPos, float3 centerCamPos,
 }
 #endif  // _GLITTER
 
-float3 CreateBinormal (float3 normal, float3 tangent, float binormalSign) {
-	return cross(normal, tangent.xyz) *
-		(binormalSign * unity_WorldTransformParams.w);
+float3 CreateBinormal(float3 normal, float3 tangent, float binormalSign) {
+	return cross(normal, tangent) * (binormalSign * unity_WorldTransformParams.w);
 }
 
 float2 matcap_distortion0(float2 matcap_uv) {

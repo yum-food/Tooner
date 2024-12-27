@@ -1001,8 +1001,8 @@ Shader "yum_food/tooner"
 
       CGPROGRAM
       #pragma target 5.0
-			#pragma multi_compile_instancing
 
+			#pragma multi_compile_instancing
 			#pragma multi_compile_fwdbase
 			#pragma multi_compile_fog
       #pragma multi_compile _ VERTEXLIGHT_ON
@@ -1037,9 +1037,10 @@ Shader "yum_food/tooner"
 
       CGPROGRAM
       #pragma target 5.0
-			#pragma multi_compile_instancing
 
+			#pragma multi_compile_instancing
       #pragma multi_compile_fwdadd_fullshadows
+
       #include "feature_macros.cginc"
 
 			#pragma vertex vert

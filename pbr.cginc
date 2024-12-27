@@ -254,12 +254,13 @@ float4 getLitColor(
         normal,
         view_dir,
         GetRoughness(smoothness),
-        0);
+        i.uv2);
     indirect_light.diffuse += acc.diffuse;
     indirect_light.specular += acc.specular;
   }
 #endif
 
+#if defined(_BRIGHTNESS_CLAMP) || defined(_PROXIMITY_DIMMING)
   direct_light.color = RGBtoHSV(direct_light.color);
   indirect_light.specular = RGBtoHSV(indirect_light.specular);
   indirect_light.diffuse = RGBtoHSV(indirect_light.diffuse);
@@ -275,17 +276,19 @@ float4 getLitColor(
       indirect_light.diffuse[2]);
   // Do this to avoid division by 0. If both light sources are black,
   // sum_brightness could be 0;
+  const float min_brightness = max(_Min_Brightness, 1E-6);
 #if defined(_BRIGHTNESS_CLAMP)
   //brightnesses = smooth_max(brightnesses, _Min_Brightness);
-  brightnesses = max(brightnesses, _Min_Brightness);
-#endif
-  float sum_brightness = brightnesses[0] + brightnesses[1];
+  brightnesses = max(brightnesses, min_brightness);
+
+  float sum_brightness = max(brightnesses[0] + brightnesses[1], min_brightness);
   float2 brightness_proportions = brightnesses / sum_brightness;
-#if defined(_BRIGHTNESS_CLAMP)
-  sum_brightness = smooth_clamp(sum_brightness, _Min_Brightness, _Max_Brightness);
-#endif
+
+  sum_brightness = smooth_clamp(sum_brightness, min_brightness, _Max_Brightness);
+
   direct_light.color[2] = sum_brightness * brightness_proportions[0];
   indirect_light.diffuse[2] = sum_brightness * brightness_proportions[1];
+#endif
 
 #if defined(_PROXIMITY_DIMMING)
   {
@@ -304,20 +307,19 @@ float4 getLitColor(
   }
 #endif
 
-  direct_light.color[2] *= _Lighting_Factor * _Direct_Lighting_Factor * enable_direct;
-  indirect_light.specular[2] *= _Lighting_Factor *
-    _Indirect_Specular_Lighting_Factor *
-    _Indirect_Specular_Lighting_Factor2;
-  indirect_light.diffuse[2] *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
-
   // Specular has to be clamped separately to avoid artifacting.
 #if defined(_BRIGHTNESS_CLAMP)
-  indirect_light.specular[2] = smooth_clamp(indirect_light.specular[2], _Min_Brightness, _Max_Brightness);
+  indirect_light.specular[2] = smooth_clamp(indirect_light.specular[2], min_brightness, _Max_Brightness);
 #endif
 
   direct_light.color = HSVtoRGB(direct_light.color);
   indirect_light.specular = HSVtoRGB(indirect_light.specular);
   indirect_light.diffuse = HSVtoRGB(indirect_light.diffuse);
+#endif
+  // _BRIGHTNESS_CLAMP || _PROXIMITY_DIMMING
+  direct_light.color *= _Lighting_Factor * _Direct_Lighting_Factor * enable_direct;
+  indirect_light.specular *= _Lighting_Factor * _Indirect_Specular_Lighting_Factor * _Indirect_Specular_Lighting_Factor2;
+  indirect_light.diffuse *= _Lighting_Factor * _Indirect_Diffuse_Lighting_Factor;
 
   // Apply AO
   indirect_light.diffuse *= ao;
@@ -389,15 +391,15 @@ float4 getLitColor(
         normal,
         view_dir,
         1.0 - smoothness,
-        0);
+        i.uv2);
     pbr.rgb += acc.diffuse * pbr.rgb + acc.specular;
   }
 #endif
 
   // TODO formalize with parameters
   // Break up color banding by adding some dithering to shaded color.
-  float screen_dither = ign(tdata.screen_uv_round) * .00390625;
-  pbr += screen_dither;
+  //float screen_dither = ign(tdata.screen_uv_round) * .00390625;
+  //pbr += screen_dither;
 
 #if defined(_CLEARCOAT)
     // Direct lighting
