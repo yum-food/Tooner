@@ -41,9 +41,8 @@ void LTCGI_Evaluate(ltcgi_input input, float3 worldNorm, float3 viewDir, float3x
         {
             if (!input.flags.lmdOnly) {
                 // very approximate lol
-                float3 ctr = (input.Lw[0] + input.Lw[1])/2;
-                float dist = length(ctr);
-                if (dist > LTCGI_DISTANCE_FADE_APPROX_MULT)
+                float3 ctr = (input.Lw[0] + input.Lw[1]) * 0.5f;
+                if (dot(ctr, ctr) > LTCGI_DISTANCE_FADE_APPROX_MULT * LTCGI_DISTANCE_FADE_APPROX_MULT)
                 {
                     return;
                 }
@@ -53,6 +52,7 @@ void LTCGI_Evaluate(ltcgi_input input, float3 worldNorm, float3 viewDir, float3x
 
     #define RET1_IF_LMDIFF [branch] if (/*const*/ diffuse && input.flags.diffFromLm) { output.intensity = 1.0f; return; }
 
+    [branch]
     if (input.flags.colormode == LTCGI_COLORMODE_SINGLEUV) {
         float2 uv = input.uvStart;
         if (uv.x < 0) uv.xy = uv.yx;
@@ -69,6 +69,7 @@ void LTCGI_Evaluate(ltcgi_input input, float3 worldNorm, float3 viewDir, float3x
     }
 
     #ifdef LTCGI_AUDIOLINK
+        [branch]
         if (input.flags.colormode == LTCGI_COLORMODE_AUDIOLINK) {
             float al = AudioLinkData(ALPASS_AUDIOLINK + uint2(0, input.flags.alBand)).r;
             output.color *= al;
@@ -133,6 +134,7 @@ void LTCGI_Evaluate(ltcgi_input input, float3 worldNorm, float3 viewDir, float3x
     LTCGI_ClipQuadToHorizon(L, n);
 
     // early out if everything was clipped below horizon
+    [branch]
     if (n == 0)
         return;
 
@@ -140,15 +142,20 @@ void LTCGI_Evaluate(ltcgi_input input, float3 worldNorm, float3 viewDir, float3x
     L[1] = normalize(L[1]);
     L[2] = normalize(L[2]);
     L[3] = normalize(L[3]);
-    L[4] = normalize(L[4]);
 
-    // integrate (and pray that constant folding works well)
+    // integrate
     float sum = 0;
-    [unroll(5)]
-    for (uint v = 0; v < max(3, (uint)n); v++) {
-        float3 a = L[v];
-        float3 b = L[(v + 1) % 5];
-        sum += LTCGI_IntegrateEdge(a, b).z;
+    sum += LTCGI_IntegrateEdge(L[0], L[1]).z;
+    sum += LTCGI_IntegrateEdge(L[1], L[2]).z;
+    sum += LTCGI_IntegrateEdge(L[2], L[3]).z;
+    [branch]
+    if (n >= 4)
+    {
+        L[4] = normalize(L[4]);
+        sum += LTCGI_IntegrateEdge(L[3], L[4]).z;
+        [branch]
+        if (n == 5)
+            sum += LTCGI_IntegrateEdge(L[4], L[0]).z;
     }
 
     // doublesided is accounted for with optimization at the start, so return abs
@@ -172,6 +179,15 @@ void LTCGI_Contribution(
         totalSpecularIntensity = 0;
         totalDiffuseIntensity = 0;
     #endif
+
+    #ifdef LTCGI_SPECULAR_OFF
+        specular = 0;
+    #endif
+    #ifdef LTCGI_DIFFUSE_OFF
+        diffuse = 0;
+    #endif
+
+    [branch]
     if (_Udon_LTCGI_GlobalEnable == 0.0f) {
         return;
     }
@@ -180,10 +196,6 @@ void LTCGI_Contribution(
     float theta = LTCGI_acos_fast(dot(worldNorm, viewDir));
     float2 uv = float2(roughness, theta/(0.5*UNITY_PI));
     uv = uv*LUT_SCALE + LUT_BIAS;
-
-    #ifndef UNITY_UV_STARTS_AT_TOP
-        uv.y = 1 - uv.y;
-    #endif
 
     // calculate LTCGI custom lightmap UV and sample
     float3 lms = LTCGI_SampleShadowmap(lmuv);
@@ -210,9 +222,12 @@ void LTCGI_Contribution(
     Minv = mul(Minv, identityBrdf);
 
     // specular brightness
+    float spec_amp = 1.0f;
     #ifndef LTCGI_SPECULAR_OFF
+    #ifndef LTCGI_DISABLE_LUT2
     #ifndef SHADER_TARGET_SURFACE_ANALYSIS_MOJOSHADER
-        float spec_amp = _Udon_LTCGI_lut2.SampleLevel(LTCGI_SAMPLER, uv, 0).x;
+        spec_amp = _Udon_LTCGI_lut2.SampleLevel(LTCGI_SAMPLER, uv, 0).x;
+    #endif
     #endif
     #endif
 
@@ -231,8 +246,14 @@ void LTCGI_Contribution(
     #endif
 
     // loop through all lights and add them to the output
+#if MAX_SOURCES != 1
     uint count = min(_Udon_LTCGI_ScreenCount, MAX_SOURCES);
     [loop]
+#else
+    // mobile config
+    const uint count = 1;
+    [unroll(1)]
+#endif
     for (uint i = 0; i < count; i++) {
         // skip masked and black lights
         if (_Udon_LTCGI_Mask[i]) continue;
@@ -298,6 +319,7 @@ void LTCGI_Contribution(
                         lmd = smoothstep(0.0, LTCGI_SPECULAR_LIGHTMAP_STEP, saturate(lm - LTCGI_LIGHTMAP_CUTOFF));
                 }
                 ltcgi_output diff;
+                diff.color = 0;
                 LTCGI_Evaluate(input, worldNorm, viewDir, identityBrdf, roughness, true, diff);
                 diff.intensity *= lmd;
 
@@ -317,6 +339,7 @@ void LTCGI_Contribution(
             if (flags.specular)
             {
                 ltcgi_output spec;
+                spec.color = 0;
                 LTCGI_Evaluate(input, worldNorm, viewDir, Minv, roughness, false, spec);
                 spec.intensity *= spec_amp * smoothstep(0.0, LTCGI_SPECULAR_LIGHTMAP_STEP, saturate(lm - LTCGI_LIGHTMAP_CUTOFF));
 
@@ -336,14 +359,16 @@ void LTCGI_Contribution(
 
 #ifndef LTCGI_API_V2
 
+// missing totalSpecularIntensity, totalDiffuseIntensity, specular
 void LTCGI_Contribution(
     float3 worldPos, float3 worldNorm, float3 viewDir, float roughness, float2 lmuv, inout half3 diffuse
 ) {
-    half3 _u1;
+    half3 _u1 = (half3)0;
     float _u2, _u3;
     LTCGI_Contribution(worldPos, worldNorm, viewDir, roughness, lmuv, diffuse, _u1, _u2, _u3);
 }
 
+// missing totalSpecularIntensity, totalDiffuseIntensity
 void LTCGI_Contribution(
     float3 worldPos, float3 worldNorm, float3 viewDir, float roughness, float2 lmuv, inout half3 diffuse, inout half3 specular
 ) {
@@ -351,6 +376,7 @@ void LTCGI_Contribution(
     LTCGI_Contribution(worldPos, worldNorm, viewDir, roughness, lmuv, diffuse, specular, _u1, _u2);
 }
 
+// missing totalDiffuseIntensity
 void LTCGI_Contribution(
     float3 worldPos, float3 worldNorm, float3 viewDir, float roughness, float2 lmuv, inout half3 diffuse, inout half3 specular, out float totalSpecularIntensity
 ) {

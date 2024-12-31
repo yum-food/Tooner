@@ -1802,6 +1802,118 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickDownstairs2() {
+    MaterialProperty bc;
+    bc = FindProperty("_Gimmick_DS2_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Downstairs 2", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_DS2", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_DS2_Mask");
+    TexturePropertySingleLine(MakeLabel(bc, "Mask"), bc);
+    bc = FindProperty("_Gimmick_DS2_Noise");
+    TexturePropertySingleLine(MakeLabel(bc, "Noise"), bc);
+    bc = FindProperty("_Gimmick_DS2_Albedo_Factor");
+    FloatProperty(bc, "Albedo factor");
+    bc = FindProperty("_Gimmick_DS2_Emission_Factor");
+    FloatProperty(bc, "Emission factor");
+
+    bc = FindProperty("_Gimmick_DS2_00_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Enable effect 00", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_DS2_00_Domain_Warping_Octaves");
+      FloatProperty(bc, "Domain warping octaves");
+      bc = FindProperty("_Gimmick_DS2_00_Domain_Warping_Strength");
+      FloatProperty(bc, "Domain warping strength");
+      bc = FindProperty("_Gimmick_DS2_00_Domain_Warping_Scale");
+      FloatProperty(bc, "Domain warping scale");
+      bc = FindProperty("_Gimmick_DS2_00_Domain_Warping_Speed");
+      FloatProperty(bc, "Domain warping speed");
+
+      EditorGUI.indentLevel -= 1;
+    }
+
+    bc = FindProperty("_Gimmick_DS2_01_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Enable effect 01", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_DS2_01_Period");
+      VectorProperty(bc, "Period");
+      bc = FindProperty("_Gimmick_DS2_01_Count");
+      VectorProperty(bc, "Count");
+      bc = FindProperty("_Gimmick_DS2_01_Radius");
+      FloatProperty(bc, "Radius");
+
+      bc = FindProperty("_Gimmick_DS2_01_Domain_Warping_Octaves");
+      FloatProperty(bc, "Domain warping octaves");
+      bc = FindProperty("_Gimmick_DS2_01_Domain_Warping_Strength");
+      FloatProperty(bc, "Domain warping strength");
+      bc = FindProperty("_Gimmick_DS2_01_Domain_Warping_Scale");
+      FloatProperty(bc, "Domain warping scale");
+      bc = FindProperty("_Gimmick_DS2_01_Domain_Warping_Speed");
+      FloatProperty(bc, "Domain warping speed");
+
+      EditorGUI.indentLevel -= 1;
+    }
+
+    bc = FindProperty("_Gimmick_DS2_02_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Enable effect 02", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      EditorGUI.indentLevel -= 1;
+    }
+
+    bc = FindProperty("_Gimmick_DS2_03_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Enable effect 03", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_DS2_03_Period");
+      VectorProperty(bc, "Period");
+      bc = FindProperty("_Gimmick_DS2_03_Count");
+      VectorProperty(bc, "Count");
+      bc = FindProperty("_Gimmick_DS2_03_Edge_Length");
+      FloatProperty(bc, "Edge length");
+
+      EditorGUI.indentLevel -= 1;
+    }
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmickHalo00() {
     MaterialProperty bc;
     bc = FindProperty("_Gimmick_Halo00_Enable_Static");
@@ -2473,6 +2585,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickEyes00();
     DoGimmickEyes01();
     DoGimmickEyes02();
+    DoGimmickDownstairs2();
     DoGimmickHalo00();
     DoGimmickPixellate();
     DoGimmickTrochoid();
@@ -2962,6 +3075,14 @@ public class ToonerGUI : ShaderGUI {
       ColorProperty(bc, "Diffuse color (RGB)");
       EditorGUI.indentLevel -= 1;
     }
+
+    bc = FindProperty("_Force_World_Lighting");
+    enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Force world lighting", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_FORCE_WORLD_LIGHTING", enabled);
 
     bc = FindProperty("_Aces_Filmic_Enable_Static");
     enabled = bc.floatValue > 1E-6;

@@ -7,6 +7,7 @@
 #include "clones.cginc"
 #include "cnlohr.cginc"
 #include "disinfo.cginc"
+#include "downstairs_02.cginc"
 #include "eyes.cginc"
 #include "fog.cginc"
 #include "gerstner.cginc"
@@ -2747,6 +2748,30 @@ float4 effect(inout v2f i, out float depth)
   albedo.rgb += glitter_color_unlit * _Glitter_Brightness_Lit;
 #endif
 
+#if defined(_GIMMICK_DS2)
+  Gimmick_DS2_Output ds2 = (Gimmick_DS2_Output)0;
+  // TODO if these remain mutually exclusive, we should use an enum + switch
+  if (_Gimmick_DS2_00_Enable_Dynamic) {
+    ds2 = Gimmick_DS2_00(i);
+  } else if (_Gimmick_DS2_01_Enable_Dynamic) {
+    ds2 = Gimmick_DS2_01(i);
+  } else if (_Gimmick_DS2_02_Enable_Dynamic) {
+    ds2 = Gimmick_DS2_02(i);
+  } else if (_Gimmick_DS2_03_Enable_Dynamic) {
+    ds2 = Gimmick_DS2_03(i);
+  }
+  float ds2_mask = _Gimmick_DS2_Mask.SampleLevel(linear_clamp_s, i.uv0, 0);
+  albedo = ds2.albedo * _Gimmick_DS2_Albedo_Factor * ds2_mask;
+  normal = ds2.normal;
+  metallic = ds2.metallic;
+  roughness = ds2.roughness;
+  i.worldPos = ds2.worldPos;
+  {
+    float4 clip_pos = mul(UNITY_MATRIX_VP, float4(ds2.worldPos, 1.0));
+    depth = clip_pos.z / clip_pos.w;
+  }
+#endif
+
   float4 lit = getLitColor(vertex_light_color, albedo, i.worldPos, normal,
       metallic, 1.0 - roughness, i.uv0, ao, /*enable_direct=*/true,
       diffuse_contrib, i, tdata);
@@ -2777,6 +2802,9 @@ float4 effect(inout v2f i, out float depth)
 #endif
 #if defined(_GLITTER)
   result.rgb += glitter_color_unlit * _Glitter_Brightness;
+#endif
+#if defined(_GIMMICK_DS2)
+  result.rgb += ds2.emission * _Gimmick_DS2_Emission_Factor * ds2_mask;
 #endif
 
 #if defined(_ACES_FILMIC)

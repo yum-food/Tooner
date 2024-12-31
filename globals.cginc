@@ -756,6 +756,36 @@ float _Gimmick_Eyes02_Roughness;
 float3 _Gimmick_Eyes02_Emission;
 #endif
 
+#if defined(_GIMMICK_DS2)
+float _Gimmick_DS2_Enable_Static;
+texture2D _Gimmick_DS2_Mask;
+texture2D _Gimmick_DS2_Noise;
+// 00
+float _Gimmick_DS2_00_Enable_Dynamic;
+float _Gimmick_DS2_Albedo_Factor;
+float _Gimmick_DS2_Emission_Factor;
+float _Gimmick_DS2_00_Domain_Warping_Octaves;
+float _Gimmick_DS2_00_Domain_Warping_Strength;
+float _Gimmick_DS2_00_Domain_Warping_Scale;
+float _Gimmick_DS2_00_Domain_Warping_Speed;
+// 01
+float _Gimmick_DS2_01_Enable_Dynamic;
+float4 _Gimmick_DS2_01_Period;
+float4 _Gimmick_DS2_01_Count;
+float _Gimmick_DS2_01_Radius;
+float _Gimmick_DS2_01_Domain_Warping_Octaves;
+float _Gimmick_DS2_01_Domain_Warping_Strength;
+float _Gimmick_DS2_01_Domain_Warping_Scale;
+float _Gimmick_DS2_01_Domain_Warping_Speed;
+// 02
+float _Gimmick_DS2_02_Enable_Dynamic;
+// 03
+float _Gimmick_DS2_03_Enable_Dynamic;
+float4 _Gimmick_DS2_03_Period;
+float4 _Gimmick_DS2_03_Count;
+float _Gimmick_DS2_03_Edge_Length;
+#endif
+
 #if defined(_PIXELLATE)
 float _Gimmick_Pixellate_Enable_Static;
 float _Gimmick_Pixellate_Resolution_U;

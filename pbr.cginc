@@ -245,7 +245,8 @@ float4 getLitColor(
     direct_light.color *= (1 - e);
   }
 
-#if 0 && defined(_LTCGI)
+#if defined(_LTCGI)
+#if !defined(LIGHTMAP_ON) && !defined(_FORCE_WORLD_LIGHTING)
   ltcgi_acc acc = (ltcgi_acc) 0;
   if (_LTCGI_Enabled_Dynamic) {
     LTCGI_Contribution(
@@ -258,6 +259,7 @@ float4 getLitColor(
     indirect_light.diffuse += acc.diffuse;
     indirect_light.specular += acc.specular;
   }
+#endif
 #endif
 
 #if defined(_BRIGHTNESS_CLAMP) || defined(_PROXIMITY_DIMMING)
@@ -382,7 +384,8 @@ float4 getLitColor(
 #endif
 
 
-#if 1 && defined(_LTCGI)
+#if defined(_LTCGI)
+#if defined(LIGHTMAP_ON) || defined(_FORCE_WORLD_LIGHTING)
   ltcgi_acc acc = (ltcgi_acc) 0;
   if (_LTCGI_Enabled_Dynamic) {
     LTCGI_Contribution(
@@ -392,8 +395,9 @@ float4 getLitColor(
         view_dir,
         1.0 - smoothness,
         i.uv2);
-    pbr.rgb += acc.diffuse * pbr.rgb + acc.specular;
+    pbr.rgb += (acc.diffuse * pbr.rgb + acc.specular) * albedo.a;
   }
+#endif
 #endif
 
   // TODO formalize with parameters

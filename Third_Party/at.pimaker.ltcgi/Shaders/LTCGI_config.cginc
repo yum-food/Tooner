@@ -73,7 +73,7 @@ const float LUT_BIAS = 0.5/LUT_SIZE;
 #define LTCGI_STATIC_UNIFORMS
 
 // Allow statically textured lights.
-//#define LTCGI_STATIC_TEXTURES
+#define LTCGI_STATIC_TEXTURES
 
 // Enable support for cylindrical screens.
 //#define LTCGI_CYLINDER

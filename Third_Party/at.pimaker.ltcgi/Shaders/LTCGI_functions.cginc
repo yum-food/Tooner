@@ -138,16 +138,28 @@ half3 premul_alpha(half4 i)
     return i.rgb * i.a;
 }
 
+half max2(half2 v)
+{
+    return max(v.x, v.y);
+}
+
 void LTCGI_sample(float2 uv, uint lod, uint idx, float blend, out float3 result)
 {
+#ifndef LTCGI_STATIC_TEXTURES
+    idx = 0; // optimize away the branches below
+#endif
+
 #ifdef LTCGI_FAST_SAMPLING
     #ifndef SHADER_TARGET_SURFACE_ANALYSIS
-        blend *= 2.5f;
+        float outside = max2(abs(uv - 0.5f) - 0.5f);
+        float outmod = smoothstep(-0.1f, 0.1f, outside) * 2.5f;
+        blend = blend * 2.5f + outmod;
         [branch]
         if (idx == 0)
         {
             result = premul_alpha(_Udon_LTCGI_Texture_LOD0.SampleLevel(LTCGI_SAMPLER, uv, blend));
         }
+        #ifdef LTCGI_STATIC_TEXTURES
         else
         {
             result = UNITY_SAMPLE_TEX2DARRAY_SAMPLER_LOD(
@@ -157,14 +169,12 @@ void LTCGI_sample(float2 uv, uint lod, uint idx, float blend, out float3 result)
                     blend
                 ).rgb;
         }
+        #endif
     #else
         result = 0;
     #endif
 #else
     result = 0;
-    #ifndef LTCGI_STATIC_TEXTURES
-    idx = 0; // optimize away the branches below
-    #endif
 
     [branch]
     if (lod == 0)
@@ -191,6 +201,7 @@ void LTCGI_sample(float2 uv, uint lod, uint idx, float blend, out float3 result)
                 return;
                 #endif
             }
+            #ifdef LTCGI_STATIC_TEXTURES
             else
             {
                 result = premul_alpha(UNITY_SAMPLE_TEX2DARRAY_SAMPLER_LOD(
@@ -201,6 +212,7 @@ void LTCGI_sample(float2 uv, uint lod, uint idx, float blend, out float3 result)
                 ));
                 return;
             }
+            #endif
         }
     }
 
@@ -227,6 +239,7 @@ void LTCGI_sample(float2 uv, uint lod, uint idx, float blend, out float3 result)
         return;
         #endif
     }
+    #ifdef LTCGI_STATIC_TEXTURES
     else
     {
         [forcecase]
@@ -258,6 +271,7 @@ void LTCGI_sample(float2 uv, uint lod, uint idx, float blend, out float3 result)
                 return;
         }
     }
+    #endif
 #endif
 }
 

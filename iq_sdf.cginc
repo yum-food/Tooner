@@ -56,6 +56,12 @@ float distance_from_box(float3 p, float3 b)
   return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0);
 }
 
+float distance_from_round_box(float3 p, float3 b, float r)
+{
+  float3 q = abs(p) - b + r;
+  return length(max(q,0.0)) + min(max(q.x,max(q.y,q.z)),0.0) - r;
+}
+
 float distance_from_box_frame(float3 p, float3 b, float e)
 {
   p = abs(p)-b;
@@ -97,9 +103,25 @@ float distance_from_plane(float3 p, float3 n, float h)
   return dot(p,n) + h;
 }
 
+float distance_from_cylinder(float3 p, float3 c)
+{
+  return length(p.xz-c.xy)-c.z;
+}
+
+float distance_from_capped_cylinder(float3 p, float h, float r)
+{
+  float2 d = abs(float2(length(p.xz),p.y)) - float2(r,h);
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0));
+}
+
 float3 op_rep(in float3 p, in float3 c)
 {
   return glsl_mod(p+0.5*c,c)-0.5*c;
+}
+
+float op_sub(float d1, float d2)
+{
+  return max(-d1,d2);
 }
 
 // End licensed section
