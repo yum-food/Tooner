@@ -760,8 +760,8 @@ float3 _Gimmick_Eyes02_Emission;
 float _Gimmick_DS2_Enable_Static;
 texture2D _Gimmick_DS2_Mask;
 texture2D _Gimmick_DS2_Noise;
+float _Gimmick_DS2_Choice;
 // 00
-float _Gimmick_DS2_00_Enable_Dynamic;
 float _Gimmick_DS2_Albedo_Factor;
 float _Gimmick_DS2_Emission_Factor;
 float _Gimmick_DS2_00_Domain_Warping_Octaves;
@@ -769,7 +769,6 @@ float _Gimmick_DS2_00_Domain_Warping_Strength;
 float _Gimmick_DS2_00_Domain_Warping_Scale;
 float _Gimmick_DS2_00_Domain_Warping_Speed;
 // 01
-float _Gimmick_DS2_01_Enable_Dynamic;
 float4 _Gimmick_DS2_01_Period;
 float4 _Gimmick_DS2_01_Count;
 float _Gimmick_DS2_01_Radius;
@@ -778,12 +777,21 @@ float _Gimmick_DS2_01_Domain_Warping_Strength;
 float _Gimmick_DS2_01_Domain_Warping_Scale;
 float _Gimmick_DS2_01_Domain_Warping_Speed;
 // 02
-float _Gimmick_DS2_02_Enable_Dynamic;
+float4 _Gimmick_DS2_02_Period;
+float4 _Gimmick_DS2_02_Count;
+float _Gimmick_DS2_02_Edge_Length;
+float _Gimmick_DS2_02_Domain_Warping_Octaves;
+float _Gimmick_DS2_02_Domain_Warping_Strength;
+float _Gimmick_DS2_02_Domain_Warping_Scale;
+float _Gimmick_DS2_02_Domain_Warping_Speed;
 // 03
-float _Gimmick_DS2_03_Enable_Dynamic;
 float4 _Gimmick_DS2_03_Period;
 float4 _Gimmick_DS2_03_Count;
 float _Gimmick_DS2_03_Edge_Length;
+float _Gimmick_DS2_03_Domain_Warping_Octaves;
+float _Gimmick_DS2_03_Domain_Warping_Strength;
+float _Gimmick_DS2_03_Domain_Warping_Scale;
+float _Gimmick_DS2_03_Domain_Warping_Speed;
 #endif
 
 #if defined(_PIXELLATE)

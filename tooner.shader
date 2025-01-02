@@ -797,18 +797,17 @@ Shader "yum_food/tooner"
     _Gimmick_Eyes02_Emission ("Emission", Color) = (0, 0, 0, 1)
 
     _Gimmick_DS2_Enable_Static  ("Enable (static)", Float) = 0
+    _Gimmick_DS2_Choice  ("Choice", Float) = 0
     _Gimmick_DS2_Noise  ("Noise", 2D) = "black" {}
     _Gimmick_DS2_Mask("Mask", 2D) = "white" {}
     _Gimmick_DS2_Albedo_Factor("Albedo factor", Float) = 1
     _Gimmick_DS2_Emission_Factor("Emission factor", Float) = 1
     // Effect 00
-    _Gimmick_DS2_00_Enable_Dynamic("Enable effect 00 (dynamic)", Float) = 0
     _Gimmick_DS2_00_Domain_Warping_Octaves("Domain warping octaves", Float) = 3
     _Gimmick_DS2_00_Domain_Warping_Strength("Domain warping strength", Float) = 1
     _Gimmick_DS2_00_Domain_Warping_Scale("Domain warping scale", Float) = 1
     _Gimmick_DS2_00_Domain_Warping_Speed("Domain warping speed", Float) = 1
     // Effect 01
-    _Gimmick_DS2_01_Enable_Dynamic("Enable effect 01 (dynamic)", Float) = 0
     _Gimmick_DS2_01_Period("Period", Vector) = (1, 1, 1, 1)
     _Gimmick_DS2_01_Count("Count", Vector) = (1, 1, 1, 1)
     _Gimmick_DS2_01_Radius("Radius", Float) = 1
@@ -817,12 +816,21 @@ Shader "yum_food/tooner"
     _Gimmick_DS2_01_Domain_Warping_Scale("Domain warping scale", Float) = 1
     _Gimmick_DS2_01_Domain_Warping_Speed("Domain warping speed", Float) = 1
     // Effect 02
-    _Gimmick_DS2_02_Enable_Dynamic("Enable effect 02 (dynamic)", Float) = 0
+    _Gimmick_DS2_02_Period("Period", Vector) = (1, 1, 1, 1)
+    _Gimmick_DS2_02_Count("Count", Vector) = (1, 1, 1, 1)
+    _Gimmick_DS2_02_Edge_Length("Edge length", Float) = 0.1
+    _Gimmick_DS2_02_Domain_Warping_Octaves("Domain warping octaves", Float) = 3
+    _Gimmick_DS2_02_Domain_Warping_Strength("Domain warping strength", Float) = 1
+    _Gimmick_DS2_02_Domain_Warping_Scale("Domain warping scale", Float) = 1
+    _Gimmick_DS2_02_Domain_Warping_Speed("Domain warping speed", Float) = 1
     // Effect 03
-    _Gimmick_DS2_03_Enable_Dynamic("Enable effect 03 (dynamic)", Float) = 0
     _Gimmick_DS2_03_Period("Period", Vector) = (1, 1, 1, 1)
     _Gimmick_DS2_03_Count("Count", Vector) = (1, 1, 1, 1)
     _Gimmick_DS2_03_Edge_Length("Edge length", Float) = 0.1
+    _Gimmick_DS2_03_Domain_Warping_Octaves("Domain warping octaves", Float) = 3
+    _Gimmick_DS2_03_Domain_Warping_Strength("Domain warping strength", Float) = 1
+    _Gimmick_DS2_03_Domain_Warping_Scale("Domain warping scale", Float) = 1
+    _Gimmick_DS2_03_Domain_Warping_Speed("Domain warping speed", Float) = 1
 
 
     _Gimmick_Halo00_Enable_Static("Enable halo", Float) = 0.0
@@ -1011,6 +1019,7 @@ Shader "yum_food/tooner"
   {
     Tags {
       "VRCFallback"="ToonCutout"
+      "DisableBatching"="True"
     }
     Pass {
       Tags {
@@ -1018,6 +1027,7 @@ Shader "yum_food/tooner"
         "Queue"="Geometry"
         "LightMode"="ForwardBase"
         "LTCGI"="ALWAYS"
+        "DisableBatching"="True"
       }
       Blend [_SrcBlend] [_DstBlend]
       ZWrite [_ZWrite]

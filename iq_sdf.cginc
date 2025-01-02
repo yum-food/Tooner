@@ -114,6 +114,24 @@ float distance_from_capped_cylinder(float3 p, float h, float r)
   return min(max(d.x,d.y),0.0) + length(max(d,0.0));
 }
 
+float distance_from_hex_prism(float3 p, float2 h)
+{
+  float3 q = abs(p);
+
+  const float3 k = float3(-0.8660254, 0.5, 0.57735);
+  p = abs(p);
+  p.xy -= 2.0*min(dot(k.xy, p.xy), 0.0)*k.xy;
+  float2 d = float2(
+      length(p.xy - float2(clamp(p.x, -k.z*h.x, k.z*h.x), h.x))*sign(p.y - h.x),
+      p.z-h.y );
+  return min(max(d.x,d.y),0.0) + length(max(d,0.0));
+}
+/*
+float sdHexPrism( vec3 p, vec2 h )
+{
+}
+*/
+
 float3 op_rep(in float3 p, in float3 c)
 {
   return glsl_mod(p+0.5*c,c)-0.5*c;

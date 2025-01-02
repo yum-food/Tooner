@@ -1827,14 +1827,17 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_DS2_Emission_Factor");
     FloatProperty(bc, "Emission factor");
 
-    bc = FindProperty("_Gimmick_DS2_00_Enable_Dynamic");
-    enabled = (bc.floatValue != 0.0);
-    EditorGUI.BeginChangeCheck();
-    enabled = Toggle("Enable effect 00", enabled);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = enabled ? 1.0f : 0.0f;
+    bc = FindProperty("_Gimmick_DS2_Choice");
+    FloatProperty(bc, "Choice");
+    float choice = bc.floatValue;
 
-    if (enabled) {
+    if (Mathf.Round(choice) == -1) {
+      EditorGUI.indentLevel += 1;
+
+      EditorGUI.indentLevel -= 1;
+    }
+
+    if (Mathf.Round(choice) == 0) {
       EditorGUI.indentLevel += 1;
 
       bc = FindProperty("_Gimmick_DS2_00_Domain_Warping_Octaves");
@@ -1849,14 +1852,7 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
 
-    bc = FindProperty("_Gimmick_DS2_01_Enable_Dynamic");
-    enabled = (bc.floatValue != 0.0);
-    EditorGUI.BeginChangeCheck();
-    enabled = Toggle("Enable effect 01", enabled);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = enabled ? 1.0f : 0.0f;
-
-    if (enabled) {
+    if (Mathf.Round(choice) == 1) {
       EditorGUI.indentLevel += 1;
 
       bc = FindProperty("_Gimmick_DS2_01_Period");
@@ -1878,27 +1874,29 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
 
-    bc = FindProperty("_Gimmick_DS2_02_Enable_Dynamic");
-    enabled = (bc.floatValue != 0.0);
-    EditorGUI.BeginChangeCheck();
-    enabled = Toggle("Enable effect 02", enabled);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = enabled ? 1.0f : 0.0f;
-
-    if (enabled) {
+    if (Mathf.Round(choice) == 2) {
       EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_DS2_02_Period");
+      VectorProperty(bc, "Period");
+      bc = FindProperty("_Gimmick_DS2_02_Count");
+      VectorProperty(bc, "Count");
+      bc = FindProperty("_Gimmick_DS2_02_Edge_Length");
+      FloatProperty(bc, "Edge length");
+
+      bc = FindProperty("_Gimmick_DS2_02_Domain_Warping_Octaves");
+      FloatProperty(bc, "Domain warping octaves");
+      bc = FindProperty("_Gimmick_DS2_02_Domain_Warping_Strength");
+      FloatProperty(bc, "Domain warping strength");
+      bc = FindProperty("_Gimmick_DS2_02_Domain_Warping_Scale");
+      FloatProperty(bc, "Domain warping scale");
+      bc = FindProperty("_Gimmick_DS2_02_Domain_Warping_Speed");
+      FloatProperty(bc, "Domain warping speed");
 
       EditorGUI.indentLevel -= 1;
     }
 
-    bc = FindProperty("_Gimmick_DS2_03_Enable_Dynamic");
-    enabled = (bc.floatValue != 0.0);
-    EditorGUI.BeginChangeCheck();
-    enabled = Toggle("Enable effect 03", enabled);
-    EditorGUI.EndChangeCheck();
-    bc.floatValue = enabled ? 1.0f : 0.0f;
-
-    if (enabled) {
+    if (Mathf.Round(choice) == 3) {
       EditorGUI.indentLevel += 1;
 
       bc = FindProperty("_Gimmick_DS2_03_Period");
@@ -1907,6 +1905,15 @@ public class ToonerGUI : ShaderGUI {
       VectorProperty(bc, "Count");
       bc = FindProperty("_Gimmick_DS2_03_Edge_Length");
       FloatProperty(bc, "Edge length");
+
+      bc = FindProperty("_Gimmick_DS2_03_Domain_Warping_Octaves");
+      FloatProperty(bc, "Domain warping octaves");
+      bc = FindProperty("_Gimmick_DS2_03_Domain_Warping_Strength");
+      FloatProperty(bc, "Domain warping strength");
+      bc = FindProperty("_Gimmick_DS2_03_Domain_Warping_Scale");
+      FloatProperty(bc, "Domain warping scale");
+      bc = FindProperty("_Gimmick_DS2_03_Domain_Warping_Speed");
+      FloatProperty(bc, "Domain warping speed");
 
       EditorGUI.indentLevel -= 1;
     }

@@ -2751,14 +2751,25 @@ float4 effect(inout v2f i, out float depth)
 #if defined(_GIMMICK_DS2)
   Gimmick_DS2_Output ds2 = (Gimmick_DS2_Output)0;
   // TODO if these remain mutually exclusive, we should use an enum + switch
-  if (_Gimmick_DS2_00_Enable_Dynamic) {
-    ds2 = Gimmick_DS2_00(i);
-  } else if (_Gimmick_DS2_01_Enable_Dynamic) {
-    ds2 = Gimmick_DS2_01(i);
-  } else if (_Gimmick_DS2_02_Enable_Dynamic) {
-    ds2 = Gimmick_DS2_02(i);
-  } else if (_Gimmick_DS2_03_Enable_Dynamic) {
-    ds2 = Gimmick_DS2_03(i);
+  switch (round(_Gimmick_DS2_Choice)) {
+    case 0:
+      ds2 = Gimmick_DS2_00(i);
+      break;
+    case 1:
+      ds2 = Gimmick_DS2_01(i);
+      break;
+    case 2:
+      ds2 = Gimmick_DS2_02(i);
+      break;
+    case 3:
+      ds2 = Gimmick_DS2_03(i);
+      break;
+    case 10:
+      ds2 = Gimmick_DS2_10(i);
+      break;
+    default:
+      ds2 = (Gimmick_DS2_Output)0;
+      break;
   }
   float ds2_mask = _Gimmick_DS2_Mask.SampleLevel(linear_clamp_s, i.uv0, 0);
   albedo = ds2.albedo * _Gimmick_DS2_Albedo_Factor * ds2_mask;
