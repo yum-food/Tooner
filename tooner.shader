@@ -827,10 +827,6 @@ Shader "yum_food/tooner"
     _Gimmick_DS2_03_Period("Period", Vector) = (1, 1, 1, 1)
     _Gimmick_DS2_03_Count("Count", Vector) = (1, 1, 1, 1)
     _Gimmick_DS2_03_Edge_Length("Edge length", Float) = 0.1
-    _Gimmick_DS2_03_Domain_Warping_Octaves("Domain warping octaves", Float) = 3
-    _Gimmick_DS2_03_Domain_Warping_Strength("Domain warping strength", Float) = 1
-    _Gimmick_DS2_03_Domain_Warping_Scale("Domain warping scale", Float) = 1
-    _Gimmick_DS2_03_Domain_Warping_Speed("Domain warping speed", Float) = 1
 
 
     _Gimmick_Halo00_Enable_Static("Enable halo", Float) = 0.0

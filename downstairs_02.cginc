@@ -354,7 +354,6 @@ Gimmick_DS2_Output Gimmick_DS2_10(inout v2f i)
   o.metallic = 0;
   o.roughness = 0.3;
   o.worldPos = mul(unity_ObjectToWorld, float4(final_position, 1));
-
   return o;
 }
 
@@ -485,24 +484,21 @@ float ds2_03_map(float3 p, float3 rid)
   float edge = _Gimmick_DS2_03_Edge_Length;
   float thickness = edge * .5;
 
-  float3 pp = p - float3(0, 0, thickness*1);
+  float3 pp = p - float3(0, 0, thickness*1.5);
 
   float wave_str = 0;
   float t = _Time[3];
-  for (uint i = 0; i < 6; i++) {
-    float wave_r = fmod(t + 50 * i, 300) - 5;
-    float wave_d2 = dot(rid.xy, rid.xy) * .01 - wave_r;
-    wave_str += (1 / (1 + exp(-wave_d2*.3)) - 0.5) * 2;
-  }
-  wave_str += (_Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, rid.xy * .001 + t *.001, 0) * 2 - 1) * .75;
-  float4 quat = get_quaternion(float3(0, 1, 0), wave_str * PI);
+  float3 noise = (_Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, rid.xy * .001 + t *.001, 0) * 2 - 1);
+  wave_str += noise.x;
+  float4 quat = get_quaternion(normalize(noise*2-1), wave_str * PI);
   pp = rotate_vector(pp, quat);
+
   return distance_from_hex_prism(pp, float2(edge, thickness));
 }
 
 float3 ds2_03_nudge_p(float3 p, float3 which)
 {
-  return p - float3(_Gimmick_DS2_03_Period.x, _Gimmick_DS2_03_Period.y * (which.x % 2 == 0), 0) * .5;
+  return p - float3(_Gimmick_DS2_03_Period.x * 0.65, _Gimmick_DS2_03_Period.y * 0.5, 0);
 }
 
 float ds2_03_map_dr(
@@ -513,13 +509,15 @@ float ds2_03_map_dr(
     )
 {
   which = floor(p / period);
+  // Direction to nearest neighboring cell.
+  float3 min_d = p - period * which;
+  float3 o = sign(min_d);
 
   float d = 1E9;
   float3 which_tmp = which;
-  for (uint xi = 0; xi < 3; xi++)
-  for (uint yi = 0; yi < 3; yi++)
+  for (uint xi = 0; xi < 1; xi++)
   {
-    float3 rid = which + (float3(xi, yi, 0) - 1);
+    float3 rid = which + float3(xi, 0, 0) * o;
     rid = clamp(rid, ceil(-(count)*0.5), floor((count-1)*0.5));
     float3 r = p - period * rid;
     r = ds2_03_nudge_p(r, rid);
@@ -532,15 +530,15 @@ float ds2_03_map_dr(
   return d;
 }
 
-float3 ds2_03_calc_normal(float3 p)
+float3 ds2_03_calc_normal(float3 p, float3 period, float3 count)
 {
   float3 small_step = float3(1E-5, 0.0, 0.0);
   float3 which;
-  float center = ds2_03_map_dr(p, _Gimmick_DS2_03_Period.xyz, _Gimmick_DS2_03_Count.xyz, which);
+  float center = ds2_03_map_dr(p, period, count, which);
   return normalize(float3(
-    ds2_03_map_dr(p + small_step.xyz, _Gimmick_DS2_03_Period.xyz, _Gimmick_DS2_03_Count.xyz, which) - center,
-    ds2_03_map_dr(p + small_step.zxy, _Gimmick_DS2_03_Period.xyz, _Gimmick_DS2_03_Count.xyz, which) - center,
-    ds2_03_map_dr(p + small_step.yzx, _Gimmick_DS2_03_Period.xyz, _Gimmick_DS2_03_Count.xyz, which) - center
+    ds2_03_map_dr(p + small_step.xyz, period, count, which) - center,
+    ds2_03_map_dr(p + small_step.zxy, period, count, which) - center,
+    ds2_03_map_dr(p + small_step.yzx, period, count, which) - center
   ));
 }
 
@@ -550,33 +548,81 @@ Gimmick_DS2_Output Gimmick_DS2_03(inout v2f i)
   float3 ro = i.objPos;
   float3 rd = normalize(i.objPos - camera_position);
 
-  float2 warping_speed_vector = normalize(float2(97, 101));
-  for (uint ii = 0; ii < _Gimmick_DS2_03_Domain_Warping_Octaves; ii++)
-  {
-      float2 noise = _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, ro.xy * _Gimmick_DS2_03_Domain_Warping_Scale + _Time[0] * _Gimmick_DS2_03_Domain_Warping_Speed * warping_speed_vector, 0);
-      ro.xy += noise * _Gimmick_DS2_03_Domain_Warping_Strength;
-  }
-
-  #define DS2_03_MARCH_STEPS 3
+  #define DS2_03_MARCH_STEPS 2
   float total_distance_traveled = 0.0;
-  const float MINIMUM_HIT_DISTANCE = 1E-4;
+  const float MINIMUM_HIT_DISTANCE = 2E-4;
   const float MAXIMUM_TRACE_DISTANCE = 1E-1;
-  float distance_to_closest;
-  float3 which;
-  for (uint ii = 0; ii < DS2_03_MARCH_STEPS; ii++)
+  const float3 period = float3(
+    _Gimmick_DS2_03_Period.x * 2,
+    _Gimmick_DS2_03_Period.yz);
+  const float3 count = float3(
+    _Gimmick_DS2_03_Count.x * 0.5,
+    _Gimmick_DS2_03_Count.yz);
+
+  const float overstep_amount = 3;
+  bool hit1;
+  float total_distance_traveled1 = 0;
+  float3 which1;
   {
-    float3 current_position = ro + total_distance_traveled * rd;
-    distance_to_closest = ds2_03_map_dr(current_position, _Gimmick_DS2_03_Period.xyz, _Gimmick_DS2_03_Count.xyz, which);
-    total_distance_traveled += distance_to_closest;
-    if (distance_to_closest < MINIMUM_HIT_DISTANCE || 
-        total_distance_traveled > MAXIMUM_TRACE_DISTANCE) {
-      break;
+    float distance_to_closest1;
+    for (uint ii = 0; ii < DS2_03_MARCH_STEPS; ii++)
+    {
+      float3 current_position = ro + total_distance_traveled1 * rd;
+      distance_to_closest1 = ds2_03_map_dr(current_position, period, count, which1)*overstep_amount;
+      total_distance_traveled1 += distance_to_closest1;
+      if (distance_to_closest1 < MINIMUM_HIT_DISTANCE || 
+          total_distance_traveled1 > MAXIMUM_TRACE_DISTANCE) {
+        break;
+      }
     }
+
+    hit1 = distance_to_closest1 < MINIMUM_HIT_DISTANCE;
   }
 
-  bool hit = distance_to_closest < MINIMUM_HIT_DISTANCE;
-  float3 final_position = ro + total_distance_traveled * rd;
-  float3 normal = hit ? UnityObjectToWorldNormal(ds2_03_calc_normal(final_position)) : i.normal;
+  bool hit2;
+  float total_distance_traveled2 = 0;
+  float3 which2;
+  {
+    ro.xy += period.xy * .5;
+    float distance_to_closest2;
+    for (uint ii = 0; ii < DS2_03_MARCH_STEPS; ii++)
+    {
+      float3 current_position = ro + total_distance_traveled2 * rd;
+      distance_to_closest2 = ds2_03_map_dr(current_position, period, count, which2)*overstep_amount;
+      total_distance_traveled2 += distance_to_closest2;
+      if (distance_to_closest2 < MINIMUM_HIT_DISTANCE || 
+          total_distance_traveled2 > MAXIMUM_TRACE_DISTANCE) {
+        break;
+      }
+    }
+
+    hit2 = distance_to_closest2 < MINIMUM_HIT_DISTANCE;
+  }
+
+  float3 final_position1 = i.objPos + total_distance_traveled1 * rd;
+  float3 final_position2 = (i.objPos + float3(period.xy * .5, 0)) + total_distance_traveled2 * rd;
+
+  float3 normal1 = hit1 ? UnityObjectToWorldNormal(ds2_03_calc_normal(final_position1, period, count)) : i.normal;
+  float3 normal2 = hit2 ? UnityObjectToWorldNormal(ds2_03_calc_normal(final_position2, period, count)) : i.normal;
+
+  float3 final_position;
+  float3 normal;
+  if (hit1 && hit2) {
+    final_position = total_distance_traveled1 < total_distance_traveled2 ? final_position1 : final_position2;
+    normal = total_distance_traveled1 < total_distance_traveled2 ? normal1 : normal2;
+  } else if (hit1) {
+    final_position = final_position1;
+    normal = normal1;
+  } else if (hit2) {
+    final_position = final_position2;
+    normal = normal2;
+  } else {
+    final_position = i.objPos;
+    normal = i.normal;
+  }
+  bool hit = hit1 || hit2;
+
+  float3 final_pos_world = mul(unity_ObjectToWorld, float4(final_position, 1));
 
   float3 light_dir = normalize(float3(0.5, -0.5, -0.5));
   float3 light_color = float3(1, 1, 1);
@@ -584,17 +630,17 @@ Gimmick_DS2_Output Gimmick_DS2_03(inout v2f i)
   float wrap_factor = 0.7;
   float4 wrapped = pow(max(1E-4, (ndotl + wrap_factor) / (1 + wrap_factor)), 1 + wrap_factor);
   float3 light_intensity = light_color * wrapped;
-  float3 color = hit ? 1 : 0;
-  color *= light_intensity;
+
+  float3 color = hit ? light_intensity : 0;
 
   Gimmick_DS2_Output o;
   o.albedo = float4(color, 1);
-  o.emission = o.albedo;
+  //o.emission = o.albedo;
+  o.emission = 0;
   o.normal = normal;
-  o.metallic = 0;
-  o.roughness = 0;
-  // Depth gets all fucked up unless we use i.objPos instead of ro, which is domain warped.
-  o.worldPos = mul(unity_ObjectToWorld, float4(i.objPos + rd * total_distance_traveled, 1));
+  o.metallic = 1;
+  o.roughness = 0.1;
+  o.worldPos = final_pos_world;
   return o;
 }
 

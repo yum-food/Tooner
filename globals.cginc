@@ -788,10 +788,6 @@ float _Gimmick_DS2_02_Domain_Warping_Speed;
 float4 _Gimmick_DS2_03_Period;
 float4 _Gimmick_DS2_03_Count;
 float _Gimmick_DS2_03_Edge_Length;
-float _Gimmick_DS2_03_Domain_Warping_Octaves;
-float _Gimmick_DS2_03_Domain_Warping_Strength;
-float _Gimmick_DS2_03_Domain_Warping_Scale;
-float _Gimmick_DS2_03_Domain_Warping_Speed;
 #endif
 
 #if defined(_PIXELLATE)

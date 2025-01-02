@@ -2774,7 +2774,7 @@ float4 effect(inout v2f i, out float depth)
   float ds2_mask = _Gimmick_DS2_Mask.SampleLevel(linear_clamp_s, i.uv0, 0);
   albedo = ds2.albedo * _Gimmick_DS2_Albedo_Factor * ds2_mask;
   normal = ds2.normal;
-  metallic = ds2.metallic;
+  metallic = ds2.metallic * ds2_mask;
   roughness = ds2.roughness;
   i.worldPos = ds2.worldPos;
   {

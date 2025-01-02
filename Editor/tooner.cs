@@ -1906,15 +1906,6 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty("_Gimmick_DS2_03_Edge_Length");
       FloatProperty(bc, "Edge length");
 
-      bc = FindProperty("_Gimmick_DS2_03_Domain_Warping_Octaves");
-      FloatProperty(bc, "Domain warping octaves");
-      bc = FindProperty("_Gimmick_DS2_03_Domain_Warping_Strength");
-      FloatProperty(bc, "Domain warping strength");
-      bc = FindProperty("_Gimmick_DS2_03_Domain_Warping_Scale");
-      FloatProperty(bc, "Domain warping scale");
-      bc = FindProperty("_Gimmick_DS2_03_Domain_Warping_Speed");
-      FloatProperty(bc, "Domain warping speed");
-
       EditorGUI.indentLevel -= 1;
     }
 
