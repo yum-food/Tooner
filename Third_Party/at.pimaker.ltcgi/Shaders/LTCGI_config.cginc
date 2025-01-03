@@ -10,18 +10,18 @@
 /// No diffuse at all.
 //#define LTCGI_DIFFUSE_OFF
 /// Disable the ability to toggle specular/diffuse on or off per screen.
-//#define LTCGI_TOGGLEABLE_SPEC_DIFF_OFF
+#define LTCGI_TOGGLEABLE_SPEC_DIFF_OFF
 
 /// Only use LTC diffuse mode, never lightmapped diffuse.
 /// This disables lightmaps entirely.
-//#define LTCGI_ALWAYS_LTC_DIFFUSE
+#define LTCGI_ALWAYS_LTC_DIFFUSE
 
 /// Double-sample screen texture for diffuse lighting to smooth resulting lighting
 /// a bit more with global screen color data. Slight performance cost.
 //#define LTCGI_BLENDED_DIFFUSE_SAMPLING
 
 /// Disable extra specular detail LUT, saves a sampler.
-//#define LTCGI_DISABLE_LUT2
+#define LTCGI_DISABLE_LUT2
 
 /// Use bicubic filtering for LTCGI lightmap. Recommended on.
 #define LTCGI_BICUBIC_LIGHTMAP

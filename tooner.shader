@@ -3,7 +3,7 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 35
+  // Build nonce: 36
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -957,6 +957,7 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Ray_Origin_Randomization("Enable ray origin randomization", Range(0,1)) = 1
     _Gimmick_Fog_00_Lod_Half_Life("fog", Float) = 5
     _Gimmick_Fog_00_Max_Brightness("max brightness", Range(0, 1)) = 1
+    _Gimmick_Fog_00_LTCGI_Brightness("LTCGI brightness", Float) = 1
 
     _Gimmick_Fog_00_Emitter_Texture("Emitter texture", 2D) = "black" {}
     _Gimmick_Fog_00_Emitter_Variable_Density("Enable emitter variable density", Float) = 0
@@ -966,8 +967,9 @@ Shader "yum_food/tooner"
 
     _Gimmick_Fog_00_Emitter0_Location("fog", Vector) = (0, 0, 0, 0)
     _Gimmick_Fog_00_Emitter0_Normal("fog", Vector) = (-1, 0, 0, 0)
-    _Gimmick_Fog_00_Emitter0_Scale_X("fog", Float) = 1
-    _Gimmick_Fog_00_Emitter0_Scale_Y("fog", Float) = 1
+    _Gimmick_Fog_00_Emitter0_Tangent("fog", Vector) = (-1, 0, 0, 0)
+    _Gimmick_Fog_00_Emitter0_Scale_T("fog", Float) = 1
+    _Gimmick_Fog_00_Emitter0_Scale_NxT("fog", Float) = 1
 
     _Gimmick_Fog_00_Emitter1_Enable_Static("fog", Float) = 0
     _Gimmick_Fog_00_Emitter1_Location("fog", Vector) = (0, 0, 0, 0)
@@ -1056,7 +1058,6 @@ Shader "yum_food/tooner"
       #include "tooner_lighting.cginc"
       ENDCG
     }
-    /*
     Pass {
       Tags {
         "RenderType"="Opaque"
@@ -1138,7 +1139,6 @@ Shader "yum_food/tooner"
       #include "mochie_shadow_caster.cginc"
 			ENDCG
 		}
-    */
   }
   CustomEditor "ToonerGUI"
 }

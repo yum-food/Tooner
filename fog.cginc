@@ -2,6 +2,7 @@
 
 #include "atrix256.cginc"
 #include "cnlohr.cginc"
+//#include "fog_ltcgi.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "math.cginc"
@@ -21,7 +22,7 @@ struct Fog00PBR {
   float depth;
 };
 
-#define FOG_PERLIN_NOISE_SCALE 32
+#define FOG_PERLIN_NOISE_SCALE 512
 
 float3 perlin_noise_3d_tex(float3 p)
 {
@@ -73,16 +74,15 @@ float3 light_fog00(
 
 float map(float3 p, out float3 normal) {
 #if 1
-  float3 t = _Time[0] * FOG_PERLIN_NOISE_SCALE;
-  t.y *= .3;
+  float3 t = float3(0, -_Time[0] * FOG_PERLIN_NOISE_SCALE, 0);
 #else
   float3 t = 0;
 #endif
-#define RADIUS_TRANS_WIDTH 800
+#define RADIUS_TRANS_WIDTH .1
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
   // Try to create a smooth transition without doing any length() or other
   // transcendental ops.
-  float radius2 = clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p, p), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP;
+  float radius2 = clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p.xz, p.xz), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP;
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
   normal = normalize(perlin_noise_3d_tex(pp+t) * 2 - 1);
@@ -97,36 +97,36 @@ void getEmitterData(float3 p,
     float step_size,
     float3 em_loc,
     float3 em_normal,
+    float3 em_tangent,
+    float3 em_normal_x_tangent,
     float2 emitter_scale,
     float2 emitter_scale_rcp,
     out float3 diffuse,
     out float3 direct)
 {
-  // Project onto plane
-  const float3 p_to_emitter = p - em_loc;
-  const float t = dot(p_to_emitter, em_normal);
-  float3 p_projected = p - t * em_normal - em_loc;
+  // Using identity a_parallel_to_b = (dot(a, b) / dot(b, b)) * b
+  //   float3 along_tangent = dot(p - em_loc, em_tangent) * em_tangent;
+  //   float3 along_normal_x_tangent = dot(p - em_loc, em_normal_x_tangent) *
+  //       em_normal_x_tangent;
+  // Given that em_tangent and em_normal_x_tangent are normalized, and the fact
+  // that we really want uvs, we can simplify this:
+  float2 uv = float2(dot(p - em_loc, em_normal_x_tangent), dot(p - em_loc, em_tangent));
+  uv *= emitter_scale_rcp;
+  uv *= 0.5;
+  uv += 0.5;
 
-  // Add some curvature to simulate scattering.
-  //emitter_scale *= 1 + t*t * .002;
-
-  bool in_range = (abs(p_projected.x) < emitter_scale.x) * (abs(p_projected.y) < emitter_scale.y) * (t > 0);
-
-  // Go up one LOD every 5 meters
-  float3 em_loc_clamp = p_projected;
-  em_loc_clamp.xy = clamp(em_loc_clamp.xy, -emitter_scale, emitter_scale);
-  float2 emitter_uv = em_loc_clamp.xy * emitter_scale_rcp;
-  emitter_uv *= 0.5;
-  emitter_uv += 0.5;
+  bool in_range = uv.x < 1 && uv.y < 1 && uv.x > 0 && uv.y > 0;
 
 #if 0
-  emitter_uv.y = FOG_PERLIN_NOISE(float3(emitter_uv*100, _Time[2]));
-  emitter_uv.x = FOG_PERLIN_NOISE(p);
-  emitter_uv.y = FOG_PERLIN_NOISE(float3(emitter_uv*100, _Time[2]));
+  uv.y = FOG_PERLIN_NOISE(float3(uv*100, _Time[2]));
+  uv.x = FOG_PERLIN_NOISE(p);
+  uv.y = FOG_PERLIN_NOISE(float3(uv*100, _Time[2]));
 #endif
 
+  const float3 p_to_emitter = p - em_loc;
+  const float t = dot(p_to_emitter, em_normal);
   float emitter_lod = floor(abs(t) / (_Gimmick_Fog_00_Emitter_Lod_Half_Life * step_size));
-  float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, emitter_uv, emitter_lod);
+  float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, uv, emitter_lod);
   float emitter_dist = in_range ? abs(t) : 1000;
   float emitter_falloff = min(1, rcp(emitter_dist));
 
@@ -134,11 +134,12 @@ void getEmitterData(float3 p,
 
 #if 1
   float e = 0.1;
-  float2 emitter_uv_inv = 1.0 - emitter_uv;
-  diffuse = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, float2(emitter_uv.x, emitter_uv.y), 16) +
-    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, float2(emitter_uv.x, emitter_uv_inv.y), 16) +
-    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, float2(emitter_uv_inv.x, emitter_uv.y), 16);
+  float2 uv_inv = 1.0 - uv;
+  diffuse = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, float2(uv.x, uv.y), 16) +
+    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, float2(uv.x, uv_inv.y), 16) +
+    _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, float2(uv_inv.x, uv.y), 16);
   diffuse *= 0.3333;
+  float3 em_loc_clamp = em_loc + (saturate(uv.x) *2 - 1) * em_tangent + (saturate(uv.y) * 2 - 1) * em_normal_x_tangent;
   em_loc_clamp += em_loc;
   // TODO parameterize shaping constants
   float diffuse_length = length(p - em_loc_clamp);
@@ -211,10 +212,10 @@ float fog00_map_dr(
 #endif
 
 Fog00PBR getFog00(v2f i, ToonerData tdata) {
-  float3 cam_pos = _WorldSpaceCameraPos;
-  float3 obj_pos = i.worldPos;
+  float3 cam_pos = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos, 1.0)).xyz;
+  float3 obj_pos = i.objPos;
 
-  float3 world_pos_depth_hit;
+  float3 obj_pos_depth_hit;
   float2 screen_uv;
   {
     float3 full_vec_eye_to_geometry = i.worldPos - _WorldSpaceCameraPos;
@@ -226,30 +227,29 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
       GetLinearZFromZDepth_WorksWithMirrors(
           SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, tdata.screen_uv),
           screen_uv) * perspective_factor;
-    world_pos_depth_hit = _WorldSpaceCameraPos + eye_depth_world * world_dir;
+    float3 world_pos_depth_hit = _WorldSpaceCameraPos + eye_depth_world * world_dir;
+    obj_pos_depth_hit = mul(unity_WorldToObject, float4(world_pos_depth_hit, 1.0)).xyz;
   }
 
   const float3 rd = normalize(obj_pos - cam_pos);
   float3 ro = cam_pos;
 
-  const bool inside_sphere = length(ro) < _Gimmick_Fog_00_Radius;
   bool no_intersection = false;
-  float distance_to_sphere = 1E6;
+  float distance_to_cylinder = 1E6;
   {
-    float3 l = ro;
-    float a = 1;
-    float b = 2 * dot(rd, l);
-    float c = dot(l, l) - _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius;
+    float a = dot(rd.xz, rd.xz);
+    float b = 2 * dot(rd.xz, ro.xz);
+    float c = dot(ro.xz, ro.xz) - _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius;
     float t0, t1;
     if (solveQuadratic(a, b, c, t0, t1)) {
       no_intersection = (t0 < 0) * (t1 < 0);
-      if (inside_sphere) {
-        distance_to_sphere = no_intersection ? distance_to_sphere : max(t0, t1);
-        distance_to_sphere = min(distance_to_sphere, length(world_pos_depth_hit - ro));
+      const bool inside_cylinder = (t0 < 0) * (t1 > 0);
+      if (inside_cylinder) {
+        distance_to_cylinder = no_intersection ? distance_to_cylinder : max(t0, t1);
+        distance_to_cylinder = min(distance_to_cylinder, length(obj_pos_depth_hit - ro));
       } else {
-        distance_to_sphere = no_intersection ? distance_to_sphere : min(max(t0, 0), max(t1, 0));
-        ro += distance_to_sphere * rd;
-        distance_to_sphere = max(distance_to_sphere, length(world_pos_depth_hit - ro));
+        distance_to_cylinder = no_intersection ? distance_to_cylinder : min(max(t0, 0), max(t1, 0));
+        ro += distance_to_cylinder * rd;
       }
     }
   }
@@ -269,9 +269,9 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   const float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
 #endif
   float dither = dither_seed * step_size * _Gimmick_Fog_00_Ray_Origin_Randomization;
-  ro += rd * (0.01 + dither);
+  ro += rd * (0.001 + dither);
 
-  const float world_pos_depth_hit_l = length(world_pos_depth_hit - ro);
+  const float depth_hit_l = length(obj_pos_depth_hit - ro);
 
   // Get common lighting data
   UnityLight direct_light;
@@ -285,26 +285,32 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   indirect_light.specular = 0;
 
   float4 acc = 0;
-  uint step_count = floor(min(
-        _Gimmick_Fog_00_Max_Ray / step_size,
-        world_pos_depth_hit_l / step_size));
-  step_count *= (1 - no_intersection);
+  uint step_count = floor(min(_Gimmick_Fog_00_Max_Ray, depth_hit_l) / step_size);
+  //step_count *= (1 - no_intersection);
 #define FOG_MAX_LOOP (128+16)
   step_count = min(step_count, FOG_MAX_LOOP);
 
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
-  const float3 em_loc = _Gimmick_Fog_00_Emitter0_Location;
-  const float3 em_normal = normalize(_Gimmick_Fog_00_Emitter0_Normal);
-  const float em_scale_x = _Gimmick_Fog_00_Emitter0_Scale_X;
-  const float em_scale_y = _Gimmick_Fog_00_Emitter0_Scale_Y;
-  const float2 em_scale = float2(em_scale_x, em_scale_y);
+  const float3 em_loc = mul(unity_WorldToObject, float4(_Gimmick_Fog_00_Emitter0_Location, 1.0)).xyz;
+  const float3 em_normal = normalize(mul(unity_WorldToObject, float4(_Gimmick_Fog_00_Emitter0_Normal, 0.0)).xyz);
+  const float3 em_tangent = normalize(mul(unity_WorldToObject, float4(_Gimmick_Fog_00_Emitter0_Tangent, 0.0)).xyz);
+  const float3 em_normal_x_tangent = normalize(cross(em_normal, em_tangent));
+  const float em_scale_t   = _Gimmick_Fog_00_Emitter0_Scale_T * length(mul(unity_WorldToObject, float4(_Gimmick_Fog_00_Emitter0_Normal, 0.0)));
+  const float em_scale_nxt = _Gimmick_Fog_00_Emitter0_Scale_NxT * length(mul(unity_WorldToObject, float4(cross(_Gimmick_Fog_00_Emitter0_Normal, _Gimmick_Fog_00_Emitter0_Tangent), 0.0)));
+  const float2 em_scale = float2(em_scale_t, em_scale_nxt);
   const float2 em_scale_rcp = rcp(em_scale);
 #endif
 
+  const float3 ro_world = mul(unity_ObjectToWorld, float4(ro, 1.0)).xyz;
+  const float3 rd_world = mul(unity_ObjectToWorld, float4(rd, 0.0)).xyz;
+  const float3 rd_world_normalized = normalize(rd_world);
+  const float step_size_world = step_size * length(rd_world);
+  const float3 view_dir_world = normalize(_WorldSpaceCameraPos - i.worldPos);
+
   const float noise_scale_rcp = 1.0 / _Gimmick_Fog_00_Noise_Scale;
   for (uint ii = 0; ii < step_count; ii++) {
-    const float ii_step_size = ii * step_size;
-    const float3 p = ro + rd * ii_step_size;
+    const float3 p = ro + rd * ii * step_size;
+    const float3 p_world = ro_world + rd_world * ii * step_size_world;
 
     float4 c;
     float3 c_lit = 0;
@@ -323,13 +329,25 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
       // Note that I'm intentionally passing in `direct` and `diffuse`
       // backwards. It looks better if the collimated light is immune to normal
       // dimming, and if the diffuse light is not.
-      getEmitterData(p, step_size, em_loc, em_normal,
-          em_scale, em_scale_rcp, direct, diffuse);
+      getEmitterData(p, step_size, em_loc, em_normal, em_tangent, em_normal_x_tangent, em_scale,
+          em_scale_rcp, direct, diffuse);
+    }
+    diffuse *= _Gimmick_Fog_00_Emitter_Brightness_Diffuse;
+    direct *= _Gimmick_Fog_00_Emitter_Brightness_Direct;
+#else
+#endif
+#if 0
+    {
+      ltcgi_acc acc = (ltcgi_acc) 0;
+      LTCGI_Contribution(acc,
+          p_world,
+          normalize(mul(unity_ObjectToWorld, float4(map_normal, 0.0))),
+          view_dir_world, /*roughness=*/0.5, /*lmuv=*/0);
+      diffuse += acc.diffuse * step_size * _Gimmick_Fog_00_LTCGI_Brightness;
+      diffuse += acc.specular * step_size * _Gimmick_Fog_00_LTCGI_Brightness;
     }
 #endif
 
-    diffuse *= _Gimmick_Fog_00_Emitter_Brightness_Diffuse;
-    direct *= _Gimmick_Fog_00_Emitter_Brightness_Direct;
     // Scaling brightness by sqrt(step_size) seems to look more consistent as
     // you vary density. No idea why :(
     float NoL = dot(map_normal, direct_light.dir);
@@ -361,7 +379,7 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     //  1. accumulate enough alpha
     //  2. go outside of the sphere
     if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff ||
-        dot(p, p) > _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius) {
+        dot(p.xz, p.xz) > _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius) {
       break;
     }
 #endif
@@ -380,11 +398,11 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   pbr.albedo.rgb = aces_filmic(pbr.albedo.rgb);
   // Clamp so max brightness is comfortable. Do it in perceptually uniform
   // space to avoid affecting saturation.
-  pbr.albedo.rgb = LRGBtoOKLAB(pbr.albedo.rgb);
-  pbr.albedo.x = smooth_clamp(pbr.albedo.x, _Gimmick_Fog_00_Max_Brightness);
-  pbr.albedo.rgb = OKLABtoLRGB(pbr.albedo.rgb);
+  //pbr.albedo.rgb = LRGBtoOKLAB(pbr.albedo.rgb);
+  //pbr.albedo.x = smooth_min(pbr.albedo.x, _Gimmick_Fog_00_Max_Brightness * .9, _Gimmick_Fog_00_Max_Brightness);
+  //pbr.albedo.rgb = OKLABtoLRGB(pbr.albedo.rgb);
 
-  float4 clip_pos = mul(UNITY_MATRIX_VP, float4(ro, 1.0));
+  float4 clip_pos = mul(UNITY_MATRIX_VP, float4(mul(unity_ObjectToWorld, float4(ro, 1.0))));
   pbr.depth = clip_pos.z / clip_pos.w;
 
   return pbr;

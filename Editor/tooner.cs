@@ -2387,6 +2387,9 @@ public class ToonerGUI : ShaderGUI {
         bc);
     SetKeyword("_GIMMICK_FOG_00_NOISE_2D", bc.textureValue);
 
+    bc = FindProperty("_Gimmick_Fog_00_LTCGI_Brightness");
+    FloatProperty(bc, "LTCGI brightness");
+
     bc = FindProperty("_Gimmick_Fog_00_Emitter_Texture");
     TexturePropertySingleLine(
         MakeLabel(bc, "Emitter texture"),
@@ -2409,10 +2412,12 @@ public class ToonerGUI : ShaderGUI {
       VectorProperty(bc, "Location (world)");
       bc = FindProperty("_Gimmick_Fog_00_Emitter0_Normal");
       VectorProperty(bc, "Normal (world)");
-      bc = FindProperty("_Gimmick_Fog_00_Emitter0_Scale_X");
-      FloatProperty(bc, "Scale (x)");
-      bc = FindProperty("_Gimmick_Fog_00_Emitter0_Scale_Y");
-      FloatProperty(bc, "Scale (y)");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter0_Tangent");
+      VectorProperty(bc, "Tangent (world)");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter0_Scale_T");
+      FloatProperty(bc, "Scale (tangent)");
+      bc = FindProperty("_Gimmick_Fog_00_Emitter0_Scale_NxT");
+      FloatProperty(bc, "Scale (normal x tangent)");
 
       bc = FindProperty("_Gimmick_Fog_00_Emitter_Brightness_Diffuse");
       FloatProperty(bc, "Brightness (diffuse)");

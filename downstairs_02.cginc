@@ -221,7 +221,7 @@ Gimmick_DS2_Output Gimmick_DS2_01(inout v2f i)
 #define DS2_01_MARCH_STEPS 8
   float total_distance_traveled = 0.0;
   const float MINIMUM_HIT_DISTANCE = 1E-4;
-  const float MAXIMUM_TRACE_DISTANCE = 30.0;
+  const float MAXIMUM_TRACE_DISTANCE = .1;
   float distance_to_closest;
   float3 which;
   for (uint ii = 0; ii < DS2_01_MARCH_STEPS; ii++)
@@ -239,9 +239,9 @@ Gimmick_DS2_Output Gimmick_DS2_01(inout v2f i)
   float3 normal = i.normal;
   bool hit = distance_to_closest < MINIMUM_HIT_DISTANCE;
   float3 color = LRGBtoOKLCH(float3(0.7, 0, 0));
-  color[0] += _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, ((which.xy / _Gimmick_DS2_01_Count.xy) + _Time[0]) / 10, 0);
-  color[2] = ign(which.xy + _Gimmick_DS2_01_Count.xy) * TAU * .1;
-  color[2] += _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, ((which.xy / _Gimmick_DS2_01_Count.xy) + _Time[0]) / 100, 0) * 5;
+  color[0] += _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, ((which.xy / _Gimmick_DS2_01_Count.xy) * 1.5 + _Time[0] * .5) / 10, 0);
+  color[2] = ign(which.xy + _Gimmick_DS2_01_Count.xy*2) * TAU * .1;
+  color[2] += _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, ((which.xy / _Gimmick_DS2_01_Count.xy) * 1.5 + _Time[0] * .5) / 100, 0) * 5;
   color = OKLCHtoLRGB(color);
   if (hit) {
     normal = ds2_01_calc_normal(ro + total_distance_traveled * rd, 
@@ -455,16 +455,17 @@ Gimmick_DS2_Output Gimmick_DS2_02(inout v2f i)
   float4 wrapped = pow(max(1E-4, (ndotl + wrap_factor) / (1 + wrap_factor)), 1 + wrap_factor);
   float3 light_intensity = light_color * wrapped;
   float3 color = hit ? 1 : 0;
-  color *= _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, which.xy * _Gimmick_DS2_02_Period.xy * .1 + _Time[0] * warping_speed_vector * .01, 0);
+  color *= _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, which.xy * _Gimmick_DS2_02_Period.xy * .2 + _Time[0] * warping_speed_vector * .01, 0);
   // Reinterpret greyscale as OKLCH.
   //color = saturate(color * 2 - (sin(_Time[0] + 1) * .5 + .6));
   color = saturate(color * 2 - 0.4);
-  float hue_noise = _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, which.xy * _Gimmick_DS2_02_Period.xy * .1 - _Time[0] * warping_speed_vector.yx * .02, 0);
+  float hue_noise = _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, which.xy * _Gimmick_DS2_02_Period.xy * .2 - _Time[0] * warping_speed_vector.yx * .02, 0);
   color = OKLCHtoLRGB(float3(
     color.x * 20,
     color.x * 10,
     color.x * TAU * .2 + hue_noise * 10 + _Time[0] * 10
   ));
+
   color = max(color, 0.005);
   color *= light_intensity;
 
@@ -638,7 +639,7 @@ Gimmick_DS2_Output Gimmick_DS2_03(inout v2f i)
   //o.emission = o.albedo;
   o.emission = 0;
   o.normal = normal;
-  o.metallic = 1;
+  o.metallic = hit;
   o.roughness = 0.1;
   o.worldPos = final_pos_world;
   return o;
