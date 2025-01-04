@@ -949,7 +949,8 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Max_Ray("Max ray", Float) = 25
     _Gimmick_Fog_00_Radius("Radius", Float) = 25
     _Gimmick_Fog_00_Step_Size_Factor("Step size (meters)", Float) = 1
-    _Gimmick_Fog_00_Noise_Scale("Noise scale", Float) = 1
+    _Gimmick_Fog_00_Noise_Scale("Noise scale", Vector) = (1, 1, 1, 1)
+    _Gimmick_Fog_00_Motion_Vector("Motion vector", Vector) = (0, 0, 0, 0)
     _Gimmick_Fog_00_Noise_Exponent("Noise exponent", Float) = 2.0
     _Gimmick_Fog_00_Density("Density", Range(0,10)) = 1.0
     _Gimmick_Fog_00_Normal_Cutoff("Normal cutoff (alpha)", Range(0,1)) = 0.5

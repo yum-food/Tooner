@@ -2364,7 +2364,9 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Gimmick_Fog_00_Max_Ray");
     FloatProperty(bc, "Max ray length (m)");
     bc = FindProperty("_Gimmick_Fog_00_Noise_Scale");
-    FloatProperty(bc, "Noise scale");
+    VectorProperty(bc, "Noise scale");
+    bc = FindProperty("_Gimmick_Fog_00_Motion_Vector");
+    VectorProperty(bc, "Motion vector");
     bc = FindProperty("_Gimmick_Fog_00_Noise_Exponent");
     FloatProperty(bc, "Noise exponent");
     bc = FindProperty("_Gimmick_Fog_00_Normal_Cutoff");

@@ -1,8 +1,8 @@
 #include "UnityCG.cginc"
 
+#include "audiolink.cginc"
 #include "atrix256.cginc"
 #include "cnlohr.cginc"
-//#include "fog_ltcgi.cginc"
 #include "globals.cginc"
 #include "interpolators.cginc"
 #include "math.cginc"
@@ -22,7 +22,7 @@ struct Fog00PBR {
   float depth;
 };
 
-#define FOG_PERLIN_NOISE_SCALE 512
+#define FOG_PERLIN_NOISE_SCALE 1
 
 float3 perlin_noise_3d_tex(float3 p)
 {
@@ -74,11 +74,11 @@ float3 light_fog00(
 
 float map(float3 p, out float3 normal) {
 #if 1
-  float3 t = float3(0, -_Time[0] * FOG_PERLIN_NOISE_SCALE, 0);
+  float3 t = float3(0, -_Time[0] * FOG_PERLIN_NOISE_SCALE, 0) * _Gimmick_Fog_00_Motion_Vector;
 #else
   float3 t = 0;
 #endif
-#define RADIUS_TRANS_WIDTH .1
+#define RADIUS_TRANS_WIDTH .5
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
   // Try to create a smooth transition without doing any length() or other
   // transcendental ops.
@@ -87,6 +87,13 @@ float map(float3 p, out float3 normal) {
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
   normal = normalize(perlin_noise_3d_tex(pp+t) * 2 - 1);
   float density = perlin_noise_3d_tex_warp(pp+t) * radius2;
+  //float density = perlin_noise_3d_tex(pp+t) * radius2;
+  //float density = 0.5 * radius2;
+  //density = pow(density, _Gimmick_Fog_00_Noise_Exponent);
+  // EV is 0.5, so apply corrective factor of pow(2, _Gimmick_Fog_00_Noise_Exponent - 1)
+  //density *= pow(2, _Gimmick_Fog_00_Noise_Exponent - 1);
+  //density *= 8;
+  density *= density * 2;
 
   return density;
 }
@@ -94,6 +101,7 @@ float map(float3 p, out float3 normal) {
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
 // Returns weighted color
 void getEmitterData(float3 p,
+    float dither,
     float step_size,
     float3 em_loc,
     float3 em_normal,
@@ -115,6 +123,11 @@ void getEmitterData(float3 p,
   uv *= 0.5;
   uv += 0.5;
 
+  //uv.x += dither * .01;
+  const float frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
+  //uv.x += ign_anim((dither+1000) * 1000, frame, /*speed=*/1.0) * .01;
+  //uv.y += ign_anim(dither * 1000, frame, /*speed=*/1.0) * .01;
+
   bool in_range = uv.x < 1 && uv.y < 1 && uv.x > 0 && uv.y > 0;
 
 #if 0
@@ -125,7 +138,7 @@ void getEmitterData(float3 p,
 
   const float3 p_to_emitter = p - em_loc;
   const float t = dot(p_to_emitter, em_normal);
-  float emitter_lod = floor(abs(t) / (_Gimmick_Fog_00_Emitter_Lod_Half_Life * step_size));
+  float emitter_lod = floor((abs(t) + dither) / ((_Gimmick_Fog_00_Emitter_Lod_Half_Life*(1+ign_anim(uv*1000, frame, /*speed=*/1.0)*2.5) * step_size)));
   float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, uv, emitter_lod);
   float emitter_dist = in_range ? abs(t) : 1000;
   float emitter_falloff = min(1, rcp(emitter_dist));
@@ -142,9 +155,8 @@ void getEmitterData(float3 p,
   float3 em_loc_clamp = em_loc + (saturate(uv.x) *2 - 1) * em_tangent + (saturate(uv.y) * 2 - 1) * em_normal_x_tangent;
   em_loc_clamp += em_loc;
   // TODO parameterize shaping constants
-  float diffuse_length = length(p - em_loc_clamp);
-  float diffuse_falloff = min(2, 10 / diffuse_length);
-  diffuse *= diffuse_falloff;
+  float diffuse_length = dot(p - em_loc_clamp, p - em_loc_clamp);
+  diffuse /= diffuse_length;
 #else
   diffuse = 0;
 #endif
@@ -253,6 +265,7 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
       }
     }
   }
+  clip(no_intersection ? -1 : 1);
 
   float density_ss_term = 1 / _Gimmick_Fog_00_Density;
   //density_ss_term = dclamp(density_ss_term, 0.33, 3.00, 5);
@@ -261,10 +274,15 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   const float step_size_sqrt_max1 = max(1, step_size_sqrt);
   //step_size = clamp(step_size, 1E-2, 1E2);
   uint2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
-#if defined(_GIMMICK_FOG_00_NOISE_2D)
-  const float dither_seed = _Gimmick_Fog_00_Noise_2D.SampleLevel(point_repeat_s, screen_uv_round * _Gimmick_Fog_00_Noise_2D_TexelSize.xy, 0);
+  const float frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
+#if false && defined(_GIMMICK_FOG_00_NOISE_2D)
+  const float golden_ratio = 1.61803398875;
+  const float speed = 0.003;
+  const float dither_seed = frac(_Gimmick_Fog_00_Noise_2D.SampleLevel(point_repeat_s, screen_uv_round * _Gimmick_Fog_00_Noise_2D_TexelSize.xy, 0) + 
+    frame * golden_ratio * speed);
 #elif 1
-  const float dither_seed = ign(screen_uv_round);
+  // float ign_anim(float2 screen_px, float frame, float speed) {
+  const float dither_seed = ign_anim(screen_uv_round, frame, /*speed=*/0.001);
 #else
   const float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
 #endif
@@ -287,7 +305,7 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   float4 acc = 0;
   uint step_count = floor(min(_Gimmick_Fog_00_Max_Ray, depth_hit_l) / step_size);
   //step_count *= (1 - no_intersection);
-#define FOG_MAX_LOOP (128+16)
+#define FOG_MAX_LOOP 10
   step_count = min(step_count, FOG_MAX_LOOP);
 
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
@@ -307,10 +325,10 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   const float step_size_world = step_size * length(rd_world);
   const float3 view_dir_world = normalize(_WorldSpaceCameraPos - i.worldPos);
 
-  const float noise_scale_rcp = 1.0 / _Gimmick_Fog_00_Noise_Scale;
-  for (uint ii = 0; ii < step_count; ii++) {
+  const float3 noise_scale_rcp = 1.0 / _Gimmick_Fog_00_Noise_Scale;
+  uint ii;
+  for (ii = 0; ii < step_count; ii++) {
     const float3 p = ro + rd * ii * step_size;
-    const float3 p_world = ro_world + rd_world * ii * step_size_world;
 
     float4 c;
     float3 c_lit = 0;
@@ -329,23 +347,12 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
       // Note that I'm intentionally passing in `direct` and `diffuse`
       // backwards. It looks better if the collimated light is immune to normal
       // dimming, and if the diffuse light is not.
-      getEmitterData(p, step_size, em_loc, em_normal, em_tangent, em_normal_x_tangent, em_scale,
+      getEmitterData(p, dither, step_size, em_loc, em_normal, em_tangent, em_normal_x_tangent, em_scale,
           em_scale_rcp, direct, diffuse);
     }
     diffuse *= _Gimmick_Fog_00_Emitter_Brightness_Diffuse;
     direct *= _Gimmick_Fog_00_Emitter_Brightness_Direct;
 #else
-#endif
-#if 0
-    {
-      ltcgi_acc acc = (ltcgi_acc) 0;
-      LTCGI_Contribution(acc,
-          p_world,
-          normalize(mul(unity_ObjectToWorld, float4(map_normal, 0.0))),
-          view_dir_world, /*roughness=*/0.5, /*lmuv=*/0);
-      diffuse += acc.diffuse * step_size * _Gimmick_Fog_00_LTCGI_Brightness;
-      diffuse += acc.specular * step_size * _Gimmick_Fog_00_LTCGI_Brightness;
-    }
 #endif
 
     // Scaling brightness by sqrt(step_size) seems to look more consistent as
@@ -384,15 +391,21 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     }
 #endif
   }
-  if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff) {
+  if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff || ii == FOG_MAX_LOOP) {
     acc /= acc.a;
   }
+  acc.rgb = LRGBtoOKLAB(acc.rgb);
+  acc.x = smooth_min(acc.x, _Gimmick_Fog_00_Max_Brightness * .85, _Gimmick_Fog_00_Max_Brightness);
+  acc.rgb = OKLABtoLRGB(acc.rgb);
 
   Fog00PBR pbr;
   pbr.albedo = acc;
+  pbr.albedo.a *= 10;
+  pbr.albedo.a = smooth_min(pbr.albedo.a, .99, 1);
 
   // Add some dithering to lit color to break up banding
-  //pbr.albedo.rgb += ign(tdata.screen_uv_round) * .00390625;
+  //const float frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
+  //pbr.albedo.rgb += ign_anim(dither * 1000, frame, /*speed=*/1.0) * .00390625;
 
   // Remap onto [0, 1]
   pbr.albedo.rgb = aces_filmic(pbr.albedo.rgb);
