@@ -229,13 +229,14 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
 
   float3 obj_pos_depth_hit;
   float2 screen_uv;
+  float eye_depth_world;
   {
     float3 full_vec_eye_to_geometry = i.worldPos - _WorldSpaceCameraPos;
     float3 world_dir = normalize(i.worldPos - _WorldSpaceCameraPos);
     float perspective_divide = 1.0 / i.pos.w;
     float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
     screen_uv = i.screenPos.xy * perspective_divide;
-    float eye_depth_world =
+    eye_depth_world =
       GetLinearZFromZDepth_WorksWithMirrors(
           SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, tdata.screen_uv),
           screen_uv) * perspective_factor;
@@ -400,7 +401,7 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
 
   Fog00PBR pbr;
   pbr.albedo = acc;
-  pbr.albedo.a *= 10;
+  pbr.albedo.a *= 1;
   pbr.albedo.a = smooth_min(pbr.albedo.a, .99, 1);
 
   // Add some dithering to lit color to break up banding

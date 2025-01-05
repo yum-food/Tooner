@@ -1583,6 +1583,8 @@ float4 effect(inout v2f i, out float depth)
     float4 clip_pos = mul(UNITY_MATRIX_VP, float4(i.worldPos, 1.0));
     depth = clip_pos.z / clip_pos.w;
   }
+#else
+  depth = 0;
 #endif
   const float3 view_dir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
   const float3 view_dir_c = normalize(i.centerCamPos - i.worldPos);

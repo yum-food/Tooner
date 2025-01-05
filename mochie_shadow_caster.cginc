@@ -1,3 +1,4 @@
+#include "atrix256.cginc"
 #include "gerstner.cginc"
 
 #ifndef __MOCHIE_SHADOW_CASTER_INC
@@ -49,6 +50,8 @@ struct v2f {
   float2 uv : TEXCOORD0;
 	UNITY_VERTEX_INPUT_INSTANCE_ID 
   UNITY_VERTEX_OUTPUT_STEREO
+  float3 worldPos : TEXCOORD1;
+  float2 screenPos : TEXCOORD2;
 };
 
 v2f vert (appdata v){
@@ -75,50 +78,27 @@ v2f vert (appdata v){
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 	TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
   o.uv = v.uv;
+  o.worldPos = mul(unity_ObjectToWorld, v.vertex);
+
+	float2 suv = o.pos * float2(0.5, 0.5 * _ProjectionParams.x);
+  o.screenPos = TransformStereoScreenSpaceTex(suv + 0.5 * o.pos.w, o.pos.w);
+
   return o;
 }
 
-float2 get_uv_by_channel(v2f i, uint which_channel) {
-  switch (which_channel) {
-    case 0:
-      return i.uv0;
-      break;
-#if !defined(_OPTIMIZE_INTERPOLATORS)
-    case 1:
-      return i.uv1;
-      break;
-#if !defined(LIGHTMAP_ON)
-    case 2:
-      return i.uv2;
-      break;
-    case 3:
-      return i.uv3;
-      break;
-    case 4:
-      return i.uv4;
-      break;
-    case 5:
-      return i.uv5;
-      break;
-    case 6:
-      return i.uv6;
-      break;
-    case 7:
-      return i.uv7;
-      break;
-#endif
-#endif  // _OPTIMIZE_INTERPOLATORS
-    default:
-      return 0;
-      break;
-  }
-}
-
-#define UV_SCOFF(i, tex_st, which_channel) get_uv_by_channel(i, round(which_channel)) * (tex_st).xy + (tex_st).zw
-
 float4 frag (v2f i) : SV_Target {
+  ToonerData tdata;
+  {
+    float3 full_vec_eye_to_geometry = i.worldPos - _WorldSpaceCameraPos;
+    float3 world_dir = normalize(i.worldPos - _WorldSpaceCameraPos);
+    float perspective_divide = 1.0 / i.pos.w;
+    float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
+    tdata.screen_uv = i.screenPos.xy * perspective_divide;
+    tdata.screen_uv_round = floor(tdata.screen_uv * _ScreenParams.xy);
+  }
+
 #if defined(_BASECOLOR_MAP)
-  float4 albedo = _MainTex.SampleBias(GET_SAMPLER_PBR, UV_SCOFF(i, _MainTex_ST, 0), _Global_Sample_Bias);
+  float4 albedo = _MainTex.SampleBias(linear_repeat_s, i.uv, _Global_Sample_Bias);
   albedo *= _Color;
 #else
   float4 albedo = _Color;
