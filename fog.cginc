@@ -257,10 +257,7 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     if (solveQuadratic(a, b, c, t0, t1)) {
       no_intersection = (t0 < 0) * (t1 < 0);
       const bool inside_cylinder = (t0 < 0) * (t1 > 0);
-      if (inside_cylinder) {
-        distance_to_cylinder = no_intersection ? distance_to_cylinder : max(t0, t1);
-        distance_to_cylinder = min(distance_to_cylinder, length(obj_pos_depth_hit - ro));
-      } else {
+      if (!inside_cylinder) {
         distance_to_cylinder = no_intersection ? distance_to_cylinder : min(max(t0, 0), max(t1, 0));
         ro += distance_to_cylinder * rd;
       }
@@ -306,7 +303,7 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   float4 acc = 0;
   uint step_count = floor(min(_Gimmick_Fog_00_Max_Ray, depth_hit_l) / step_size);
   //step_count *= (1 - no_intersection);
-#define FOG_MAX_LOOP 10
+#define FOG_MAX_LOOP 20
   step_count = min(step_count, FOG_MAX_LOOP);
 
 #if defined(_GIMMICK_FOG_00_EMITTER_TEXTURE)
@@ -401,8 +398,7 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
 
   Fog00PBR pbr;
   pbr.albedo = acc;
-  pbr.albedo.a *= 1;
-  pbr.albedo.a = smooth_min(pbr.albedo.a, .99, 1);
+  pbr.albedo.a = smooth_min(pbr.albedo.a, .999, 1);
 
   // Add some dithering to lit color to break up banding
   //const float frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
@@ -418,6 +414,11 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
 
   float4 clip_pos = mul(UNITY_MATRIX_VP, float4(mul(unity_ObjectToWorld, float4(ro, 1.0))));
   pbr.depth = clip_pos.z / clip_pos.w;
+
+#if 0
+  pbr.albedo.rgb = eye_depth_world / 100;
+  pbr.albedo.a = 1;
+#endif
 
   return pbr;
 }

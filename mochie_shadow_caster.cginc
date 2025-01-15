@@ -1,5 +1,8 @@
+#include "UnityCG.cginc"
+
 #include "atrix256.cginc"
 #include "gerstner.cginc"
+#include "trochoid_math.cginc"
 
 #ifndef __MOCHIE_SHADOW_CASTER_INC
 #define __MOCHIE_SHADOW_CASTER_INC
@@ -58,6 +61,11 @@ v2f vert (appdata v){
 #if defined(_DISCARD)
   if (_Discard_Enable_Dynamic) {
     return (v2f) (0.0 / 0.0);
+  }
+#endif
+#if defined(_TROCHOID)
+  {
+    v.vertex.xyz = cyl2_to_troch_map(cyl_to_cyl2_map(cart_to_cyl_map(v.vertex.xyz)));
   }
 #endif
 #if !defined(_SCROLL) && defined(_GIMMICK_GERSTNER_WATER)

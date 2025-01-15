@@ -1981,6 +1981,14 @@ public class ToonerGUI : ShaderGUI {
     FloatProperty(bc, "r");
     bc = FindProperty("_Trochoid_d");
     FloatProperty(bc, "d");
+    bc = FindProperty("_Trochoid_Speed");
+    FloatProperty(bc, "Speed");
+    bc = FindProperty("_Trochoid_Radius_Power");
+    FloatProperty(bc, "Radius power");
+    bc = FindProperty("_Trochoid_Radius_Scale");
+    FloatProperty(bc, "Radius scale");
+    bc = FindProperty("_Trochoid_Height_Scale");
+    FloatProperty(bc, "Height scale");
 
     EditorGUI.indentLevel -= 1;
   }

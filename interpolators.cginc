@@ -50,6 +50,10 @@ struct v2f
 
   float2 screenPos : TEXCOORD14;
 
+#if defined(_TROCHOID)
+  float3 objPos_pre_trochoid : TEXCOORD15;
+#endif
+
   UNITY_VERTEX_INPUT_INSTANCE_ID
   UNITY_VERTEX_OUTPUT_STEREO
 };
@@ -107,6 +111,10 @@ struct v2f
   #if defined(VERTEXLIGHT_ON)
   float3 vertexLightColor : TEXCOORD16;
   #endif
+
+#if defined(_TROCHOID)
+  float3 objPos_pre_trochoid : TEXCOORD17;
+#endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID
   UNITY_VERTEX_OUTPUT_STEREO

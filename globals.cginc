@@ -801,6 +801,10 @@ texture2D _Gimmick_Pixellate_Effect_Mask;
 float _Trochoid_R;
 float _Trochoid_r;
 float _Trochoid_d;
+float _Trochoid_Speed;
+float _Trochoid_Radius_Power;
+float _Trochoid_Radius_Scale;
+float _Trochoid_Height_Scale;
 #endif
 
 #if defined(_FACE_ME_WORLD_Y)

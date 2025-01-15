@@ -137,9 +137,8 @@ v2f vert(appdata v)
 
 #if defined(_TROCHOID)
   {
-    float theta = v.uv0.x * TAU;
-    float r0 = length(v.vertex.xyz);
-    v.vertex.xyz = trochoid_map(theta, r0, v.vertex.z);
+    o.objPos_pre_trochoid = v.vertex.xyz;
+    v.vertex.xyz = cyl2_to_troch_map(cyl_to_cyl2_map(cart_to_cyl_map(v.vertex.xyz)));
   }
 #endif
 #if defined(_FACE_ME_WORLD_Y)
@@ -1598,12 +1597,23 @@ float4 effect(inout v2f i, out float depth)
 
 #if defined(_TROCHOID)
   {
-    i.normal = trochoid_normal(i.objPos.xyz, i.uv0);
-
-    float theta = i.uv0.x * TAU;
-    float r0 = length(i.objPos.xyz);
-    float z = i.objPos.z;
-    i.objPos.xyz = trochoid_map(theta, r0, z);
+    // Let h(v) be the trochoid of the cartesian coordinates v.
+    // We evaluate h(v) by first mapping it to cylindrical coordinates, then applying a trochoid function defined on those coordinates:
+    //   h(v) = h_cyl(g(v))
+    // g(v) maps v to cylindrical coordinates.
+    // h_cyl(v) evaluates the trochoid function on cylindrical coordinates.
+    // We want to compute h'(v), i.e. its Jacobian.
+    // By the chain rule:
+    //   h'(v) = h_cyl'(g(v)) * g'(v)
+    // The reality is a little more complex: we also apply a distortion to the cylindrical coordinates:
+    //   h(v) = h_cyl(f(g(v)))
+    // where f(v) is that distortion.
+    // Again, by the chain rule:
+    //   h'(v) = h_cyl'(f(g(v))) * f'(g(v)) * g'(v)
+    float3x3 j0 = cart_to_cyl_jacobian(i.objPos_pre_trochoid);
+    float3x3 j1 = cyl_to_cyl2_jacobian(cart_to_cyl_map(i.objPos_pre_trochoid));
+    float3x3 j2 = cyl2_to_troch_jacobian(cyl_to_cyl2_map(cart_to_cyl_map(i.objPos_pre_trochoid)));
+    i.normal = normalize(mul(transpose(invert(mul(j0, mul(j1, j2)))), i.normal));
   }
 #endif
 

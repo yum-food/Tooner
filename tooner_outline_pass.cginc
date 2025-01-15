@@ -36,15 +36,7 @@ v2f vert(appdata v)
 
 #if defined(_TROCHOID)
   {
-#define TAU PI * 2.0
-    float theta = v.uv0.x * TAU;
-    float r0 = length(v.vertex.xyz);
-
-    float x = v.vertex.x;
-    float y = v.vertex.y;
-    float z = v.vertex.z;
-
-    v.vertex.xyz = trochoid_map(theta, r0, z);
+    v.vertex.xyz = cyl2_to_troch_map(cyl_to_cyl2_map(cart_to_cyl_map(v.vertex.xyz)));
   }
 #endif
 

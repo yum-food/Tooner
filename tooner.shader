@@ -849,6 +849,10 @@ Shader "yum_food/tooner"
     _Trochoid_R("R", Float) = 5.0
     _Trochoid_r("r", Float) = 3.0
     _Trochoid_d("d", Float) = 5.0
+    _Trochoid_Speed("Speed", Float) = 1.0
+    _Trochoid_Radius_Power("Radius power", Float) = 1.0
+    _Trochoid_Radius_Scale("Radius scale", Float) = 1.0
+    _Trochoid_Height_Scale("Height scale", Float) = 1.0
 
     _FaceMeWorldY_Enable_Static("Enable face me gimmick", Float) = 0.0
     _FaceMeWorldY_Enable_Dynamic("Enable face me gimmick", Float) = 0.0
