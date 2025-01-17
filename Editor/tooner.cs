@@ -1990,6 +1990,13 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Trochoid_Height_Scale");
     FloatProperty(bc, "Height scale");
 
+    bc = FindProperty("_Trochoid_Enable_Fragment_Normals");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Enable fragment normals", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
     EditorGUI.indentLevel -= 1;
   }
 

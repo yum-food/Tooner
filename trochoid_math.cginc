@@ -17,16 +17,22 @@ float3 cyl2_to_troch_map(float3 v)
   const float d = _Trochoid_d;
   const float rrrr = (R - r) * R / r;
 
+  float rr_gcd = gcd(round(R), round(r));
+  float rr_lcm = (R * r) / rr_gcd;
+  float rr_lcm_factor = rr_lcm / R;
+  float toff = _Time[0] * _Trochoid_Speed;
+
   float x =
-      cos(v.x * R) * v.y * (R - r) * TROCH_POSITION_SCALE +
-      cos(v.x * rrrr) * v.y * d * TROCH_POSITION_SCALE;
+      cos(v.x * rr_lcm_factor * R + toff * 2.3 + toff) * v.y * (R - r) * TROCH_POSITION_SCALE +
+      cos(v.x * rr_lcm_factor * rrrr - toff * 2.9 + toff) * v.y * d * TROCH_POSITION_SCALE;
   float y =
-      sin(v.x * R) * v.y * (R - r) * TROCH_POSITION_SCALE -
-      sin(v.x * rrrr) * v.y * d * TROCH_POSITION_SCALE;
+      sin(v.x * rr_lcm_factor * R - toff * 3.1 + toff) * v.y * (R - r) * TROCH_POSITION_SCALE -
+      sin(v.x * rr_lcm_factor * rrrr + toff * 3.7 + toff) * v.y * d * TROCH_POSITION_SCALE;
   float z =
-      (v.x * v.y * R * TROCH_Z_THETA_SCALE +
-      cos(v.x * R * 5) * v.y * TROCH_POSITION_SCALE +
-      v.y * v.z);
+      (v.x * v.y * rr_lcm_factor * R * TROCH_Z_THETA_SCALE +
+      cos(v.x * rr_lcm_factor * R * 5 + toff * 4.1 + toff) * v.y * TROCH_POSITION_SCALE +
+      //v.y * v.z);
+      v.z);
 
   return float3(x, y, z);
 }
@@ -63,25 +69,30 @@ float3x3 cyl2_to_troch_jacobian(float3 v)
   const float d = _Trochoid_d;
   const float rrrr = (R - r) * R / r;
 
+  float rr_gcd = gcd(round(R), round(r));
+  float rr_lcm = (R * r) / rr_gcd;
+  float rr_lcm_factor = rr_lcm / R;
+  float toff = _Time[0] * _Trochoid_Speed;
+
 #if 1
   float3 df_dt = float3(
-    -R * sin(v.x * R) * v.y * (R - r) * TROCH_POSITION_SCALE +
-    -rrrr * sin(v.x * rrrr) * v.y * d * TROCH_POSITION_SCALE,
+    -R * rr_lcm_factor * sin(v.x * rr_lcm_factor * R + toff * 2.3 + toff) * v.y * (R - r) * TROCH_POSITION_SCALE +
+    -rrrr * rr_lcm_factor * sin(v.x * rr_lcm_factor * rrrr - toff * 2.9 + toff) * v.y * d * TROCH_POSITION_SCALE,
 
-    R * cos(v.x * R) * v.y * (R - r) * TROCH_POSITION_SCALE -
-    rrrr * cos(v.x * rrrr) * v.y * d * TROCH_POSITION_SCALE,
+    R * rr_lcm_factor * cos(v.x * rr_lcm_factor * R - toff * 3.1 + toff) * v.y * (R - r) * TROCH_POSITION_SCALE -
+    rrrr * rr_lcm_factor * cos(v.x * rr_lcm_factor * rrrr + toff * 3.7 + toff) * v.y * d * TROCH_POSITION_SCALE,
 
     v.y * R * TROCH_Z_THETA_SCALE -
-    R * 5 * sin(v.x * R * 5) * v.y * TROCH_POSITION_SCALE);
+    R * rr_lcm_factor *5 * sin(v.x * rr_lcm_factor * R * 5 + toff * 4.1 + toff) * v.y * TROCH_POSITION_SCALE);
 #else
   float3 df_dt = (cyl2_to_troch_map(v + float3(TROCH_EPSILON, 0, 0)) - cyl2_to_troch_map(v - float3(TROCH_EPSILON, 0, 0))) / (2 * TROCH_EPSILON);
 #endif
 
 #if 1
   float3 df_dr = float3(
-    ((R - r) * cos(v.x * R) + d * cos((R - r) * v.x * R / r)) * TROCH_POSITION_SCALE,
-    ((R - r) * sin(v.x * R) - d * sin((R - r) * v.x * R / r)) * TROCH_POSITION_SCALE,
-    cos(v.x * R * 5) * TROCH_POSITION_SCALE);
+    ((R - r) * rr_lcm_factor * cos(v.x * rr_lcm_factor * R + toff * 2.3) + d * rr_lcm_factor * cos((R - r) * v.x * rr_lcm_factor * R / r + toff * 2.9)) * TROCH_POSITION_SCALE,
+    ((R - r) * rr_lcm_factor * sin(v.x * rr_lcm_factor * R + toff * 3.1) - d * rr_lcm_factor * sin((R - r) * v.x * rr_lcm_factor * R / r + toff * 3.7)) * TROCH_POSITION_SCALE,
+    rr_lcm_factor * cos(v.x * rr_lcm_factor * R * 5 + toff * 4.1) * TROCH_POSITION_SCALE);
 #else
   float3 df_dr = (cyl2_to_troch_map(v + float3(0, TROCH_EPSILON, 0)) - cyl2_to_troch_map(v - float3(0, TROCH_EPSILON, 0))) / (2 * TROCH_EPSILON);
 #endif
@@ -90,7 +101,7 @@ float3x3 cyl2_to_troch_jacobian(float3 v)
   float3 df_dz = float3(
     0,
     0,
-    v.y);
+    1);
 #else
   float3 df_dz = (cyl2_to_troch_map(v + float3(0, 0, TROCH_EPSILON)) - cyl2_to_troch_map(v - float3(0, 0, TROCH_EPSILON))) / (2 * TROCH_EPSILON);
 #endif

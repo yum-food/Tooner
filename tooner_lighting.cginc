@@ -20,6 +20,7 @@
 #include "motion.cginc"
 #include "oklab.cginc"
 #include "pbr.cginc"
+#include "pema_quad_intrinsics.cginc"
 #include "poi.cginc"
 #include "shear_math.cginc"
 #include "tone.cginc"
@@ -139,17 +140,9 @@ v2f vert(appdata v)
   {
     o.objPos_pre_trochoid = v.vertex.xyz;
 //#define TROCHOID_DECOMPOSE
+#define TROCHOID_SCREEN_SPACE_NORMALS
 #if defined(TROCHOID_DECOMPOSE)
     v.vertex.xyz = cyl2_to_troch_map(cyl_to_cyl2_map(cart_to_cyl_map(v.vertex.xyz)));
-#else
-    v.vertex.xyz = cart_to_troch_map(v.vertex.xyz);
-#endif
-  }
-#endif
-
-#if defined(_TROCHOID)
-  {
-#if defined(TROCHOID_DECOMPOSE)
     // Let h(v) be the trochoid of the cartesian coordinates v.
     // We evaluate h(v) by first mapping it to cylindrical coordinates, then applying a trochoid function defined on those coordinates:
     //   h(v) = h_cyl(g(v))
@@ -167,13 +160,16 @@ v2f vert(appdata v)
     float3x3 j1 = cyl_to_cyl2_jacobian(cart_to_cyl_map(o.objPos_pre_trochoid));
     float3x3 j2 = cyl2_to_troch_jacobian(cyl_to_cyl2_map(cart_to_cyl_map(o.objPos_pre_trochoid)));
     float3x3 vector_mover = transpose(invert(mul(mul(j2, j1), j0)));
-#else
-    float3x3 vector_mover = transpose(invert(cart_to_troch_jacobian(o.objPos_pre_trochoid)));
-#endif
     v.normal = mul(vector_mover, v.normal);
     v.tangent.xyz = mul(vector_mover, v.tangent.xyz);
-  }
+#else
+    v.vertex.xyz = cart_to_troch_map(v.vertex.xyz);
+    float3x3 vector_mover = transpose(invert(cart_to_troch_jacobian(o.objPos_pre_trochoid)));
+    v.normal = mul(vector_mover, v.normal);
+    v.tangent.xyz = mul(vector_mover, v.tangent.xyz);
 #endif
+  }
+#endif  // _TROCHOID
 #if defined(_FACE_ME_WORLD_Y)
   if (_FaceMeWorldY_Enable_Dynamic) {
     // Undo object coordinate system rotation.
@@ -1618,6 +1614,29 @@ float4 effect(inout v2f i, out float depth)
 #else
   depth = 0;
 #endif
+
+#if defined(TROCHOID_SCREEN_SPACE_NORMALS)
+  {
+    float3 my_pos;
+    [branch]
+    if (_Trochoid_Enable_Fragment_Normals) {
+      my_pos = cart_to_troch_map(i.objPos_pre_trochoid.xyz);
+    } else {
+      my_pos = i.objPos.xyz;
+    }
+    float3 neighbor_x = QuadReadAcrossX(my_pos);
+    float3 neighbor_y = QuadReadAcrossY(my_pos);
+    uint2 lane_pos = QuadGetLaneID();
+    float x_sign = (lane_pos == 1 || lane_pos == 3) ? 1 : -1;
+    float y_sign = (lane_pos == 0 || lane_pos == 1) ? 1 : -1;
+    float3 tan1 = (neighbor_x - my_pos) * x_sign;
+    float3 tan2 = (neighbor_y - my_pos) * y_sign;
+    float3 normal = cross(tan1, tan2);
+    i.normal = UnityObjectToWorldNormal(normal);
+    i.tangent.xyz = UnityObjectToWorldDir(tan1);
+  }
+#endif
+
   const float3 view_dir = normalize(_WorldSpaceCameraPos.xyz - i.worldPos);
   const float3 view_dir_c = normalize(i.centerCamPos - i.worldPos);
 #define VIEW_DIR(center_eye_fix) (center_eye_fix == 1 ? view_dir_c : view_dir)
@@ -2907,6 +2926,17 @@ fixed4 frag(v2f i
   UNITY_APPLY_DITHER_CROSSFADE(i.pos.xy);
   UNITY_SETUP_INSTANCE_ID(i);
   UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
+
+  SETUP_QUAD_INTRINSICS(i.pos);
+
+/*
+#if defined(_TROCHOID)
+  float3x3 vector_mover = cyl2_to_troch_jacobian(i.objPos_pre_trochoid);
+  float det = determinant(vector_mover);
+  det = saturate(abs(det));
+  return float4(det, det, det, 1);
+#endif
+*/
 
   return effect(i, depth);
 }

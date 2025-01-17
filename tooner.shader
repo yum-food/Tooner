@@ -853,6 +853,7 @@ Shader "yum_food/tooner"
     _Trochoid_Radius_Power("Radius power", Float) = 1.0
     _Trochoid_Radius_Scale("Radius scale", Float) = 1.0
     _Trochoid_Height_Scale("Height scale", Float) = 1.0
+    _Trochoid_Enable_Fragment_Normals("Enable fragment normals", Float) = 1.0
 
     _FaceMeWorldY_Enable_Static("Enable face me gimmick", Float) = 0.0
     _FaceMeWorldY_Enable_Dynamic("Enable face me gimmick", Float) = 0.0
@@ -1125,6 +1126,7 @@ Shader "yum_food/tooner"
       Tags {
         "LightMode" = "ShadowCaster"
       }
+      Cull [_Cull]
 
       Stencil {
         Ref [_Stencil_Ref_Base]

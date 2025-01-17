@@ -805,6 +805,7 @@ float _Trochoid_Speed;
 float _Trochoid_Radius_Power;
 float _Trochoid_Radius_Scale;
 float _Trochoid_Height_Scale;
+float _Trochoid_Enable_Fragment_Normals;
 #endif
 
 #if defined(_FACE_ME_WORLD_Y)
