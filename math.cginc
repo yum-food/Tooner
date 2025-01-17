@@ -247,5 +247,50 @@ bool solveQuadratic(float a, float b, float c, out float x0, out float x1)
   return true;
 }
 
+float determinant(float3x3 m)
+{
+  return m[0][0] * (m[1][1] * m[2][2] - m[1][2] * m[2][1])
+            - m[0][1] * (m[1][0] * m[2][2] - m[1][2] * m[2][0])
+            + m[0][2] * (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+}
+
+float3x3 invert(float3x3 m)
+{
+  float det = determinant(m);
+
+  float3x3 adj;
+  adj[0][0] =  (m[1][1] * m[2][2] - m[1][2] * m[2][1]);
+  adj[0][1] = -(m[0][1] * m[2][2] - m[0][2] * m[2][1]);
+  adj[0][2] =  (m[0][1] * m[1][2] - m[0][2] * m[1][1]);
+  
+  adj[1][0] = -(m[1][0] * m[2][2] - m[1][2] * m[2][0]);
+  adj[1][1] =  (m[0][0] * m[2][2] - m[0][2] * m[2][0]);
+  adj[1][2] = -(m[0][0] * m[1][2] - m[0][2] * m[1][0]);
+  
+  adj[2][0] =  (m[1][0] * m[2][1] - m[1][1] * m[2][0]);
+  adj[2][1] = -(m[0][0] * m[2][1] - m[0][1] * m[2][0]);
+  adj[2][2] =  (m[0][0] * m[1][1] - m[0][1] * m[1][0]);
+
+  return adj * (1.0 / det);
+}
+
+// Return largest number which divides into both 'a' and 'b'.
+// Uses the Euclidean algorithm: repeatedly divide 'b' by 'a'.
+uint gcd(uint a, uint b)
+{
+  uint tmp = a * b;
+  #define GCD_MAX_ITER 10
+  for (uint i = 0; i < GCD_MAX_ITER; i++) {
+    tmp = b;
+    b = a % b;
+    a = tmp;
+    if (a == b) {
+      return a;
+    }
+  }
+  return 1;
+  
+}
+
 #endif  // __MATH_INC
 
