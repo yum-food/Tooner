@@ -1909,6 +1909,73 @@ public class ToonerGUI : ShaderGUI {
       EditorGUI.indentLevel -= 1;
     }
 
+    if (Mathf.Round(choice) == 11) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_DS2_11_Fog_Enable");
+      enabled = (bc.floatValue != 0.0);
+      EditorGUI.BeginChangeCheck();
+      enabled = Toggle("Fog enable", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+
+      if (enabled) {
+        bc = FindProperty("_Gimmick_DS2_11_Fog_Density");
+        FloatProperty(bc, "Fog density");
+        bc = FindProperty("_Gimmick_DS2_11_Fog_Sun_Direction");
+        VectorProperty(bc, "Fog sun direction");
+        bc = FindProperty("_Gimmick_DS2_11_Fog_Sun_Exponent");
+        FloatProperty(bc, "Fog sun exponent");
+        bc = FindProperty("_Gimmick_DS2_11_Fog_Color");
+        ColorProperty(bc, "Fog color");
+        bc = FindProperty("_Gimmick_DS2_11_Fog_Sun_Color");
+        ColorProperty(bc, "Fog sun color");
+      }
+
+      bc = FindProperty("_Gimmick_DS2_11_Snow_Color");
+      ColorProperty(bc, "Snow color");
+      bc = FindProperty("_Gimmick_DS2_11_Snowline");
+      FloatProperty(bc, "Snowline");
+      bc = FindProperty("_Gimmick_DS2_11_Snowline_Width");
+      FloatProperty(bc, "Snowline width");
+      bc = FindProperty("_Gimmick_DS2_11_Snowline_Noise_Scale");
+      FloatProperty(bc, "Snowline noise scale");
+      bc = FindProperty("_Gimmick_DS2_11_Rock_Color");
+      ColorProperty(bc, "Rock color");
+      bc = FindProperty("_Gimmick_DS2_11_Rockline");
+      FloatProperty(bc, "Rockline");
+      bc = FindProperty("_Gimmick_DS2_11_Rockline_Width");
+      FloatProperty(bc, "Rockline width");
+      bc = FindProperty("_Gimmick_DS2_11_Rockline_Noise_Scale");
+      FloatProperty(bc, "Rockline noise scale");
+      bc = FindProperty("_Gimmick_DS2_11_Grass_Color");
+      ColorProperty(bc, "Grass color");
+      bc = FindProperty("_Gimmick_DS2_11_Alpha");
+      RangeProperty(bc, "Alpha");
+      bc = FindProperty("_Gimmick_DS2_11_XZ_Offset");
+      VectorProperty(bc, "XZ offset");
+
+      bc = FindProperty("_Gimmick_DS2_11_Distance_Culling_Enable");
+      enabled = (bc.floatValue != 0.0);
+      EditorGUI.BeginChangeCheck();
+      enabled = Toggle("Distance culling enable", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+      
+      if (enabled) {
+        EditorGUI.indentLevel += 1;
+
+        bc = FindProperty("_Gimmick_DS2_11_Activation_Center");
+        VectorProperty(bc, "Activation center");
+        bc = FindProperty("_Gimmick_DS2_11_Activation_Radius");
+        FloatProperty(bc, "Activation radius");
+
+        EditorGUI.indentLevel -= 1;
+      }
+
+      EditorGUI.indentLevel -= 1;
+    }
+
     EditorGUI.indentLevel -= 1;
   }
 
@@ -1996,6 +2063,24 @@ public class ToonerGUI : ShaderGUI {
     enabled = Toggle("Enable fragment normals", enabled);
     EditorGUI.EndChangeCheck();
     bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    bc = FindProperty("_Trochoid_Distance_Culling_Enable");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Distance culling enable", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Trochoid_Activation_Center");
+      VectorProperty(bc, "Activation center");
+      bc = FindProperty("_Trochoid_Activation_Radius");
+      FloatProperty(bc, "Activation radius");
+
+      EditorGUI.indentLevel -= 1;
+    }
 
     EditorGUI.indentLevel -= 1;
   }
@@ -2491,6 +2576,53 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickFog1() {
+    MaterialProperty bc;
+
+    bc = FindProperty("_Gimmick_Fog_01_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Fog 01", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_FOG_01", enabled);
+
+    if (!enabled) {
+      return;
+    }
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Fog_01_Density");
+    RangeProperty(bc, "Density");
+    bc = FindProperty("_Gimmick_Fog_01_Sun_Direction");
+    VectorProperty(bc, "Sun direction");
+    bc = FindProperty("_Gimmick_Fog_01_Color");
+    ColorProperty(bc, "Color");
+    bc = FindProperty("_Gimmick_Fog_01_Sun_Color");
+    ColorProperty(bc, "Sun color");
+    bc = FindProperty("_Gimmick_Fog_01_Sun_Exponent");
+    FloatProperty(bc, "Sun exponent");
+    bc = FindProperty("_Gimmick_Fog_01_Distance_Culling_Enable");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Distance culling enable", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+
+      bc = FindProperty("_Gimmick_Fog_01_Activation_Center");
+      VectorProperty(bc, "Activation center");
+      bc = FindProperty("_Gimmick_Fog_01_Activation_Radius");
+      FloatProperty(bc, "Activation radius");
+
+      EditorGUI.indentLevel -= 1;
+    }
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmickAurora() {
     MaterialProperty bc;
 
@@ -2616,6 +2748,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickLetterGrid2();
     DoGimmickAudiolinkChroma00();
     DoGimmickFog0();
+    DoGimmickFog1();
     DoGimmickAurora();
     DoGimmickGerstnerWater();
     DoClones();

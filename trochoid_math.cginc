@@ -17,9 +17,14 @@ float3 cyl2_to_troch_map(float3 v)
   const float d = _Trochoid_d;
   const float rrrr = (R - r) * R / r;
 
-  float rr_gcd = gcd(round(R), round(r));
+#if 1
+  float rr_gcd = gcd(abs(round(R)), abs(round(r)));
   float rr_lcm = (R * r) / rr_gcd;
   float rr_lcm_factor = rr_lcm / R;
+#else
+  float rr_lcm_factor = r;
+#endif
+
   float toff = _Time[0] * _Trochoid_Speed;
 
   float x =
@@ -39,7 +44,8 @@ float3 cyl2_to_troch_map(float3 v)
 
 float3 cyl_to_cyl2_map(float3 v)
 {
-  return float3(v.x * .5, pow(v.y, _Trochoid_Radius_Power) * _Trochoid_Radius_Scale, v.z * _Trochoid_Height_Scale);
+  float power_scale = pow(100, _Trochoid_Radius_Power - 1);
+  return float3(v.x * .5, pow(v.y, _Trochoid_Radius_Power) * _Trochoid_Radius_Scale * power_scale, v.z * _Trochoid_Height_Scale);
 }
 
 float3 cart_to_cyl_map(float3 v)
@@ -49,6 +55,18 @@ float3 cart_to_cyl_map(float3 v)
 
 float3 cart_to_troch_map(float3 v)
 {
+  [branch]
+  if (_Trochoid_Distance_Culling_Enable) {
+    float3 activation_center = _Trochoid_Activation_Center;
+    float activation_radius = _Trochoid_Activation_Radius;
+    float cur_radius = length(_WorldSpaceCameraPos - activation_center);
+    [branch]
+    //if (cur_radius > activation_radius) {
+    if (_WorldSpaceCameraPos.y > activation_center.y + activation_radius) {
+      return v;
+    }
+  }
+
   return cyl2_to_troch_map(cyl_to_cyl2_map(cart_to_cyl_map(v)));
 }
 
@@ -69,9 +87,14 @@ float3x3 cyl2_to_troch_jacobian(float3 v)
   const float d = _Trochoid_d;
   const float rrrr = (R - r) * R / r;
 
-  float rr_gcd = gcd(round(R), round(r));
+#if 1
+  float rr_gcd = gcd(abs(round(R)), abs(round(r)));
   float rr_lcm = (R * r) / rr_gcd;
   float rr_lcm_factor = rr_lcm / R;
+#else
+  float rr_lcm_factor = r;
+#endif
+
   float toff = _Time[0] * _Trochoid_Speed;
 
 #if 1

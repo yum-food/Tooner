@@ -827,6 +827,27 @@ Shader "yum_food/tooner"
     _Gimmick_DS2_03_Period("Period", Vector) = (1, 1, 1, 1)
     _Gimmick_DS2_03_Count("Count", Vector) = (1, 1, 1, 1)
     _Gimmick_DS2_03_Edge_Length("Edge length", Float) = 0.1
+    // Effect 11
+    _Gimmick_DS2_11_Fog_Enable("Fog enable", Float) = 0
+    _Gimmick_DS2_11_Fog_Density("Fog density", Float) = 1
+    _Gimmick_DS2_11_Fog_Sun_Direction("Fog sun direction", Vector) = (0, 0, 0, 0)
+    _Gimmick_DS2_11_Fog_Sun_Exponent("Fog sun exponent", Float) = 1
+    [HDR] _Gimmick_DS2_11_Fog_Color("Fog color", Color) = (1, 1, 1, 1)
+    [HDR] _Gimmick_DS2_11_Fog_Sun_Color("Fog sun color", Color) = (1, 1, 1, 1)
+    _Gimmick_DS2_11_Snowline("Snowline", Float) = 1
+    _Gimmick_DS2_11_Snowline_Width("Snowline width", Float) = 0.1
+    _Gimmick_DS2_11_Snowline_Noise_Scale("Snowline noise scale", Float) = 1
+    [HDR] _Gimmick_DS2_11_Snow_Color("Snow color", Color) = (1, 1, 1, 1)
+    _Gimmick_DS2_11_Rockline("Rockline", Float) = 0
+    _Gimmick_DS2_11_Rockline_Width("Rockline width", Float) = 0.1
+    _Gimmick_DS2_11_Rockline_Noise_Scale("Rockline noise scale", Float) = 1
+    [HDR] _Gimmick_DS2_11_Rock_Color("Rock color", Color) = (1, 1, 1, 1)
+    [HDR] _Gimmick_DS2_11_Grass_Color("Grass color", Color) = (1, 1, 1, 1)
+    _Gimmick_DS2_11_Alpha("Alpha", Range(0, 1)) = 0.5
+    _Gimmick_DS2_11_XZ_Offset("XZ offset", Vector) = (0, 0, 0, 0)
+    _Gimmick_DS2_11_Distance_Culling_Enable("Distance culling enable", Float) = 0
+    _Gimmick_DS2_11_Activation_Center("Activation center", Vector) = (0, 0, 0, 0)
+    _Gimmick_DS2_11_Activation_Radius("Activation radius", Float) = 1
 
 
     _Gimmick_Halo00_Enable_Static("Enable halo", Float) = 0.0
@@ -854,6 +875,9 @@ Shader "yum_food/tooner"
     _Trochoid_Radius_Scale("Radius scale", Float) = 1.0
     _Trochoid_Height_Scale("Height scale", Float) = 1.0
     _Trochoid_Enable_Fragment_Normals("Enable fragment normals", Float) = 1.0
+    _Trochoid_Distance_Culling_Enable("Distance culling enable", Float) = 0
+    _Trochoid_Activation_Center("Activation center", Vector) = (0, 0, 0, 0)
+    _Trochoid_Activation_Radius("Activation radius", Float) = 1
 
     _FaceMeWorldY_Enable_Static("Enable face me gimmick", Float) = 0.0
     _FaceMeWorldY_Enable_Dynamic("Enable face me gimmick", Float) = 0.0
@@ -991,6 +1015,16 @@ Shader "yum_food/tooner"
 
     _Gimmick_Fog_00_Ray_March_0_Enable_Static("enable ray march effect 0", Float) = 0
     _Gimmick_Fog_00_Ray_March_0_Seed("seed", Float) = 0
+
+    _Gimmick_Fog_01_Enable_Static("Enable fog 01", Float) = 0
+    _Gimmick_Fog_01_Density("Density", Range(0, 1)) = 1
+    _Gimmick_Fog_01_Sun_Direction("Sun direction", Vector) = (0.866, 0.5, 0, 0)
+    _Gimmick_Fog_01_Sun_Exponent("Sun exponent", Float) = 1
+    [HDR] _Gimmick_Fog_01_Color("Color", Color) = (1, 1, 1, 1)
+    [HDR] _Gimmick_Fog_01_Sun_Color("Sun color", Color) = (1, 1, 1, 1)
+    _Gimmick_Fog_01_Distance_Culling_Enable("Distance culling enable", Float) = 0
+    _Gimmick_Fog_01_Activation_Center("Activation center", Vector) = (0, 0, 0, 0)
+    _Gimmick_Fog_01_Activation_Radius("Activation radius", Float) = 1
 
     _Gimmick_Aurora_Enable_Static("Enable aurora", Float) = 0
 
@@ -1138,6 +1172,7 @@ Shader "yum_food/tooner"
 			CGPROGRAM
       #pragma target 5.0
 			#pragma multi_compile_instancing
+
       #include "feature_macros.cginc"
 
       #pragma vertex vert

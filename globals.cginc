@@ -788,6 +788,27 @@ float _Gimmick_DS2_02_Domain_Warping_Speed;
 float4 _Gimmick_DS2_03_Period;
 float4 _Gimmick_DS2_03_Count;
 float _Gimmick_DS2_03_Edge_Length;
+// 11
+float _Gimmick_DS2_11_Fog_Enable;
+float _Gimmick_DS2_11_Fog_Density;
+float3 _Gimmick_DS2_11_Fog_Sun_Direction;
+float4 _Gimmick_DS2_11_Fog_Sun_Color;
+float4 _Gimmick_DS2_11_Fog_Color;
+float _Gimmick_DS2_11_Snowline;
+float _Gimmick_DS2_11_Snowline_Width;
+float _Gimmick_DS2_11_Snowline_Noise_Scale;
+float3 _Gimmick_DS2_11_Snow_Color;
+float _Gimmick_DS2_11_Rockline;
+float _Gimmick_DS2_11_Rockline_Width;
+float _Gimmick_DS2_11_Rockline_Noise_Scale;
+float3 _Gimmick_DS2_11_Rock_Color;
+float3 _Gimmick_DS2_11_Grass_Color;
+float _Gimmick_DS2_11_Alpha;
+float3 _Gimmick_DS2_11_XZ_Offset;
+float _Gimmick_DS2_11_Fog_Sun_Exponent;
+float _Gimmick_DS2_11_Distance_Culling_Enable;
+float3 _Gimmick_DS2_11_Activation_Center;
+float _Gimmick_DS2_11_Activation_Radius;
 #endif
 
 #if defined(_PIXELLATE)
@@ -806,6 +827,9 @@ float _Trochoid_Radius_Power;
 float _Trochoid_Radius_Scale;
 float _Trochoid_Height_Scale;
 float _Trochoid_Enable_Fragment_Normals;
+float _Trochoid_Distance_Culling_Enable;
+float3 _Trochoid_Activation_Center;
+float _Trochoid_Activation_Radius;
 #endif
 
 #if defined(_FACE_ME_WORLD_Y)
@@ -938,6 +962,17 @@ float _Gimmick_Fog_00_Emitter2_Scale_X;
 float _Gimmick_Fog_00_Emitter2_Scale_Y;
 #endif
 #endif
+#endif
+
+#if defined(_GIMMICK_FOG_01) || defined(_GIMMICK_DS2)
+float _Gimmick_Fog_01_Density;
+float3 _Gimmick_Fog_01_Sun_Direction;
+float4 _Gimmick_Fog_01_Color;
+float4 _Gimmick_Fog_01_Sun_Color;
+float _Gimmick_Fog_01_Sun_Exponent;
+float _Gimmick_Fog_01_Distance_Culling_Enable;
+float3 _Gimmick_Fog_01_Activation_Center;
+float _Gimmick_Fog_01_Activation_Radius;
 #endif
 
 #if defined(_GIMMICK_GERSTNER_WATER)

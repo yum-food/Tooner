@@ -10,6 +10,7 @@ struct appdata
 {
   float4 vertex : POSITION;
   float3 normal : NORMAL;
+  float4 tangent : TANGENT;
   float2 uv0 : TEXCOORD0;
 #if !defined(_OPTIMIZE_INTERPOLATORS)
   float2 uv1 : TEXCOORD1;

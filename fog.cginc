@@ -294,9 +294,9 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   UnityIndirect indirect_light;
   direct_light.dir = getDirectLightDirection(i);
   direct_light.ndotl = 0;  // Not used
-  direct_light.color = getDirectLightColor();
+  direct_light.color = getDirectLightColor() *_Direct_Lighting_Factor;
   // TODO try per-sample baked lighting
-  indirect_light.diffuse = getIndirectDiffuse(i, /*vertex_light_color=*/0);
+  indirect_light.diffuse = getIndirectDiffuse(i, /*vertex_light_color=*/0) * _Indirect_Diffuse_Lighting_Factor;
   // TODO consider doing specular. At time of writing it seems pointless.
   indirect_light.specular = 0;
 
@@ -424,6 +424,85 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
 }
 
 #endif  // _GIMMICK_FOG_00
+
+#if defined(_GIMMICK_FOG_01) || defined(_GIMMICK_DS2)
+
+struct Fog01PBR {
+  float4 albedo;
+  float depth;
+};
+
+float4 apply_fog(
+    float t,
+    float density,
+    float3 rd,
+    float3 sun_dir,
+    float4 sun_color,
+    float sun_exponent,
+    float4 fog_color) {
+  float fog_amount = 1 - exp(-t * density);
+  float sun_amount = pow(max(dot(rd, sun_dir), 0), sun_exponent);
+  float4 color =
+    lerp(
+      fog_color,
+      sun_color,
+      sun_amount);
+  return float4(color.rgb, fog_amount * color.a);
+}
+
+Fog01PBR getFog01(v2f i, ToonerData tdata) {
+  float3 cam_pos = _WorldSpaceCameraPos;
+  float3 obj_pos = i.worldPos;
+
+  if (_Gimmick_Fog_01_Distance_Culling_Enable) {
+    float3 activation_center = _Gimmick_Fog_01_Activation_Center;
+    float activation_radius = _Gimmick_Fog_01_Activation_Radius;
+    float cur_radius = length(_WorldSpaceCameraPos - activation_center);
+    [branch]
+    //if (cur_radius > activation_radius) {
+    if (_WorldSpaceCameraPos.y > activation_center.y + activation_radius) {
+      return (Fog01PBR)0;
+    }
+  }
+
+  float3 world_pos_depth_hit;
+  float2 screen_uv;
+  float eye_depth_world;
+  {
+    float3 full_vec_eye_to_geometry = i.worldPos - _WorldSpaceCameraPos;
+    float3 world_dir = normalize(i.worldPos - _WorldSpaceCameraPos);
+    float perspective_divide = 1.0 / i.pos.w;
+    float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
+    screen_uv = i.screenPos.xy * perspective_divide;
+    eye_depth_world =
+      GetLinearZFromZDepth_WorksWithMirrors(
+          SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, tdata.screen_uv),
+          screen_uv) * perspective_factor;
+    world_pos_depth_hit = _WorldSpaceCameraPos + eye_depth_world * world_dir;
+  }
+
+  const float3 rd = normalize(obj_pos - cam_pos);
+  float3 ro = cam_pos + rd * 1E-5;
+
+  Fog01PBR pbr;
+  pbr.albedo = apply_fog(eye_depth_world,
+      _Gimmick_Fog_01_Density, rd,
+      normalize(_Gimmick_Fog_01_Sun_Direction),
+      _Gimmick_Fog_01_Sun_Color,
+      _Gimmick_Fog_01_Sun_Exponent,
+      _Gimmick_Fog_01_Color);
+  pbr.albedo.rgb = aces_filmic(pbr.albedo.rgb);
+
+  //pbr.albedo.rgb = eye_depth_world / 100000;
+  //pbr.albedo.a = 1;
+
+  float4 clip_pos = mul(UNITY_MATRIX_VP, float4(ro, 1));
+  pbr.depth = clip_pos.z / clip_pos.w;
+
+  return pbr;
+}
+
+#endif  // _GIMMICK_FOG_01
 
 #endif  // __FOG_INC
 

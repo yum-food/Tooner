@@ -279,7 +279,7 @@ float3x3 invert(float3x3 m)
 uint gcd(uint a, uint b)
 {
   uint tmp = a * b;
-  #define GCD_MAX_ITER 10
+  #define GCD_MAX_ITER 8
   for (uint i = 0; i < GCD_MAX_ITER; i++) {
     tmp = b;
     b = a % b;

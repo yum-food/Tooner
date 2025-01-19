@@ -270,6 +270,7 @@
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_1
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_2
 #pragma shader_feature_local _ _GIMMICK_FOG_00_RAY_MARCH_0
+#pragma shader_feature_local _ _GIMMICK_FOG_01
 #pragma shader_feature_local _ _UNITY_FOG
 #pragma shader_feature_local _ _GIMMICK_AURORA
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER

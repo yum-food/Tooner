@@ -20,7 +20,7 @@
 #include "motion.cginc"
 #include "oklab.cginc"
 #include "pbr.cginc"
-#include "pema_quad_intrinsics.cginc"
+#include "pbr_overlay.cginc"
 #include "poi.cginc"
 #include "shear_math.cginc"
 #include "tone.cginc"
@@ -139,35 +139,7 @@ v2f vert(appdata v)
 #if defined(_TROCHOID)
   {
     o.objPos_pre_trochoid = v.vertex.xyz;
-//#define TROCHOID_DECOMPOSE
-#define TROCHOID_SCREEN_SPACE_NORMALS
-#if defined(TROCHOID_DECOMPOSE)
-    v.vertex.xyz = cyl2_to_troch_map(cyl_to_cyl2_map(cart_to_cyl_map(v.vertex.xyz)));
-    // Let h(v) be the trochoid of the cartesian coordinates v.
-    // We evaluate h(v) by first mapping it to cylindrical coordinates, then applying a trochoid function defined on those coordinates:
-    //   h(v) = h_cyl(g(v))
-    // g(v) maps v to cylindrical coordinates.
-    // h_cyl(v) evaluates the trochoid function on cylindrical coordinates.
-    // We want to compute h'(v), i.e. its Jacobian.
-    // By the chain rule:
-    //   h'(v) = h_cyl'(g(v)) * g'(v)
-    // The reality is a little more complex: we also apply a distortion to the cylindrical coordinates:
-    //   h(v) = h_cyl(f(g(v)))
-    // where f(v) is that distortion.
-    // Again, by the chain rule:
-    //   h'(v) = h_cyl'(f(g(v))) * f'(g(v)) * g'(v)
-    float3x3 j0 = cart_to_cyl_jacobian(o.objPos_pre_trochoid);
-    float3x3 j1 = cyl_to_cyl2_jacobian(cart_to_cyl_map(o.objPos_pre_trochoid));
-    float3x3 j2 = cyl2_to_troch_jacobian(cyl_to_cyl2_map(cart_to_cyl_map(o.objPos_pre_trochoid)));
-    float3x3 vector_mover = transpose(invert(mul(mul(j2, j1), j0)));
-    v.normal = mul(vector_mover, v.normal);
-    v.tangent.xyz = mul(vector_mover, v.tangent.xyz);
-#else
     v.vertex.xyz = cart_to_troch_map(v.vertex.xyz);
-    float3x3 vector_mover = transpose(invert(cart_to_troch_jacobian(o.objPos_pre_trochoid)));
-    v.normal = mul(vector_mover, v.normal);
-    v.tangent.xyz = mul(vector_mover, v.tangent.xyz);
-#endif
   }
 #endif  // _TROCHOID
 #if defined(_FACE_ME_WORLD_Y)
@@ -627,404 +599,6 @@ float2 matcap_distortion0(float2 matcap_uv) {
   return matcap_uv;
 }
 
-float2 get_uv_by_channel(v2f i, uint which_channel) {
-  switch (which_channel) {
-    case 0:
-      return i.uv0;
-      break;
-#if !defined(_OPTIMIZE_INTERPOLATORS)
-    case 1:
-      return i.uv1;
-      break;
-#if !defined(LIGHTMAP_ON)
-    case 2:
-      return i.uv2;
-      break;
-    case 3:
-      return i.uv3;
-      break;
-    case 4:
-      return i.uv4;
-      break;
-    case 5:
-      return i.uv5;
-      break;
-    case 6:
-      return i.uv6;
-      break;
-    case 7:
-      return i.uv7;
-      break;
-#endif
-#endif  // _OPTIMIZE_INTERPOLATORS
-    default:
-      return 0;
-      break;
-  }
-}
-
-#define UV_SCOFF(i, tex_st, which_channel) get_uv_by_channel(i, round(which_channel)) * (tex_st).xy + (tex_st).zw
-
-#if defined(_PBR_SAMPLER_LINEAR_REPEAT)
-#define GET_SAMPLER_PBR linear_repeat_s
-#elif defined(_PBR_SAMPLER_LINEAR_CLAMP)
-#define GET_SAMPLER_PBR linear_clamp_s
-#elif defined(_PBR_SAMPLER_POINT_REPEAT)
-#define GET_SAMPLER_PBR point_repeat_s
-#elif defined(_PBR_SAMPLER_POINT_CLAMP)
-#define GET_SAMPLER_PBR point_clamp_s
-#elif defined(_PBR_SAMPLER_BILINEAR_REPEAT)
-#define GET_SAMPLER_PBR bilinear_repeat_s
-#elif defined(_PBR_SAMPLER_BILINEAR_CLAMP)
-#define GET_SAMPLER_PBR bilinear_clamp_s
-#else
-#define GET_SAMPLER_PBR bilinear_clamp_s
-#endif
-
-#if defined(_PBR_OVERLAY0_SAMPLER_LINEAR_REPEAT)
-#define GET_SAMPLER_OV0 linear_repeat_s
-#elif defined(_PBR_OVERLAY0_SAMPLER_LINEAR_CLAMP)
-#define GET_SAMPLER_OV0 linear_clamp_s
-#elif defined(_PBR_OVERLAY0_SAMPLER_POINT_REPEAT)
-#define GET_SAMPLER_OV0 point_repeat_s
-#elif defined(_PBR_OVERLAY0_SAMPLER_POINT_CLAMP)
-#define GET_SAMPLER_OV0 point_clamp_s
-#elif defined(_PBR_OVERLAY0_SAMPLER_BILINEAR_REPEAT)
-#define GET_SAMPLER_OV0 bilinear_repeat_s
-#elif defined(_PBR_OVERLAY0_SAMPLER_BILINEAR_CLAMP)
-#define GET_SAMPLER_OV0 bilinear_clamp_s
-#else
-#define GET_SAMPLER_OV0 linear_clamp_s
-#endif
-
-#if defined(_PBR_OVERLAY1_SAMPLER_LINEAR_REPEAT)
-#define GET_SAMPLER_OV1 linear_repeat_s
-#elif defined(_PBR_OVERLAY1_SAMPLER_LINEAR_CLAMP)
-#define GET_SAMPLER_OV1 linear_clamp_s
-#elif defined(_PBR_OVERLAY1_SAMPLER_POINT_REPEAT)
-#define GET_SAMPLER_OV1 point_repeat_s
-#elif defined(_PBR_OVERLAY1_SAMPLER_POINT_CLAMP)
-#define GET_SAMPLER_OV1 point_clamp_s
-#elif defined(_PBR_OVERLAY1_SAMPLER_BILINEAR_REPEAT)
-#define GET_SAMPLER_OV1 bilinear_repeat_s
-#elif defined(_PBR_OVERLAY1_SAMPLER_BILINEAR_CLAMP)
-#define GET_SAMPLER_OV1 bilinear_clamp_s
-#else
-#define GET_SAMPLER_OV1 linear_clamp_s
-#endif
-
-#if defined(_PBR_OVERLAY2_SAMPLER_LINEAR_REPEAT)
-#define GET_SAMPLER_OV2 linear_repeat_s
-#elif defined(_PBR_OVERLAY2_SAMPLER_LINEAR_CLAMP)
-#define GET_SAMPLER_OV2 linear_clamp_s
-#elif defined(_PBR_OVERLAY2_SAMPLER_POINT_REPEAT)
-#define GET_SAMPLER_OV2 point_repeat_s
-#elif defined(_PBR_OVERLAY2_SAMPLER_POINT_CLAMP)
-#define GET_SAMPLER_OV2 point_clamp_s
-#elif defined(_PBR_OVERLAY2_SAMPLER_BILINEAR_REPEAT)
-#define GET_SAMPLER_OV2 bilinear_repeat_s
-#elif defined(_PBR_OVERLAY2_SAMPLER_BILINEAR_CLAMP)
-#define GET_SAMPLER_OV2 bilinear_clamp_s
-#else
-#define GET_SAMPLER_OV2 linear_clamp_s
-#endif
-
-#if defined(_PBR_OVERLAY3_SAMPLER_LINEAR_REPEAT)
-#define GET_SAMPLER_OV3 linear_repeat_s
-#elif defined(_PBR_OVERLAY3_SAMPLER_LINEAR_CLAMP)
-#define GET_SAMPLER_OV3 linear_clamp_s
-#elif defined(_PBR_OVERLAY3_SAMPLER_POINT_REPEAT)
-#define GET_SAMPLER_OV3 point_repeat_s
-#elif defined(_PBR_OVERLAY3_SAMPLER_POINT_CLAMP)
-#define GET_SAMPLER_OV3 point_clamp_s
-#elif defined(_PBR_OVERLAY3_SAMPLER_BILINEAR_REPEAT)
-#define GET_SAMPLER_OV3 bilinear_repeat_s
-#elif defined(_PBR_OVERLAY3_SAMPLER_BILINEAR_CLAMP)
-#define GET_SAMPLER_OV3 bilinear_clamp_s
-#else
-#define GET_SAMPLER_OV3 linear_clamp_s
-#endif
-
-#if defined(_RIM_LIGHTING0_SAMPLER_LINEAR_REPEAT)
-#define GET_SAMPLER_RL0 linear_repeat_s
-#elif defined(_RIM_LIGHTING0_SAMPLER_LINEAR_CLAMP)
-#define GET_SAMPLER_RL0 linear_clamp_s
-#elif defined(_RIM_LIGHTING0_SAMPLER_POINT_REPEAT)
-#define GET_SAMPLER_RL0 point_repeat_s
-#elif defined(_RIM_LIGHTING0_SAMPLER_POINT_CLAMP)
-#define GET_SAMPLER_RL0 point_clamp_s
-#elif defined(_RIM_LIGHTING0_SAMPLER_BILINEAR_REPEAT)
-#define GET_SAMPLER_RL0 bilinear_repeat_s
-#elif defined(_RIM_LIGHTING0_SAMPLER_BILINEAR_CLAMP)
-#define GET_SAMPLER_RL0 bilinear_clamp_s
-#else
-#define GET_SAMPLER_RL0 linear_clamp_s
-#endif
-
-#if defined(_RIM_LIGHTING1_SAMPLER_LINEAR_REPEAT)
-#define GET_SAMPLER_RL1 linear_repeat_s
-#elif defined(_RIM_LIGHTING1_SAMPLER_LINEAR_CLAMP)
-#define GET_SAMPLER_RL1 linear_clamp_s
-#elif defined(_RIM_LIGHTING1_SAMPLER_POINT_REPEAT)
-#define GET_SAMPLER_RL1 point_repeat_s
-#elif defined(_RIM_LIGHTING1_SAMPLER_POINT_CLAMP)
-#define GET_SAMPLER_RL1 point_clamp_s
-#elif defined(_RIM_LIGHTING1_SAMPLER_BILINEAR_REPEAT)
-#define GET_SAMPLER_RL1 bilinear_repeat_s
-#elif defined(_RIM_LIGHTING1_SAMPLER_BILINEAR_CLAMP)
-#define GET_SAMPLER_RL1 bilinear_clamp_s
-#else
-#define GET_SAMPLER_RL1 linear_clamp_s
-#endif
-
-#if defined(_RIM_LIGHTING2_SAMPLER_LINEAR_REPEAT)
-#define GET_SAMPLER_RL2 linear_repeat_s
-#elif defined(_RIM_LIGHTING2_SAMPLER_LINEAR_CLAMP)
-#define GET_SAMPLER_RL2 linear_clamp_s
-#elif defined(_RIM_LIGHTING2_SAMPLER_POINT_REPEAT)
-#define GET_SAMPLER_RL2 point_repeat_s
-#elif defined(_RIM_LIGHTING2_SAMPLER_POINT_CLAMP)
-#define GET_SAMPLER_RL2 point_clamp_s
-#elif defined(_RIM_LIGHTING2_SAMPLER_BILINEAR_REPEAT)
-#define GET_SAMPLER_RL2 bilinear_repeat_s
-#elif defined(_RIM_LIGHTING2_SAMPLER_BILINEAR_CLAMP)
-#define GET_SAMPLER_RL2 bilinear_clamp_s
-#else
-#define GET_SAMPLER_RL2 linear_clamp_s
-#endif
-
-#if defined(_RIM_LIGHTING3_SAMPLER_LINEAR_REPEAT)
-#define GET_SAMPLER_RL3 linear_repeat_s
-#elif defined(_RIM_LIGHTING3_SAMPLER_LINEAR_CLAMP)
-#define GET_SAMPLER_RL3 linear_clamp_s
-#elif defined(_RIM_LIGHTING3_SAMPLER_POINT_REPEAT)
-#define GET_SAMPLER_RL3 point_repeat_s
-#elif defined(_RIM_LIGHTING3_SAMPLER_POINT_CLAMP)
-#define GET_SAMPLER_RL3 point_clamp_s
-#elif defined(_RIM_LIGHTING3_SAMPLER_BILINEAR_REPEAT)
-#define GET_SAMPLER_RL3 bilinear_repeat_s
-#elif defined(_RIM_LIGHTING3_SAMPLER_BILINEAR_CLAMP)
-#define GET_SAMPLER_RL3 bilinear_clamp_s
-#else
-#define GET_SAMPLER_RL3 linear_clamp_s
-#endif
-
-struct PbrOverlay {
-#if defined(_PBR_OVERLAY0)
-  float4 ov0_albedo;
-#if defined(_PBR_OVERLAY0_ROUGHNESS)
-  float ov0_roughness;
-#endif
-#if defined(_PBR_OVERLAY0_METALLIC)
-  float ov0_metallic;
-#endif
-  float ov0_mask;
-#endif
-#if defined(_PBR_OVERLAY1)
-  float4 ov1_albedo;
-#if defined(_PBR_OVERLAY1_ROUGHNESS)
-  float ov1_roughness;
-#endif
-#if defined(_PBR_OVERLAY1_METALLIC)
-  float ov1_metallic;
-#endif
-  float ov1_mask;
-#endif
-#if defined(_PBR_OVERLAY2)
-  float4 ov2_albedo;
-#if defined(_PBR_OVERLAY2_ROUGHNESS)
-  float ov2_roughness;
-#endif
-#if defined(_PBR_OVERLAY2_METALLIC)
-  float ov2_metallic;
-#endif
-  float ov2_mask;
-#endif
-#if defined(_PBR_OVERLAY3)
-  float4 ov3_albedo;
-#if defined(_PBR_OVERLAY3_ROUGHNESS)
-  float ov3_roughness;
-#endif
-#if defined(_PBR_OVERLAY3_METALLIC)
-  float ov3_metallic;
-#endif
-  float ov3_mask;
-#endif
-};
-
-void getOverlayAlbedoRoughnessMetallic(inout PbrOverlay ov,
-    v2f i)
-{
-#if defined(_PBR_OVERLAY0)
-#if defined(_PBR_OVERLAY0_BASECOLOR_MAP)
-  ov.ov0_albedo = _PBR_Overlay0_BaseColorTex.SampleBias(GET_SAMPLER_OV0,
-      UV_SCOFF(i, _PBR_Overlay0_BaseColorTex_ST, _PBR_Overlay0_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias);
-  ov.ov0_albedo *= _PBR_Overlay0_BaseColor;
-#else
-  ov.ov0_albedo = _PBR_Overlay0_BaseColor;
-#endif  // _PBR_OVERLAY0_BASECOLOR_MAP
-
-#if defined(_PBR_OVERLAY0_ROUGHNESS)
-#if defined(_PBR_OVERLAY0_ROUGHNESS_MAP)
-  ov.ov0_roughness = _PBR_Overlay0_RoughnessTex.SampleBias(GET_SAMPLER_OV0,
-      UV_SCOFF(i, _PBR_Overlay0_RoughnessTex_ST, _PBR_Overlay0_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias);
-  ov.ov0_roughness *= _PBR_Overlay0_Roughness;
-#else
-  ov.ov0_roughness = _PBR_Overlay0_Roughness;
-#endif  // _PBR_OVERLAY0_ROUGHNESS_MAP
-#endif
-
-#if defined(_PBR_OVERLAY0_METALLIC)
-#if defined(_PBR_OVERLAY0_METALLIC_MAP)
-  ov.ov0_metallic = _PBR_Overlay0_MetallicTex.SampleBias(GET_SAMPLER_OV0,
-      UV_SCOFF(i, _PBR_Overlay0_MetallicTex_ST, _PBR_Overlay0_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias);
-  ov.ov0_metallic *= _PBR_Overlay0_Metallic;
-#else
-  ov.ov0_metallic = _PBR_Overlay0_Metallic;
-#endif  // _PBR_OVERLAY0_METALLIC_MAP
-#endif
-
-#if defined(_PBR_OVERLAY0_MASK)
-  ov.ov0_mask = _PBR_Overlay0_Mask.SampleLevel(GET_SAMPLER_OV0,
-  UV_SCOFF(i, _PBR_Overlay0_Mask_ST, _PBR_Overlay0_UV_Select),
-      get_uv_by_channel(i, _PBR_Overlay0_UV_Select), 0);
-  ov.ov0_mask = ((bool) round(_PBR_Overlay0_Mask_Invert)) ? 1.0 - ov.ov0_mask : ov.ov0_mask;
-#else
-  ov.ov0_mask = 1;
-#endif
-  ov.ov0_albedo.a *= ov.ov0_mask;
-#endif  // _PBR_OVERLAY0
-
-#if defined(_PBR_OVERLAY1)
-#if defined(_PBR_OVERLAY1_BASECOLOR_MAP)
-  ov.ov1_albedo = _PBR_Overlay1_BaseColorTex.SampleBias(GET_SAMPLER_OV1,
-      UV_SCOFF(i, _PBR_Overlay1_BaseColorTex_ST, _PBR_Overlay1_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias);
-  ov.ov1_albedo *= _PBR_Overlay1_BaseColor;
-#else
-  ov.ov1_albedo = _PBR_Overlay1_BaseColor;
-#endif  // _PBR_OVERLAY1_BASECOLOR_MAP
-
-#if defined(_PBR_OVERLAY1_ROUGHNESS)
-#if defined(_PBR_OVERLAY1_ROUGHNESS_MAP)
-  ov.ov1_roughness = _PBR_Overlay1_RoughnessTex.SampleBias(GET_SAMPLER_OV1,
-      UV_SCOFF(i, _PBR_Overlay1_RoughnessTex_ST, _PBR_Overlay1_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias);
-  ov.ov1_roughness *= _PBR_Overlay1_Roughness;
-#else
-  ov.ov1_roughness = _PBR_Overlay1_Roughness;
-#endif  // _PBR_OVERLAY1_ROUGHNESS_MAP
-#endif
-
-#if defined(_PBR_OVERLAY1_METALLIC)
-#if defined(_PBR_OVERLAY1_METALLIC_MAP)
-  ov.ov1_metallic = _PBR_Overlay1_MetallicTex.SampleBias(GET_SAMPLER_OV1,
-      UV_SCOFF(i, _PBR_Overlay1_MetallicTex_ST, _PBR_Overlay1_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias);
-  ov.ov1_metallic *= _PBR_Overlay1_Metallic;
-#else
-  ov.ov1_metallic = _PBR_Overlay1_Metallic;
-#endif  // _PBR_OVERLAY1_METALLIC_MAP
-#endif
-
-#if defined(_PBR_OVERLAY1_MASK)
-  ov.ov1_mask = _PBR_Overlay1_Mask.SampleLevel(GET_SAMPLER_OV1,
-      UV_SCOFF(i, _PBR_Overlay1_Mask_ST, _PBR_Overlay1_UV_Select), 0);
-  ov.ov1_mask = ((bool) round(_PBR_Overlay1_Mask_Invert)) ? 1.0 - ov.ov1_mask : ov.ov1_mask;
-#else
-  ov.ov1_mask = 1;
-#endif
-  ov.ov1_albedo.a *= ov.ov1_mask;
-#endif  // _PBR_OVERLAY1
-
-#if defined(_PBR_OVERLAY2)
-#if defined(_PBR_OVERLAY2_BASECOLOR_MAP)
-  ov.ov2_albedo = _PBR_Overlay2_BaseColorTex.SampleBias(GET_SAMPLER_OV2,
-      UV_SCOFF(i, _PBR_Overlay2_BaseColorTex_ST, _PBR_Overlay2_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias);
-  ov.ov2_albedo *= _PBR_Overlay2_BaseColor;
-#else
-  ov.ov2_albedo = _PBR_Overlay2_BaseColor;
-#endif  // _PBR_OVERLAY2_BASECOLOR_MAP
-
-#if defined(_PBR_OVERLAY2_ROUGHNESS)
-#if defined(_PBR_OVERLAY2_ROUGHNESS_MAP)
-  ov.ov2_roughness = _PBR_Overlay2_RoughnessTex.SampleBias(GET_SAMPLER_OV2,
-      UV_SCOFF(i, _PBR_Overlay2_RoughnessTex_ST, _PBR_Overlay2_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias);
-  ov.ov2_roughness *= _PBR_Overlay2_Roughness;
-#else
-  ov.ov2_roughness = _PBR_Overlay2_Roughness;
-#endif  // _PBR_OVERLAY2_ROUGHNESS_MAP
-#endif
-
-#if defined(_PBR_OVERLAY2_METALLIC)
-#if defined(_PBR_OVERLAY2_METALLIC_MAP)
-  ov.ov2_metallic = _PBR_Overlay2_MetallicTex.SampleBias(GET_SAMPLER_OV2,
-      UV_SCOFF(i, _PBR_Overlay2_MetallicTex_ST, _PBR_Overlay2_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias);
-  ov.ov2_metallic *= _PBR_Overlay2_Metallic;
-#else
-  ov.ov2_metallic = _PBR_Overlay2_Metallic;
-#endif  // _PBR_OVERLAY2_METALLIC_MAP
-#endif
-
-#if defined(_PBR_OVERLAY2_MASK)
-  ov.ov2_mask = _PBR_Overlay2_Mask.SampleLevel(GET_SAMPLER_OV2,
-      UV_SCOFF(i, _PBR_Overlay2_Mask_ST, _PBR_Overlay2_UV_Select), 0);
-  ov.ov2_mask = ((bool) round(_PBR_Overlay2_Mask_Invert)) ? 1.0 - ov.ov2_mask : ov.ov2_mask;
-#else
-  ov.ov2_mask = 1;
-#endif
-  ov.ov2_albedo.a *= ov.ov2_mask;
-#endif  // _PBR_OVERLAY2
-
-#if defined(_PBR_OVERLAY3)
-#if defined(_PBR_OVERLAY3_BASECOLOR_MAP)
-  ov.ov3_albedo = _PBR_Overlay3_BaseColorTex.SampleBias(GET_SAMPLER_OV3,
-      UV_SCOFF(i, _PBR_Overlay3_BaseColorTex_ST, _PBR_Overlay3_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias);
-  ov.ov3_albedo *= _PBR_Overlay3_BaseColor;
-#else
-  ov.ov3_albedo = _PBR_Overlay3_BaseColor;
-#endif  // _PBR_OVERLAY3_BASECOLOR_MAP
-
-#if defined(_PBR_OVERLAY3_ROUGHNESS)
-#if defined(_PBR_OVERLAY3_ROUGHNESS_MAP)
-  ov.ov3_roughness = _PBR_Overlay3_RoughnessTex.SampleBias(GET_SAMPLER_OV3,
-      UV_SCOFF(i, _PBR_Overlay3_RoughnessTex_ST, _PBR_Overlay3_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias);
-  ov.ov3_roughness *= _PBR_Overlay3_Roughness;
-#else
-  ov.ov3_roughness = _PBR_Overlay3_Roughness;
-#endif  // _PBR_OVERLAY3_ROUGHNESS_MAP
-#endif
-
-#if defined(_PBR_OVERLAY3_METALLIC)
-#if defined(_PBR_OVERLAY3_METALLIC_MAP)
-  ov.ov3_metallic = _PBR_Overlay3_MetallicTex.SampleBias(GET_SAMPLER_OV3,
-      UV_SCOFF(i, _PBR_Overlay3_MetallicTex_ST, _PBR_Overlay3_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias);
-  ov.ov3_metallic *= _PBR_Overlay3_Metallic;
-#else
-  ov.ov3_metallic = _PBR_Overlay3_Metallic;
-#endif  // _PBR_OVERLAY3_METALLIC_MAP
-#endif
-
-#if defined(_PBR_OVERLAY3_MASK)
-  ov.ov3_mask = _PBR_Overlay3_Mask.SampleLevel(GET_SAMPLER_OV3,
-      UV_SCOFF(i, _PBR_Overlay3_Mask_ST, _PBR_Overlay3_UV_Select), 0);
-  ov.ov3_mask = ((bool) round(_PBR_Overlay3_Mask_Invert)) ? 1.0 - ov.ov3_mask : ov.ov3_mask;
-#else
-  ov.ov3_mask = 1;
-#endif
-  ov.ov3_albedo.a *= ov.ov3_mask;
-#endif  // _PBR_OVERLAY3
-}
-
 struct DecalParams {
     float4 color;
     texture2D tex;
@@ -1325,246 +899,6 @@ void applyDecal(inout float4 albedo,
 #endif
 }
 
-void mixOverlayAlbedoRoughnessMetallic(inout float4 albedo,
-    inout float roughness, inout float metallic, PbrOverlay ov,
-    float mask, out float glitter_mask) {
-  glitter_mask = 1;
-  // Calculate alpha masks before we start mutating alpha.
-#if defined(_PBR_OVERLAY0)
-  float a0 = saturate(ov.ov0_albedo.a * _PBR_Overlay0_Alpha_Multiplier);
-  if (_PBR_Overlay0_Constrain_By_Alpha) {
-    bool in_range = (albedo.a > _PBR_Overlay0_Constrain_By_Alpha_Min) *
-      (albedo.a < _PBR_Overlay0_Constrain_By_Alpha_Max);
-    a0 *= in_range;
-  }
-  a0 *= mask;
-  a0 *= ov.ov0_mask;
-  glitter_mask *= 1 - a0 * _PBR_Overlay0_Mask_Glitter;
-#endif
-#if defined(_PBR_OVERLAY1)
-  float a1 = saturate(ov.ov1_albedo.a * _PBR_Overlay1_Alpha_Multiplier);
-  if (_PBR_Overlay1_Constrain_By_Alpha) {
-    bool in_range = (albedo.a > _PBR_Overlay1_Constrain_By_Alpha_Min) *
-      (albedo.a < _PBR_Overlay1_Constrain_By_Alpha_Max);
-    a1 *= in_range;
-  }
-  a1 *= mask;
-  a1 *= ov.ov1_mask;
-  glitter_mask *= 1 - a1 * _PBR_Overlay1_Mask_Glitter;
-#endif
-#if defined(_PBR_OVERLAY2)
-  float a2 = saturate(ov.ov2_albedo.a * _PBR_Overlay2_Alpha_Multiplier);
-  if (_PBR_Overlay2_Constrain_By_Alpha) {
-    bool in_range = (albedo.a > _PBR_Overlay2_Constrain_By_Alpha_Min) *
-      (albedo.a < _PBR_Overlay2_Constrain_By_Alpha_Max);
-    a2 *= in_range;
-  }
-  a2 *= mask;
-  a2 *= ov.ov2_mask;
-  glitter_mask *= 1 - a2 * _PBR_Overlay2_Mask_Glitter;
-#endif
-#if defined(_PBR_OVERLAY3)
-  float a3 = saturate(ov.ov3_albedo.a * _PBR_Overlay3_Alpha_Multiplier);
-  if (_PBR_Overlay3_Constrain_By_Alpha) {
-    bool in_range = (albedo.a > _PBR_Overlay3_Constrain_By_Alpha_Min) *
-      (albedo.a < _PBR_Overlay3_Constrain_By_Alpha_Max);
-    a3 *= in_range;
-  }
-  a3 *= mask;
-  a3 *= ov.ov3_mask;
-  glitter_mask *= 1 - a3 * _PBR_Overlay3_Mask_Glitter;
-#endif
-
-#if defined(_PBR_OVERLAY0)
-#if defined(_PBR_OVERLAY0_MIX_ALPHA_BLEND)
-  albedo.rgb = lerp(albedo.rgb, ov.ov0_albedo.rgb, a0);
-#if defined(_PBR_OVERLAY0_ROUGHNESS)
-  roughness = lerp(roughness, ov.ov0_roughness, a0);
-#endif
-#if defined(_PBR_OVERLAY0_METALLIC)
-  metallic = lerp(metallic, ov.ov0_metallic, a0);
-#endif
-  albedo.a = max(albedo.a, a0);
-#elif defined(_PBR_OVERLAY0_MIX_ADD)
-  albedo.rgb += ov.ov0_albedo * mask * ov.ov0_mask;
-#elif defined(_PBR_OVERLAY0_MIX_MIN)
-  albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov0_albedo), mask * ov.ov0_mask);
-#elif defined(_PBR_OVERLAY0_MIX_MAX)
-  albedo.rgb = max(albedo.rgb, ov.ov0_albedo * mask * ov.ov0_mask);
-#elif defined(_PBR_OVERLAY0_MIX_MULTIPLY)
-  albedo.rgb = lerp(albedo.rgb, albedo.rgb * ov.ov0_albedo, mask * ov.ov0_mask);
-#endif
-#endif
-
-#if defined(_PBR_OVERLAY1)
-#if defined(_PBR_OVERLAY1_MIX_ALPHA_BLEND)
-  albedo.rgb = lerp(albedo.rgb, ov.ov1_albedo.rgb, a1);
-#if defined(_PBR_OVERLAY1_ROUGHNESS)
-  roughness = lerp(roughness, ov.ov1_roughness, a1);
-#endif
-#if defined(_PBR_OVERLAY1_METALLIC)
-  metallic = lerp(metallic, ov.ov1_metallic, a1);
-#endif
-  albedo.a = max(albedo.a, a1);
-#elif defined(_PBR_OVERLAY1_MIX_ADD)
-  albedo.rgb += ov.ov1_albedo * mask * ov.ov1_mask;
-#elif defined(_PBR_OVERLAY1_MIX_MIN)
-  albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov1_albedo), mask * ov.ov1_mask);
-#elif defined(_PBR_OVERLAY1_MIX_MAX)
-  albedo.rgb = max(albedo.rgb, ov.ov1_albedo * mask * ov.ov1_mask);
-#elif defined(_PBR_OVERLAY1_MIX_MULTIPLY)
-  albedo.rgb = lerp(albedo.rgb, albedo.rgb * ov.ov1_albedo, mask * ov.ov1_mask);
-#endif
-#endif
-
-#if defined(_PBR_OVERLAY2)
-#if defined(_PBR_OVERLAY2_MIX_ALPHA_BLEND)
-  albedo.rgb = lerp(albedo.rgb, ov.ov2_albedo.rgb, a2);
-#if defined(_PBR_OVERLAY2_ROUGHNESS)
-  roughness = lerp(roughness, ov.ov2_roughness, a2);
-#endif
-#if defined(_PBR_OVERLAY2_METALLIC)
-  metallic = lerp(metallic, ov.ov2_metallic, a2);
-#endif
-  albedo.a = max(albedo.a, a2);
-#elif defined(_PBR_OVERLAY2_MIX_ADD)
-  albedo.rgb += ov.ov2_albedo * mask * ov.ov2_mask;
-#elif defined(_PBR_OVERLAY2_MIX_MIN)
-  albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov2_albedo), mask * ov.ov2_mask);
-#elif defined(_PBR_OVERLAY2_MIX_MAX)
-  albedo.rgb = max(albedo.rgb, ov.ov2_albedo * mask * ov.ov2_mask);
-#elif defined(_PBR_OVERLAY2_MIX_MULTIPLY)
-  albedo.rgb = lerp(albedo.rgb, albedo.rgb * ov.ov2_albedo, mask * ov.ov2_mask);
-#endif
-#endif
-
-#if defined(_PBR_OVERLAY3)
-#if defined(_PBR_OVERLAY3_MIX_ALPHA_BLEND)
-  albedo.rgb = lerp(albedo.rgb, ov.ov3_albedo.rgb, a3);
-#if defined(_PBR_OVERLAY3_ROUGHNESS)
-  roughness = lerp(roughness, ov.ov3_roughness, a3);
-#endif
-#if defined(_PBR_OVERLAY3_METALLIC)
-  metallic = lerp(metallic, ov.ov3_metallic, a3);
-#endif
-  albedo.a = max(albedo.a, a3);
-#elif defined(_PBR_OVERLAY3_MIX_ADD)
-  albedo.rgb += ov.ov3_albedo * mask * ov.ov3_mask;
-#elif defined(_PBR_OVERLAY3_MIX_MIN)
-  albedo.rgb = lerp(albedo.rgb, min(albedo.rgb, ov.ov3_albedo), mask * ov.ov3_mask);
-#elif defined(_PBR_OVERLAY3_MIX_MAX)
-  albedo.rgb = max(albedo.rgb, ov.ov3_albedo * mask * ov.ov3_mask);
-#elif defined(_PBR_OVERLAY3_MIX_MULTIPLY)
-  albedo.rgb = lerp(albedo.rgb, albedo.rgb * ov.ov3_albedo, mask * ov.ov3_mask);
-#endif
-#endif
-}
-
-void applyOverlayNormal(inout float3 raw_normal, float4 albedo, PbrOverlay ov, v2f i)
-{
-  float3 raw_normal_2;
-#if defined(_PBR_OVERLAY0) && defined(_PBR_OVERLAY0_NORMAL_MAP)
-  float a0 = 1;
-  if (_PBR_Overlay0_Constrain_By_Alpha) {
-    bool in_range = (albedo.a > _PBR_Overlay0_Constrain_By_Alpha_Min) *
-      (albedo.a < _PBR_Overlay0_Constrain_By_Alpha_Max);
-    a0 *= in_range;
-  }
-  // Use UVs to smoothly blend between fully detailed normals when close up and
-  // flat normals when far away. If we don't do this, then we see moire effects
-  // on e.g. striped normal maps.
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay0_NormalTex.SampleBias(GET_SAMPLER_OV0,
-        UV_SCOFF(i, _PBR_Overlay0_NormalTex_ST, _PBR_Overlay0_UV_Select),
-        _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias),
-      _PBR_Overlay0_Tex_NormalStr * ov.ov0_mask * a0);
-
-  raw_normal = BlendNormals(
-      raw_normal,
-      raw_normal_2);
-#endif  // _PBR_OVERLAY0 && _PBR_OVERLAY0_NORMAL_MAP
-#if defined(_PBR_OVERLAY1) && defined(_PBR_OVERLAY1_NORMAL_MAP)
-  float a1 = 1;
-  if (_PBR_Overlay1_Constrain_By_Alpha) {
-    bool in_range = (albedo.a > _PBR_Overlay1_Constrain_By_Alpha_Min) *
-      (albedo.a < _PBR_Overlay1_Constrain_By_Alpha_Max);
-    a1 *= in_range;
-  }
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay1_NormalTex.SampleBias(GET_SAMPLER_OV1,
-        UV_SCOFF(i, _PBR_Overlay1_NormalTex_ST, _PBR_Overlay1_UV_Select),
-        _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias),
-      _PBR_Overlay1_Tex_NormalStr * ov.ov1_mask * a1);
-
-  raw_normal = BlendNormals(
-      raw_normal,
-      raw_normal_2);
-#endif  // _PBR_OVERLAY1 && _PBR_OVERLAY1_NORMAL_MAP
-#if defined(_PBR_OVERLAY2) && defined(_PBR_OVERLAY2_NORMAL_MAP)
-  float a2 = 1;
-  if (_PBR_Overlay2_Constrain_By_Alpha) {
-    bool in_range = (albedo.a > _PBR_Overlay2_Constrain_By_Alpha_Min) *
-      (albedo.a < _PBR_Overlay2_Constrain_By_Alpha_Max);
-    a2 *= in_range;
-  }
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay2_NormalTex.SampleBias(GET_SAMPLER_OV2,
-        UV_SCOFF(i, _PBR_Overlay2_NormalTex_ST, _PBR_Overlay2_UV_Select),
-        _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias),
-      _PBR_Overlay2_Tex_NormalStr * ov.ov2_mask * a2);
-
-  raw_normal = BlendNormals(
-      raw_normal,
-      raw_normal_2);
-#endif  // _PBR_OVERLAY2 && _PBR_OVERLAY2_NORMAL_MAP
-#if defined(_PBR_OVERLAY3) && defined(_PBR_OVERLAY3_NORMAL_MAP)
-  float a3 = 1;
-  if (_PBR_Overlay3_Constrain_By_Alpha) {
-    bool in_range = (albedo.a > _PBR_Overlay3_Constrain_By_Alpha_Min) *
-      (albedo.a < _PBR_Overlay3_Constrain_By_Alpha_Max);
-    a3 *= in_range;
-  }
-  raw_normal_2 = UnpackScaleNormal(_PBR_Overlay3_NormalTex.SampleBias(GET_SAMPLER_OV3,
-        UV_SCOFF(i, _PBR_Overlay3_NormalTex_ST, _PBR_Overlay3_UV_Select),
-        _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias),
-      _PBR_Overlay3_Tex_NormalStr * ov.ov3_mask * a3);
-
-  raw_normal = BlendNormals(
-      raw_normal,
-      raw_normal_2);
-#endif  // _PBR_OVERLAY3 && _PBR_OVERLAY3_NORMAL_MAP
-}
-
-float3 getOverlayEmission(PbrOverlay ov, v2f i)
-{
-  float3 em = 0;
-#if defined(_PBR_OVERLAY0_EMISSION_MAP)
-  em += _PBR_Overlay0_EmissionTex.SampleBias(GET_SAMPLER_OV0,
-      UV_SCOFF(i, _PBR_Overlay0_EmissionTex_ST, _PBR_Overlay0_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay0_Mip_Bias) *
-    _PBR_Overlay0_Emission * ov.ov0_mask;
-#endif
-
-#if defined(_PBR_OVERLAY1_EMISSION_MAP)
-  em += _PBR_Overlay1_EmissionTex.SampleBias(GET_SAMPLER_OV1,
-      UV_SCOFF(i, _PBR_Overlay1_EmissionTex_ST, _PBR_Overlay1_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay1_Mip_Bias) *
-    _PBR_Overlay1_Emission * ov.ov1_mask;
-#endif
-
-#if defined(_PBR_OVERLAY2_EMISSION_MAP)
-  em += _PBR_Overlay2_EmissionTex.SampleBias(GET_SAMPLER_OV2,
-      UV_SCOFF(i, _PBR_Overlay2_EmissionTex_ST, _PBR_Overlay2_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay2_Mip_Bias) *
-    _PBR_Overlay2_Emission * ov.ov2_mask;
-#endif
-
-#if defined(_PBR_OVERLAY3_EMISSION_MAP)
-  em += _PBR_Overlay3_EmissionTex.SampleBias(GET_SAMPLER_OV3,
-      UV_SCOFF(i, _PBR_Overlay3_EmissionTex_ST, _PBR_Overlay3_UV_Select),
-      _Global_Sample_Bias + _PBR_Overlay3_Mip_Bias) *
-    _PBR_Overlay3_Emission * ov.ov3_mask;
-#endif
-  return em;
-}
-
 #if defined(_PIXELLATE)
 float2 pixellate_uv(int2 px_res, float2 uv)
 {
@@ -1615,7 +949,7 @@ float4 effect(inout v2f i, out float depth)
   depth = 0;
 #endif
 
-#if defined(TROCHOID_SCREEN_SPACE_NORMALS)
+#if defined(_TROCHOID)
   {
     float3 my_pos;
     [branch]
@@ -1624,15 +958,10 @@ float4 effect(inout v2f i, out float depth)
     } else {
       my_pos = i.objPos.xyz;
     }
-    float3 neighbor_x = QuadReadAcrossX(my_pos);
-    float3 neighbor_y = QuadReadAcrossY(my_pos);
-    uint2 lane_pos = QuadGetLaneID();
-    float x_sign = (lane_pos == 1 || lane_pos == 3) ? 1 : -1;
-    float y_sign = (lane_pos == 0 || lane_pos == 1) ? 1 : -1;
-    float3 tan1 = (neighbor_x - my_pos) * x_sign;
-    float3 tan2 = (neighbor_y - my_pos) * y_sign;
+    float3 tan1 = ddx(my_pos);
+    float3 tan2 = ddy(my_pos);
     float3 normal = cross(tan1, tan2);
-    i.normal = UnityObjectToWorldNormal(normal);
+    i.normal = -UnityObjectToWorldNormal(normal);
     i.tangent.xyz = UnityObjectToWorldDir(tan1);
   }
 #endif
@@ -2036,9 +1365,15 @@ float4 effect(inout v2f i, out float depth)
   float ar = rand2(i.uv0);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_IGN)
+  float frame = 0;
+  if (AudioLinkIsAvailable()) {
+    frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
+  } else {
+    frame = floor(_Frame_Counter);
+  }
   float ar = ign_anim(
       floor(tdata.screen_uv_round * _Rendering_Cutout_Noise_Scale) + _Rendering_Cutout_Ign_Seed,
-      floor(_Frame_Counter), _Rendering_Cutout_Ign_Speed);
+      frame, _Rendering_Cutout_Ign_Speed);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_NOISE_MASK)
   float ar = _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s, tdata.screen_uv * _ScreenParams.xy * _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0);
@@ -2758,6 +2093,17 @@ float4 effect(inout v2f i, out float depth)
     return albedo;
   }
 #endif
+#if defined(_GIMMICK_FOG_01)
+  {
+    Fog01PBR pbr = getFog01(i, tdata);
+    albedo = pbr.albedo;
+    depth = pbr.depth;
+#if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)
+    albedo.rgb *= albedo.a;
+#endif
+    return albedo;
+  }
+#endif
 #if defined(_GIMMICK_AURORA)
   {
     AuroraPBR pbr = getAurora(i);
@@ -2809,6 +2155,9 @@ float4 effect(inout v2f i, out float depth)
     case 10:
       ds2 = Gimmick_DS2_10(i);
       break;
+    case 11:
+      ds2 = Gimmick_DS2_11(i, tdata);
+      break;
     default:
       ds2 = (Gimmick_DS2_Output)0;
       break;
@@ -2857,6 +2206,7 @@ float4 effect(inout v2f i, out float depth)
   result.rgb += glitter_color_unlit * _Glitter_Brightness;
 #endif
 #if defined(_GIMMICK_DS2)
+  result = ds2.fog + result * (1 - ds2.fog.a);
   result.rgb += ds2.emission * _Gimmick_DS2_Emission_Factor * ds2_mask;
 #endif
 
@@ -2926,8 +2276,6 @@ fixed4 frag(v2f i
   UNITY_APPLY_DITHER_CROSSFADE(i.pos.xy);
   UNITY_SETUP_INSTANCE_ID(i);
   UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
-
-  SETUP_QUAD_INTRINSICS(i.pos);
 
 /*
 #if defined(_TROCHOID)

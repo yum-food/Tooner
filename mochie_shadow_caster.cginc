@@ -1,7 +1,11 @@
 #include "UnityCG.cginc"
 
 #include "atrix256.cginc"
+#include "audiolink.cginc"
 #include "gerstner.cginc"
+#include "globals.cginc"
+#include "pbr_overlay.cginc"
+#include "interpolators.cginc"
 #include "trochoid_math.cginc"
 
 #ifndef __MOCHIE_SHADOW_CASTER_INC
@@ -37,25 +41,6 @@
 
 #pragma multi_compile_instancing
 #pragma multi_compile_shadowcaster
-#include "UnityCG.cginc"
-#include "globals.cginc"
-
-struct appdata {
-	float4 vertex : POSITION;
-	float3 normal : NORMAL;
-  float2 uv : TEXCOORD0;
-  
-	UNITY_VERTEX_INPUT_INSTANCE_ID
-};
-
-struct v2f {
-	float4 pos : SV_POSITION;
-  float2 uv : TEXCOORD0;
-	UNITY_VERTEX_INPUT_INSTANCE_ID 
-  UNITY_VERTEX_OUTPUT_STEREO
-  float3 worldPos : TEXCOORD1;
-  float2 screenPos : TEXCOORD2;
-};
 
 v2f vert (appdata v){
 #if defined(_DISCARD)
@@ -65,9 +50,9 @@ v2f vert (appdata v){
 #endif
 #if defined(_TROCHOID)
   {
-    v.vertex.xyz = cyl2_to_troch_map(cyl_to_cyl2_map(cart_to_cyl_map(v.vertex.xyz)));
+    v.vertex.xyz = cart_to_troch_map(v.vertex.xyz);
   }
-#endif
+#endif  // _TROCHOID
 #if !defined(_SCROLL) && defined(_GIMMICK_GERSTNER_WATER)
   {
     GerstnerParams p = getGerstnerParams();
@@ -85,7 +70,7 @@ v2f vert (appdata v){
 	UNITY_SETUP_INSTANCE_ID(v);
 	UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 	TRANSFER_SHADOW_CASTER_NORMALOFFSET(o)
-  o.uv = v.uv;
+  o.uv0 = v.uv0;
   o.worldPos = mul(unity_ObjectToWorld, v.vertex);
 
 	float2 suv = o.pos * float2(0.5, 0.5 * _ProjectionParams.x);
@@ -106,19 +91,34 @@ float4 frag (v2f i) : SV_Target {
   }
 
 #if defined(_BASECOLOR_MAP)
-  float4 albedo = _MainTex.SampleBias(linear_repeat_s, i.uv, _Global_Sample_Bias);
+  float4 albedo = _MainTex.SampleBias(GET_SAMPLER_PBR, UV_SCOFF(i, _MainTex_ST, 0), _Global_Sample_Bias);
   albedo *= _Color;
 #else
   float4 albedo = _Color;
 #endif  // _BASECOLOR_MAP
+
+  PbrOverlay ov;
+  getOverlayAlbedoRoughnessMetallic(ov, i);
+  float roughness = 0;
+  float metallic = 0;
+  float overlay_glitter_mask;
+  float one = 1;
+  mixOverlayAlbedoRoughnessMetallic(albedo, roughness, metallic, ov, one, overlay_glitter_mask);
+
 #if defined(_RENDERING_CUTOUT)
 #if defined(_RENDERING_CUTOUT_STOCHASTIC)
   float ar = rand2(i.uv0);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_IGN)
+  float frame = 0;
+  if (AudioLinkIsAvailable()) {
+    frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
+  } else {
+    frame = floor(_Frame_Counter);
+  }
   float ar = ign_anim(
       floor(tdata.screen_uv_round * _Rendering_Cutout_Noise_Scale) + _Rendering_Cutout_Ign_Seed,
-      floor(_Frame_Counter), _Rendering_Cutout_Ign_Speed);
+      frame, _Rendering_Cutout_Ign_Speed);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_NOISE_MASK)
   float ar = _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s, tdata.screen_uv * _ScreenParams.xy * _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0);
@@ -128,6 +128,7 @@ float4 frag (v2f i) : SV_Target {
 #endif
   albedo.a = 1;
 #endif
+
 	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 	return 0;
 }
