@@ -138,7 +138,9 @@ void getEmitterData(float3 p,
 
   const float3 p_to_emitter = p - em_loc;
   const float t = dot(p_to_emitter, em_normal);
-  float emitter_lod = floor((abs(t) + dither) / ((_Gimmick_Fog_00_Emitter_Lod_Half_Life*(1+ign_anim(uv*1000, frame, /*speed=*/1.0)*2.5) * step_size)));
+
+  const float raw_noise_sample = _Gimmick_Fog_00_Noise_2D.SampleLevel(point_repeat_s, uv * 1000, 0).x;
+  float emitter_lod = floor((abs(t) + dither) / ((_Gimmick_Fog_00_Emitter_Lod_Half_Life*(1+raw_noise_sample*2.5) * step_size)));
   float3 em_color = _Gimmick_Fog_00_Emitter_Texture.SampleLevel(point_clamp_s, uv, emitter_lod);
   float emitter_dist = in_range ? abs(t) : 1000;
   float emitter_falloff = min(1, rcp(emitter_dist));
@@ -273,14 +275,13 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   //step_size = clamp(step_size, 1E-2, 1E2);
   uint2 screen_uv_round = floor(screen_uv * _ScreenParams.xy);
   const float frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
-#if false && defined(_GIMMICK_FOG_00_NOISE_2D)
-  const float golden_ratio = 1.61803398875;
-  const float speed = 0.003;
-  const float dither_seed = frac(_Gimmick_Fog_00_Noise_2D.SampleLevel(point_repeat_s, screen_uv_round * _Gimmick_Fog_00_Noise_2D_TexelSize.xy, 0) + 
-    frame * golden_ratio * speed);
+#if defined(_GIMMICK_FOG_00_NOISE_2D)
+  const float raw_noise_sample = _Gimmick_Fog_00_Noise_2D.SampleLevel(point_repeat_s, screen_uv * _ScreenParams.xy * _Gimmick_Fog_00_Noise_2D_TexelSize.xy, 0).x;
+  const float dither_seed = frac(raw_noise_sample + frame * PHI);
 #elif 1
   // float ign_anim(float2 screen_px, float frame, float speed) {
-  const float dither_seed = ign_anim(screen_uv_round, frame, /*speed=*/0.001);
+  //const float dither_seed = ign_anim(screen_uv_round, frame, /*speed=*/0.001);
+  const float dither_seed = frac(ign_anim(screen_uv_round, frame, /*speed=*/0.000) + frame * 1.618033989);
 #else
   const float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
 #endif
@@ -416,7 +417,8 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   pbr.depth = clip_pos.z / clip_pos.w;
 
 #if 0
-  pbr.albedo.rgb = eye_depth_world / 100;
+  //pbr.albedo.rgb = eye_depth_world / 100;
+  pbr.albedo.rgb = dither_seed;
   pbr.albedo.a = 1;
 #endif
 
@@ -439,14 +441,25 @@ float4 apply_fog(
     float3 sun_dir,
     float4 sun_color,
     float sun_exponent,
+    float sun_color_2_enable,
+    float4 sun_color_2,
+    float sun_exponent_2,
     float4 fog_color) {
   float fog_amount = 1 - exp(-t * density);
-  float sun_amount = pow(max(dot(rd, sun_dir), 0), sun_exponent);
-  float4 color =
-    lerp(
-      fog_color,
-      sun_color,
-      sun_amount);
+  float4 color = fog_color;
+  float ndotl = dot(rd, sun_dir);
+  // Wrap ndotl
+  ndotl = (ndotl + 1) / (2);
+  ndotl *= ndotl;
+  ndotl = max(ndotl, 0);
+  [branch]
+  if (sun_color_2_enable) {
+    float sun_amount_2 = saturate(pow(ndotl, sun_exponent_2) * fog_amount);
+    color = lerp(color, sun_color_2, sun_amount_2);
+  }
+  float sun_amount = saturate(pow(ndotl, sun_exponent) * fog_amount);
+  color = lerp(color, sun_color, sun_amount);
+  //return float4(color.rgb, fog_amount * color.a);
   return float4(color.rgb, fog_amount * color.a);
 }
 
@@ -460,7 +473,7 @@ Fog01PBR getFog01(v2f i, ToonerData tdata) {
     float cur_radius = length(_WorldSpaceCameraPos - activation_center);
     [branch]
     //if (cur_radius > activation_radius) {
-    if (_WorldSpaceCameraPos.y > activation_center.y + activation_radius) {
+    if (getCenterCamPos().y > activation_center.y + activation_radius) {
       return (Fog01PBR)0;
     }
   }
@@ -490,6 +503,9 @@ Fog01PBR getFog01(v2f i, ToonerData tdata) {
       normalize(_Gimmick_Fog_01_Sun_Direction),
       _Gimmick_Fog_01_Sun_Color,
       _Gimmick_Fog_01_Sun_Exponent,
+      _Gimmick_Fog_01_Sun_Color_2_Enable,
+      _Gimmick_Fog_01_Sun_Color_2,
+      _Gimmick_Fog_01_Sun_Exponent_2,
       _Gimmick_Fog_01_Color);
   pbr.albedo.rgb = aces_filmic(pbr.albedo.rgb);
 

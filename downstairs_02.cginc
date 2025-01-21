@@ -1,5 +1,6 @@
 #include "atrix256.cginc"
 #include "audiolink.cginc"
+#include "cnlohr.cginc"
 #include "globals.cginc"
 #include "fog.cginc"
 #include "interpolators.cginc"
@@ -657,37 +658,52 @@ Gimmick_DS2_Output Gimmick_DS2_03(inout v2f i)
 float ds2_11_height(float2 p)
 {
   float sc = .4;
-  float2 offset = _Time[0] * .00 + _Gimmick_DS2_11_XZ_Offset.xz;
-  //float t = 0;
+  float sc_rcp = 2.5;
+  float2 offset = _Gimmick_DS2_11_XZ_Offset.xz * _Gimmick_DS2_11_Simulation_Scale;
+
+  float2 pp = (p - offset) * sc_rcp;
+  p /= _Gimmick_DS2_11_Simulation_Scale;
+  pp /= _Gimmick_DS2_11_Simulation_Scale;
+#define _GIMMICK_DS2_11_TEXTURE_NOISE
+#if defined(_GIMMICK_DS2_11_TEXTURE_NOISE)
+  pp *= .01;
+#endif
 
   float h = 0;
-  float hsc = 2.0;
-  uint octaves = 11;
-  float corrective_term = 0;
-  float cur_factor = 1;
+  float hsc = _Gimmick_DS2_11_Height_Scale;
+  float sc_hsc = sc * hsc;
+  uint octaves = _Gimmick_DS2_11_Octaves;
   float alpha = _Gimmick_DS2_11_Alpha;
   float alpha_rcp = 1 / alpha;
-  //for (uint i = 0; i < octaves; i += sqrt(i+1)) {
+  float alpha_i = 1;
+  float alpha_rcp_i = 1;
   for (uint i = 0; i < octaves; i++) {
-    corrective_term += cur_factor;
-    h += _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, (p - offset) * .01 * pow(alpha_rcp, i) / sc, 0) * sc * hsc * cur_factor;
-    cur_factor *= alpha;
+#if defined(_GIMMICK_DS2_11_TEXTURE_NOISE)
+    // Combine components to increase precision.
+    float noise = _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, pp * alpha_rcp_i, 0);
+#else
+    float noise = perlin_noise(pp * alpha_rcp_i);
+#endif
+    h += noise * sc_hsc * alpha_i;
+    alpha_i *= alpha;
+    alpha_rcp_i *= alpha_rcp;
   }
-  h /= corrective_term;
+  // The sum of the series k^-i is 1 / (1 - k^-1)
+  h /= 1 / (1 - alpha);
+  h *= h;
 
   // `scale_factor` goes from [0, 1] based on radius.
-  float2 center = p + (float2(0, .05));
+  float2 center = p;
   float scale_factor = 1 - exp(-dot(center, center) * 16);
   h *= scale_factor;
-  h -= (1 - scale_factor) * sc * hsc * .15;
-  h += .015;
+  h = ((h - (1 - scale_factor) * sc_hsc * .15) + .015) * _Gimmick_DS2_11_Simulation_Scale;
 
   return h;
 }
 
 float3 ds2_11_calc_normal(float3 p)
 {
-  float epsilon = 4E-4;
+  float epsilon = 6E-4;
   return normalize(float3(
     ds2_11_height(p.xz - float2(epsilon, 0)) - ds2_11_height(p.xz + float2(epsilon, 0)),
     2 * epsilon,
@@ -699,23 +715,27 @@ Gimmick_DS2_Output Gimmick_DS2_11(inout v2f i, ToonerData tdata)
 {
   float3 camera_position = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos, 1));
   float3 rd = normalize(i.objPos - camera_position);
-  float3 ro = camera_position + rd * 1E-2;
+  float3 ro = camera_position + rd * _Gimmick_DS2_11_March_Initial_Offset * _Gimmick_DS2_11_Simulation_Scale;
+
+// 180 degrees is pi radians
+// (d/180)*pi
+  [branch]
+  //if (dot(rd, UnityObjectToWorldNormal(float3(0, 1, 0))) > cos((60/180)*PI)) {
+  if (dot(rd, UnityObjectToWorldNormal(float3(0, 1, 0))) > _Gimmick_DS2_11_Early_Exit_Cutoff_Cos_Theta) {
+    return (Gimmick_DS2_Output)0;
+  }
 
   [branch]
   if (_Gimmick_DS2_11_Distance_Culling_Enable) {
-    float3 activation_center = _Gimmick_DS2_11_Activation_Center;
-    float activation_radius = _Gimmick_DS2_11_Activation_Radius;
-    float cur_radius = length(_WorldSpaceCameraPos - activation_center);
+    float activation_y = _Gimmick_DS2_11_Activation_Y;
     [branch]
-    //if (cur_radius > activation_radius) {
-    if (_WorldSpaceCameraPos.y > activation_center.y + activation_radius) {
+    if (getCenterCamPos().y > activation_y) {
       return (Gimmick_DS2_Output)0;
     }
   }
 
-  #define DS2_11_MARCH_STEPS 20
   float t = 0.0;
-  float dt0 = 0.002;
+  float dt0 = 0.01 * _Gimmick_DS2_11_Simulation_Scale;
   float dt = dt0;
   // last height, last y
   float lh = 0;
@@ -723,46 +743,50 @@ Gimmick_DS2_Output Gimmick_DS2_11(inout v2f i, ToonerData tdata)
 
   // https://iquilezles.org/articles/terrainmarching/
   bool hit = false;
-  for (uint ii = 0; ii < DS2_11_MARCH_STEPS; ii++) {
-    float3 p = ro + rd * t;
-    float h = ds2_11_height(p.xz);
+  float3 p;
+  float h;
+  for (uint ii = 0; ii < _Gimmick_DS2_11_March_Steps; ii++) {
+    p = ro + rd * t;
+    h = ds2_11_height(p.xz);
     if (p.y < h) {
-      t = t - dt + dt * (lh - ly) / (p.y - ly - h + lh);
-      hit = true;
       break;
     }
     t += dt;
-    dt = dt0 * ii;
+    dt = dt0 * (ii+1);
     lh = h;
     ly = p.y;
   }
+  if (p.y < h) {
+    hit = true;
+    t = t - dt + dt * (lh - ly) / (p.y - ly - h + lh);
+  }
 
-  float3 final_pos = ro + t * rd;
+  float3 final_pos = ro + t * rd + (1 - hit) * rd * 1E2;
   float3 final_pos_world = mul(unity_ObjectToWorld, float4(final_pos, 1));
   float4 final_color = 1;
 
   float snowline_noise = 0;
   float alpha = 0.6;
   float alpha_rcp = 1 / alpha;
-  for (uint ii = 0; ii < 8; ii++) {
+  for (uint ii = 0; ii < _Gimmick_DS2_11_Snowline_Octaves; ii++) {
     snowline_noise += _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, final_pos.xz * _Gimmick_DS2_11_Snowline_Noise_Scale * pow(alpha_rcp, ii), 0) * pow(alpha, ii);
   }
-  float snowline = snowline_noise * _Gimmick_DS2_11_Snowline_Width - _Gimmick_DS2_11_Snowline;
+  float snowline = (snowline_noise - _Gimmick_DS2_11_Snowline) * _Gimmick_DS2_11_Snowline_Width;
   float rockline_noise = 0;
-  for (uint ii = 0; ii < 8; ii++) {
+  for (uint ii = 0; ii < _Gimmick_DS2_11_Rockline_Octaves; ii++) {
     rockline_noise += _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, final_pos.xz * _Gimmick_DS2_11_Rockline_Noise_Scale * pow(alpha_rcp, ii), 0) * pow(alpha, ii);
   }
-  float rockline = rockline_noise * _Gimmick_DS2_11_Rockline_Width - _Gimmick_DS2_11_Rockline;
-
-  final_color.rgb = lerp(
-    _Gimmick_DS2_11_Rock_Color,
-    _Gimmick_DS2_11_Snow_Color,
-    saturate(final_pos_world.y - snowline));
+  float rockline = (rockline_noise - _Gimmick_DS2_11_Rockline) * _Gimmick_DS2_11_Rockline_Width;
 
   final_color.rgb = lerp(
     _Gimmick_DS2_11_Grass_Color,
-    final_color.rgb,
+    _Gimmick_DS2_11_Rock_Color,
     saturate(final_pos_world.y - rockline));
+
+  final_color.rgb = lerp(
+    final_color.rgb,
+    _Gimmick_DS2_11_Snow_Color,
+    saturate(final_pos_world.y - snowline));
 
   final_color *= hit;
 
@@ -770,20 +794,19 @@ Gimmick_DS2_Output Gimmick_DS2_11(inout v2f i, ToonerData tdata)
   [branch]
   if (_Gimmick_DS2_11_Fog_Enable) {
     fog = apply_fog(
-        length(final_pos_world - _WorldSpaceCameraPos),
+        length(final_pos_world.xyz - _WorldSpaceCameraPos.xyz),
         _Gimmick_DS2_11_Fog_Density,
         UnityObjectToWorldNormal(rd),
         normalize(_Gimmick_DS2_11_Fog_Sun_Direction),
         _Gimmick_DS2_11_Fog_Sun_Color,
         _Gimmick_DS2_11_Fog_Sun_Exponent,
+        _Gimmick_DS2_11_Fog_Sun_Color_2_Enable,
+        _Gimmick_DS2_11_Fog_Sun_Color_2,
+        _Gimmick_DS2_11_Fog_Sun_Exponent_2,
         _Gimmick_DS2_11_Fog_Color) * hit;
   }
 
   float3 normal = UnityObjectToWorldNormal(ds2_11_calc_normal(final_pos));
-  //normal = MY_BLEND_NORMALS(float3(0, 1, 0), normal, hit);
-  //normal = float3(0, 1, 0);
-  //normal = MY_BLEND_NORMALS(normal, float3(0, 1, 0), fog.a);
-
   Gimmick_DS2_Output o;
   o.albedo = final_color;
   o.emission = 0;

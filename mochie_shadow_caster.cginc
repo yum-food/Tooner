@@ -48,6 +48,20 @@ v2f vert (appdata v){
     return (v2f) (0.0 / 0.0);
   }
 #endif
+#if defined(_GIMMICK_BOX_DISCARD)
+  if (_Gimmick_Box_Discard_Enable_Static) {
+    float3 p = getCenterCamPos();
+    float3 c1 = _Gimmick_Box_Discard_Corner_1;
+    float3 c2 = _Gimmick_Box_Discard_Corner_2;
+    bool inside = (p.x >= c1.x && p.x <= c2.x &&
+        p.y >= c1.y && p.y <= c2.y &&
+        p.z >= c1.z && p.z <= c2.z);
+    if (_Gimmick_Box_Discard_Invert && !inside ||
+        !_Gimmick_Box_Discard_Invert && inside) {
+      return (v2f) (0.0 / 0.0);
+    }
+  }
+#endif
 #if defined(_TROCHOID)
   {
     v.vertex.xyz = cart_to_troch_map(v.vertex.xyz);
@@ -106,22 +120,25 @@ float4 frag (v2f i) : SV_Target {
   mixOverlayAlbedoRoughnessMetallic(albedo, roughness, metallic, ov, one, overlay_glitter_mask);
 
 #if defined(_RENDERING_CUTOUT)
-#if defined(_RENDERING_CUTOUT_STOCHASTIC)
-  float ar = rand2(i.uv0);
-  clip(albedo.a - ar);
-#elif defined(_RENDERING_CUTOUT_IGN)
   float frame = 0;
   if (AudioLinkIsAvailable()) {
     frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
   } else {
     frame = floor(_Frame_Counter);
   }
+#if defined(_RENDERING_CUTOUT_STOCHASTIC)
+  float ar = rand2(i.uv0);
+  clip(albedo.a - ar);
+#elif defined(_RENDERING_CUTOUT_IGN)
   float ar = ign_anim(
       floor(tdata.screen_uv_round * _Rendering_Cutout_Noise_Scale) + _Rendering_Cutout_Ign_Seed,
       frame, _Rendering_Cutout_Ign_Speed);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_NOISE_MASK)
-  float ar = _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s, tdata.screen_uv * _ScreenParams.xy * _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0);
+  float ar = frac(
+    _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s, tdata.screen_uv * _ScreenParams.xy * _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0)
+    + frame * PHI);
+  //return float4(ar, ar, ar, 1);
   clip(albedo.a - ar);
 #else
   clip(albedo.a - _Alpha_Cutoff);

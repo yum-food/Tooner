@@ -698,6 +698,17 @@ float4 _Gimmick_Flat_Color_Color;
 float3 _Gimmick_Flat_Color_Emission;
 #endif
 
+#if defined(_GIMMICK_UV_DOMAIN_WARPING)
+float _Gimmick_UV_Domain_Warping_Enable_Static;
+float _Gimmick_UV_Domain_Warping_Octaves;
+float _Gimmick_UV_Domain_Warping_Strength;
+float _Gimmick_UV_Domain_Warping_Scale;
+float _Gimmick_UV_Domain_Warping_Speed;
+texture2D _Gimmick_UV_Domain_Warping_Noise;
+texture2D _Gimmick_UV_Domain_Warping_Mask;
+float _Gimmick_UV_Domain_Warping_Mask_Invert;
+#endif
+
 #if defined(_GIMMICK_QUANTIZE_LOCATION)
 float _Gimmick_Quantize_Location_Enable_Static;
 float _Gimmick_Quantize_Location_Enable_Dynamic;
@@ -793,22 +804,32 @@ float _Gimmick_DS2_11_Fog_Enable;
 float _Gimmick_DS2_11_Fog_Density;
 float3 _Gimmick_DS2_11_Fog_Sun_Direction;
 float4 _Gimmick_DS2_11_Fog_Sun_Color;
+float _Gimmick_DS2_11_Fog_Sun_Exponent;
+float _Gimmick_DS2_11_Fog_Sun_Color_2_Enable;
+float4 _Gimmick_DS2_11_Fog_Sun_Color_2;
+float _Gimmick_DS2_11_Fog_Sun_Exponent_2;
 float4 _Gimmick_DS2_11_Fog_Color;
 float _Gimmick_DS2_11_Snowline;
+float _Gimmick_DS2_11_Snowline_Octaves;
 float _Gimmick_DS2_11_Snowline_Width;
 float _Gimmick_DS2_11_Snowline_Noise_Scale;
 float3 _Gimmick_DS2_11_Snow_Color;
 float _Gimmick_DS2_11_Rockline;
+float _Gimmick_DS2_11_Rockline_Octaves;
 float _Gimmick_DS2_11_Rockline_Width;
 float _Gimmick_DS2_11_Rockline_Noise_Scale;
 float3 _Gimmick_DS2_11_Rock_Color;
 float3 _Gimmick_DS2_11_Grass_Color;
 float _Gimmick_DS2_11_Alpha;
+float _Gimmick_DS2_11_Octaves;
+float _Gimmick_DS2_11_March_Initial_Offset;
+float _Gimmick_DS2_11_March_Steps;
+float _Gimmick_DS2_11_Simulation_Scale;
+float _Gimmick_DS2_11_Height_Scale;
 float3 _Gimmick_DS2_11_XZ_Offset;
-float _Gimmick_DS2_11_Fog_Sun_Exponent;
 float _Gimmick_DS2_11_Distance_Culling_Enable;
-float3 _Gimmick_DS2_11_Activation_Center;
-float _Gimmick_DS2_11_Activation_Radius;
+float _Gimmick_DS2_11_Activation_Y;
+float _Gimmick_DS2_11_Early_Exit_Cutoff_Cos_Theta;
 #endif
 
 #if defined(_PIXELLATE)
@@ -966,10 +987,14 @@ float _Gimmick_Fog_00_Emitter2_Scale_Y;
 
 #if defined(_GIMMICK_FOG_01) || defined(_GIMMICK_DS2)
 float _Gimmick_Fog_01_Density;
+float _Gimmick_Fog_01_Overlay_Mode;
 float3 _Gimmick_Fog_01_Sun_Direction;
 float4 _Gimmick_Fog_01_Color;
 float4 _Gimmick_Fog_01_Sun_Color;
+float4 _Gimmick_Fog_01_Sun_Color_2;
 float _Gimmick_Fog_01_Sun_Exponent;
+float _Gimmick_Fog_01_Sun_Exponent_2;
+float _Gimmick_Fog_01_Sun_Color_2_Enable;
 float _Gimmick_Fog_01_Distance_Culling_Enable;
 float3 _Gimmick_Fog_01_Activation_Center;
 float _Gimmick_Fog_01_Activation_Radius;
@@ -1002,6 +1027,13 @@ float4 _Gimmick_Gerstner_Water_Color_Ramp_Mask;
 float4 _Gimmick_Gerstner_Water_Color_Ramp_Mask1;
 #endif
 #endif
+#endif
+
+#if defined(_GIMMICK_BOX_DISCARD)
+float _Gimmick_Box_Discard_Enable_Static;
+float3 _Gimmick_Box_Discard_Corner_1;
+float3 _Gimmick_Box_Discard_Corner_2;
+float _Gimmick_Box_Discard_Invert;
 #endif
 
 #if defined(_GIMMICK_FOG_00_RAY_MARCH_0)

@@ -231,6 +231,7 @@
 #pragma shader_feature_local _ _MATCAP1_DISTORTION0
 #pragma shader_feature_local _ _AMBIENT_OCCLUSION
 #pragma shader_feature_local _ _GIMMICK_FLAT_COLOR
+#pragma shader_feature_local _ _GIMMICK_UV_DOMAIN_WARPING
 #pragma shader_feature_local _ _GIMMICK_QUANTIZE_LOCATION
 #pragma shader_feature_local _ _GIMMICK_QUANTIZE_LOCATION_AUDIOLINK
 #pragma shader_feature_local _ _GIMMICK_SHEAR_LOCATION
@@ -276,6 +277,7 @@
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER_OCTAVE_1
 #pragma shader_feature_local _ _GIMMICK_GERSTNER_WATER_COLOR_RAMP
+#pragma shader_feature_local _ _GIMMICK_BOX_DISCARD
 #pragma shader_feature_local _ _OPTIMIZE_INTERPOLATORS
 #pragma shader_feature_local _ _ACES_FILMIC
 

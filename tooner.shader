@@ -3,7 +3,7 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 36
+  // Build nonce: 38
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -746,6 +746,15 @@ Shader "yum_food/tooner"
     _Gimmick_Flat_Color_Color("Flat color gimmick color", Color) = (0, 0, 0, 1)
     _Gimmick_Flat_Color_Emission("Flat color gimmick emission", Color) = (0, 0, 0, 1)
 
+    _Gimmick_UV_Domain_Warping_Enable_Static("Enable UV domain warping", Float) = 0.0
+    _Gimmick_UV_Domain_Warping_Octaves("UV domain warping octaves", Float) = 3
+    _Gimmick_UV_Domain_Warping_Strength("UV domain warping strength", Float) = 1
+    _Gimmick_UV_Domain_Warping_Scale("UV domain warping scale", Float) = 1
+    _Gimmick_UV_Domain_Warping_Speed("UV domain warping speed", Float) = 1
+    _Gimmick_UV_Domain_Warping_Noise("UV domain warping noise", 2D) = "black" {}
+    _Gimmick_UV_Domain_Warping_Mask("UV domain warping mask", 2D) = "white" {}
+    _Gimmick_UV_Domain_Warping_Mask_Invert("UV domain warping mask invert", Float) = 0.0
+
     _Gimmick_Quantize_Location_Enable_Static("Enable quantize location gimmick", Float) = 0.0
     _Gimmick_Quantize_Location_Enable_Dynamic("quantize location gimmick", Float) = 0.0
     _Gimmick_Quantize_Location_Precision("quantize location precision", Float) = 100.0
@@ -832,23 +841,32 @@ Shader "yum_food/tooner"
     _Gimmick_DS2_11_Fog_Density("Fog density", Float) = 1
     _Gimmick_DS2_11_Fog_Sun_Direction("Fog sun direction", Vector) = (0, 0, 0, 0)
     _Gimmick_DS2_11_Fog_Sun_Exponent("Fog sun exponent", Float) = 1
+    _Gimmick_DS2_11_Fog_Sun_Color_2_Enable("Fog sun color 2 enable", Float) = 0
+    [HDR] _Gimmick_DS2_11_Fog_Sun_Color_2("Fog sun color 2", Color) = (1, 1, 1, 1)
+    _Gimmick_DS2_11_Fog_Sun_Exponent_2("Fog sun exponent 2", Float) = 1
     [HDR] _Gimmick_DS2_11_Fog_Color("Fog color", Color) = (1, 1, 1, 1)
     [HDR] _Gimmick_DS2_11_Fog_Sun_Color("Fog sun color", Color) = (1, 1, 1, 1)
     _Gimmick_DS2_11_Snowline("Snowline", Float) = 1
+    _Gimmick_DS2_11_Snowline_Octaves("Snowline octaves", Float) = 1
     _Gimmick_DS2_11_Snowline_Width("Snowline width", Float) = 0.1
     _Gimmick_DS2_11_Snowline_Noise_Scale("Snowline noise scale", Float) = 1
     [HDR] _Gimmick_DS2_11_Snow_Color("Snow color", Color) = (1, 1, 1, 1)
     _Gimmick_DS2_11_Rockline("Rockline", Float) = 0
+    _Gimmick_DS2_11_Rockline_Octaves("Rockline octaves", Float) = 1
     _Gimmick_DS2_11_Rockline_Width("Rockline width", Float) = 0.1
     _Gimmick_DS2_11_Rockline_Noise_Scale("Rockline noise scale", Float) = 1
     [HDR] _Gimmick_DS2_11_Rock_Color("Rock color", Color) = (1, 1, 1, 1)
     [HDR] _Gimmick_DS2_11_Grass_Color("Grass color", Color) = (1, 1, 1, 1)
     _Gimmick_DS2_11_Alpha("Alpha", Range(0, 1)) = 0.5
+    _Gimmick_DS2_11_Octaves("Octaves", Float) = 12
+    _Gimmick_DS2_11_March_Steps("March steps", Float) = 24
+    _Gimmick_DS2_11_March_Initial_Offset("March initial offset", Float) = 0
+    _Gimmick_DS2_11_Simulation_Scale("Simulation scale", Float) = 1
+    _Gimmick_DS2_11_Height_Scale("Height scale", Float) = 1
     _Gimmick_DS2_11_XZ_Offset("XZ offset", Vector) = (0, 0, 0, 0)
     _Gimmick_DS2_11_Distance_Culling_Enable("Distance culling enable", Float) = 0
-    _Gimmick_DS2_11_Activation_Center("Activation center", Vector) = (0, 0, 0, 0)
-    _Gimmick_DS2_11_Activation_Radius("Activation radius", Float) = 1
-
+    _Gimmick_DS2_11_Activation_Y("Activation Y", Float) = 0
+    _Gimmick_DS2_11_Early_Exit_Cutoff_Cos_Theta("Early exit cutoff (cos theta)", Float) = 0
 
     _Gimmick_Halo00_Enable_Static("Enable halo", Float) = 0.0
 
@@ -1017,11 +1035,15 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Ray_March_0_Seed("seed", Float) = 0
 
     _Gimmick_Fog_01_Enable_Static("Enable fog 01", Float) = 0
+    _Gimmick_Fog_01_Overlay_Mode("Overlay mode", Float) = 0
     _Gimmick_Fog_01_Density("Density", Range(0, 1)) = 1
     _Gimmick_Fog_01_Sun_Direction("Sun direction", Vector) = (0.866, 0.5, 0, 0)
     _Gimmick_Fog_01_Sun_Exponent("Sun exponent", Float) = 1
+    _Gimmick_Fog_01_Sun_Exponent_2("Sun exponent 2", Float) = 1
     [HDR] _Gimmick_Fog_01_Color("Color", Color) = (1, 1, 1, 1)
     [HDR] _Gimmick_Fog_01_Sun_Color("Sun color", Color) = (1, 1, 1, 1)
+    [HDR] _Gimmick_Fog_01_Sun_Color_2("Sun color 2", Color) = (1, 1, 1, 1)
+    _Gimmick_Fog_01_Sun_Color_2_Enable("Sun color 2 enable", Float) = 0
     _Gimmick_Fog_01_Distance_Culling_Enable("Distance culling enable", Float) = 0
     _Gimmick_Fog_01_Activation_Center("Activation center", Vector) = (0, 0, 0, 0)
     _Gimmick_Fog_01_Activation_Radius("Activation radius", Float) = 1
@@ -1047,11 +1069,16 @@ Shader "yum_food/tooner"
 
     _Gimmick_Gerstner_Water_h("Mean water depth", Float) = 10
     _Gimmick_Gerstner_Water_g("Gravity", Float) = 9.8
-    _Gimmick_Gerstner_Water_Scale("Scale", Vector) = (1000, 1000, .1)
+    _Gimmick_Gerstner_Water_Scale("Scale", Vector) = (1000, 1000, .1, 0)
     _Gimmick_Gerstner_Water_Origin_Damping_Direction("Origin damping direction", Float) = 1
-    _Gimmick_Gerstner_Water_Color_Ramp("Color ramp", 2D) = "white"
+    _Gimmick_Gerstner_Water_Color_Ramp("Color ramp", 2D) = "white" {}
     _Gimmick_Gerstner_Water_Color_Ramp_Offset("Color ramp offset", Float) = 0.5
     _Gimmick_Gerstner_Water_Color_Ramp_Scale("Color ramp offset", Float) = 1
+
+    _Gimmick_Box_Discard_Enable_Static("Enable box discard (static)", Float) = 0
+    _Gimmick_Box_Discard_Corner_1("Corner 1", Vector) = (0, 0, 0, 0)
+    _Gimmick_Box_Discard_Corner_2("Corner 2", Vector) = (0, 0, 0, 0)
+    _Gimmick_Box_Discard_Invert("Invert", Float) = 0
   }
   SubShader
   {
@@ -1103,6 +1130,7 @@ Shader "yum_food/tooner"
         "RenderType"="Opaque"
         "Queue"="Geometry"
         "LightMode"="ForwardAdd"
+        "DisableBatching"="True"
       }
       Blend [_SrcBlend] One
       ZWrite Off
@@ -1131,6 +1159,9 @@ Shader "yum_food/tooner"
       ENDCG
     }
 		Pass {
+      Tags {
+        "DisableBatching"="True"
+      }
       Cull [_OutlinesCull]
 
       ZWrite [_ZWrite]
@@ -1159,6 +1190,7 @@ Shader "yum_food/tooner"
 		Pass {
       Tags {
         "LightMode" = "ShadowCaster"
+        "DisableBatching"="True"
       }
       Cull [_Cull]
 

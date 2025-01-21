@@ -1,3 +1,4 @@
+#include "cnlohr.cginc"
 #include "globals.cginc"
 #include "math.cginc"
 
@@ -12,15 +13,15 @@
 
 float3 cyl2_to_troch_map(float3 v)
 {
-  const float R = _Trochoid_R;
-  const float r = _Trochoid_r;
+  float R = abs(_Trochoid_R) > abs(_Trochoid_r) ? _Trochoid_R : _Trochoid_r;
+  float r = abs(_Trochoid_R) > abs(_Trochoid_r) ? _Trochoid_r : _Trochoid_R;
   const float d = _Trochoid_d;
   const float rrrr = (R - r) * R / r;
 
 #if 1
   float rr_gcd = gcd(abs(round(R)), abs(round(r)));
   float rr_lcm = (R * r) / rr_gcd;
-  float rr_lcm_factor = rr_lcm / R;
+  float rr_lcm_factor = abs(rr_lcm / R);
 #else
   float rr_lcm_factor = r;
 #endif
@@ -28,15 +29,14 @@ float3 cyl2_to_troch_map(float3 v)
   float toff = _Time[0] * _Trochoid_Speed;
 
   float x =
-      cos(v.x * rr_lcm_factor * R + toff * 2.3 + toff) * v.y * (R - r) * TROCH_POSITION_SCALE +
-      cos(v.x * rr_lcm_factor * rrrr - toff * 2.9 + toff) * v.y * d * TROCH_POSITION_SCALE;
+      cos((v.x / rr_lcm_factor) * R + toff * 2.3 + toff) * v.y * (R - r) * TROCH_POSITION_SCALE +
+      cos((v.x / rr_lcm_factor) * rrrr - toff * 2.9 + toff) * v.y * d * TROCH_POSITION_SCALE;
   float y =
-      sin(v.x * rr_lcm_factor * R - toff * 3.1 + toff) * v.y * (R - r) * TROCH_POSITION_SCALE -
-      sin(v.x * rr_lcm_factor * rrrr + toff * 3.7 + toff) * v.y * d * TROCH_POSITION_SCALE;
+      sin((v.x / rr_lcm_factor) * R - toff * 3.1 + toff) * v.y * (R - r) * TROCH_POSITION_SCALE -
+      sin((v.x / rr_lcm_factor) * rrrr + toff * 3.7 + toff) * v.y * d * TROCH_POSITION_SCALE;
   float z =
-      (v.x * v.y * rr_lcm_factor * R * TROCH_Z_THETA_SCALE +
-      cos(v.x * rr_lcm_factor * R * 5 + toff * 4.1 + toff) * v.y * TROCH_POSITION_SCALE +
-      //v.y * v.z);
+      ((v.x / rr_lcm_factor) * v.y * R * TROCH_Z_THETA_SCALE +
+      cos((v.x / rr_lcm_factor) * R * 5 + toff * 4.1 + toff) * v.y * TROCH_POSITION_SCALE +
       v.z);
 
   return float3(x, y, z);
@@ -62,7 +62,7 @@ float3 cart_to_troch_map(float3 v)
     float cur_radius = length(_WorldSpaceCameraPos - activation_center);
     [branch]
     //if (cur_radius > activation_radius) {
-    if (_WorldSpaceCameraPos.y > activation_center.y + activation_radius) {
+    if (getCenterCamPos().y > activation_center.y + activation_radius) {
       return v;
     }
   }

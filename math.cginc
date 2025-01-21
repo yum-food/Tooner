@@ -149,11 +149,19 @@ float rand(uint seed) {
 }
 
 // Generate a random number on [0, 1].
+/*
 float rand2(float2 p)
 {
   return frac(sin(dot(p,
           float2(12.9898, 78.233)))
       * 43758.5453123);
+}
+*/
+float rand2(float2 p)
+{
+    float3 p3  = frac(float3(p.xyx) * float3(.1031, .1030, .0973));
+    p3 += dot(p3, p3.yzx + 33.33);
+    return frac((p3.x + p3.y) * p3.z);
 }
 
 // Generate a random number on [0, 1].
@@ -275,21 +283,21 @@ float3x3 invert(float3x3 m)
 }
 
 // Return largest number which divides into both 'a' and 'b'.
-// Uses the Euclidean algorithm: repeatedly divide 'b' by 'a'.
+// Uses the Euclidean algorithm: repeatedly divide larger by smaller number.
 uint gcd(uint a, uint b)
 {
-  uint tmp = a * b;
-  #define GCD_MAX_ITER 8
-  for (uint i = 0; i < GCD_MAX_ITER; i++) {
-    tmp = b;
-    b = a % b;
-    a = tmp;
-    if (a == b) {
-      return a;
+    #define GCD_MAX_ITER 24
+    for (uint i = 0; i < GCD_MAX_ITER; i++) {
+        if (b == 0) {
+            return a;
+        }
+        a = a % b;
+        // Swap a and b
+        uint tmp = a;
+        a = b;
+        b = tmp;
     }
-  }
-  return 1;
-  
+    return 1;
 }
 
 #endif  // __MATH_INC

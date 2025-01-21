@@ -106,6 +106,22 @@ v2f vert(appdata v)
   UNITY_SETUP_INSTANCE_ID(v);
   UNITY_TRANSFER_INSTANCE_ID(v, o);
   UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
+  //UNITY_TRANSFER_VERTEX_OUTPUT_STEREO(v, o);
+
+#if defined(_GIMMICK_BOX_DISCARD)
+  if (_Gimmick_Box_Discard_Enable_Static) {
+    float3 p = getCenterCamPos();
+    float3 c1 = _Gimmick_Box_Discard_Corner_1;
+    float3 c2 = _Gimmick_Box_Discard_Corner_2;
+    bool inside = (p.x >= c1.x && p.x <= c2.x &&
+        p.y >= c1.y && p.y <= c2.y &&
+        p.z >= c1.z && p.z <= c2.z);
+    if (_Gimmick_Box_Discard_Invert && !inside ||
+        !_Gimmick_Box_Discard_Invert && inside) {
+      return (v2f) (0.0 / 0.0);
+    }
+  }
+#endif
 
   o.centerCamPos = getCenterCamPos();
 
@@ -949,6 +965,21 @@ float4 effect(inout v2f i, out float depth)
   depth = 0;
 #endif
 
+#if defined(_GIMMICK_UV_DOMAIN_WARPING)
+  {
+    float2 uv = i.uv0;
+    for (uint ii = 0; ii < _Gimmick_UV_Domain_Warping_Octaves; ii++) {
+      uv +=
+        (_Gimmick_UV_Domain_Warping_Noise.SampleLevel(
+          linear_repeat_s,
+          (uv + _Time[0] * _Gimmick_UV_Domain_Warping_Speed) *
+          _Gimmick_UV_Domain_Warping_Scale, 0) - 0.5) *
+        _Gimmick_UV_Domain_Warping_Strength;
+    }
+    i.uv0 = uv;
+  }
+#endif
+
 #if defined(_TROCHOID)
   {
     float3 my_pos;
@@ -1361,22 +1392,24 @@ float4 effect(inout v2f i, out float depth)
 #endif
 
 #if defined(_RENDERING_CUTOUT)
-#if defined(_RENDERING_CUTOUT_STOCHASTIC)
-  float ar = rand2(i.uv0);
-  clip(albedo.a - ar);
-#elif defined(_RENDERING_CUTOUT_IGN)
   float frame = 0;
   if (AudioLinkIsAvailable()) {
     frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
   } else {
     frame = floor(_Frame_Counter);
   }
+#if defined(_RENDERING_CUTOUT_STOCHASTIC)
+  float ar = rand2(i.uv0);
+  clip(albedo.a - ar);
+#elif defined(_RENDERING_CUTOUT_IGN)
   float ar = ign_anim(
       floor(tdata.screen_uv_round * _Rendering_Cutout_Noise_Scale) + _Rendering_Cutout_Ign_Seed,
       frame, _Rendering_Cutout_Ign_Speed);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_NOISE_MASK)
-  float ar = _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s, tdata.screen_uv * _ScreenParams.xy * _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0);
+  float ar = frac(
+    _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s, tdata.screen_uv * _ScreenParams.xy * _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0)
+    + frame * PHI);
   //return float4(ar, ar, ar, 1);
   clip(albedo.a - ar);
 #else
@@ -2094,10 +2127,10 @@ float4 effect(inout v2f i, out float depth)
   }
 #endif
 #if defined(_GIMMICK_FOG_01)
-  {
-    Fog01PBR pbr = getFog01(i, tdata);
-    albedo = pbr.albedo;
-    depth = pbr.depth;
+  if (!round(_Gimmick_Fog_01_Overlay_Mode)) {
+    Fog01PBR fog_01_pbr = getFog01(i, tdata);
+    albedo = fog_01_pbr.albedo;
+    depth = fog_01_pbr.depth;
 #if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)
     albedo.rgb *= albedo.a;
 #endif
@@ -2208,6 +2241,24 @@ float4 effect(inout v2f i, out float depth)
 #if defined(_GIMMICK_DS2)
   result = ds2.fog + result * (1 - ds2.fog.a);
   result.rgb += ds2.emission * _Gimmick_DS2_Emission_Factor * ds2_mask;
+#endif
+
+#if defined(_GIMMICK_FOG_01)
+  if (round(_Gimmick_Fog_01_Overlay_Mode)) {
+    float4 fog_color = apply_fog(
+      length(i.worldPos.xyz - getCenterCamPos()),
+      _Gimmick_Fog_01_Density,
+      normalize(i.worldPos.xyz - getCenterCamPos()),
+      _Gimmick_Fog_01_Sun_Direction,
+      _Gimmick_Fog_01_Sun_Color,
+      _Gimmick_Fog_01_Sun_Exponent,
+      _Gimmick_Fog_01_Sun_Color_2_Enable,
+      _Gimmick_Fog_01_Sun_Color_2,
+      _Gimmick_Fog_01_Sun_Exponent_2,
+      _Gimmick_Fog_01_Color
+    );
+    result.xyz = fog_color * fog_color.a + result * (1 - fog_color.a);
+  }
 #endif
 
 #if defined(_ACES_FILMIC)
