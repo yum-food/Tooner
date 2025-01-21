@@ -438,6 +438,10 @@ Shader "yum_food/tooner"
     _Glitter_Angle("Glitter angle", Range(0, 90)) = 90
     _Glitter_Power("Glitter power", Float) = 30
     _Glitter_UV_Select("Glitter UV channel", Range(0, 7)) = 0
+    _Glitter_Vector_Mask_Enabled("Glitter vector mask enabled", Float) = 0
+    _Glitter_Vector_Mask_Vector("Glitter vector mask vector", Vector) = (1, 0, 0)
+    _Glitter_Vector_Mask_Power("Glitter vector mask power", Float) = 1
+    _Glitter_Vector_Mask_Invert("Glitter vector mask invert", Float) = 0
 
     _Gimmick_Letter_Grid_Enable_Static("Enable letter grid (static)", Float) = 0
     _Gimmick_Letter_Grid_Texture("Letter grid texture", 2D) = "black" {}

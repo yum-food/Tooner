@@ -1381,6 +1381,30 @@ public class ToonerGUI : ShaderGUI {
       RangeProperty(
           bc,
           "UV select");
+
+      bc = FindProperty("_Glitter_Vector_Mask_Enabled");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = Toggle("Vector mask", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+
+      if (enabled) {
+        EditorGUI.indentLevel += 1;
+
+        bc = FindProperty("_Glitter_Vector_Mask_Vector");
+        VectorProperty(bc, "Vector");
+        bc = FindProperty("_Glitter_Vector_Mask_Power");
+        FloatProperty(bc, "Power");
+        bc = FindProperty("_Glitter_Vector_Mask_Invert");
+        bool inverted = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        inverted = Toggle("Invert", inverted);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = inverted ? 1.0f : 0.0f;
+
+        EditorGUI.indentLevel -= 1;
+      }
     }
     EditorGUI.indentLevel -= 1;
     show_ui.RemoveAt(show_ui.Count - 1);

@@ -454,10 +454,10 @@ void geom(triangle v2f tri_in[3],
 struct RorschachPBR {
   float4 albedo;
 };
-float rorschach_map_sdf(float3 p, float2 e, float3 period, float center_randomization)
+float rorschach_map_sdf(float3 p, float2 e, float3 period, float center_randomization, float speed)
 {
   float r = _Rorschach_Radius * min(period.x, min(period.y, period.z));
-  float st = sin(_Time[1] * _Rorschach_Speed * e.y * e.y + e.x * 3.14159265 * 2);
+  float st = sin(_Time[1] * speed * e.y * e.y + e.x * 3.14159265 * 2);
   r *= st;
   float3 o = float3(
     (e.x - 0.5) * period.x,
@@ -472,6 +472,7 @@ float rorschach_map_dr(
     float3 period,
     float3 count,
     float center_randomization,
+    float speed,
     out float3 which
     )
 {
@@ -490,7 +491,7 @@ float rorschach_map_dr(
     float2 e = float2(
         rand3(rid / 100.0),
         rand3(rid / 100.0 + 1));
-    float cur_d = rorschach_map_sdf(r, e, period, center_randomization);
+    float cur_d = rorschach_map_sdf(r, e, period, center_randomization, speed);
     which_tmp = cur_d < d ? rid : which;
     d = min(d, cur_d);
   }
@@ -507,6 +508,7 @@ struct RorschachParams {
   float quantization;
   float alpha_cutoff;
   float center_randomization;
+  float speed;
 };
 
 RorschachPBR get_rorschach(float2 uv, RorschachParams p)
@@ -520,7 +522,7 @@ RorschachPBR get_rorschach(float2 uv, RorschachParams p)
   float3 which;
   float3 period = float3(1 / (p.count_x+1), 1 / (p.count_y+1), 1);
   float3 count = float3(p.count_x, p.count_y, 1);
-  float d = rorschach_map_dr(ro, period, count, p.center_randomization, which);
+  float d = rorschach_map_dr(ro, period, count, p.center_randomization, p.speed, which);
 
   d *= max(p.count_x + 1, p.count_y + 1);
 
@@ -557,6 +559,7 @@ float get_glitter(float2 uv, float3 worldPos, float3 centerCamPos,
   p.quantization = 1;
   p.alpha_cutoff = 0.5;
   p.center_randomization = 1;
+  p.speed = speed;
   RorschachPBR result = get_rorschach(uv, p);
 
   float glitter = result.albedo.r;
@@ -565,6 +568,18 @@ float get_glitter(float2 uv, float3 worldPos, float3 centerCamPos,
     float cutoff = cos((angle / 180) * 3.14159);
 
     glitter *= saturate(pow(ndotl / cutoff, power));
+  }
+  if (_Glitter_Vector_Mask_Enabled) {
+    float3 mask_vector = _Glitter_Vector_Mask_Vector;
+    float power = _Glitter_Vector_Mask_Power;
+    float invert = _Glitter_Vector_Mask_Invert;
+    float vector_mask = dot(normal, normalize(mask_vector));
+    // Wrap ndotl
+    vector_mask = (vector_mask + 1) / 2;
+    vector_mask *= vector_mask;
+    vector_mask = max(vector_mask, 0);
+    vector_mask = invert ? 1 - vector_mask : vector_mask;
+    glitter *= pow(vector_mask, power);
   }
 
   return glitter;
@@ -1077,6 +1092,7 @@ float4 effect(inout v2f i, out float depth)
     p.quantization = _Rorschach_Quantization;
     p.alpha_cutoff = _Rorschach_Alpha_Cutoff;
     p.center_randomization = _Rorschach_Center_Randomization;
+    p.speed = _Rorschach_Speed;
     rorschach_albedo = get_rorschach(i.uv0, p).albedo;
     albedo.rgb = rorschach_albedo.rgb * rorschach_albedo.a + albedo.rgb * (1 - rorschach_albedo.a);
     albedo.a = saturate(rorschach_albedo.a + albedo.a * (1 - rorschach_albedo.a));

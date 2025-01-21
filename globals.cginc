@@ -409,6 +409,10 @@ float _Glitter_Brightness_Lit;
 float _Glitter_Angle;
 float _Glitter_Power;
 float _Glitter_UV_Select;
+float _Glitter_Vector_Mask_Enabled;
+float3 _Glitter_Vector_Mask_Vector;
+float _Glitter_Vector_Mask_Power;
+float _Glitter_Vector_Mask_Invert;
 #endif
 
 #if defined(_EXPLODE)
