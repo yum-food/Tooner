@@ -18,6 +18,7 @@ Shader "yum_food/tooner"
     _Clearcoat_Mask_Invert("Clearcoat mask invert", Float) = 0
     _Clearcoat_Mask2("Clearcoat mask 2", 2D) = "white" {}
     _Clearcoat_Mask2_Invert("Clearcoat mask 2 invert", Float) = 0
+    _Clearcoat_Use_Texture_Normals("Use texture normals", Float) = 1
 
     _Rendering_Cutout_Noise_Mask("Noise mask", 2D) = "white" {}
 
@@ -854,6 +855,7 @@ Shader "yum_food/tooner"
     _Gimmick_DS2_11_Snowline_Octaves("Snowline octaves", Float) = 1
     _Gimmick_DS2_11_Snowline_Width("Snowline width", Float) = 0.1
     _Gimmick_DS2_11_Snowline_Noise_Scale("Snowline noise scale", Float) = 1
+    _Gimmick_DS2_11_FBM("FBM", 2D) = "white" {}
     [HDR] _Gimmick_DS2_11_Snow_Color("Snow color", Color) = (1, 1, 1, 1)
     _Gimmick_DS2_11_Rockline("Rockline", Float) = 0
     _Gimmick_DS2_11_Rockline_Octaves("Rockline octaves", Float) = 1
@@ -864,8 +866,11 @@ Shader "yum_food/tooner"
     _Gimmick_DS2_11_Alpha("Alpha", Range(0, 1)) = 0.5
     _Gimmick_DS2_11_Octaves("Octaves", Float) = 12
     _Gimmick_DS2_11_March_Steps("March steps", Float) = 24
+    _Gimmick_DS2_11_March_Backtrack_Steps("March backtrack steps", Float) = 5
     _Gimmick_DS2_11_March_Initial_Offset("March initial offset", Float) = 0
+    _Gimmick_DS2_11_March_Initial_Step_Size("March initial step size", Float) = 0.01
     _Gimmick_DS2_11_Simulation_Scale("Simulation scale", Float) = 1
+    _Gimmick_DS2_11_Coord_Scale("Coord scale", Float) = 1
     _Gimmick_DS2_11_Height_Scale("Height scale", Float) = 1
     _Gimmick_DS2_11_XZ_Offset("XZ offset", Vector) = (0, 0, 0, 0)
     _Gimmick_DS2_11_Distance_Culling_Enable("Distance culling enable", Float) = 0
@@ -873,6 +878,12 @@ Shader "yum_food/tooner"
     _Gimmick_DS2_11_Early_Exit_Cutoff_Cos_Theta("Early exit cutoff (cos theta)", Float) = 0
 
     _Gimmick_Halo00_Enable_Static("Enable halo", Float) = 0.0
+
+    _Gimmick_Epilepsy_Mode_Enable_Static("Enable epilepsy mode", Float) = 0.0
+    _Gimmick_Epilepsy_Mode_Enable_Dynamic("Enable epilepsy mode", Float) = 0.0
+    _Gimmick_Epilepsy_Mode_Luminance_Cutoff("Luminance cutoff", Range(0, 1)) = 0.5
+    _Gimmick_Epilepsy_Mode_Saturation_Cutoff("Saturation cutoff", Range(0, 1)) = 0.4
+    _Gimmick_Epilepsy_Mode_Rolloff_Power("Rolloff power", Range(0, 1)) = 8
 
     _Gimmick_Pixellate_Enable_Static("Enable pixellation", Float) = 0.0
     _Gimmick_Pixellate_Resolution_U("Resolution (U)", Float) = 64
@@ -995,10 +1006,14 @@ Shader "yum_food/tooner"
 
     _Gimmick_Fog_00_Enable_Static("Enable fog 00", Float) = 0
     _Gimmick_Fog_00_Enable_Area_Lighting("Enable fog 00 area lighting", Float) = 1
+    // 0 = cylinder, 1 = plane
+    _Gimmick_Fog_00_Boundary_Type("Boundary type", Float) = 0
+    _Gimmick_Fog_00_Radius("Radius", Float) = 25
+    _Gimmick_Fog_00_Plane_Normal("Plane normal", Vector) = (0, 1, 0, 0)
+    _Gimmick_Fog_00_Plane_Center("Plane center", Vector) = (0, 0, 0, 0)
     _Gimmick_Fog_00_Noise("3D noise", 3D) = "white" {}
     _Gimmick_Fog_00_Noise_2D("2D noise", 2D) = "black" {}
     _Gimmick_Fog_00_Max_Ray("Max ray", Float) = 25
-    _Gimmick_Fog_00_Radius("Radius", Float) = 25
     _Gimmick_Fog_00_Step_Size_Factor("Step size (meters)", Float) = 1
     _Gimmick_Fog_00_Noise_Scale("Noise scale", Vector) = (1, 1, 1, 1)
     _Gimmick_Fog_00_Motion_Vector("Motion vector", Vector) = (0, 0, 0, 0)
@@ -1010,7 +1025,7 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Lod_Half_Life("fog", Float) = 5
     _Gimmick_Fog_00_Max_Brightness("max brightness", Range(0, 1)) = 1
     _Gimmick_Fog_00_LTCGI_Brightness("LTCGI brightness", Float) = 1
-
+    _Gimmick_Fog_00_Overlay_Mode("Overlay mode", Float) = 0
     _Gimmick_Fog_00_Emitter_Texture("Emitter texture", 2D) = "black" {}
     _Gimmick_Fog_00_Emitter_Variable_Density("Enable emitter variable density", Float) = 0
     _Gimmick_Fog_00_Emitter_Brightness_Diffuse("fog", Float) = 1

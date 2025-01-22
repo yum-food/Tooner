@@ -241,6 +241,7 @@
 #pragma shader_feature_local _ _GIMMICK_EYES_02
 #pragma shader_feature_local _ _GIMMICK_DS2
 #pragma shader_feature_local _ _GIMMICK_HALO_00
+#pragma shader_feature_local _ _GIMMICK_EPILEPSY_MODE
 #pragma shader_feature_local _ _PIXELLATE
 #pragma shader_feature_local _ _TROCHOID
 #pragma shader_feature_local _ _FACE_ME_WORLD_Y

@@ -82,7 +82,9 @@ float map(float3 p, out float3 normal) {
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
   // Try to create a smooth transition without doing any length() or other
   // transcendental ops.
-  float radius2 = clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p.xz, p.xz), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP;
+  float radius2 = (_Gimmick_Fog_00_Boundary_Type == 0) ?
+    clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p.xz, p.xz), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP :
+    0;
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
   normal = normalize(perlin_noise_3d_tex(pp+t) * 2 - 1);
@@ -225,20 +227,21 @@ float fog00_map_dr(
 }
 #endif
 
-Fog00PBR getFog00(v2f i, ToonerData tdata) {
-  float3 cam_pos = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos, 1.0)).xyz;
-  float3 obj_pos = i.objPos;
+Fog00PBR __getFog00(v2f i, ToonerData tdata,
+    float3 obj_pos_depth_hit,
+    float2 screen_uv);
 
+Fog00PBR getFog00(v2f i, ToonerData tdata)
+{
   float3 obj_pos_depth_hit;
   float2 screen_uv;
-  float eye_depth_world;
   {
     float3 full_vec_eye_to_geometry = i.worldPos - _WorldSpaceCameraPos;
     float3 world_dir = normalize(i.worldPos - _WorldSpaceCameraPos);
     float perspective_divide = 1.0 / i.pos.w;
     float perspective_factor = length(full_vec_eye_to_geometry * perspective_divide);
     screen_uv = i.screenPos.xy * perspective_divide;
-    eye_depth_world =
+    float eye_depth_world =
       GetLinearZFromZDepth_WorksWithMirrors(
           SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, tdata.screen_uv),
           screen_uv) * perspective_factor;
@@ -246,26 +249,63 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     obj_pos_depth_hit = mul(unity_WorldToObject, float4(world_pos_depth_hit, 1.0)).xyz;
   }
 
+  return __getFog00(i, tdata, obj_pos_depth_hit, screen_uv);
+}
+
+Fog00PBR __getFog00(v2f i, ToonerData tdata,
+    float3 obj_pos_depth_hit,
+    float2 screen_uv)
+{
+  float3 cam_pos = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos, 1.0)).xyz;
+  float3 obj_pos = i.objPos;
+
   const float3 rd = normalize(obj_pos - cam_pos);
   float3 ro = cam_pos;
 
-  bool no_intersection = false;
-  float distance_to_cylinder = 1E6;
-  {
-    float a = dot(rd.xz, rd.xz);
-    float b = 2 * dot(rd.xz, ro.xz);
-    float c = dot(ro.xz, ro.xz) - _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius;
-    float t0, t1;
-    if (solveQuadratic(a, b, c, t0, t1)) {
-      no_intersection = (t0 < 0) * (t1 < 0);
-      const bool inside_cylinder = (t0 < 0) * (t1 > 0);
-      if (!inside_cylinder) {
-        distance_to_cylinder = no_intersection ? distance_to_cylinder : min(max(t0, 0), max(t1, 0));
-        ro += distance_to_cylinder * rd;
+  if (_Gimmick_Fog_00_Boundary_Type == 0) {
+    // Raytrace distance to cylinder
+    bool no_intersection = false;
+    float distance_to_cylinder = 1E6;
+    {
+      float a = dot(rd.xz, rd.xz);
+      float b = 2 * dot(rd.xz, ro.xz);
+      float c = dot(ro.xz, ro.xz) - _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius;
+      float t0, t1;
+      if (solveQuadratic(a, b, c, t0, t1)) {
+        no_intersection = (t0 < 0) * (t1 < 0);
+        const bool inside_cylinder = (t0 < 0) * (t1 > 0);
+        if (!inside_cylinder) {
+          distance_to_cylinder = no_intersection ? distance_to_cylinder : min(max(t0, 0), max(t1, 0));
+          ro += distance_to_cylinder * rd;
+        }
       }
     }
+    clip(no_intersection ? -1 : 1);
+  } else if (_Gimmick_Fog_00_Boundary_Type == 1) {
+    // Raytrace distance to plane
+    bool no_intersection = false;
+    float distance_to_plane = 1E6;
+    {
+      // Define the plane by normal and point
+      float3 n = normalize(mul(unity_WorldToObject, float4(_Gimmick_Fog_00_Plane_Normal, 0.0)).xyz);
+      float3 p0 = _Gimmick_Fog_00_Plane_Center;
+
+      float denom = dot(n, rd);
+      if (abs(denom) > 1e-6) {
+        // The ray is not parallel to the plane
+        float t = dot(n, (p0 - ro)) / denom;
+        if (t >= 0) {
+          distance_to_plane = t;
+          ro += distance_to_plane * rd;
+        } else {
+          no_intersection = true; // Intersection is behind the ray origin
+        }
+      } else {
+        no_intersection = true; // Ray is parallel to the plane
+      }
+    }
+    clip(no_intersection ? -1 : 1);
   }
-  clip(no_intersection ? -1 : 1);
 
   float density_ss_term = 1 / _Gimmick_Fog_00_Density;
   //density_ss_term = dclamp(density_ss_term, 0.33, 3.00, 5);
@@ -279,8 +319,6 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
   const float raw_noise_sample = _Gimmick_Fog_00_Noise_2D.SampleLevel(point_repeat_s, screen_uv * _ScreenParams.xy * _Gimmick_Fog_00_Noise_2D_TexelSize.xy, 0).x;
   const float dither_seed = frac(raw_noise_sample + frame * PHI);
 #elif 1
-  // float ign_anim(float2 screen_px, float frame, float speed) {
-  //const float dither_seed = ign_anim(screen_uv_round, frame, /*speed=*/0.001);
   const float dither_seed = frac(ign_anim(screen_uv_round, frame, /*speed=*/0.000) + frame * 1.618033989);
 #else
   const float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
@@ -384,8 +422,10 @@ Fog00PBR getFog00(v2f i, ToonerData tdata) {
     // For performance, stop if we...
     //  1. accumulate enough alpha
     //  2. go outside of the sphere
-    if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff ||
-        dot(p.xz, p.xz) > _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius) {
+    if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff) {
+      break;
+    }
+    if (_Gimmick_Fog_00_Boundary_Type == 0 && dot(p.xz, p.xz) > _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius) {
       break;
     }
 #endif
@@ -472,7 +512,6 @@ Fog01PBR getFog01(v2f i, ToonerData tdata) {
     float activation_radius = _Gimmick_Fog_01_Activation_Radius;
     float cur_radius = length(_WorldSpaceCameraPos - activation_center);
     [branch]
-    //if (cur_radius > activation_radius) {
     if (getCenterCamPos().y > activation_center.y + activation_radius) {
       return (Fog01PBR)0;
     }

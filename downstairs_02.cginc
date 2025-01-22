@@ -679,8 +679,7 @@ float ds2_11_height(float2 p)
   float alpha_rcp_i = 1;
   for (uint i = 0; i < octaves; i++) {
 #if defined(_GIMMICK_DS2_11_TEXTURE_NOISE)
-    // Combine components to increase precision.
-    float noise = _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, pp * alpha_rcp_i, 0);
+    float noise = _Gimmick_DS2_11_FBM.SampleLevel(linear_repeat_s, pp * alpha_rcp_i, 0);
 #else
     float noise = perlin_noise(pp * alpha_rcp_i);
 #endif
@@ -703,24 +702,147 @@ float ds2_11_height(float2 p)
 
 float3 ds2_11_calc_normal(float3 p)
 {
-  float epsilon = 6E-4;
+#if 0
+  // 4-point anti aliasing in an X shape with full central differences. 16 taps.
+  float epsilon = 1E-3;
+  float3 result = 0;
+  for (uint i = 0; i < 4; i++) {
+    float2 pp = p.xz + epsilon * (float2(i % 2, (i/2) % 2) - .5) * 2;
+    result += float3(
+      ds2_11_height(pp - float2(epsilon, 0)) - ds2_11_height(pp + float2(epsilon, 0)),
+      2 * epsilon,
+      ds2_11_height(pp - float2(0, epsilon)) - ds2_11_height(pp + float2(0, epsilon))
+    );
+  }
+  return normalize(result);
+#elif 0
+  // Full central differences. 4 taps.
+  float epsilon = 1E-3;
   return normalize(float3(
     ds2_11_height(p.xz - float2(epsilon, 0)) - ds2_11_height(p.xz + float2(epsilon, 0)),
     2 * epsilon,
     ds2_11_height(p.xz - float2(0, epsilon)) - ds2_11_height(p.xz + float2(0, epsilon))
   ));
+#elif 0
+  // Abridged central differences along stochastic diagonal. 6 taps.
+  float epsilon = 1E-3;
+  float noise = _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, p.xz * 1000, 0) * TAU;
+  float2 axis = float2(cos(noise), sin(noise));
+  float2 p0 = p.xz + (epsilon * axis);
+  float2 p1 = p.xz - (epsilon * axis);
+  float c0 = ds2_11_height(p0);
+  float c1 = ds2_11_height(p1);
+  float3 n0 = float3(
+    ds2_11_height(p0 - float2(epsilon, 0)) - c0,
+    epsilon,
+    ds2_11_height(p0 - float2(0, epsilon)) - c0
+  );
+  float3 n1 = float3(
+    ds2_11_height(p1 - float2(epsilon, 0)) - c1,
+    epsilon,
+    ds2_11_height(p1 - float2(0, epsilon)) - c1
+  );
+  return normalize(n0 + n1);
+#elif 1
+  // Full central differences rotated a random amount about the original point. 4 taps.
+  float epsilon = 8E-4;
+  float3 pp = p * 64;
+  float noise = _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, pp.xz, 0) * TAU;
+  float2 axis = float2(cos(noise), sin(noise));
+  float2 p0 = p.xz + (epsilon * axis) * 1.20710678;
+  float3 n0 = float3(
+    ds2_11_height(p0 - float2(epsilon, 0)) - ds2_11_height(p0 + float2(epsilon, 0)),
+    2 * epsilon,
+    ds2_11_height(p0 - float2(0, epsilon)) - ds2_11_height(p0 + float2(0, epsilon))
+  );
+  return normalize(n0);
+#elif 1
+  // Abridged central differences along diagonal oriented tangent to circle centered at the origin. 6 taps.
+  float epsilon = 1E-3;
+  float2 n2 = normalize(p.xz);
+  float2 ortho = float2(-n2.y, n2.x);
+  float2 p0 = p.xz + (epsilon * .7071 * ortho);
+  float2 p1 = p.xz - (epsilon * .7071 * ortho);
+  float c0 = ds2_11_height(p0);
+  float c1 = ds2_11_height(p1);
+  float3 n0 = float3(
+    ds2_11_height(p0 - float2(epsilon, 0)) - c0,
+    epsilon,
+    ds2_11_height(p0 - float2(0, epsilon)) - c0
+  );
+  float3 n1 = float3(
+    ds2_11_height(p1 - float2(epsilon, 0)) - c1,
+    epsilon,
+    ds2_11_height(p1 - float2(0, epsilon)) - c1
+  );
+  return normalize(n0 + n1);
+#elif 0
+  // Abridged central differences along diagonal oriented normal to circle centered at the origin. 6 taps.
+  float epsilon = 1E-3;
+  float2 n2 = normalize(p.xz);
+  float2 p0 = p.xz + (epsilon * .5 * n2);
+  float2 p1 = p.xz - (epsilon * .5 * n2);
+  float c0 = ds2_11_height(p0);
+  float c1 = ds2_11_height(p1);
+  float3 n0 = normalize(float3(
+    c0 - ds2_11_height(p0 - float2(epsilon, 0)),
+    epsilon,
+    c0 - ds2_11_height(p0 - float2(0, epsilon))
+  ));
+  float3 n1 = normalize(float3(
+    c1 - ds2_11_height(p1 - float2(epsilon, 0)),
+    epsilon,
+    c1 - ds2_11_height(p1 - float2(0, epsilon))
+  ));
+  return normalize(n0 + n1);
+#else
+  // Abridged central differences. 3 taps.
+  float epsilon = 1E-3;
+  float center = ds2_11_height(p.xz);
+  return normalize(float3(
+    ds2_11_height(p.xz - float2(epsilon, 0)) - center,
+    2 * epsilon,
+    ds2_11_height(p.xz - float2(0, epsilon)) - center
+  ));
+#endif
 }
 
 Gimmick_DS2_Output Gimmick_DS2_11(inout v2f i, ToonerData tdata)
 {
   float3 camera_position = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos, 1));
   float3 rd = normalize(i.objPos - camera_position);
-  float3 ro = camera_position + rd * _Gimmick_DS2_11_March_Initial_Offset * _Gimmick_DS2_11_Simulation_Scale;
+  float3 ro = camera_position;
 
-// 180 degrees is pi radians
-// (d/180)*pi
+  // Raytrace to intersection with sphere of radius _Gimmick_DS2_11_March_Initial_Offset centered at the object space origin.
+  {
+    float r = _Gimmick_DS2_11_March_Initial_Offset * _Gimmick_DS2_11_Simulation_Scale;
+    float3 L = ro; // Sphere center is at the origin
+    float b = 2.0 * dot(rd, L);
+    float c = dot(L, L) - r * r;
+    float discriminant = b * b - 4.0 * c;
+
+    // If discriminant is negative, the ray does not intersect the sphere
+    if (discriminant > 0.0)
+    {
+      // Compute the two points of intersection
+      float sqrt_discriminant = sqrt(discriminant);
+      float t0 = (-b - sqrt_discriminant) * 0.5;
+      float t1 = (-b + sqrt_discriminant) * 0.5;
+
+      // Choose the nearest positive t
+      float t_sphere = (t0 > 0.0) ? t0 : ((t1 > 0.0) ? t1 : -1.0);
+
+      // If both t0 and t1 are negative, the sphere is behind the ray origin
+      if (t_sphere > 0.0)
+      {
+          ro += rd * t_sphere;
+      }
+    }
+  }
+
+  // 180 degrees is pi radians
+  // (d/180)*pi
   [branch]
-  //if (dot(rd, UnityObjectToWorldNormal(float3(0, 1, 0))) > cos((60/180)*PI)) {
   if (dot(rd, UnityObjectToWorldNormal(float3(0, 1, 0))) > _Gimmick_DS2_11_Early_Exit_Cutoff_Cos_Theta) {
     return (Gimmick_DS2_Output)0;
   }
@@ -734,8 +856,14 @@ Gimmick_DS2_Output Gimmick_DS2_11(inout v2f i, ToonerData tdata)
     }
   }
 
+  float perspective_divide = 1.0 / i.pos.w;
+  float2 screen_uv = i.screenPos.xy * perspective_divide * _ScreenParams.xy * _Gimmick_DS2_Noise_TexelSize.xy;
+  const float noise = _Gimmick_DS2_Noise.SampleLevel(point_repeat_s, screen_uv, 0);
+  const float frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
+  const float tnoise = frac(noise + frame * PHI);
+
   float t = 0.0;
-  float dt0 = 0.01 * _Gimmick_DS2_11_Simulation_Scale;
+  float dt0 = _Gimmick_DS2_11_March_Initial_Step_Size * _Gimmick_DS2_11_Simulation_Scale;
   float dt = dt0;
   // last height, last y
   float lh = 0;
@@ -756,17 +884,34 @@ Gimmick_DS2_Output Gimmick_DS2_11(inout v2f i, ToonerData tdata)
     lh = h;
     ly = p.y;
   }
+  [branch]
   if (p.y < h) {
     hit = true;
     t = t - dt + dt * (lh - ly) / (p.y - ly - h + lh);
+
+    // Backtrack to find a closer intersection point using binary search
+    float t0 = t;
+    //p = ro + rd * t;
+    //float t1 = t + dt * sign(h - ds2_11_height(p.xz));
+    float t1 = t + dt * .5;
+    for (uint j = 0; j < _Gimmick_DS2_11_March_Backtrack_Steps; j++) {
+      float tm = (t0 + t1) * 0.5;
+      float3 pm = ro + rd * tm;
+      float hm = ds2_11_height(pm.xz);
+      t1 = (pm.y < hm) ? tm : t1;
+      t0 = (pm.y < hm) ? t0 : tm;
+    }
+    t = t1;  // Refined intersection time
+    p = ro + rd * t;
   }
 
   float3 final_pos = ro + t * rd + (1 - hit) * rd * 1E2;
+  float3 normal = UnityObjectToWorldNormal(ds2_11_calc_normal(final_pos));
   float3 final_pos_world = mul(unity_ObjectToWorld, float4(final_pos, 1));
   float4 final_color = 1;
 
   float snowline_noise = 0;
-  float alpha = 0.6;
+  float alpha = 0.3;
   float alpha_rcp = 1 / alpha;
   for (uint ii = 0; ii < _Gimmick_DS2_11_Snowline_Octaves; ii++) {
     snowline_noise += _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, final_pos.xz * _Gimmick_DS2_11_Snowline_Noise_Scale * pow(alpha_rcp, ii), 0) * pow(alpha, ii);
@@ -806,7 +951,6 @@ Gimmick_DS2_Output Gimmick_DS2_11(inout v2f i, ToonerData tdata)
         _Gimmick_DS2_11_Fog_Color) * hit;
   }
 
-  float3 normal = UnityObjectToWorldNormal(ds2_11_calc_normal(final_pos));
   Gimmick_DS2_Output o;
   o.albedo = final_color;
   o.emission = 0;

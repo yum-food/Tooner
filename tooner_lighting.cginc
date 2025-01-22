@@ -959,6 +959,28 @@ float4 pixellate_color(int2 px_res, float2 uv, float4 c)
 }
 #endif
 
+#if defined(_GIMMICK_EPILEPSY_MODE)
+float4 map_color_epilepsy(float4 color) {
+  [branch]
+  if (_Gimmick_Epilepsy_Mode_Enable_Dynamic) {
+    color.rgb = saturate(color.rgb);
+
+    color.rgb = LRGBtoOKLCH(color.rgb);
+    color.rgb[0] = dmin(color.rgb[0], _Gimmick_Epilepsy_Mode_Luminance_Cutoff, _Gimmick_Epilepsy_Mode_Rolloff_Power);
+    color.rgb = OKLCHtoLRGB(color.rgb);
+
+    color.rgb = RGBtoHSV(color.rgb);
+    color.rgb[1] = dmin(color.rgb[1], _Gimmick_Epilepsy_Mode_Saturation_Cutoff, _Gimmick_Epilepsy_Mode_Rolloff_Power);
+    color.rgb = HSVtoRGB(color.rgb);
+  }
+
+  return color;
+}
+#define FILTER_COLOR(color) map_color_epilepsy(color)
+#else
+#define FILTER_COLOR(color) color
+#endif
+
 float4 effect(inout v2f i, out float depth)
 {
   ToonerData tdata;
@@ -2130,38 +2152,6 @@ float4 effect(inout v2f i, out float depth)
   float ao = 1;
 #endif
 
-  float3 diffuse_contrib = 0;
-#if defined(_GIMMICK_FOG_00)
-  {
-    Fog00PBR pbr = getFog00(i, tdata);
-    albedo = pbr.albedo;
-    depth = pbr.depth;
-#if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)
-    albedo.rgb *= albedo.a;
-#endif
-    return albedo;
-  }
-#endif
-#if defined(_GIMMICK_FOG_01)
-  if (!round(_Gimmick_Fog_01_Overlay_Mode)) {
-    Fog01PBR fog_01_pbr = getFog01(i, tdata);
-    albedo = fog_01_pbr.albedo;
-    depth = fog_01_pbr.depth;
-#if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)
-    albedo.rgb *= albedo.a;
-#endif
-    return albedo;
-  }
-#endif
-#if defined(_GIMMICK_AURORA)
-  {
-    AuroraPBR pbr = getAurora(i);
-    albedo = pbr.albedo;
-    depth = pbr.depth;
-    diffuse_contrib += pbr.diffuse;
-  }
-#endif
-
 #if defined(_GIMMICK_FLAT_COLOR)
   if (round(_Gimmick_Flat_Color_Enable_Dynamic)) {
     albedo = _Gimmick_Flat_Color_Color;
@@ -2223,9 +2213,47 @@ float4 effect(inout v2f i, out float depth)
   }
 #endif
 
+  float3 diffuse_contrib = 0;
+#if defined(_GIMMICK_FOG_01)
+  if (!round(_Gimmick_Fog_01_Overlay_Mode)) {
+    Fog01PBR fog_01_pbr = getFog01(i, tdata);
+    albedo = fog_01_pbr.albedo;
+    depth = fog_01_pbr.depth;
+#if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)
+    albedo.rgb *= albedo.a;
+#endif
+    return albedo;
+  }
+#endif
+#if defined(_GIMMICK_AURORA)
+  {
+    AuroraPBR pbr = getAurora(i);
+    albedo = pbr.albedo;
+    depth = pbr.depth;
+    diffuse_contrib += pbr.diffuse;
+  }
+#endif
+
   float4 lit = getLitColor(vertex_light_color, albedo, i.worldPos, normal,
       metallic, 1.0 - roughness, i.uv0, ao, /*enable_direct=*/true,
       diffuse_contrib, i, tdata);
+
+#if defined(_GIMMICK_FOG_00)
+  {
+    if (round(_Gimmick_Fog_00_Overlay_Mode)) {
+      Fog00PBR pbr = __getFog00(i, tdata, mul(unity_WorldToObject, float4(i.worldPos, 1.0)).xyz, tdata.screen_uv);
+      lit = pbr.albedo + lit * (1 - pbr.albedo.a);
+    } else {
+      Fog00PBR pbr = getFog00(i, tdata);
+      albedo = pbr.albedo;
+      depth = pbr.depth;
+#if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)
+      albedo.rgb *= albedo.a;
+#endif
+      return albedo;
+    }
+  }
+#endif
 
 #if defined(_GIMMICK_FLAT_COLOR)
   if (round(_Gimmick_Flat_Color_Enable_Dynamic)) {
@@ -2353,7 +2381,7 @@ fixed4 frag(v2f i
 #endif
 */
 
-  return effect(i, depth);
+  return FILTER_COLOR(effect(i, depth));
 }
 
 #endif  // TOONER_LIGHTING

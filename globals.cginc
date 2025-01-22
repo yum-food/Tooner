@@ -96,6 +96,7 @@ float _Clearcoat_Mask_Invert;
 texture2D _Clearcoat_Mask2;
 float _Clearcoat_Mask2_Invert;
 #endif
+float _Clearcoat_Use_Texture_Normals;
 #endif
 
 #if defined(SSR_ENABLED)
@@ -775,6 +776,7 @@ float3 _Gimmick_Eyes02_Emission;
 float _Gimmick_DS2_Enable_Static;
 texture2D _Gimmick_DS2_Mask;
 texture2D _Gimmick_DS2_Noise;
+float4 _Gimmick_DS2_Noise_TexelSize;
 float _Gimmick_DS2_Choice;
 // 00
 float _Gimmick_DS2_Albedo_Factor;
@@ -818,6 +820,7 @@ float _Gimmick_DS2_11_Snowline_Octaves;
 float _Gimmick_DS2_11_Snowline_Width;
 float _Gimmick_DS2_11_Snowline_Noise_Scale;
 float3 _Gimmick_DS2_11_Snow_Color;
+texture2D _Gimmick_DS2_11_FBM;
 float _Gimmick_DS2_11_Rockline;
 float _Gimmick_DS2_11_Rockline_Octaves;
 float _Gimmick_DS2_11_Rockline_Width;
@@ -827,8 +830,11 @@ float3 _Gimmick_DS2_11_Grass_Color;
 float _Gimmick_DS2_11_Alpha;
 float _Gimmick_DS2_11_Octaves;
 float _Gimmick_DS2_11_March_Initial_Offset;
+float _Gimmick_DS2_11_March_Initial_Step_Size;
 float _Gimmick_DS2_11_March_Steps;
+float _Gimmick_DS2_11_March_Backtrack_Steps;
 float _Gimmick_DS2_11_Simulation_Scale;
+float _Gimmick_DS2_11_Coord_Scale;
 float _Gimmick_DS2_11_Height_Scale;
 float3 _Gimmick_DS2_11_XZ_Offset;
 float _Gimmick_DS2_11_Distance_Culling_Enable;
@@ -947,6 +953,9 @@ float _Gimmick_AL_Chroma_00_Hue_Shift_Theta;
 float _Gimmick_Fog_00_Max_Ray;
 float _Gimmick_Fog_00_Enable_Area_Lighting;
 float _Gimmick_Fog_00_Radius;
+float _Gimmick_Fog_00_Boundary_Type;
+float3 _Gimmick_Fog_00_Plane_Normal;
+float3 _Gimmick_Fog_00_Plane_Center;
 float _Gimmick_Fog_00_Step_Size_Factor;
 float3 _Gimmick_Fog_00_Noise_Scale;
 float3 _Gimmick_Fog_00_Motion_Vector;
@@ -958,6 +967,7 @@ float _Gimmick_Fog_00_Ray_Origin_Randomization;
 float _Gimmick_Fog_00_Lod_Half_Life;
 float _Gimmick_Fog_00_Max_Brightness;
 float _Gimmick_Fog_00_LTCGI_Brightness;
+float _Gimmick_Fog_00_Overlay_Mode;
 texture3D _Gimmick_Fog_00_Noise;
 #if defined(_GIMMICK_FOG_00_NOISE_2D)
 texture2D _Gimmick_Fog_00_Noise_2D;
@@ -1042,6 +1052,13 @@ float _Gimmick_Box_Discard_Invert;
 
 #if defined(_GIMMICK_FOG_00_RAY_MARCH_0)
 float _Gimmick_Fog_00_Ray_March_0_Seed;
+#endif
+
+#if defined(_GIMMICK_EPILEPSY_MODE)
+float _Gimmick_Epilepsy_Mode_Enable_Dynamic;
+float _Gimmick_Epilepsy_Mode_Luminance_Cutoff;
+float _Gimmick_Epilepsy_Mode_Saturation_Cutoff;
+float _Gimmick_Epilepsy_Mode_Rolloff_Power;
 #endif
 
 #if defined(_RENDERING_CUTOUT_NOISE_MASK)

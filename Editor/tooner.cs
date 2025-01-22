@@ -313,6 +313,13 @@ public class ToonerGUI : ShaderGUI {
           bc.floatValue = enabled ? 1.0f : 0.0f;
           EditorGUI.indentLevel -= 1;
         }
+
+        bc = FindProperty("_Clearcoat_Use_Texture_Normals");
+        enabled = bc.floatValue > 1E-6;
+        EditorGUI.BeginChangeCheck();
+        enabled = Toggle("Use texture normals", enabled);
+        EditorGUI.EndChangeCheck();
+        bc.floatValue = enabled ? 1.0f : 0.0f;
     }
     EditorGUI.indentLevel -= 1;
     show_ui.RemoveAt(show_ui.Count - 1);
@@ -2012,6 +2019,9 @@ public class ToonerGUI : ShaderGUI {
         }
       }
 
+      bc = FindProperty("_Gimmick_DS2_11_FBM");
+      TexturePropertySingleLine(MakeLabel(bc, "FBM"), bc);
+
       bc = FindProperty("_Gimmick_DS2_11_Snow_Color");
       ColorProperty(bc, "Snow color");
       bc = FindProperty("_Gimmick_DS2_11_Snowline");
@@ -2045,10 +2055,16 @@ public class ToonerGUI : ShaderGUI {
       FloatProperty(bc, "Octaves");
       bc = FindProperty("_Gimmick_DS2_11_March_Initial_Offset");
       FloatProperty(bc, "March initial offset");
+      bc = FindProperty("_Gimmick_DS2_11_March_Initial_Step_Size");
+      FloatProperty(bc, "March initial step size");
       bc = FindProperty("_Gimmick_DS2_11_March_Steps");
       FloatProperty(bc, "March steps");
+      bc = FindProperty("_Gimmick_DS2_11_March_Backtrack_Steps");
+      FloatProperty(bc, "March backtrack steps");
       bc = FindProperty("_Gimmick_DS2_11_Simulation_Scale");
       FloatProperty(bc, "Simulation scale");
+      bc = FindProperty("_Gimmick_DS2_11_Coord_Scale");
+      FloatProperty(bc, "Coord scale");
       bc = FindProperty("_Gimmick_DS2_11_Height_Scale");
       FloatProperty(bc, "Height scale");
       bc = FindProperty("_Gimmick_DS2_11_Early_Exit_Cutoff_Cos_Theta");
@@ -2535,6 +2551,11 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
 	}
 
+  enum GimmickFog00BoundaryType {
+    Cylinder = 0,
+    Plane = 1,
+  }
+
   void DoGimmickFog0() {
     MaterialProperty bc;
 
@@ -2554,8 +2575,25 @@ public class ToonerGUI : ShaderGUI {
 
     bc = FindProperty("_Gimmick_Fog_00_Density");
     RangeProperty(bc, "Density");
-    bc = FindProperty("_Gimmick_Fog_00_Radius");
-    FloatProperty(bc, "Radius");
+
+    bc = FindProperty("_Gimmick_Fog_00_Boundary_Type");
+    EditorGUI.BeginChangeCheck();
+    GimmickFog00BoundaryType boundary_type = (GimmickFog00BoundaryType) Math.Round(bc.floatValue);
+    boundary_type = (GimmickFog00BoundaryType) EnumPopup(
+        MakeLabel("Boundary type"), boundary_type);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = (int) boundary_type;
+
+    if (boundary_type == GimmickFog00BoundaryType.Cylinder) {
+      bc = FindProperty("_Gimmick_Fog_00_Radius");
+      FloatProperty(bc, "Radius");
+    } else if (boundary_type == GimmickFog00BoundaryType.Plane) {
+      bc = FindProperty("_Gimmick_Fog_00_Plane_Normal");
+      VectorProperty(bc, "Plane normal");
+      bc = FindProperty("_Gimmick_Fog_00_Plane_Center");
+      VectorProperty(bc, "Plane center");
+    }
+
     bc = FindProperty("_Gimmick_Fog_00_Step_Size_Factor");
     FloatProperty(bc, "Step size multiplier");
     bc = FindProperty("_Gimmick_Fog_00_Max_Ray");
@@ -2669,6 +2707,15 @@ public class ToonerGUI : ShaderGUI {
 
       EditorGUI.indentLevel -= 1;
     }
+
+    // Composite fog on top of some raymarched effect. Does not rely on depth
+    // buffer; uses whatever the raymarch generated.
+    bc = FindProperty("_Gimmick_Fog_00_Overlay_Mode");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Overlay mode", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
 
     EditorGUI.indentLevel -= 1;
   }
@@ -2882,6 +2929,44 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  // Dim and desaturate colors. This is in no way comprehensive. Proceed with
+  // utmost caution whenever creating effects for users with photosensitive
+  // epilepsy.
+  void DoGimmickEpilepsyMode() {
+    MaterialProperty bc;
+
+    bc = FindProperty("_Gimmick_Epilepsy_Mode_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Epilepsy protection mode", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_EPILEPSY_MODE", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Epilepsy_Mode_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Enable (runtime switch)", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
+    bc = FindProperty("_Gimmick_Epilepsy_Mode_Luminance_Cutoff");
+    RangeProperty(bc, "Luminance cutoff");
+    bc = FindProperty("_Gimmick_Epilepsy_Mode_Saturation_Cutoff");
+    RangeProperty(bc, "Saturation cutoff");
+
+    bc = FindProperty("_Gimmick_Epilepsy_Mode_Rolloff_Power");
+    FloatProperty(bc, "Rolloff power");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmicks() {
     show_ui.Add(AddCollapsibleMenu("Gimmicks", "_Gimmicks"));
     EditorGUI.indentLevel += 1;
@@ -2912,6 +2997,7 @@ public class ToonerGUI : ShaderGUI {
     DoClones();
     DoExplosion();
     DoGeoScroll();
+    DoGimmickEpilepsyMode();
 
     EditorGUI.indentLevel -= 1;
     show_ui.RemoveAt(show_ui.Count - 1);

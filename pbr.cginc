@@ -423,6 +423,7 @@ float4 getLitColor(
     }
     cc_mask *= cc_mask2_tmp;
 #endif
+    float3 cc_normal = _Clearcoat_Use_Texture_Normals ? normal : i.normal;
     // Diffuse specular
     const float cc_roughness = max(1E-4, _Clearcoat_Roughness);
     {
@@ -431,12 +432,12 @@ float4 getLitColor(
       // https://google.github.io/filament/Filament.html
       metallic = 0;
       smoothness = 1.0 - _Clearcoat_Roughness;
-      indirect_light.specular = getIndirectSpecular(i, view_dir, normal, smoothness,
+      indirect_light.specular = getIndirectSpecular(i, view_dir, cc_normal, smoothness,
           metallic, worldPos, uv);
 
-      const float3 l = reflect(-view_dir, normal);
+      const float3 l = reflect(-view_dir, cc_normal);
       const float3 h = normalize(l + view_dir);
-      const float NoH = dot(normal, h);
+      const float NoH = dot(cc_normal, h);
       const float LoH = dot(l, h);
 
       float Fc;
@@ -453,7 +454,7 @@ float4 getLitColor(
     {
       const float3 l = direct_light.dir;
       const float3 h = normalize(l + view_dir);
-      const float NoH = dot(normal, h);
+      const float NoH = dot(cc_normal, h);
       const float LoH = dot(direct_light.dir, h);
 
       float Fc;
