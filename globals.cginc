@@ -692,6 +692,7 @@ texture2D _UVScroll_Alpha;
 
 #if defined(_LTCGI)
 float _LTCGI_Enabled_Dynamic;
+float _LTCGI_Strength;
 float4 _LTCGI_SpecularColor;
 float4 _LTCGI_DiffuseColor;
 #endif

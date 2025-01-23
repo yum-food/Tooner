@@ -732,6 +732,7 @@ Shader "yum_food/tooner"
     _UVScroll_Alpha("UV scroll alpha", 2D) = "white" {}
 
     _LTCGI_Enabled("LTCGI enabled", Float) = 0.0
+    _LTCGI_Strength("LTCGI strength", Float) = 5.0
     // This is set to 1 for backwards compatibility. Don't want to have to go
     // click on like 30 materials....
     _LTCGI_Enabled_Dynamic("LTCGI enabled (runtime switch)", Float) = 1.0

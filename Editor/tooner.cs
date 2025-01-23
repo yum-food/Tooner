@@ -3479,6 +3479,10 @@ public class ToonerGUI : ShaderGUI {
 
       bc = FindProperty("_LTCGI_DiffuseColor");
       ColorProperty(bc, "Diffuse color (RGB)");
+
+      bc = FindProperty("_LTCGI_Strength");
+      FloatProperty(bc, "LTCGI strength");
+
       EditorGUI.indentLevel -= 1;
     }
 

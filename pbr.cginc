@@ -257,8 +257,8 @@ float4 getLitColor(
         view_dir,
         GetRoughness(smoothness),
         i.uv2);
-    indirect_light.diffuse += acc.diffuse;
-    indirect_light.specular += acc.specular;
+    indirect_light.diffuse += acc.diffuse * _LTCGI_Strength;
+    indirect_light.specular += acc.specular * _LTCGI_Strength;
   }
 #endif
 #endif
