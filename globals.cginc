@@ -836,10 +836,14 @@ float _Gimmick_DS2_11_March_Backtrack_Steps;
 float _Gimmick_DS2_11_Simulation_Scale;
 float _Gimmick_DS2_11_Coord_Scale;
 float _Gimmick_DS2_11_Height_Scale;
-float3 _Gimmick_DS2_11_XZ_Offset;
+float _Gimmick_DS2_11_Height_Power;
+float3 _Gimmick_DS2_11_Offset;
 float _Gimmick_DS2_11_Distance_Culling_Enable;
 float _Gimmick_DS2_11_Activation_Y;
 float _Gimmick_DS2_11_Early_Exit_Cutoff_Cos_Theta;
+float _Gimmick_DS2_11_Normal_Epsilon;
+float _Gimmick_DS2_11_Valley_Power;
+float _Gimmick_DS2_11_Valley_Depth;
 #endif
 
 #if defined(_PIXELLATE)

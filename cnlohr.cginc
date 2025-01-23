@@ -43,7 +43,7 @@ bool isMirror() { return _VRChatMirrorMode != 0; }
 // Source:
 // https://github.com/cnlohr/shadertrixx?tab=readme-ov-file#eye-center-position
 float3 getCenterCamPos() {
-#if defined(USING_STEREO_MATRICES)
+#if defined(USING_STEREO_MATRICES) || defined(UNITY_SINGLE_PASS_STEREO)
   return (unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1]) / 2;
 #else
   return isMirror() ? _VRChatMirrorCameraPos : _WorldSpaceCameraPos.xyz;

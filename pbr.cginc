@@ -112,7 +112,7 @@ float4 getIndirectDiffuse(v2f i, float4 vertexLightColor, float3 normal) {
 }
 
 float3 getIndirectSpecular(v2f i, float3 view_dir, float3 normal,
-    float smoothness, float metallic, float3 worldPos, float2 uv) {
+    float smoothness, float metallic, float3 worldPos) {
   float3 specular = 0;
 
 #if defined(FORWARD_BASE_PASS)
@@ -235,8 +235,8 @@ float4 getLitColor(
     direct_light.color = getDirectLightColor();
 #endif
     indirect_light.diffuse = getIndirectDiffuse(i, vertexLightColor, normal) + diffuse_contrib;
-    indirect_light.specular = getIndirectSpecular(i, view_dir, normal, smoothness,
-        metallic, worldPos, uv);
+    indirect_light.specular = getIndirectSpecular(i, view_dir, normal,
+        smoothness, metallic, worldPos);
   }
 
   if (normals_mode == 0) {
@@ -423,18 +423,19 @@ float4 getLitColor(
     }
     cc_mask *= cc_mask2_tmp;
 #endif
-    float3 cc_normal = _Clearcoat_Use_Texture_Normals ? normal : i.normal;
+    const float3 cc_normal = _Clearcoat_Use_Texture_Normals ? normal : i.normal;
     // Diffuse specular
     const float cc_roughness = max(1E-4, _Clearcoat_Roughness);
+    const float3 cc_indirect_specular = getIndirectSpecular(
+        i, view_dir,
+        cc_normal,
+        /*smoothness=*/1 - cc_roughness,
+        /*metallic=*/0,
+        worldPos);
     {
       // TODO fold this into the full BRDF and apply the brightness corrections
       // described in the filament whitepaper:
       // https://google.github.io/filament/Filament.html
-      metallic = 0;
-      smoothness = 1.0 - _Clearcoat_Roughness;
-      indirect_light.specular = getIndirectSpecular(i, view_dir, cc_normal, smoothness,
-          metallic, worldPos, uv);
-
       const float3 l = reflect(-view_dir, cc_normal);
       const float3 h = normalize(l + view_dir);
       const float NoH = dot(cc_normal, h);
@@ -448,7 +449,7 @@ float4 getLitColor(
           LoH,
           h,
           Fc);
-      pbr.rgb += cc_term * indirect_light.specular * cc_mask;
+      pbr.rgb += cc_term * cc_indirect_specular * cc_mask;
     }
     // Direct
     {

@@ -659,7 +659,7 @@ float ds2_11_height(float2 p)
 {
   float sc = .4;
   float sc_rcp = 2.5;
-  float2 offset = _Gimmick_DS2_11_XZ_Offset.xz * _Gimmick_DS2_11_Simulation_Scale;
+  float2 offset = _Gimmick_DS2_11_Offset.xz * _Gimmick_DS2_11_Simulation_Scale;
 
   float2 pp = (p - offset) * sc_rcp;
   p /= _Gimmick_DS2_11_Simulation_Scale;
@@ -691,20 +691,31 @@ float ds2_11_height(float2 p)
   h /= 1 / (1 - alpha);
   h *= h;
 
-  // `scale_factor` goes from [0, 1] based on radius.
+#if 0
+  // `scale_factor` goes from [0, 1] based on radius. 0 at center, 1 at infinity.
   float2 center = p;
   float scale_factor = 1 - exp(-dot(center, center) * 16);
   h *= scale_factor;
   h = ((h - (1 - scale_factor) * sc_hsc * .15) + .015) * _Gimmick_DS2_11_Simulation_Scale;
+#else
+  float2 center = p;
+  float scale_factor = exp(-dot(center, center) * _Gimmick_DS2_11_Valley_Power);
+  h -= scale_factor * sc_hsc * _Gimmick_DS2_11_Valley_Depth * _Gimmick_DS2_11_Simulation_Scale;
+  h += sc_hsc * _Gimmick_DS2_11_Offset.y * _Gimmick_DS2_11_Simulation_Scale;
+#endif
+
+  h += 1;
+  h = pow(h, _Gimmick_DS2_11_Height_Power);
+  h -= 1;
 
   return h;
 }
 
 float3 ds2_11_calc_normal(float3 p)
 {
+  float epsilon = _Gimmick_DS2_11_Normal_Epsilon * length(_WorldSpaceCameraPos - p);
 #if 0
   // 4-point anti aliasing in an X shape with full central differences. 16 taps.
-  float epsilon = 1E-3;
   float3 result = 0;
   for (uint i = 0; i < 4; i++) {
     float2 pp = p.xz + epsilon * (float2(i % 2, (i/2) % 2) - .5) * 2;
@@ -715,9 +726,8 @@ float3 ds2_11_calc_normal(float3 p)
     );
   }
   return normalize(result);
-#elif 0
+#elif 1
   // Full central differences. 4 taps.
-  float epsilon = 1E-3;
   return normalize(float3(
     ds2_11_height(p.xz - float2(epsilon, 0)) - ds2_11_height(p.xz + float2(epsilon, 0)),
     2 * epsilon,
@@ -725,7 +735,6 @@ float3 ds2_11_calc_normal(float3 p)
   ));
 #elif 0
   // Abridged central differences along stochastic diagonal. 6 taps.
-  float epsilon = 1E-3;
   float noise = _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, p.xz * 1000, 0) * TAU;
   float2 axis = float2(cos(noise), sin(noise));
   float2 p0 = p.xz + (epsilon * axis);
@@ -743,13 +752,12 @@ float3 ds2_11_calc_normal(float3 p)
     ds2_11_height(p1 - float2(0, epsilon)) - c1
   );
   return normalize(n0 + n1);
-#elif 1
+#elif 0
   // Full central differences rotated a random amount about the original point. 4 taps.
-  float epsilon = 8E-4;
   float3 pp = p * 64;
   float noise = _Gimmick_DS2_Noise.SampleLevel(linear_repeat_s, pp.xz, 0) * TAU;
   float2 axis = float2(cos(noise), sin(noise));
-  float2 p0 = p.xz + (epsilon * axis) * 1.20710678;
+  float2 p0 = p.xz + (epsilon * axis) * 1.20710678 * 0;
   float3 n0 = float3(
     ds2_11_height(p0 - float2(epsilon, 0)) - ds2_11_height(p0 + float2(epsilon, 0)),
     2 * epsilon,
@@ -758,7 +766,6 @@ float3 ds2_11_calc_normal(float3 p)
   return normalize(n0);
 #elif 1
   // Abridged central differences along diagonal oriented tangent to circle centered at the origin. 6 taps.
-  float epsilon = 1E-3;
   float2 n2 = normalize(p.xz);
   float2 ortho = float2(-n2.y, n2.x);
   float2 p0 = p.xz + (epsilon * .7071 * ortho);
@@ -778,7 +785,6 @@ float3 ds2_11_calc_normal(float3 p)
   return normalize(n0 + n1);
 #elif 0
   // Abridged central differences along diagonal oriented normal to circle centered at the origin. 6 taps.
-  float epsilon = 1E-3;
   float2 n2 = normalize(p.xz);
   float2 p0 = p.xz + (epsilon * .5 * n2);
   float2 p1 = p.xz - (epsilon * .5 * n2);
@@ -797,7 +803,6 @@ float3 ds2_11_calc_normal(float3 p)
   return normalize(n0 + n1);
 #else
   // Abridged central differences. 3 taps.
-  float epsilon = 1E-3;
   float center = ds2_11_height(p.xz);
   return normalize(float3(
     ds2_11_height(p.xz - float2(epsilon, 0)) - center,

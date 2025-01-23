@@ -2049,8 +2049,8 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty("_Gimmick_DS2_11_Alpha");
       RangeProperty(bc, "Alpha");
 
-      bc = FindProperty("_Gimmick_DS2_11_XZ_Offset");
-      VectorProperty(bc, "XZ offset");
+      bc = FindProperty("_Gimmick_DS2_11_Offset");
+      VectorProperty(bc, "Offset");
       bc = FindProperty("_Gimmick_DS2_11_Octaves");
       FloatProperty(bc, "Octaves");
       bc = FindProperty("_Gimmick_DS2_11_March_Initial_Offset");
@@ -2067,6 +2067,12 @@ public class ToonerGUI : ShaderGUI {
       FloatProperty(bc, "Coord scale");
       bc = FindProperty("_Gimmick_DS2_11_Height_Scale");
       FloatProperty(bc, "Height scale");
+      bc = FindProperty("_Gimmick_DS2_11_Height_Power");
+      FloatProperty(bc, "Height power");
+      bc = FindProperty("_Gimmick_DS2_11_Valley_Power");
+      FloatProperty(bc, "Valley power");
+      bc = FindProperty("_Gimmick_DS2_11_Valley_Depth");
+      FloatProperty(bc, "Valley depth");
       bc = FindProperty("_Gimmick_DS2_11_Early_Exit_Cutoff_Cos_Theta");
       FloatProperty(bc, "Early exit cutoff (cos theta)");
 
@@ -2085,6 +2091,9 @@ public class ToonerGUI : ShaderGUI {
 
         EditorGUI.indentLevel -= 1;
       }
+
+      bc = FindProperty("_Gimmick_DS2_11_Normal_Epsilon");
+      FloatProperty(bc, "Normal epsilon");
 
       EditorGUI.indentLevel -= 1;
     }

@@ -669,6 +669,7 @@ void applyDecalImpl(
   float2 d0_uv =
       ((get_uv_by_channel(i, p.uv_select) - 0.5) - p.tex_st.zw) * p.tex_st.xy + 0.5;
 
+  [branch]
   if (abs(p.angle) > 1E-6) {
     float theta = p.angle * 2.0 * 3.14159265;
     float2x2 rot = float2x2(
@@ -679,6 +680,7 @@ void applyDecalImpl(
   d0_uv = (p.tiling_mode == 0) ? saturate(d0_uv) : d0_uv;
 
   float d0_uv_fwidth = -1;
+  [branch]
   if (p.domain_warping) {
     p.domain_warping_octaves = min(p.domain_warping_octaves, 10);
     for (uint ii = 0; ii < p.domain_warping_octaves; ii++) {
@@ -690,6 +692,7 @@ void applyDecalImpl(
   }
 
   float4 d0_c = 0;
+  [branch]
   if (p.base_color_mode == 0) {
     d0_c = p.tex.SampleBias(
         linear_repeat_s,
@@ -2214,11 +2217,15 @@ float4 effect(inout v2f i, out float depth)
 #endif
 
   float3 diffuse_contrib = 0;
-#if defined(_GIMMICK_FOG_01)
-  if (!round(_Gimmick_Fog_01_Overlay_Mode)) {
+  // TODO restore this
+  // For some dumb fucking dipshit reason, this is incompatible with clearcoat
+  // in worlds. Probably the compiler optimizer shitting the bed.
+#if 0 && defined(_GIMMICK_FOG_01)
+  [branch]
+  if (!_Gimmick_Fog_01_Overlay_Mode) {
     Fog01PBR fog_01_pbr = getFog01(i, tdata);
     albedo = fog_01_pbr.albedo;
-    depth = fog_01_pbr.depth;
+    //depth = fog_01_pbr.depth;
 #if defined(_RENDERING_TRANSPARENT) || defined(_RENDERING_TRANSCLIPPING)
     albedo.rgb *= albedo.a;
 #endif
@@ -2288,7 +2295,8 @@ float4 effect(inout v2f i, out float depth)
 #endif
 
 #if defined(_GIMMICK_FOG_01)
-  if (round(_Gimmick_Fog_01_Overlay_Mode)) {
+  [branch]
+  if (_Gimmick_Fog_01_Overlay_Mode) {
     float4 fog_color = apply_fog(
       length(i.worldPos.xyz - getCenterCamPos()),
       _Gimmick_Fog_01_Density,
@@ -2357,6 +2365,17 @@ float4 effect(inout v2f i, out float depth)
   result.rgb += _Global_Emission_Additive_Factor * albedo.rgb;
 
   return result;
+}
+
+fixed4 frag_debug(v2f i)
+{
+  float3 view_dir = normalize(_WorldSpaceCameraPos - i.worldPos);
+  float3 indirect_specular = getIndirectSpecular(i, view_dir, i.normal,
+      /*smoothness=*/1, /*metallic=*/0, i.worldPos);
+  const float3 l = reflect(-view_dir, i.normal);
+  const float3 h = normalize(l + view_dir);
+  const float NoH = dot(i.normal, h);
+  return float4(saturate(NoH) * indirect_specular, 1);
 }
 
 fixed4 frag(v2f i

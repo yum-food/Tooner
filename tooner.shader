@@ -872,10 +872,14 @@ Shader "yum_food/tooner"
     _Gimmick_DS2_11_Simulation_Scale("Simulation scale", Float) = 1
     _Gimmick_DS2_11_Coord_Scale("Coord scale", Float) = 1
     _Gimmick_DS2_11_Height_Scale("Height scale", Float) = 1
-    _Gimmick_DS2_11_XZ_Offset("XZ offset", Vector) = (0, 0, 0, 0)
+    _Gimmick_DS2_11_Height_Power("Height power", Float) = 1
+    _Gimmick_DS2_11_Offset("XZ offset", Vector) = (0, 0, 0, 0)
     _Gimmick_DS2_11_Distance_Culling_Enable("Distance culling enable", Float) = 0
     _Gimmick_DS2_11_Activation_Y("Activation Y", Float) = 0
     _Gimmick_DS2_11_Early_Exit_Cutoff_Cos_Theta("Early exit cutoff (cos theta)", Float) = 0
+    _Gimmick_DS2_11_Normal_Epsilon("Normal epsilon", Float) = 0.001
+    _Gimmick_DS2_11_Valley_Power("Valley power", Float) = 8
+    _Gimmick_DS2_11_Valley_Depth("Valley scale", Float) = .15
 
     _Gimmick_Halo00_Enable_Static("Enable halo", Float) = 0.0
 
