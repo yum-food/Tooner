@@ -120,31 +120,32 @@ float4 frag (v2f i) : SV_Target {
   mixOverlayAlbedoRoughnessMetallic(albedo, roughness, metallic, ov, one, overlay_glitter_mask);
 
 #if defined(_RENDERING_CUTOUT)
+#if defined(_FRAME_COUNTER)
+  float frame = floor(_Frame_Counter);
+#else
   float frame = 0;
   if (AudioLinkIsAvailable()) {
     frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
-  } else {
-    frame = floor(_Frame_Counter);
   }
+#endif  // _FRAME_COUNTER
 #if defined(_RENDERING_CUTOUT_STOCHASTIC)
   float ar = rand2(i.uv0);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_IGN)
-  float ar = ign_anim(
-      floor(tdata.screen_uv_round * _Rendering_Cutout_Noise_Scale) + _Rendering_Cutout_Ign_Seed,
-      frame, _Rendering_Cutout_Ign_Speed);
+  float ar = ign(floor(tdata.screen_uv_round * _Rendering_Cutout_Noise_Scale) + _Rendering_Cutout_Ign_Seed);
+  ar = frac(ar + frame * PHI * _Rendering_Cutout_Speed);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_NOISE_MASK)
-  float ar = frac(
-    _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s, tdata.screen_uv * _ScreenParams.xy * _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0)
-    + frame * PHI);
-  //return float4(ar, ar, ar, 1);
+  float ar = _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s,
+      tdata.screen_uv * _ScreenParams.xy *
+      _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0);
+  ar = frac(ar + frame * PHI * _Rendering_Cutout_Speed);
   clip(albedo.a - ar);
 #else
   clip(albedo.a - _Alpha_Cutoff);
 #endif
   albedo.a = 1;
-#endif
+#endif  // _RENDERING_CUTOUT
 
 	UNITY_SETUP_STEREO_EYE_INDEX_POST_VERTEX(i);
 	return 0;

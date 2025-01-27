@@ -287,7 +287,7 @@ float4 getLitColor(
   float sum_brightness = max(brightnesses[0] + brightnesses[1], min_brightness);
   float2 brightness_proportions = brightnesses / sum_brightness;
 
-  sum_brightness = smooth_clamp(sum_brightness, min_brightness, _Max_Brightness);
+  sum_brightness = clamp(sum_brightness, min_brightness, _Max_Brightness);
 
   direct_light.color[2] = sum_brightness * brightness_proportions[0];
   indirect_light.diffuse[2] = sum_brightness * brightness_proportions[1];
@@ -312,7 +312,7 @@ float4 getLitColor(
 
   // Specular has to be clamped separately to avoid artifacting.
 #if defined(_BRIGHTNESS_CLAMP)
-  indirect_light.specular[2] = smooth_clamp(indirect_light.specular[2], min_brightness, _Max_Brightness);
+  indirect_light.specular[2] = clamp(indirect_light.specular[2], min_brightness, _Max_Brightness);
 #endif
 
   direct_light.color = HSVtoRGB(direct_light.color);
@@ -451,7 +451,7 @@ float4 getLitColor(
           LoH,
           h,
           Fc);
-      pbr.rgb += cc_term * (indirect_light.specular + indirect_light.diffuse) * cc_mask;
+      pbr.rgb += cc_term * indirect_light.specular * cc_mask;
     }
     // Direct
     {

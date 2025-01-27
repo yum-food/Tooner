@@ -21,6 +21,7 @@ Shader "yum_food/tooner"
     _Clearcoat_Use_Texture_Normals("Use texture normals", Float) = 1
 
     _Rendering_Cutout_Noise_Mask("Noise mask", 2D) = "white" {}
+    _Rendering_Cutout_Speed("Speed (for stochastic methods)", Float) = 1
 
     _MainTex("Base color", 2D) = "white" {}
     [Normal] _BumpMap("Normal", 2D) = "bump" {}
@@ -135,6 +136,7 @@ Shader "yum_food/tooner"
     _Decal0_BaseColor("Base color", 2D) = "white" {}
     _Decal0_BaseColor_Mode("Base color mode", Float) = 0
     _Decal0_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal0_SDF_Invert("SDF invert", Float) = 0
     _Decal0_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
     _Decal0_SDF_Px_Range("SDF px range", Float) = 2
     _Decal0_Roughness("Roughness", 2D) = "white" {}
@@ -159,6 +161,7 @@ Shader "yum_food/tooner"
     _Decal1_BaseColor("Base color", 2D) = "white" {}
     _Decal1_BaseColor_Mode("Base color mode", Float) = 0
     _Decal1_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal1_SDF_Invert("SDF invert", Float) = 0
     _Decal1_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
     _Decal1_SDF_Px_Range("SDF px range", Float) = 2
     _Decal1_Roughness("Roughness", 2D) = "white" {}
@@ -183,6 +186,7 @@ Shader "yum_food/tooner"
     _Decal2_BaseColor("Base color", 2D) = "white" {}
     _Decal2_BaseColor_Mode("Base color mode", Float) = 0
     _Decal2_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal2_SDF_Invert("SDF invert", Float) = 0
     _Decal2_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
     _Decal2_SDF_Px_Range("SDF px range", Float) = 2
     _Decal2_Roughness("Roughness", 2D) = "white" {}
@@ -207,6 +211,7 @@ Shader "yum_food/tooner"
     _Decal3_BaseColor("Base color", 2D) = "white" {}
     _Decal3_BaseColor_Mode("Base color mode", Float) = 0
     _Decal3_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal3_SDF_Invert("SDF invert", Float) = 0
     _Decal3_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
     _Decal3_SDF_Px_Range("SDF px range", Float) = 2
     _Decal3_Roughness("Roughness", 2D) = "white" {}
@@ -231,6 +236,7 @@ Shader "yum_food/tooner"
     _Decal4_BaseColor("Base color", 2D) = "white" {}
     _Decal4_BaseColor_Mode("Base color mode", Float) = 0
     _Decal4_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal4_SDF_Invert("SDF invert", Float) = 0
     _Decal4_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
     _Decal4_SDF_Px_Range("SDF px range", Float) = 2
     _Decal4_Roughness("Roughness", 2D) = "white" {}
@@ -255,6 +261,7 @@ Shader "yum_food/tooner"
     _Decal5_BaseColor("Base color", 2D) = "white" {}
     _Decal5_BaseColor_Mode("Base color mode", Float) = 0
     _Decal5_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal5_SDF_Invert("SDF invert", Float) = 0
     _Decal5_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
     _Decal5_SDF_Px_Range("SDF px range", Float) = 2
     _Decal5_Roughness("Roughness", 2D) = "white" {}
@@ -279,6 +286,7 @@ Shader "yum_food/tooner"
     _Decal6_BaseColor("Base color", 2D) = "white" {}
     _Decal6_BaseColor_Mode("Base color mode", Float) = 0
     _Decal6_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal6_SDF_Invert("SDF invert", Float) = 0
     _Decal6_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
     _Decal6_SDF_Px_Range("SDF px range", Float) = 2
     _Decal6_Roughness("Roughness", 2D) = "white" {}
@@ -303,6 +311,7 @@ Shader "yum_food/tooner"
     _Decal7_BaseColor("Base color", 2D) = "white" {}
     _Decal7_BaseColor_Mode("Base color mode", Float) = 0
     _Decal7_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal7_SDF_Invert("SDF invert", Float) = 0
     _Decal7_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
     _Decal7_SDF_Px_Range("SDF px range", Float) = 2
     _Decal7_Roughness("Roughness", 2D) = "white" {}
@@ -327,6 +336,7 @@ Shader "yum_food/tooner"
     _Decal8_BaseColor("Base color", 2D) = "white" {}
     _Decal8_BaseColor_Mode("Base color mode", Float) = 0
     _Decal8_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal8_SDF_Invert("SDF invert", Float) = 0
     _Decal8_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
     _Decal8_SDF_Px_Range("SDF px range", Float) = 2
     _Decal8_Roughness("Roughness", 2D) = "white" {}
@@ -351,6 +361,7 @@ Shader "yum_food/tooner"
     _Decal9_BaseColor("Base color", 2D) = "white" {}
     _Decal9_BaseColor_Mode("Base color mode", Float) = 0
     _Decal9_SDF_Threshold("SDF threshold", Range(0, 1)) = 0.5
+    _Decal9_SDF_Invert("SDF invert", Float) = 0
     _Decal9_SDF_Softness("SDF softness", Range(0, 1)) = 0.01
     _Decal9_SDF_Px_Range("SDF px range", Float) = 2
     _Decal9_Roughness("Roughness", 2D) = "white" {}
@@ -397,7 +408,7 @@ Shader "yum_food/tooner"
     _Reflection_Probe_Saturation("Reflection probe saturation", Range(0, 1)) = 1
     _Enable_Brightness_Clamp("Enable brightness clamp", Float) = 0
     _Min_Brightness("Min brightness", Range(0, 1)) = 0
-    _Max_Brightness("Max brightness", Range(0, 1.5)) = 1
+    _Max_Brightness("Max brightness", Range(0, 10)) = 1
     _Mesh_Normal_Strength("Mesh normal strength", Range(0, 10)) = 1
     _NormalStr("Normal strength", Range(0, 10)) = 1
     _Ambient_Occlusion("Ambient occlusion", 2D) = "white" {}
@@ -417,7 +428,7 @@ Shader "yum_food/tooner"
     _Alpha_Cutoff("Alpha cutoff", Range(0, 1)) = 0.5
     _Rendering_Cutout_Noise_Scale("Noise scale", Float) = 1
     _Rendering_Cutout_Ign_Seed("IGN seed", Float) = 0
-    _Rendering_Cutout_Ign_Speed("IGN speed", Float) = 0.00001
+    _Frame_Counter_Enable_Static("Frame counter enable", Float) = 0
     _Frame_Counter("Frame counter", Float) = 0
 
     _Outline_Width("Outline width", Range(0, 0.1)) = 0.01
@@ -597,6 +608,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting0_Custom_View_Vector_Enabled("custom view vector", Float) = 0
     _Rim_Lighting0_Custom_View_Vector("custom view vector", Vector) = (1, 0, 0, 0)
     _Rim_Lighting0_Center_Eye_Fix("Enable center eye fix", Float) = 0
+    _Rim_Lighting0_Use_Texture_Normals("Use texture normals", Float) = 1
     _Rim_Lighting0_Reflect_In_World_Space("Reflect in world space", Float) = 0
 
     _Rim_Lighting1_Enabled("Enable rim lighting", Float) = 0
@@ -627,6 +639,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting1_Custom_View_Vector_Enabled("custom view vector", Float) = 0
     _Rim_Lighting1_Custom_View_Vector("custom view vector", Vector) = (1, 0, 0, 0)
     _Rim_Lighting1_Center_Eye_Fix("Enable center eye fix", Float) = 0
+    _Rim_Lighting1_Use_Texture_Normals("Use texture normals", Float) = 1
     _Rim_Lighting1_Reflect_In_World_Space("Reflect in world space", Float) = 0
 
     _Rim_Lighting2_Enabled("Enable rim lighting", Float) = 0
@@ -657,6 +670,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting2_Custom_View_Vector_Enabled("custom view vector", Float) = 0
     _Rim_Lighting2_Custom_View_Vector("custom view vector", Vector) = (1, 0, 0, 0)
     _Rim_Lighting2_Center_Eye_Fix("Enable center eye fix", Float) = 0
+    _Rim_Lighting2_Use_Texture_Normals("Use texture normals", Float) = 1
     _Rim_Lighting2_Reflect_In_World_Space("Reflect in world space", Float) = 0
 
     _Rim_Lighting3_Enabled("Enable rim lighting", Float) = 0
@@ -687,6 +701,7 @@ Shader "yum_food/tooner"
     _Rim_Lighting3_Custom_View_Vector_Enabled("custom view vector", Float) = 0
     _Rim_Lighting3_Custom_View_Vector("custom view vector", Vector) = (1, 0, 0, 0)
     _Rim_Lighting3_Center_Eye_Fix("Enable center eye fix", Float) = 0
+    _Rim_Lighting3_Use_Texture_Normals("Use texture normals", Float) = 1
     _Rim_Lighting3_Reflect_In_World_Space("Reflect in world space", Float) = 0
 
     _OKLAB_Enabled("Enable OKLAB", Float) = 0.0

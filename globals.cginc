@@ -272,6 +272,7 @@ float MERGE(_Decal,n,_Angle); \
 float MERGE(_Decal,n,_Alpha_Multiplier); \
 float MERGE(_Decal,n,_Round_Alpha_Multiplier); \
 float MERGE(_Decal,n,_SDF_Threshold); \
+float MERGE(_Decal,n,_SDF_Invert); \
 float MERGE(_Decal,n,_SDF_Softness); \
 float MERGE(_Decal,n,_SDF_Px_Range); \
 float MERGE(_Decal,n,_Tiling_Mode); \
@@ -384,9 +385,9 @@ float _Ambient_Occlusion_Strength;
 
 #if defined(_RENDERING_CUTOUT)
 float _Alpha_Cutoff;
+float _Rendering_Cutout_Speed;
 #if defined(_RENDERING_CUTOUT_IGN)
 float _Rendering_Cutout_Ign_Seed;
-float _Rendering_Cutout_Ign_Speed;
 #endif
 #endif
 
@@ -505,6 +506,7 @@ float _Rim_Lighting0_Mask2_Invert_Colors;
 float _Rim_Lighting0_Mask2_Invert_Alpha;
 float _Rim_Lighting0_Mask2_UV_Select;
 float _Rim_Lighting0_Center_Eye_Fix;
+float _Rim_Lighting0_Use_Texture_Normals;
 float _Rim_Lighting0_Center;
 float _Rim_Lighting0_Power;
 float _Rim_Lighting0_Strength;
@@ -541,6 +543,7 @@ float _Rim_Lighting1_Mask2_Invert_Colors;
 float _Rim_Lighting1_Mask2_Invert_Alpha;
 float _Rim_Lighting1_Mask2_UV_Select;
 float _Rim_Lighting1_Center_Eye_Fix;
+float _Rim_Lighting1_Use_Texture_Normals;
 float _Rim_Lighting1_Center;
 float _Rim_Lighting1_Power;
 float _Rim_Lighting1_Strength;
@@ -577,6 +580,7 @@ float _Rim_Lighting2_Mask2_Invert_Colors;
 float _Rim_Lighting2_Mask2_Invert_Alpha;
 float _Rim_Lighting2_Mask2_UV_Select;
 float _Rim_Lighting2_Center_Eye_Fix;
+float _Rim_Lighting2_Use_Texture_Normals;
 float _Rim_Lighting2_Center;
 float _Rim_Lighting2_Power;
 float _Rim_Lighting2_Strength;
@@ -613,6 +617,7 @@ float _Rim_Lighting3_Mask2_Invert_Colors;
 float _Rim_Lighting3_Mask2_Invert_Alpha;
 float _Rim_Lighting3_Mask2_UV_Select;
 float _Rim_Lighting3_Center_Eye_Fix;
+float _Rim_Lighting3_Use_Texture_Normals;
 float _Rim_Lighting3_Center;
 float _Rim_Lighting3_Power;
 float _Rim_Lighting3_Strength;

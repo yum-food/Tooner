@@ -224,6 +224,7 @@
 #pragma shader_feature_local _ _DECAL9_METALLIC
 #pragma shader_feature_local _ _DECAL9_MASK
 #pragma shader_feature_local _ _DECAL9_DOMAIN_WARPING
+#pragma shader_feature_local _ _FRAME_COUNTER
 #pragma shader_feature_local _ _LTCGI
 #pragma shader_feature_local _ _FORCE_WORLD_LIGHTING
 #pragma shader_feature_local _ _TESSELLATION

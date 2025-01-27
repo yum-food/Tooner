@@ -538,122 +538,198 @@ public class ToonerGUI : ShaderGUI {
     show_ui.Add(AddCollapsibleMenu("Decals", "_Decal"));
     EditorGUI.indentLevel += 1;
     for (int i = 0; i < 10; i++) {
-      show_ui.Add(AddCollapsibleMenu($"Decal {i}", $"_Decal{i}"));
-      EditorGUI.indentLevel += 1;
+        show_ui.Add(AddCollapsibleMenu($"Decal {i}", $"_Decal{i}"));
+        EditorGUI.indentLevel += 1;
 
-      MaterialProperty bc = FindProperty($"_Decal{i}_Enable");
-      bool enabled = bc.floatValue > 1E-6;
-      EditorGUI.BeginChangeCheck();
-      enabled = Toggle("Enable", enabled);
-      EditorGUI.EndChangeCheck();
-      bc.floatValue = enabled ? 1.0f : 0.0f;
-      SetKeyword($"_DECAL{i}", enabled);
-
-      if (enabled) {
-        MaterialProperty bct;
-        bc = FindProperty($"_Decal{i}_Color");
-        bct = FindProperty($"_Decal{i}_BaseColor");
-        TexturePropertySingleLine(MakeLabel(bct, "Base color (RGBA)"), bct, bc);
-        // Unconditionally drive scale + offset because it affects all textures.
-        TextureScaleOffsetProperty(bct);
-
-        bc = FindProperty($"_Decal{i}_BaseColor_Mode");
-        BaseColorMode base_color_mode = (BaseColorMode) Math.Round(bc.floatValue);
-        base_color_mode = (BaseColorMode) EnumPopup(MakeLabel("Base color mode"), base_color_mode);
-        bc.floatValue = (int) base_color_mode;
-
-        if (base_color_mode == BaseColorMode.SDF) {
-          bc = FindProperty($"_Decal{i}_SDF_Threshold");
-          RangeProperty(bc, "SDF threshold");
-
-          bc = FindProperty($"_Decal{i}_SDF_Softness");
-          RangeProperty(bc, "SDF softness");
-
-          bc = FindProperty($"_Decal{i}_SDF_Px_Range");
-          FloatProperty(bc, "SDF px range");
-        }
-
-        bc = FindProperty($"_Decal{i}_Roughness");
-        TexturePropertySingleLine(
-            MakeLabel(bc, "Roughness"),
-            bc);
-        SetKeyword($"_DECAL{i}_ROUGHNESS", bc.textureValue);
-
-        bc = FindProperty($"_Decal{i}_Metallic");
-        TexturePropertySingleLine(
-            MakeLabel(bc, "Metallic"),
-            bc);
-        SetKeyword($"_DECAL{i}_METALLIC", bc.textureValue);
-
-        bc = FindProperty($"_Decal{i}_Emission_Strength");
-        FloatProperty(
-            bc,
-            "Emission strength");
-        bc = FindProperty($"_Decal{i}_Angle");
-        RangeProperty(
-            bc,
-            "Angle");
-
-        bc = FindProperty($"_Decal{i}_Alpha_Multiplier");
-        RangeProperty(bc, "Alpha multiplier");
-
-        bc = FindProperty($"_Decal{i}_Round_Alpha_Multiplier");
-        enabled = bc.floatValue > 1E-6;
+        MaterialProperty bc = FindProperty($"_Decal{i}_Enable");
+        bool enabled = bc.floatValue > 1E-6;
         EditorGUI.BeginChangeCheck();
-        enabled = Toggle("Round alpha multiplier", enabled);
+        enabled = Toggle("Enable", enabled);
         EditorGUI.EndChangeCheck();
         bc.floatValue = enabled ? 1.0f : 0.0f;
-
-        bct = FindProperty($"_Decal{i}_Mask");
-        TexturePropertySingleLine(MakeLabel(bct, "Mask"), bct);
-        SetKeyword($"_DECAL{i}_MASK", bct.textureValue);
-
-        if (bct.textureValue) {
-          bc = FindProperty($"_Decal{i}_Mask_Invert");
-          enabled = bc.floatValue > 1E-6;
-          EditorGUI.BeginChangeCheck();
-          enabled = Toggle("Invert mask", enabled);
-          EditorGUI.EndChangeCheck();
-          bc.floatValue = enabled ? 1.0f : 0.0f;
-        }
-
-        bc = FindProperty($"_Decal{i}_Tiling_Mode");
-        TilingMode tiling_mode = (TilingMode) Math.Round(bc.floatValue);
-        tiling_mode = (TilingMode) EnumPopup(
-            MakeLabel("Tiling mode"), tiling_mode);
-        bc.floatValue = (int) tiling_mode;
-
-        bc = FindProperty($"_Decal{i}_UV_Select");
-        RangeProperty(
-            bc,
-            "UV channel");
-
-        bc = FindProperty($"_Decal{i}_Domain_Warping_Enable_Static");
-        enabled = bc.floatValue > 1E-6;
-        EditorGUI.BeginChangeCheck();
-        enabled = Toggle("Enable domain warping", enabled);
-        EditorGUI.EndChangeCheck();
-        bc.floatValue = enabled ? 1.0f : 0.0f;
-        SetKeyword($"_DECAL{i}_DOMAIN_WARPING", enabled);
+        SetKeyword($"_DECAL{i}", enabled);
 
         if (enabled) {
-          bc = FindProperty($"_Decal{i}_Domain_Warping_Noise");
-          TexturePropertySingleLine(MakeLabel(bc, "Domain warping noise"), bc);
-          bc = FindProperty($"_Decal{i}_Domain_Warping_Strength");
-          FloatProperty(bc, "Domain warping noise strength");
-          bc = FindProperty($"_Decal{i}_Domain_Warping_Speed");
-          FloatProperty(bc, "Domain warping noise speed");
-          bc = FindProperty($"_Decal{i}_Domain_Warping_Octaves");
-          FloatProperty(bc, "Domain warping octaves");
-          bc = FindProperty($"_Decal{i}_Domain_Warping_Scale");
-          FloatProperty(bc, "Domain warping scale");
+          // Add up/down buttons in a horizontal layout
+          EditorGUILayout.BeginHorizontal();
+          if (i > 0 && GUILayout.Button("↑", GUILayout.Width(30))) {
+              SwapDecalSlots(i - 1, i);
+          }
+          if (i < 9 && GUILayout.Button("↓", GUILayout.Width(30))) {
+              SwapDecalSlots(i, i + 1);
+          }
+          EditorGUILayout.EndHorizontal();
+
+          MaterialProperty bct;
+          bc = FindProperty($"_Decal{i}_Color");
+          bct = FindProperty($"_Decal{i}_BaseColor");
+          TexturePropertySingleLine(MakeLabel(bct, "Base color (RGBA)"), bct, bc);
+          // Unconditionally drive scale + offset because it affects all textures.
+          TextureScaleOffsetProperty(bct);
+
+          bc = FindProperty($"_Decal{i}_BaseColor_Mode");
+          BaseColorMode base_color_mode = (BaseColorMode) Math.Round(bc.floatValue);
+          base_color_mode = (BaseColorMode) EnumPopup(MakeLabel("Base color mode"), base_color_mode);
+          bc.floatValue = (int) base_color_mode;
+
+          if (base_color_mode == BaseColorMode.SDF) {
+            bc = FindProperty($"_Decal{i}_SDF_Threshold");
+            RangeProperty(bc, "SDF threshold");
+
+            bc = FindProperty($"_Decal{i}_SDF_Softness");
+            RangeProperty(bc, "SDF softness");
+
+            bc = FindProperty($"_Decal{i}_SDF_Px_Range");
+            FloatProperty(bc, "SDF px range");
+
+            bc = FindProperty($"_Decal{i}_SDF_Invert");
+            enabled = bc.floatValue > 1E-6;
+            EditorGUI.BeginChangeCheck();
+            enabled = Toggle("Invert SDF", enabled);
+            EditorGUI.EndChangeCheck();
+            bc.floatValue = enabled ? 1.0f : 0.0f;
+          }
+
+          bc = FindProperty($"_Decal{i}_Roughness");
+          TexturePropertySingleLine(
+              MakeLabel(bc, "Roughness"),
+              bc);
+          SetKeyword($"_DECAL{i}_ROUGHNESS", bc.textureValue);
+
+          bc = FindProperty($"_Decal{i}_Metallic");
+          TexturePropertySingleLine(
+              MakeLabel(bc, "Metallic"),
+              bc);
+          SetKeyword($"_DECAL{i}_METALLIC", bc.textureValue);
+
+          bc = FindProperty($"_Decal{i}_Emission_Strength");
+          FloatProperty(
+              bc,
+              "Emission strength");
+          bc = FindProperty($"_Decal{i}_Angle");
+          RangeProperty(
+              bc,
+              "Angle");
+
+          bc = FindProperty($"_Decal{i}_Alpha_Multiplier");
+          RangeProperty(bc, "Alpha multiplier");
+
+          bc = FindProperty($"_Decal{i}_Round_Alpha_Multiplier");
+          enabled = bc.floatValue > 1E-6;
+          EditorGUI.BeginChangeCheck();
+          enabled = Toggle("Round alpha multiplier", enabled);
+          EditorGUI.EndChangeCheck();
+          bc.floatValue = enabled ? 1.0f : 0.0f;
+
+          bct = FindProperty($"_Decal{i}_Mask");
+          TexturePropertySingleLine(MakeLabel(bct, "Mask"), bct);
+          SetKeyword($"_DECAL{i}_MASK", bct.textureValue);
+
+          if (bct.textureValue) {
+            bc = FindProperty($"_Decal{i}_Mask_Invert");
+            enabled = bc.floatValue > 1E-6;
+            EditorGUI.BeginChangeCheck();
+            enabled = Toggle("Invert mask", enabled);
+            EditorGUI.EndChangeCheck();
+            bc.floatValue = enabled ? 1.0f : 0.0f;
+          }
+
+          bc = FindProperty($"_Decal{i}_Tiling_Mode");
+          TilingMode tiling_mode = (TilingMode) Math.Round(bc.floatValue);
+          tiling_mode = (TilingMode) EnumPopup(
+              MakeLabel("Tiling mode"), tiling_mode);
+          bc.floatValue = (int) tiling_mode;
+
+          bc = FindProperty($"_Decal{i}_UV_Select");
+          RangeProperty(
+              bc,
+              "UV channel");
+
+          bc = FindProperty($"_Decal{i}_Domain_Warping_Enable_Static");
+          enabled = bc.floatValue > 1E-6;
+          EditorGUI.BeginChangeCheck();
+          enabled = Toggle("Enable domain warping", enabled);
+          EditorGUI.EndChangeCheck();
+          bc.floatValue = enabled ? 1.0f : 0.0f;
+          SetKeyword($"_DECAL{i}_DOMAIN_WARPING", enabled);
+
+          if (enabled) {
+            bc = FindProperty($"_Decal{i}_Domain_Warping_Noise");
+            TexturePropertySingleLine(MakeLabel(bc, "Domain warping noise"), bc);
+            bc = FindProperty($"_Decal{i}_Domain_Warping_Strength");
+            FloatProperty(bc, "Domain warping noise strength");
+            bc = FindProperty($"_Decal{i}_Domain_Warping_Speed");
+            FloatProperty(bc, "Domain warping noise speed");
+            bc = FindProperty($"_Decal{i}_Domain_Warping_Octaves");
+            FloatProperty(bc, "Domain warping octaves");
+            bc = FindProperty($"_Decal{i}_Domain_Warping_Scale");
+            FloatProperty(bc, "Domain warping scale");
+          }
         }
-      }
-      EditorGUI.indentLevel -= 1;
-      show_ui.RemoveAt(show_ui.Count - 1);
+        EditorGUI.indentLevel -= 1;
+        show_ui.RemoveAt(show_ui.Count - 1);
     }
     EditorGUI.indentLevel -= 1;
     show_ui.RemoveAt(show_ui.Count - 1);
+  }
+
+  void SwapDecalSlots(int slotA, int slotB) {
+    // List of property suffixes to swap
+    string[] propertiesToSwap = new string[] {
+        "_Enable",
+        "_Color",
+        "_BaseColor",
+        "_BaseColor_Mode",
+        "_SDF_Threshold",
+        "_SDF_Softness",
+        "_SDF_Px_Range",
+        "_Roughness",
+        "_Metallic",
+        "_Emission_Strength",
+        "_Angle",
+        "_Alpha_Multiplier",
+        "_Round_Alpha_Multiplier",
+        "_Mask",
+        "_Mask_Invert",
+        "_Tiling_Mode",
+        "_UV_Select",
+        "_Domain_Warping_Enable_Static",
+        "_Domain_Warping_Noise",
+        "_Domain_Warping_Strength", 
+        "_Domain_Warping_Speed",
+        "_Domain_Warping_Octaves",
+        "_Domain_Warping_Scale"
+    };
+
+    // Record undo
+    RecordAction($"Swap decal slots {slotA} and {slotB}");
+
+    // For each property, swap values between slots
+    foreach (string prop in propertiesToSwap) {
+        MaterialProperty propA = FindProperty($"_Decal{slotA}{prop}");
+        MaterialProperty propB = FindProperty($"_Decal{slotB}{prop}");
+        
+        if (propA != null && propB != null) {
+            if (propA.type == MaterialProperty.PropType.Color) {
+                Color tempColor = propA.colorValue;
+                propA.colorValue = propB.colorValue;
+                propB.colorValue = tempColor;
+            } else if (propA.type == MaterialProperty.PropType.Texture) {
+                var tempTex = propA.textureValue;
+                propA.textureValue = propB.textureValue;
+                propB.textureValue = tempTex;
+                
+                // Also swap texture scale and offset
+                Vector4 tempScale = propA.textureScaleAndOffset;
+                propA.textureScaleAndOffset = propB.textureScaleAndOffset;
+                propB.textureScaleAndOffset = tempScale;
+            } else {
+              var tempValue = propA.floatValue;
+              propA.floatValue = propB.floatValue;
+              propB.floatValue = tempValue;
+            }
+        }
+    }
   }
 
   void DoEmission() {
@@ -972,6 +1048,13 @@ public class ToonerGUI : ShaderGUI {
       enabled = bc.floatValue > 1E-6;
       EditorGUI.BeginChangeCheck();
       enabled = Toggle("Center eye fix", enabled);
+      EditorGUI.EndChangeCheck();
+      bc.floatValue = enabled ? 1.0f : 0.0f;
+
+      bc = FindProperty($"_Rim_Lighting{i}_Use_Texture_Normals");
+      enabled = bc.floatValue > 1E-6;
+      EditorGUI.BeginChangeCheck();
+      enabled = Toggle("Use texture normals", enabled);
       EditorGUI.EndChangeCheck();
       bc.floatValue = enabled ? 1.0f : 0.0f;
 
@@ -3202,19 +3285,22 @@ public class ToonerGUI : ShaderGUI {
       SetKeyword("_RENDERING_CUTOUT_NOISE_MASK", cmode == CutoutMode.NoiseMask);
 
       EditorGUI.indentLevel += 1;
-      if (cmode == CutoutMode.Cutoff) {
-        bc = FindProperty("_Alpha_Cutoff");
-        ShaderProperty(bc, MakeLabel(bc));
-      } else if (cmode == CutoutMode.NoiseMask) {
-        bc = FindProperty("_Rendering_Cutout_Noise_Mask");
-        TexturePropertySingleLine(
-            MakeLabel(bc, "Noise mask"),
-            bc);
-      } else if (cmode == CutoutMode.InterleavedGradientNoise) {
-        bc = FindProperty("_Rendering_Cutout_Ign_Seed");
-        FloatProperty(bc, "Seed");
-        bc = FindProperty("_Rendering_Cutout_Ign_Speed");
-        FloatProperty(bc, "Speed");
+      {
+        if (cmode == CutoutMode.Cutoff) {
+          bc = FindProperty("_Alpha_Cutoff");
+          ShaderProperty(bc, MakeLabel(bc));
+        } else if (cmode == CutoutMode.NoiseMask) {
+          bc = FindProperty("_Rendering_Cutout_Noise_Mask");
+          TexturePropertySingleLine(
+              MakeLabel(bc, "Noise mask"),
+              bc);
+        } else if (cmode == CutoutMode.InterleavedGradientNoise) {
+          bc = FindProperty("_Rendering_Cutout_Ign_Seed");
+          FloatProperty(bc, "Seed");
+        }
+
+        bc = FindProperty("_Rendering_Cutout_Speed");
+        FloatProperty(bc, "Speed (for stochastic methods)");
       }
       EditorGUI.indentLevel -= 1;
     }
@@ -3222,8 +3308,17 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Rendering_Cutout_Noise_Scale");
     FloatProperty(bc, "Cutout noise scale");
 
-    bc = FindProperty("_Frame_Counter");
-    FloatProperty(bc, "Frame counter");
+    bc = FindProperty("_Frame_Counter_Enable_Static");
+    bool enabled = bc.floatValue > 1E-6;
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Frame counter", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_FRAME_COUNTER", enabled);
+    if (enabled) {
+      bc = FindProperty("_Frame_Counter");
+      FloatProperty(bc, "Frame counter");
+    }
 
     bc = FindProperty("_Cull");
     UnityEngine.Rendering.CullMode cull_mode = (UnityEngine.Rendering.CullMode) bc.floatValue;
@@ -3244,7 +3339,7 @@ public class ToonerGUI : ShaderGUI {
     bc.floatValue = (float) zmode;
 
     bc = FindProperty("_Discard_Enable_Static");
-    bool enabled = bc.floatValue > 1E-6;
+    enabled = bc.floatValue > 1E-6;
     EditorGUI.BeginChangeCheck();
     enabled = Toggle("Discard", enabled);
     EditorGUI.EndChangeCheck();

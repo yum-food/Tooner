@@ -642,6 +642,7 @@ struct DecalParams {
     float tiling_mode;
     float base_color_mode;
     float sdf_threshold;
+    float sdf_invert;
     float sdf_softness;
     float sdf_px_range;
     bool domain_warping;
@@ -693,6 +694,7 @@ void applyDecalImpl(
         d0_uv, _Global_Sample_Bias);
   } else if (p.base_color_mode == 1) {
     float sd = p.tex.SampleLevel(linear_repeat_s, d0_uv, 0);
+    sd = p.sdf_invert ? 1 - sd : sd;
 
     float2 screen_tex_size = 1 / fwidth(d0_uv);
     float2 cell_size_texels = p.tex_texelsize.zw;
@@ -721,7 +723,7 @@ void applyDecalImpl(
 
   albedo.rgb = lerp(albedo.rgb, d0_c.rgb, d0_c.a);
   albedo.a = max(albedo.a, d0_c.a);
-  decal_emission += d0_c.rgb * p.emission_strength * d0_c.a;
+  decal_emission = d0_c.rgb * p.emission_strength * d0_c.a + decal_emission * (1 - d0_c.a);
 
   if (p.do_roughness) {
     float4 d0_r = p.roughness_tex.SampleBias(linear_clamp_s, saturate(d0_uv), _Global_Sample_Bias);
@@ -753,6 +755,7 @@ void applyDecalImpl(
   MERGE(d,n,_params).tiling_mode = MERGE(_Decal,n,_Tiling_Mode); \
   MERGE(d,n,_params).base_color_mode = MERGE(_Decal,n,_BaseColor_Mode); \
   MERGE(d,n,_params).sdf_threshold = MERGE(_Decal,n,_SDF_Threshold); \
+  MERGE(d,n,_params).sdf_invert = MERGE(_Decal,n,_SDF_Invert); \
   MERGE(d,n,_params).sdf_softness = MERGE(_Decal,n,_SDF_Softness); \
   MERGE(d,n,_params).sdf_px_range = MERGE(_Decal,n,_SDF_Px_Range); \
   MERGE(d,n,_params).domain_warping = MERGE(_Decal,n,_Domain_Warping_Enable_Static); \
@@ -1427,31 +1430,32 @@ float4 effect(inout v2f i, out float depth)
 #endif
 
 #if defined(_RENDERING_CUTOUT)
+#if defined(_FRAME_COUNTER)
+  float frame = floor(_Frame_Counter);
+#else
   float frame = 0;
   if (AudioLinkIsAvailable()) {
     frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
-  } else {
-    frame = floor(_Frame_Counter);
   }
+#endif  // _FRAME_COUNTER
 #if defined(_RENDERING_CUTOUT_STOCHASTIC)
   float ar = rand2(i.uv0);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_IGN)
-  float ar = ign_anim(
-      floor(tdata.screen_uv_round * _Rendering_Cutout_Noise_Scale) + _Rendering_Cutout_Ign_Seed,
-      frame, _Rendering_Cutout_Ign_Speed);
+  float ar = ign(floor(tdata.screen_uv_round * _Rendering_Cutout_Noise_Scale) + _Rendering_Cutout_Ign_Seed);
+  ar = frac(ar + frame * PHI * _Rendering_Cutout_Speed);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_NOISE_MASK)
-  float ar = frac(
-    _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s, tdata.screen_uv * _ScreenParams.xy * _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0)
-    + frame * PHI);
-  //return float4(ar, ar, ar, 1);
+  float ar = _Rendering_Cutout_Noise_Mask.SampleLevel(point_repeat_s,
+      tdata.screen_uv * _ScreenParams.xy *
+      _Rendering_Cutout_Noise_Mask_TexelSize.xy, 0);
+  ar = frac(ar + frame * PHI * _Rendering_Cutout_Speed);
   clip(albedo.a - ar);
 #else
   clip(albedo.a - _Alpha_Cutoff);
 #endif
   albedo.a = 1;
-#endif
+#endif  // _RENDERING_CUTOUT
 
 #if defined(_GIMMICK_AL_CHROMA_00)
   if (_Gimmick_AL_Chroma_00_Forward_Pass && AudioLinkIsAvailable()) {
@@ -1476,10 +1480,10 @@ float4 effect(inout v2f i, out float depth)
       float2 rl_uv;
       {
 #if defined(_RIM_LIGHTING0_REFLECT_IN_WORLD)
-        const float3 cam_normal = normal;
+        const float3 cam_normal = _Rim_Lighting0_Use_Texture_Normals ? normal : i.normal;
         const float3 cam_view_dir = rl_view_dir;
 #else
-        const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(normal, 0)));
+        const float3 cam_normal = normalize(mul(UNITY_MATRIX_V, float4(_Rim_Lighting0_Use_Texture_Normals ? normal : i.normal, 0)));
         const float3 cam_view_dir = normalize(mul(UNITY_MATRIX_V, float4(rl_view_dir, 0)));
 #endif
         const float3 cam_refl = -reflect(cam_view_dir, cam_normal);
