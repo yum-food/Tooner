@@ -27,6 +27,19 @@ float distance_from_sphere(float3 p, float r)
     return length(p) - r;
 }
 
+float distance_from_torus(float3 p, float2 t)
+{
+  float2 q = float2(length(p.xz) - t.x, p.y);
+  return length(q) - t.y;
+}
+
+float distance_from_capped_torus(float3 p, float2 sc, float ra, float rb)
+{
+  p.x = abs(p.x);
+  float k = (sc.y*p.x>sc.x*p.y) ? dot(p.xy,sc) : length(p.xy);
+  return sqrt(dot(p,p) + ra*ra - 2.0*ra*k) - rb;
+}
+
 float distance_from_cut_sphere( in float3 p, in float r, in float h )
 {
   float w = sqrt(r*r-h*h); // constant for a given shape
@@ -126,6 +139,14 @@ float distance_from_hex_prism(float3 p, float2 h)
       p.z-h.y );
   return min(max(d.x,d.y),0.0) + length(max(d,0.0));
 }
+
+float distance_from_capsule(float3 p, float3 a, float3 b, float r)
+{
+  float3 pa = p - a, ba = b - a;
+  float h = clamp( dot(pa,ba)/dot(ba,ba), 0.0, 1.0 );
+  return length( pa - ba*h ) - r;
+}
+
 /*
 float sdHexPrism( vec3 p, vec2 h )
 {

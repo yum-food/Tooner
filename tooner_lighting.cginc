@@ -26,6 +26,7 @@
 #include "tone.cginc"
 #include "tooner_scroll.cginc"
 #include "trochoid_math.cginc"
+#include "zwrite_abomination.cginc"
 
 #ifndef TOONER_LIGHTING
 #define TOONER_LIGHTING
@@ -1168,6 +1169,23 @@ float4 effect(inout v2f i, out float depth)
   roughness *= _Roughness;
 #else
   float roughness = _Roughness;
+#endif
+
+#if defined(_GIMMICK_ZWRITE_ABOMINATION) && defined(FORWARD_BASE_PASS)
+  {
+    ZWriteAbominationPBR pbr = zwrite_abomination(i);
+    i.worldPos = pbr.worldPos;
+    albedo = pbr.albedo;
+    metallic = pbr.metallic;
+    roughness = pbr.roughness;
+    normal = pbr.normal;
+    depth = pbr.depth;
+#if 0
+    float3 c = 1;
+    c *= saturate(dot(normal, float3(0, -1, 1)));
+    return float4(c, albedo.a);
+#endif
+  }
 #endif
 
 #if defined(VERTEXLIGHT_ON)

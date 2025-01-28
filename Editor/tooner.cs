@@ -2891,6 +2891,116 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoGimmickZWriteAbomination() {
+    MaterialProperty bc;
+
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Zwrite abomination", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_ZWRITE_ABOMINATION", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Min_Hit_Dist");
+    FloatProperty(bc, "Min hit dist");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_March_Steps");
+    FloatProperty(bc, "March steps");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Normal_Epsilon");
+    FloatProperty(bc, "Normal epsilon");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Initial_Step_Size");
+    FloatProperty(bc, "Initial step size");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Global_Scale");
+    FloatProperty(bc, "Global scale");
+
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Body_Half_Height");
+    FloatProperty(bc, "Body half height");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Body_Radius");
+    FloatProperty(bc, "Body radius");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Radius");
+    FloatProperty(bc, "Denim radius");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Half_Height");
+    FloatProperty(bc, "Denim half height");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Center");
+    VectorProperty(bc, "Denim center");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Strap_Theta");
+    FloatProperty(bc, "Denim strap theta");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Strap_RA");
+    FloatProperty(bc, "Denim strap RA");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Strap_RB");
+    FloatProperty(bc, "Denim strap RB");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Strap_Z_Theta");
+    FloatProperty(bc, "Denim strap z theta");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Strap_Center");
+    VectorProperty(bc, "Denim strap center");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Lens_Radius");
+    FloatProperty(bc, "Lens radius");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Lens_Depth");
+    FloatProperty(bc, "Lens depth");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Lens_Thickness");
+    FloatProperty(bc, "Lens thickness");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Lens_Strap_Height");
+    FloatProperty(bc, "Lens strap height");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Pupil_Radius");
+    FloatProperty(bc, "Pupil radius");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Eye_Center");
+    VectorProperty(bc, "Eye center");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Arm_Radius");
+    FloatProperty(bc, "Arm radius");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Arm_Half_Length");
+    FloatProperty(bc, "Arm half length");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Arm_Center");
+    VectorProperty(bc, "Arm center");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Leg_Radius");
+    FloatProperty(bc, "Leg radius");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Leg_Half_Length");
+    FloatProperty(bc, "Leg half length");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Leg_Center");
+    VectorProperty(bc, "Leg center");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Mouth_Theta");
+    FloatProperty(bc, "Mouth theta");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Mouth_RA");
+    FloatProperty(bc, "Mouth RA");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Mouth_RB");
+    FloatProperty(bc, "Mouth RB");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Mouth_Center");
+    VectorProperty(bc, "Mouth center");
+
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Lens_Strap_Color");
+    ColorProperty(bc, "Lens strap color");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Lens_Strap_Metallic");
+    FloatProperty(bc, "Lens strap metallic");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Lens_Strap_Roughness");
+    FloatProperty(bc, "Lens strap roughness");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Skin_Color");
+    ColorProperty(bc, "Skin color");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Skin_Metallic");
+    FloatProperty(bc, "Skin metallic");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Skin_Roughness");
+    FloatProperty(bc, "Skin roughness");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Lens_Color");
+    ColorProperty(bc, "Lens color");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Lens_Metallic");
+    FloatProperty(bc, "Lens metallic");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Lens_Roughness");
+    FloatProperty(bc, "Lens roughness");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Color");
+    ColorProperty(bc, "Denim color");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Metallic");
+    FloatProperty(bc, "Denim metallic");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Denim_Roughness");
+    FloatProperty(bc, "Denim roughness");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
+
   void DoGimmickAurora() {
     MaterialProperty bc;
 
@@ -3089,6 +3199,7 @@ public class ToonerGUI : ShaderGUI {
     DoGimmickAudiolinkChroma00();
     DoGimmickFog0();
     DoGimmickFog1();
+    DoGimmickZWriteAbomination();
     DoGimmickAurora();
     DoGimmickGerstnerWater();
     DoGimmickBoxDiscard();

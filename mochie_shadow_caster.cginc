@@ -48,6 +48,9 @@ v2f vert (appdata v){
     return (v2f) (0.0 / 0.0);
   }
 #endif
+#if defined(_GIMMICK_ZWRITE_ABOMINATION)
+  return (v2f) (0.0 / 0.0);
+#endif
 #if defined(_GIMMICK_BOX_DISCARD)
   if (_Gimmick_Box_Discard_Enable_Static) {
     float3 p = getCenterCamPos();

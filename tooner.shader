@@ -3,7 +3,7 @@ Shader "yum_food/tooner"
   // Unity fucking sucks ass and sometimes incorrectly uses an old cached
   // version of the shader. Bump the nonce below to encourage it to use the
   // current version.
-  // Build nonce: 38
+  // Build nonce: 39
   Properties
   {
     _Color("Base color", Color) = (0.8, 0.8, 0.8, 1)
@@ -1087,6 +1087,52 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_01_Distance_Culling_Enable("Distance culling enable", Float) = 0
     _Gimmick_Fog_01_Activation_Center("Activation center", Vector) = (0, 0, 0, 0)
     _Gimmick_Fog_01_Activation_Radius("Activation radius", Float) = 1
+
+    _Gimmick_ZWrite_Abomination_Enable_Static("Enable zwrite abomination", Float) = 0
+    _Gimmick_ZWrite_Abomination_Min_Hit_Dist("Min hit dist", Float) = 0.001
+    _Gimmick_ZWrite_Abomination_March_Steps("March steps", Float) = 30
+    _Gimmick_ZWrite_Abomination_Normal_Epsilon("Normal epsilon", Float) = 0.001
+    _Gimmick_ZWrite_Abomination_Initial_Step_Size("Initial step size", Float) = 0.001
+    _Gimmick_ZWrite_Abomination_Global_Scale("Global scale", Float) = 1
+
+    _Gimmick_ZWrite_Abomination_Body_Half_Height("Body half height", Float) = 0.1
+    _Gimmick_ZWrite_Abomination_Body_Radius("Body radius", Float) = 0.1
+    _Gimmick_ZWrite_Abomination_Denim_Half_Height("Denim half height", Float) = 0.1
+    _Gimmick_ZWrite_Abomination_Denim_Radius("Denim radius", Float) = 0.1
+    _Gimmick_ZWrite_Abomination_Denim_Center("Denim center", Vector) = (0, 0, 0, 0)
+    _Gimmick_ZWrite_Abomination_Denim_Strap_Theta("Denim strap theta", Float) = 0
+    _Gimmick_ZWrite_Abomination_Denim_Strap_RA("Denim strap RA", Float) = 0.01
+    _Gimmick_ZWrite_Abomination_Denim_Strap_RB("Denim strap RB", Float) = 0.01
+    _Gimmick_ZWrite_Abomination_Denim_Strap_Z_Theta("Denim strap z theta", Float) = 0
+    _Gimmick_ZWrite_Abomination_Denim_Strap_Center("Denim strap center", Vector) = (0, 0, 0, 0)
+    _Gimmick_ZWrite_Abomination_Lens_Radius("Lens radius", Float) = 0.05
+    _Gimmick_ZWrite_Abomination_Lens_Depth("Lens depth", Float) = 0.01
+    _Gimmick_ZWrite_Abomination_Lens_Thickness("Lens thickness", Float) = 0.01
+    _Gimmick_ZWrite_Abomination_Lens_Strap_Height("Lens strap height", Float) = 0.01
+    _Gimmick_ZWrite_Abomination_Pupil_Radius("Pupil radius", Float) = 0.01
+    _Gimmick_ZWrite_Abomination_Eye_Center("Eye center", Vector) = (0, 0, 0, 0)
+    _Gimmick_ZWrite_Abomination_Arm_Center("Arm center", Vector) = (0, 0, 0, 0)
+    _Gimmick_ZWrite_Abomination_Arm_Radius("Arm radius", Float) = 0.01
+    _Gimmick_ZWrite_Abomination_Arm_Half_Length("Arm half length", Float) = 0.05
+    _Gimmick_ZWrite_Abomination_Leg_Center("Leg center", Vector) = (0, 0, 0, 0)
+    _Gimmick_ZWrite_Abomination_Leg_Radius("Leg radius", Float) = 0.01
+    _Gimmick_ZWrite_Abomination_Leg_Half_Length("Leg half length", Float) = 0.05
+    _Gimmick_ZWrite_Abomination_Mouth_Center("Mouth center", Vector) = (0, 0, 0, 0)
+    _Gimmick_ZWrite_Abomination_Mouth_Theta("Mouth theta", Float) = 0
+    _Gimmick_ZWrite_Abomination_Mouth_RA("Mouth RA", Float) = 0.01
+    _Gimmick_ZWrite_Abomination_Mouth_RB("Mouth RB", Float) = 0.01
+    _Gimmick_ZWrite_Abomination_Skin_Color("Skin color", Color) = (1, 1, 1, 1)
+    _Gimmick_ZWrite_Abomination_Skin_Metallic("Skin metallic", Float) = 0
+    _Gimmick_ZWrite_Abomination_Skin_Roughness("Skin roughness", Float) = 0
+    _Gimmick_ZWrite_Abomination_Lens_Color("Lens color", Color) = (1, 1, 1, 1)
+    _Gimmick_ZWrite_Abomination_Lens_Metallic("Lens metallic", Float) = 0
+    _Gimmick_ZWrite_Abomination_Lens_Roughness("Lens roughness", Float) = 0
+    _Gimmick_ZWrite_Abomination_Denim_Color("Denim color", Color) = (1, 1, 1, 1)
+    _Gimmick_ZWrite_Abomination_Denim_Metallic("Denim metallic", Float) = 0
+    _Gimmick_ZWrite_Abomination_Denim_Roughness("Denim roughness", Float) = 0
+    _Gimmick_ZWrite_Abomination_Lens_Strap_Color("Lens strap color", Color) = (1, 1, 1, 1)
+    _Gimmick_ZWrite_Abomination_Lens_Strap_Metallic("Lens strap metallic", Float) = 0
+    _Gimmick_ZWrite_Abomination_Lens_Strap_Roughness("Lens strap roughness", Float) = 0
 
     _Gimmick_Aurora_Enable_Static("Enable aurora", Float) = 0
 

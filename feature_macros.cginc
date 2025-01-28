@@ -268,8 +268,8 @@
 #pragma shader_feature_local _ SSR_MASK
 #pragma shader_feature_local _ _GIMMICK_FOG_00
 #pragma shader_feature_local _ _GIMMICK_FOG_00_BOUNDARY_CYLINDER
-#pragma shader_feature_local _ _GIMMICK_FOG_00_BOUNDARY_PLANE
 #pragma shader_feature_local _ _GIMMICK_FOG_00_BOUNDARY_SPHERE
+#pragma shader_feature_local _ _GIMMICK_FOG_00_BOUNDARY_PLANE
 #pragma shader_feature_local _ _GIMMICK_FOG_00_NOISE_2D
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_TEXTURE
 #pragma shader_feature_local _ _GIMMICK_FOG_00_EMITTER_VARIABLE_DENSITY
@@ -285,6 +285,7 @@
 #pragma shader_feature_local _ _GIMMICK_BOX_DISCARD
 #pragma shader_feature_local _ _OPTIMIZE_INTERPOLATORS
 #pragma shader_feature_local _ _ACES_FILMIC
+#pragma shader_feature_local _ _GIMMICK_ZWRITE_ABOMINATION
 
 #endif  // __FEATURE_MACROS_INC
 
