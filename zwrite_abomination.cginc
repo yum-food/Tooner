@@ -32,6 +32,8 @@ struct ZWriteAbominationPBR {
 float zwrite_abomination_map(float3 p, out uint body_part) {
     float epsilon = 1E-4;
     float d;
+    float s = _Gimmick_ZWrite_Abomination_Global_Scale;
+    p = p / s;  // Scale all positions first
 
     // Capsule representing body
     {
@@ -59,7 +61,6 @@ float zwrite_abomination_map(float3 p, out uint body_part) {
         float3 pp = p;
         pp.x = abs(pp.x);
         pp -= strap_center;
-        // Rotate about z axis
         float theta = _Gimmick_ZWrite_Abomination_Denim_Strap_Z_Theta;
         float2x2 rot = float2x2(float2(cos(theta), -sin(theta)), float2(sin(theta), cos(theta)));
         pp.xy = mul(rot, pp.xy);
@@ -81,7 +82,6 @@ float zwrite_abomination_map(float3 p, out uint body_part) {
         float lens_depth = _Gimmick_ZWrite_Abomination_Lens_Depth;
         float lens_thickness = _Gimmick_ZWrite_Abomination_Lens_Thickness;
         float lens_d0 = distance_from_capped_cylinder(pp, lens_depth, lens_radius);
-        // TODO do we need a capped cylinder? Can we use a more efficient SDF to cut out the middle?
         float lens_d1 = distance_from_capped_cylinder(pp, lens_depth + 0.1, lens_radius - lens_thickness);
         float lens_d = op_sub(lens_d1, lens_d0);
         body_part = lens_d < d ? BODY_PART_LENS : body_part;
@@ -147,7 +147,7 @@ float zwrite_abomination_map(float3 p, out uint body_part) {
         d = min(d, leg_d);
     }
 
-    return d;
+    return d * s;
 }
 
 // TODO tetrahedral normals
@@ -166,8 +166,60 @@ ZWriteAbominationPBR zwrite_abomination(in v2f i)
   float3 cam_pos = mul(unity_WorldToObject, float4(_WorldSpaceCameraPos, 1));
   float3 rd = normalize(i.objPos - cam_pos);
   float3 ro = cam_pos + rd * _Gimmick_ZWrite_Abomination_Initial_Step_Size;
+  float l = length(ro);
+  float scale_factor = pow(l, 1.5);
+  ro /= scale_factor;
 
-  // TODO raytrace ro near the object
+  float3 forward_axis = float3(0, 0, 1);
+  // We apply a factor of -1 to shift the result forward by a phase shift of pi.
+  float cos_t = -dot(normalize(rd.xz), forward_axis.xz);
+  // We want to get sin(t) using the identity:
+  //   || a x b || = || a || || b || sin(t)
+  // For normal vectors, this simplifies to:
+  //   || a x b || = sin(t)
+  // The issue is that the norm operator loses the sign.
+  // We can estimate the sign by assuming that `rd` and `forward_axis` are on
+  // the xz plane.
+  // If that's the case, then the cross product is necessarily constrained to
+  // the y axis.
+  float sin_t_sign = sign(cross(rd, forward_axis).y);
+  // Here we use the identity:
+  //   sin(t) = sqrt(1 - cos(t)^2)
+  // We simply apply the sign correction `sin_t_sign` to the result.
+  // We then invert it, since the goal is not to amplify the rotation, but
+  // to negate it.
+  // Finally, we add a phase correction to make the abomination face us.
+  float sin_t = sqrt(1 - cos_t * cos_t) * sin_t_sign;
+  float2x2 face_me_rot = float2x2(cos_t, -sin_t, sin_t, cos_t);
+  float2x2 face_me_rot_inv = float2x2(cos_t, sin_t, -sin_t, cos_t);
+  ro.xz = mul(face_me_rot, ro.xz);
+  rd.xz = mul(face_me_rot, rd.xz);
+
+  // Raytrace ro onto sphere containing sim
+
+#if 0
+  {
+    bool no_intersection = false;
+    float distance_to_sphere = 1E6;
+    float circle_radius = 0.5 * scale_factor;
+    {
+      float3 l = ro;
+      float a = 1;
+      float b = 2 * dot(rd, l);
+      float c = dot(l, l) - circle_radius * circle_radius;
+      float t0, t1;
+      if (solveQuadratic(a, b, c, t0, t1)) {
+        no_intersection = (t0 < 0) * (t1 < 0);
+        const bool inside_sphere = (t0 < 0) * (t1 > 0);
+        if (!inside_sphere) {
+          distance_to_sphere = no_intersection ? distance_to_sphere : min(max(t0, 0), max(t1, 0));
+          ro += distance_to_sphere * rd;
+        }
+      }
+    }
+    clip(no_intersection ? -1 : 1);
+  }
+#endif
 
   const float MIN_HIT_DIST = _Gimmick_ZWrite_Abomination_Min_Hit_Dist;
   const float MAX_DIST = 1;
@@ -228,7 +280,10 @@ ZWriteAbominationPBR zwrite_abomination(in v2f i)
     pbr.albedo = float4(c, 1);
     pbr.metallic = metallic;
     pbr.roughness = roughness;
-    pbr.normal = UnityObjectToWorldNormal(zwrite_abomination_normal(p));
+    float3 normal = zwrite_abomination_normal(p);
+    // TODO inverse of this matrix?
+    normal.xz = mul(face_me_rot_inv, normal.xz);
+    pbr.normal = UnityObjectToWorldNormal(normal);
     float4 clip_pos = mul(UNITY_MATRIX_VP, float4(mul(unity_ObjectToWorld, float4(p, 1.0))));
     pbr.depth = clip_pos.z / clip_pos.w;
   } else {

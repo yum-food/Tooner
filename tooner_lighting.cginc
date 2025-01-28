@@ -153,6 +153,9 @@ v2f vert(appdata v)
     v.vertex.xyz = cart_to_troch_map(v.vertex.xyz);
   }
 #endif  // _TROCHOID
+#if defined(_GIMMICK_ZWRITE_ABOMINATION)
+  v.vertex.xyz *= _Gimmick_ZWrite_Abomination_Vertex_Expansion_Factor;
+#endif
 #if defined(_FACE_ME_WORLD_Y)
   if (_FaceMeWorldY_Enable_Dynamic) {
     // Undo object coordinate system rotation.
