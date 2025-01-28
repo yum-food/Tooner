@@ -1051,6 +1051,7 @@ Shader "yum_food/tooner"
     _Gimmick_Fog_00_Emitter_Brightness_Diffuse("fog", Float) = 1
     _Gimmick_Fog_00_Emitter_Brightness_Direct("fog", Float) = 1
     _Gimmick_Fog_00_Emitter_Lod_Half_Life("fog", Float) = 5
+    _Gimmick_Fog_00_Initial_Offset("Initial offset", Float) = 0.00001
 
     _Gimmick_Fog_00_Emitter0_Location("fog", Vector) = (0, 0, 0, 0)
     _Gimmick_Fog_00_Emitter0_Normal("fog", Vector) = (-1, 0, 0, 0)

@@ -2646,6 +2646,7 @@ public class ToonerGUI : ShaderGUI {
   enum GimmickFog00BoundaryType {
     Cylinder = 0,
     Plane = 1,
+    Sphere = 2,
   }
 
   void DoGimmickFog0() {
@@ -2676,7 +2677,7 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.EndChangeCheck();
     bc.floatValue = (int) boundary_type;
 
-    if (boundary_type == GimmickFog00BoundaryType.Cylinder) {
+    if (boundary_type == GimmickFog00BoundaryType.Cylinder || boundary_type == GimmickFog00BoundaryType.Sphere) {
       bc = FindProperty("_Gimmick_Fog_00_Radius");
       FloatProperty(bc, "Radius");
     } else if (boundary_type == GimmickFog00BoundaryType.Plane) {
@@ -2685,9 +2686,14 @@ public class ToonerGUI : ShaderGUI {
       bc = FindProperty("_Gimmick_Fog_00_Plane_Center");
       VectorProperty(bc, "Plane center");
     }
+    SetKeyword("_GIMMICK_FOG_00_BOUNDARY_CYLINDER", boundary_type == GimmickFog00BoundaryType.Cylinder);
+    SetKeyword("_GIMMICK_FOG_00_BOUNDARY_SPHERE", boundary_type == GimmickFog00BoundaryType.Sphere);
+    SetKeyword("_GIMMICK_FOG_00_BOUNDARY_PLANE", boundary_type == GimmickFog00BoundaryType.Plane);
 
     bc = FindProperty("_Gimmick_Fog_00_Step_Size_Factor");
     FloatProperty(bc, "Step size multiplier");
+    bc = FindProperty("_Gimmick_Fog_00_Initial_Offset");
+    FloatProperty(bc, "Initial offset");
     bc = FindProperty("_Gimmick_Fog_00_Max_Ray");
     FloatProperty(bc, "Max ray length (m)");
     bc = FindProperty("_Gimmick_Fog_00_Noise_Scale");

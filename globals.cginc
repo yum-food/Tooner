@@ -978,6 +978,7 @@ float _Gimmick_Fog_00_Lod_Half_Life;
 float _Gimmick_Fog_00_Max_Brightness;
 float _Gimmick_Fog_00_LTCGI_Brightness;
 float _Gimmick_Fog_00_Overlay_Mode;
+float _Gimmick_Fog_00_Initial_Offset;
 texture3D _Gimmick_Fog_00_Noise;
 #if defined(_GIMMICK_FOG_00_NOISE_2D)
 texture2D _Gimmick_Fog_00_Noise_2D;

@@ -82,9 +82,13 @@ float map(float3 p, out float3 normal) {
 #define RADIUS_TRANS_WIDTH_RCP (1.0 / RADIUS_TRANS_WIDTH)
   // Try to create a smooth transition without doing any length() or other
   // transcendental ops.
-  float radius2 = (_Gimmick_Fog_00_Boundary_Type == 0) ?
-    clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p.xz, p.xz), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP :
-    0;
+#if 1 && defined(_GIMMICK_FOG_00_BOUNDARY_CYLINDER)
+  float radius2 = clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p.xz, p.xz), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP;
+#elif 1 && defined(_GIMMICK_FOG_00_BOUNDARY_SPHERE)
+  float radius2 = clamp(_Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius - dot(p, p), 0, RADIUS_TRANS_WIDTH) * RADIUS_TRANS_WIDTH_RCP;
+#else
+  float radius2 = 1;
+#endif
 
 	float3 pp = p * _Gimmick_Fog_00_Noise_Scale * FOG_PERLIN_NOISE_SCALE;
   normal = normalize(perlin_noise_3d_tex(pp+t) * 2 - 1);
@@ -262,7 +266,8 @@ Fog00PBR __getFog00(v2f i, ToonerData tdata,
   const float3 rd = normalize(obj_pos - cam_pos);
   float3 ro = cam_pos;
 
-  if (_Gimmick_Fog_00_Boundary_Type == 0) {
+#if defined(_GIMMICK_FOG_00_BOUNDARY_CYLINDER)
+  {
     // Raytrace distance to cylinder
     bool no_intersection = false;
     float distance_to_cylinder = 1E6;
@@ -281,7 +286,9 @@ Fog00PBR __getFog00(v2f i, ToonerData tdata,
       }
     }
     clip(no_intersection ? -1 : 1);
-  } else if (_Gimmick_Fog_00_Boundary_Type == 1) {
+  }
+#elif defined(_GIMMICK_FOG_00_BOUNDARY_PLANE)
+  {
     // Raytrace distance to plane
     bool no_intersection = false;
     float distance_to_plane = 1E6;
@@ -306,6 +313,28 @@ Fog00PBR __getFog00(v2f i, ToonerData tdata,
     }
     clip(no_intersection ? -1 : 1);
   }
+#elif defined(_GIMMICK_FOG_00_BOUNDARY_SPHERE)
+  {
+    bool no_intersection = false;
+    float distance_to_sphere = 1E6;
+    {
+      float3 l = ro;
+      float a = 1;
+      float b = 2 * dot(rd, l);
+      float c = dot(l, l) - _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius;
+      float t0, t1;
+      if (solveQuadratic(a, b, c, t0, t1)) {
+        no_intersection = (t0 < 0) * (t1 < 0);
+        const bool inside_sphere = (t0 < 0) * (t1 > 0);
+        if (!inside_sphere) {
+          distance_to_sphere = no_intersection ? distance_to_sphere : min(max(t0, 0), max(t1, 0));
+          ro += distance_to_sphere * rd;
+        }
+      }
+    }
+    clip(no_intersection ? -1 : 1);
+  }
+#endif
 
   float density_ss_term = 1 / _Gimmick_Fog_00_Density;
   //density_ss_term = dclamp(density_ss_term, 0.33, 3.00, 5);
@@ -324,7 +353,7 @@ Fog00PBR __getFog00(v2f i, ToonerData tdata,
   const float dither_seed = rand2(float2(screen_uv_round.x, screen_uv_round.y)*.001);
 #endif
   float dither = dither_seed * step_size * _Gimmick_Fog_00_Ray_Origin_Randomization;
-  ro += rd * (0.001 + dither);
+  ro += rd * (_Gimmick_Fog_00_Initial_Offset + dither);
 
   const float depth_hit_l = length(obj_pos_depth_hit - ro);
 
@@ -425,9 +454,11 @@ Fog00PBR __getFog00(v2f i, ToonerData tdata,
     if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff) {
       break;
     }
-    if (_Gimmick_Fog_00_Boundary_Type == 0 && dot(p.xz, p.xz) > _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius) {
+#if defined(_GIMMICK_FOG_00_BOUNDARY_SPHERE) || defined(_GIMMICK_FOG_00_BOUNDARY_CYLINDER)
+    if (dot(p.xz, p.xz) > _Gimmick_Fog_00_Radius * _Gimmick_Fog_00_Radius) {
       break;
     }
+#endif
 #endif
   }
   if (acc.a > _Gimmick_Fog_00_Alpha_Cutoff || ii == FOG_MAX_LOOP) {
