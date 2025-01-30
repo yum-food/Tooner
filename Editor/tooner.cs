@@ -2920,6 +2920,8 @@ public class ToonerGUI : ShaderGUI {
     FloatProperty(bc, "Global scale");
     bc = FindProperty("_Gimmick_ZWrite_Abomination_Vertex_Expansion_Factor");
     FloatProperty(bc, "Vertex expansion factor");
+    bc = FindProperty("_Gimmick_ZWrite_Abomination_Global_Offset");
+    VectorProperty(bc, "Global offset");
 
     bc = FindProperty("_Gimmick_ZWrite_Abomination_Body_Half_Height");
     FloatProperty(bc, "Body half height");

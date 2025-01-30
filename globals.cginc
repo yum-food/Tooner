@@ -1017,6 +1017,7 @@ float _Gimmick_ZWrite_Abomination_Normal_Epsilon;
 float _Gimmick_ZWrite_Abomination_Initial_Step_Size;
 float _Gimmick_ZWrite_Abomination_Global_Scale;
 float _Gimmick_ZWrite_Abomination_Vertex_Expansion_Factor;
+float3 _Gimmick_ZWrite_Abomination_Global_Offset;
 
 float _Gimmick_ZWrite_Abomination_Body_Half_Height;
 float _Gimmick_ZWrite_Abomination_Body_Radius;

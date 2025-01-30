@@ -1095,6 +1095,7 @@ Shader "yum_food/tooner"
     _Gimmick_ZWrite_Abomination_Initial_Step_Size("Initial step size", Float) = 0.001
     _Gimmick_ZWrite_Abomination_Global_Scale("Global scale", Float) = 1
     _Gimmick_ZWrite_Abomination_Vertex_Expansion_Factor("Vertex expansion factor", Float) = 1
+    _Gimmick_ZWrite_Abomination_Global_Offset("Global offset", Vector) = (0, 0, 0, 0)
 
     _Gimmick_ZWrite_Abomination_Body_Half_Height("Body half height", Float) = 0.1
     _Gimmick_ZWrite_Abomination_Body_Radius("Body radius", Float) = 0.1

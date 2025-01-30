@@ -169,6 +169,7 @@ ZWriteAbominationPBR zwrite_abomination(in v2f i)
   float l = length(ro);
   float scale_factor = pow(l, 1.5);
   ro /= scale_factor;
+  ro += _Gimmick_ZWrite_Abomination_Global_Offset;
 
   float3 forward_axis = float3(0, 0, 1);
   // We apply a factor of -1 to shift the result forward by a phase shift of pi.
