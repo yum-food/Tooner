@@ -529,11 +529,11 @@ public class ToonerGUI : ShaderGUI {
   enum TilingMode {
     Clamp,
     Repeat,
-  }
+  };
   enum BaseColorMode {
     Color,
     SDF,
-  }
+  };
   void DoDecal() {
     show_ui.Add(AddCollapsibleMenu("Decals", "_Decal"));
     EditorGUI.indentLevel += 1;
@@ -792,7 +792,7 @@ public class ToonerGUI : ShaderGUI {
     Subtract,
     Min,
     Max,
-  }
+  };
 
   void DoMatcap() {
     for (int i = 0; i < 2; i++) {
@@ -2647,7 +2647,7 @@ public class ToonerGUI : ShaderGUI {
     Cylinder = 0,
     Plane = 1,
     Sphere = 2,
-  }
+  };
 
   void DoGimmickFog0() {
     MaterialProperty bc;
@@ -3179,6 +3179,63 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  enum Lens00Mode {
+    Bayer,
+    InterleavedGradientNoise,
+  }
+
+  void DoLens00() {
+    MaterialProperty bc;
+
+    bc = FindProperty("_Gimmick_Lens_00_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Lens00", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_LENS_00", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Gimmick_Lens_00_Enable_Frame_Counter");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Frame counter", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_GIMMICK_LENS_00_FRAME_COUNTER", enabled);
+
+    bc = FindProperty("_Gimmick_Lens_00_Subdivisions");
+    FloatProperty(bc, "Quantization subdivisions");
+
+    if (enabled) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Gimmick_Lens_00_Frame_Counter_Speed");
+      FloatProperty(bc, "Speed");
+      EditorGUI.indentLevel -= 1;
+    }
+
+
+    bc = FindProperty("_Gimmick_Lens_00_Scale");
+    FloatProperty(bc, "Scale");
+
+    bc = FindProperty("_Gimmick_Lens_00_Mode");
+    Lens00Mode mode = (Lens00Mode) Math.Round(bc.floatValue);
+    EditorGUI.BeginChangeCheck();
+    mode = (Lens00Mode) EnumPopup(
+        MakeLabel("Mode"), mode);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = (float) mode;
+    SetKeyword("_GIMMICK_LENS_00_BAYER", mode == Lens00Mode.Bayer);
+    SetKeyword("_GIMMICK_LENS_00_INTERLEAVED_GRADIENT_NOISE", mode == Lens00Mode.InterleavedGradientNoise);
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmicks() {
     show_ui.Add(AddCollapsibleMenu("Gimmicks", "_Gimmicks"));
     EditorGUI.indentLevel += 1;
@@ -3211,6 +3268,7 @@ public class ToonerGUI : ShaderGUI {
     DoExplosion();
     DoGeoScroll();
     DoGimmickEpilepsyMode();
+    DoLens00();
 
     EditorGUI.indentLevel -= 1;
     show_ui.RemoveAt(show_ui.Count - 1);

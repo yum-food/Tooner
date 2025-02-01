@@ -108,13 +108,14 @@ struct v2f
   float3 centerCamPos : TEXCOORD14;
 
   float2 screenPos : TEXCOORD15;
+  float4 grabPos : TEXCOORD16;
 
   #if defined(VERTEXLIGHT_ON)
-  float3 vertexLightColor : TEXCOORD16;
+  float3 vertexLightColor : TEXCOORD17;
   #endif
 
 #if defined(_TROCHOID)
-  float3 objPos_pre_trochoid : TEXCOORD17;
+  float3 objPos_pre_trochoid : TEXCOORD18;
 #endif
 
   UNITY_VERTEX_INPUT_INSTANCE_ID

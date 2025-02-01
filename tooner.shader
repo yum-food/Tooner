@@ -1167,9 +1167,19 @@ Shader "yum_food/tooner"
     _Gimmick_Box_Discard_Corner_1("Corner 1", Vector) = (0, 0, 0, 0)
     _Gimmick_Box_Discard_Corner_2("Corner 2", Vector) = (0, 0, 0, 0)
     _Gimmick_Box_Discard_Invert("Invert", Float) = 0
+
+    _Gimmick_Lens_00_Enable_Static("Enable lens 00", Float) = 0
+    _Gimmick_Lens_00_Enable_Frame_Counter("Enable frame counter", Float) = 0
+    _Gimmick_Lens_00_Frame_Counter_Speed("Speed", Float) = 1
+    _Gimmick_Lens_00_Subdivisions("Quantization subdivisions", Float) = 1
+    _Gimmick_Lens_00_Mode("Mode", Float) = 0  // 0 = Bayer, 1 = InterleavedGradientNoise
+    _Gimmick_Lens_00_Scale("Scale", Float) = 1
+
+
   }
   SubShader
   {
+    GrabPass { "_Tooner_Grabpass" }
     Tags {
       "VRCFallback"="ToonCutout"
       "DisableBatching"="True"

@@ -267,6 +267,7 @@ v2f vert(appdata v)
 
 	float2 suv = o.pos * float2(0.5, 0.5 * _ProjectionParams.x);
   o.screenPos = TransformStereoScreenSpaceTex(suv + 0.5 * o.pos.w, o.pos.w);
+  o.grabPos = ComputeGrabScreenPos(o.pos);
 
   getVertexLightColor(o);
   UNITY_TRANSFER_FOG(o, o.pos);
@@ -441,6 +442,11 @@ void geom(triangle v2f tri_in[3],
   tri_out.Append(v2);
   tri_out.RestartStrip();
 }
+
+#if defined(_LENS00)
+
+#endif
+
 
 #if defined(_RORSCHACH) || defined(_GLITTER) || defined(_RIM_LIGHTING0_GLITTER) || defined(_RIM_LIGHTING1_GLITTER) || defined(_RIM_LIGHTING2_GLITTER) || defined(_RIM_LIGHTING3_GLITTER)
 struct RorschachPBR {
@@ -1055,8 +1061,18 @@ float4 effect(inout v2f i, out float depth)
   float4 albedo = _Color;
 #endif  // _BASECOLOR_MAP
 
+#if defined(_FRAME_COUNTER)
+  const float frame = floor(_Frame_Counter);
+#elif defined(TOONER_AUDIOLINK_AVAILABLE)
+  const float frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
+#else
+  const float frame = 0;
+#endif  // _FRAME_COUNTER
+
+
 #if defined(_GIMMICK_GERSTNER_WATER)
 #if defined(_EXPLODE)
+
   if (_Explode_Phase < 1E-6)
 #endif
   {
@@ -1445,14 +1461,6 @@ float4 effect(inout v2f i, out float depth)
 #endif
 
 #if defined(_RENDERING_CUTOUT)
-#if defined(_FRAME_COUNTER)
-  float frame = floor(_Frame_Counter);
-#else
-  float frame = 0;
-  if (AudioLinkIsAvailable()) {
-    frame = ((float) AudioLinkData(ALPASS_GENERALVU + int2(1, 0)).x);
-  }
-#endif  // _FRAME_COUNTER
 #if defined(_RENDERING_CUTOUT_STOCHASTIC)
   float ar = rand2(i.uv0);
   clip(albedo.a - ar);
@@ -2272,6 +2280,28 @@ float4 effect(inout v2f i, out float depth)
 #endif
       return albedo;
     }
+  }
+#endif
+
+#if defined(_GIMMICK_LENS_00)
+  {
+    // Use tdata.screen_uv to sample 8x8 Bayer matrix.
+    //uint2 screen_uv_round = floor(tdata.screen_uv * _ScreenParams.xy * _Gimmick_Lens_00_Scale);
+    //uint2 screen_uv_round = floor(tdata.screen_uv * _ScreenParams.xy * _Gimmick_Lens_00_Scale);
+    uint2 glasses_uv_round = floor(i.uv0 * _ScreenParams.xy * _Gimmick_Lens_00_Scale);
+    uint2 bayer_idx = (glasses_uv_round % 8);
+#if defined(_GIMMICK_LENS_00_BAYER)
+    float mask = BayerM8x8[bayer_idx.y * 8 + bayer_idx.x];
+#elif defined(_GIMMICK_LENS_00_INTERLEAVED_GRADIENT_NOISE)
+    float mask = ign(glasses_uv_round);
+#endif
+    mask = frac(mask + frame * PHI * _Gimmick_Lens_00_Frame_Counter_Speed);
+    float2 grab_uv = i.grabPos.xy / i.grabPos.w;
+
+    //grab_uv = floor(grab_uv * _ScreenParams.xy * _Gimmick_Lens_00_Scale) / (_ScreenParams.xy * _Gimmick_Lens_00_Scale);
+    float3 grab_color = _Tooner_Grabpass.SampleLevel(linear_clamp_s, grab_uv, 0).rgb;
+    grab_color = round(grab_color * _Gimmick_Lens_00_Subdivisions) / _Gimmick_Lens_00_Subdivisions;
+    lit.rgb = (grab_color > mask);
   }
 #endif
 

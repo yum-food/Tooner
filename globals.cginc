@@ -60,11 +60,15 @@ float _SpecularStrength;
 float _FresnelStrength;
 float _UseFresnel;
 float _ReflectionStrength;
+
+texture2D _Tooner_Grabpass;
+
 #if defined(_REFLECTION_STRENGTH_TEX)
 texture2D _ReflectionStrengthTex;
 #endif
 float3 shadowedReflections;
 int _ReflShadows;
+
 float _ReflShadowStrength;
 float			_BrightnessReflShad;
 float			_ContrastReflShad;
@@ -1124,6 +1128,15 @@ float _Gimmick_Epilepsy_Mode_Rolloff_Power;
 #if defined(_RENDERING_CUTOUT_NOISE_MASK)
 texture2D _Rendering_Cutout_Noise_Mask;
 float4 _Rendering_Cutout_Noise_Mask_TexelSize;
+#endif
+
+#if defined(_GIMMICK_LENS_00)
+float _Gimmick_Lens_00_Enable_Frame_Counter;
+float _Gimmick_Lens_00_Scale;
+float _Gimmick_Lens_00_Subdivisions;
+#if defined(_GIMMICK_LENS_00_FRAME_COUNTER)
+float _Gimmick_Lens_00_Frame_Counter_Speed;
+#endif
 #endif
 
 #endif

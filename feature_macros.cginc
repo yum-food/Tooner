@@ -286,6 +286,11 @@
 #pragma shader_feature_local _ _OPTIMIZE_INTERPOLATORS
 #pragma shader_feature_local _ _ACES_FILMIC
 #pragma shader_feature_local _ _GIMMICK_ZWRITE_ABOMINATION
+#pragma shader_feature_local _ _GIMMICK_LENS_00
+#pragma shader_feature_local _ _GIMMICK_LENS_00_FRAME_COUNTER
+#pragma shader_feature_local _ _GIMMICK_LENS_00_GRABPASS
+#pragma shader_feature_local _ _GIMMICK_LENS_00_BAYER
+#pragma shader_feature_local _ _GIMMICK_LENS_00_INTERLEAVED_GRADIENT_NOISE
 
 #endif  // __FEATURE_MACROS_INC
 
