@@ -157,41 +157,43 @@ v2f vert(appdata v)
   v.vertex.xyz *= _Gimmick_ZWrite_Abomination_Vertex_Expansion_Factor;
 #endif
 #if defined(_FACE_ME_WORLD_Y)
+  [branch]
   if (_FaceMeWorldY_Enable_Dynamic) {
-    // Undo object coordinate system rotation.
-    float3x3 rotation = float3x3(
-        normalize(unity_ObjectToWorld._m00_m10_m20),
-        normalize(unity_ObjectToWorld._m01_m11_m21),
-        normalize(unity_ObjectToWorld._m02_m12_m22));
-    rotation = transpose(rotation);
-    float3 unrotated = mul(transpose(rotation),
-        v.vertex.xyz);
-    float4 pos = mul(unity_ObjectToWorld,
-        float4(unrotated, v.vertex.w));
-    float3 unrotated_n = mul(transpose(rotation),
-        v.normal);
-    float3 n = UnityObjectToWorldNormal(unrotated_n);
-
-    float3 origin = mul(unity_ObjectToWorld, float4(0, 0, 0, 1)).xyz;
-    float3 view_dir = o.centerCamPos - origin;
-    // Project onto xz plane
-    n.y = 0;
-    view_dir.y = 0;
-    // Normalize
-    n = normalize(n);
-    view_dir = normalize(view_dir);
-    // Calculate angles and rotate
-    float ct = dot(view_dir, n);
-    float3 n_cross_v = cross(view_dir, n);
-    float st = length(n_cross_v);
-    st *= sign(n_cross_v.y);
-    float2x2 rot = float2x2(
-        ct, -st,
-        st, ct);
-    pos.xz = mul(rot, pos.xz - origin.xz) + origin.xz;
-
-    v.vertex = mul(unity_WorldToObject, pos);
-    o.normal = view_dir;
+    float3 object_center = mul(unity_ObjectToWorld, float4(0, 0, 0, 1));
+    // Get forward axis of object coordinate system, i.e. the orientation of
+    // the hip bone.
+    // Then project it onto the xz plane.
+    float3 forward_axis = mul(unity_ObjectToWorld, float3(0, 0, 1));
+    forward_axis.y = 0;
+    forward_axis = normalize(forward_axis);
+    float4 worldPos = mul(unity_ObjectToWorld, v.vertex);
+    float3 rd = normalize((worldPos - object_center) - getCenterCamPos());
+    // We apply a factor of -1 to shift the result forward by a phase shift of pi.
+    float cos_t = -dot(normalize(rd.xz), forward_axis.xz);
+    // We want to get sin(t) using the identity:
+    //   || a x b || = || a || || b || sin(t)
+    // For normal vectors, this simplifies to:
+    //   || a x b || = sin(t)
+    // The issue is that the norm operator loses the sign.
+    // We can estimate the sign by assuming that `rd` and `forward_axis` are on
+    // the xz plane.
+    // If that's the case, then the cross product is necessarily constrained to
+    // the y axis.
+    float sin_t_sign = sign(cross(rd, forward_axis).y);
+    // Here we use the identity:
+    //   sin(t) = sqrt(1 - cos(t)^2)
+    // We simply apply the sign correction `sin_t_sign` to the result.
+    // We then invert it, since the goal is not to amplify the rotation, but
+    // to negate it.
+    // Finally, we add a phase correction to make the abomination face us.
+    float sin_t = -sqrt(1 - cos_t * cos_t) * sin_t_sign;
+    float2x2 face_me_rot = float2x2(cos_t, -sin_t, sin_t, cos_t);
+    float2x2 face_me_rot_inv = float2x2(cos_t, sin_t, -sin_t, cos_t);
+    worldPos.xz = mul(face_me_rot, (worldPos.xz - object_center.xz)) + object_center.xz;
+    v.vertex = mul(unity_WorldToObject, worldPos);
+    float3 world_normal = UnityObjectToWorldNormal(v.normal);
+    world_normal.xz = mul(face_me_rot_inv, world_normal.xz);
+    v.normal = normalize(mul(unity_WorldToObject, world_normal));
   }
 #endif
 
@@ -227,15 +229,7 @@ v2f vert(appdata v)
   o.pos = UnityObjectToClipPos(v.vertex);
   o.worldPos = mul(unity_ObjectToWorld, v.vertex);
   o.objPos = v.vertex;
-
-#if defined(_FACE_ME_WORLD_Y)
-  if (!_FaceMeWorldY_Enable_Dynamic) {
-    o.normal = UnityObjectToWorldNormal(v.normal);
-  }
-#else
   o.normal = UnityObjectToWorldNormal(v.normal);
-#endif
-
   o.tangent = float4(UnityObjectToWorldDir(v.tangent.xyz), v.tangent.w);
   o.uv0 = v.uv0;
 #if !defined(_OPTIMIZE_INTERPOLATORS)

@@ -198,7 +198,7 @@ ZWriteAbominationPBR zwrite_abomination(in v2f i)
 
   // Raytrace ro onto sphere containing sim
 
-#if 0
+#if 1
   {
     bool no_intersection = false;
     float distance_to_sphere = 1E6;
