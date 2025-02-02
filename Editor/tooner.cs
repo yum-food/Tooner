@@ -3236,6 +3236,33 @@ public class ToonerGUI : ShaderGUI {
     EditorGUI.indentLevel -= 1;
   }
 
+  void DoSurfaceStableFractalDithering() {
+    MaterialProperty bc;
+
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_Enable_Static");
+    bool enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Stable fractal dithering", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+    SetKeyword("_SURFACE_STABLE_FRACTAL_DITHERING", enabled);
+
+    if (!enabled) {
+      return;
+    }
+
+    EditorGUI.indentLevel += 1;
+
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_Noise");
+    TexturePropertySingleLine(MakeLabel(bc, "Noise"), bc);
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_Scale");
+    FloatProperty(bc, "Scale");
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_Max_Fwidth");
+    FloatProperty(bc, "Max fwidth");
+
+    EditorGUI.indentLevel -= 1;
+  }
+
   void DoGimmicks() {
     show_ui.Add(AddCollapsibleMenu("Gimmicks", "_Gimmicks"));
     EditorGUI.indentLevel += 1;
@@ -3269,6 +3296,7 @@ public class ToonerGUI : ShaderGUI {
     DoGeoScroll();
     DoGimmickEpilepsyMode();
     DoLens00();
+    DoSurfaceStableFractalDithering();
 
     EditorGUI.indentLevel -= 1;
     show_ui.RemoveAt(show_ui.Count - 1);

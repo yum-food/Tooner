@@ -1139,5 +1139,11 @@ float _Gimmick_Lens_00_Frame_Counter_Speed;
 #endif
 #endif
 
+#if defined(_SURFACE_STABLE_FRACTAL_DITHERING)
+texture3D _Surface_Stable_Fractal_Dithering_Noise;
+float _Surface_Stable_Fractal_Dithering_Scale;
+float _Surface_Stable_Fractal_Dithering_Max_Fwidth;
+#endif
+
 #endif
 

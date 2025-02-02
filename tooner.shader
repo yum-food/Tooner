@@ -1175,7 +1175,10 @@ Shader "yum_food/tooner"
     _Gimmick_Lens_00_Mode("Mode", Float) = 0  // 0 = Bayer, 1 = InterleavedGradientNoise
     _Gimmick_Lens_00_Scale("Scale", Float) = 1
 
-
+    _Surface_Stable_Fractal_Dithering_Enable_Static("Enable stable fractal dithering", Float) = 0
+    _Surface_Stable_Fractal_Dithering_Noise("Noise", 3D) = "white" {}
+    _Surface_Stable_Fractal_Dithering_Scale("Scale", Float) = 1
+    _Surface_Stable_Fractal_Dithering_Max_Fwidth("Max fwidth", Float) = 0.001
   }
   SubShader
   {
