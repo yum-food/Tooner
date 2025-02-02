@@ -985,6 +985,59 @@ float4 map_color_epilepsy(float4 color) {
 #define FILTER_COLOR(color) color
 #endif
 
+float ssfd(float2 uv, float scale, float max_fwidth, texture3D noise)
+{
+  float2 duv = uv;
+
+  //float duv_fw = fwidth(duv.x) + fwidth(duv.y);
+  // Original paper uses SVD instead of fwidth.
+  float2x2 M = float2x2(ddx(duv), ddy(duv));
+  float2x2 MtM = mul(transpose(M), M);
+  float trace = MtM[0][0] + MtM[1][1];
+  float det = determinant(MtM);
+  // Calculate eigenvalues using quadratic formula.
+  float tmp = sqrt(trace * trace - 4 * det);
+  float e1 = (trace + tmp) * 0.5;
+  float e2 = (trace - tmp) * 0.5;
+  float2 singular_values = sqrt(float2(e1, e2));
+  // Logic from original paper: the smaller eigenvalue corresponds to the
+  // largest amount of stretching, so we use it to determine when to
+  // subdivide.
+  float duv_fw = singular_values.y;
+
+  // Suppose Max_Fwidth is 1.
+  // duv_fw is 16. That means UV is changing a lot per pixel. That means we want to shrink the scale of the UV.
+  // Factor is 16.
+  // log_2(factor) is 4.
+  // Divide original by 16.
+  float fw_factor = duv_fw / max_fwidth;
+  float fractal_level = log2(fw_factor);
+  float fractal_level_floor = floor(fractal_level);
+  float fractal_remainder = fractal_level - fractal_level_floor;
+
+  duv /= pow(2, fractal_level_floor);
+  duv *= scale;
+
+#if 1
+  // Four layers -> coarsest at 0.125, finest at 0.875.
+  uint width, height, depth;
+  noise.GetDimensions(width, height, depth);
+  float n_layers = depth;
+  float not_used_lo = 1/(n_layers*2);
+  float not_used_hi = 1 - not_used_lo;
+
+  float uvw = (not_used_hi - not_used_lo) * (1 - fractal_remainder) + not_used_lo;
+
+  float3 duv_3d = float3(duv, uvw);
+#else
+  float3 duv_3d = float3(duv, 0);
+#endif
+  float dither = noise.SampleLevel(bilinear_repeat_s, duv_3d, 0);
+  dither = (dither > 0.5) ? 1 : 0;
+
+  return dither;
+}
+
 float4 effect(inout v2f i, out float depth)
 {
   ToonerData tdata;
@@ -1070,63 +1123,7 @@ float4 effect(inout v2f i, out float depth)
 #endif  // _FRAME_COUNTER
 
 #if defined(_SURFACE_STABLE_FRACTAL_DITHERING)
-  {
-    float2 duv = i.uv0;
-
-    //float duv_fw = fwidth(duv.x) + fwidth(duv.y);
-    // Original paper uses SVD instead of fwidth.
-    float2x2 M = float2x2(ddx(duv), ddy(duv));
-    float2x2 MtM = mul(transpose(M), M);
-    float trace = MtM[0][0] + MtM[1][1];
-    float det = determinant(MtM);
-    // Calculate eigenvalues using quadratic formula.
-    float tmp = sqrt(trace * trace - 4 * det);
-    float e1 = (trace + tmp) * 0.5;
-    float e2 = (trace - tmp) * 0.5;
-    float2 singular_values = sqrt(float2(e1, e2));
-    // Logic from original paper: the smaller eigenvalue corresponds to the
-    // largest amount of stretching, so we use it to determine when to
-    // subdivide.
-    float duv_fw = singular_values.y;
-
-    // Suppose Max_Fwidth is 1.
-    // duv_fw is 16. That means UV is changing a lot per pixel. That means we want to shrink the scale of the UV.
-    // Factor is 16.
-    // log_2(factor) is 4.
-    // Divide original by 16.
-    float fw_factor = duv_fw / _Surface_Stable_Fractal_Dithering_Max_Fwidth;
-    float fractal_level = log2(fw_factor);
-    float fractal_level_floor = floor(fractal_level);
-    float fractal_remainder = fractal_level - fractal_level_floor;
-    duv /= pow(2, fractal_level_floor);
-    duv *= _Surface_Stable_Fractal_Dithering_Scale;
-
-    //float subdivisions = 4;
-    //float fractal_remainder_subd = fractal_remainder * subdivisions;
-
-#if 1
-    // Four layers -> coarsest at 0.125, finest at 0.875.
-    uint width, height, depth;
-    _Surface_Stable_Fractal_Dithering_Noise.GetDimensions(width, height, depth);
-    float n_layers = depth;
-    float not_used_lo = 1/(n_layers*2);
-    float not_used_hi = 1 - not_used_lo;
-    float uvw = (not_used_hi - not_used_lo) * (1 - fractal_remainder) + not_used_lo;
-
-    float3 duv_3d = float3(duv, uvw);
-#else
-    float3 duv_3d = float3(duv, 0);
-#endif
-    float noise = _Surface_Stable_Fractal_Dithering_Noise.SampleLevel(bilinear_repeat_s, duv_3d, 0);
-    noise = (noise > 0.5) ? 1 : 0;
-
-    albedo.rgb = noise;
-#if 0
-    float hue = 0;
-    hue += glsl_mod(fractal_level_floor*.1, 1);
-    albedo.rgb *= HSVtoRGB(float3(hue, 1, 1));
-#endif
-  }
+  albedo.rgb = ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale, _Surface_Stable_Fractal_Dithering_Max_Fwidth, _Surface_Stable_Fractal_Dithering_Noise);
 #endif
 
 #if defined(_GIMMICK_GERSTNER_WATER)
@@ -2353,14 +2350,17 @@ float4 effect(inout v2f i, out float depth)
     float mask = BayerM8x8[bayer_idx.y * 8 + bayer_idx.x];
 #elif defined(_GIMMICK_LENS_00_INTERLEAVED_GRADIENT_NOISE)
     float mask = ign(glasses_uv_round);
+#elif defined(_GIMMICK_LENS_00_SSFD)
+    float mask = ssfd(glasses_uv_round, _Gimmick_Lens_00_SSFD_Scale, _Gimmick_Lens_00_SSFD_Max_Fwidth, _Gimmick_Lens_00_SSFD_Noise);
 #endif
-    mask = frac(mask + frame * PHI * _Gimmick_Lens_00_Frame_Counter_Speed);
+    //mask = frac(mask + frame * PHI * _Gimmick_Lens_00_Frame_Counter_Speed);
     float2 grab_uv = i.grabPos.xy / i.grabPos.w;
 
     //grab_uv = floor(grab_uv * _ScreenParams.xy * _Gimmick_Lens_00_Scale) / (_ScreenParams.xy * _Gimmick_Lens_00_Scale);
     float3 grab_color = _Tooner_Grabpass.SampleLevel(linear_clamp_s, grab_uv, 0).rgb;
     grab_color = round(grab_color * _Gimmick_Lens_00_Subdivisions) / _Gimmick_Lens_00_Subdivisions;
     lit.rgb = (grab_color > mask);
+    lit.rgb = mask * .1;
   }
 #endif
 

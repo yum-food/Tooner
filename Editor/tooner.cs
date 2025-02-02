@@ -3182,6 +3182,7 @@ public class ToonerGUI : ShaderGUI {
   enum Lens00Mode {
     Bayer,
     InterleavedGradientNoise,
+    SurfaceStableFractalDithering,
   }
 
   void DoLens00() {
@@ -3232,6 +3233,19 @@ public class ToonerGUI : ShaderGUI {
     bc.floatValue = (float) mode;
     SetKeyword("_GIMMICK_LENS_00_BAYER", mode == Lens00Mode.Bayer);
     SetKeyword("_GIMMICK_LENS_00_INTERLEAVED_GRADIENT_NOISE", mode == Lens00Mode.InterleavedGradientNoise);
+    SetKeyword("_GIMMICK_LENS_00_SSFD", mode == Lens00Mode.SurfaceStableFractalDithering);
+
+    if (mode == Lens00Mode.SurfaceStableFractalDithering) {
+      EditorGUI.indentLevel += 1;
+      bc = FindProperty("_Gimmick_Lens_00_SSFD_Scale");
+      FloatProperty(bc, "Scale");
+      bc = FindProperty("_Gimmick_Lens_00_SSFD_Max_Fwidth");
+      FloatProperty(bc, "Max fwidth");
+      bc = FindProperty("_Gimmick_Lens_00_SSFD_Noise");
+      TexturePropertySingleLine(MakeLabel(bc, "Noise"), bc);
+      EditorGUI.indentLevel -= 1;
+    }
+
 
     EditorGUI.indentLevel -= 1;
   }

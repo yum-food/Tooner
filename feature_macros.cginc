@@ -291,7 +291,9 @@
 #pragma shader_feature_local _ _GIMMICK_LENS_00_GRABPASS
 #pragma shader_feature_local _ _GIMMICK_LENS_00_BAYER
 #pragma shader_feature_local _ _GIMMICK_LENS_00_INTERLEAVED_GRADIENT_NOISE
+#pragma shader_feature_local _ _GIMMICK_LENS_00_SSFD
 #pragma shader_feature_local _ _SURFACE_STABLE_FRACTAL_DITHERING
+
 
 #endif  // __FEATURE_MACROS_INC
 
