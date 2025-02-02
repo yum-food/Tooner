@@ -3389,6 +3389,7 @@ public class ToonerGUI : ShaderGUI {
     Stochastic,
     InterleavedGradientNoise,
     NoiseMask,
+    SurfaceStableFractalDithering,
   }
 
   // unity is made by fucking morons and they don't expose this so i'm
@@ -3504,6 +3505,7 @@ public class ToonerGUI : ShaderGUI {
       SetKeyword("_RENDERING_CUTOUT_STOCHASTIC", cmode == CutoutMode.Stochastic);
       SetKeyword("_RENDERING_CUTOUT_IGN", cmode == CutoutMode.InterleavedGradientNoise);
       SetKeyword("_RENDERING_CUTOUT_NOISE_MASK", cmode == CutoutMode.NoiseMask);
+      SetKeyword("_RENDERING_CUTOUT_SSFD", cmode == CutoutMode.SurfaceStableFractalDithering);
 
       EditorGUI.indentLevel += 1;
       {
@@ -3518,6 +3520,13 @@ public class ToonerGUI : ShaderGUI {
         } else if (cmode == CutoutMode.InterleavedGradientNoise) {
           bc = FindProperty("_Rendering_Cutout_Ign_Seed");
           FloatProperty(bc, "Seed");
+        } else if (cmode == CutoutMode.SurfaceStableFractalDithering) {
+          bc = FindProperty("_Rendering_Cutout_SSFD_Scale");
+          FloatProperty(bc, "Scale");
+          bc = FindProperty("_Rendering_Cutout_SSFD_Max_Fwidth");
+          FloatProperty(bc, "Max fwidth");
+          bc = FindProperty("_Rendering_Cutout_SSFD_Noise");
+          TexturePropertySingleLine(MakeLabel(bc, "Noise"), bc);
         }
 
         bc = FindProperty("_Rendering_Cutout_Speed");

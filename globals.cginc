@@ -393,6 +393,11 @@ float _Rendering_Cutout_Speed;
 #if defined(_RENDERING_CUTOUT_IGN)
 float _Rendering_Cutout_Ign_Seed;
 #endif
+#if defined(_RENDERING_CUTOUT_SSFD)
+float _Rendering_Cutout_SSFD_Scale;
+float _Rendering_Cutout_SSFD_Max_Fwidth;
+texture3D _Rendering_Cutout_SSFD_Noise;
+#endif
 #endif
 
 #if defined(_OUTLINES)

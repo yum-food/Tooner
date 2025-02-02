@@ -22,6 +22,9 @@ Shader "yum_food/tooner"
 
     _Rendering_Cutout_Noise_Mask("Noise mask", 2D) = "white" {}
     _Rendering_Cutout_Speed("Speed (for stochastic methods)", Float) = 1
+    _Rendering_Cutout_SSFD_Scale("Scale", Float) = 1
+    _Rendering_Cutout_SSFD_Max_Fwidth("Max fwidth", Float) = 1
+    _Rendering_Cutout_SSFD_Noise("Noise", 3D) = "black" {}
 
     _MainTex("Base color", 2D) = "white" {}
     [Normal] _BumpMap("Normal", 2D) = "bump" {}
