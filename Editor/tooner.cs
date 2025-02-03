@@ -3270,9 +3270,11 @@ public class ToonerGUI : ShaderGUI {
     bc = FindProperty("_Surface_Stable_Fractal_Dithering_Noise");
     TexturePropertySingleLine(MakeLabel(bc, "Noise"), bc);
     bc = FindProperty("_Surface_Stable_Fractal_Dithering_Scale");
-    FloatProperty(bc, "Scale");
+    RangeProperty(bc, "Scale");
     bc = FindProperty("_Surface_Stable_Fractal_Dithering_Max_Fwidth");
     FloatProperty(bc, "Max fwidth");
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_Cutoff");
+    RangeProperty(bc, "Cutoff");
 
     EditorGUI.indentLevel -= 1;
   }

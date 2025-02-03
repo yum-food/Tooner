@@ -1004,6 +1004,7 @@ float ssfd(float2 uv, float scale, float max_fwidth, texture3D noise)
   // largest amount of stretching, so we use it to determine when to
   // subdivide.
   float duv_fw = singular_values.y;
+  duv_fw *= scale;
 
   // Suppose Max_Fwidth is 1.
   // duv_fw is 16. That means UV is changing a lot per pixel. That means we want to shrink the scale of the UV.
@@ -1016,7 +1017,6 @@ float ssfd(float2 uv, float scale, float max_fwidth, texture3D noise)
   float fractal_remainder = fractal_level - fractal_level_floor;
 
   duv /= pow(2, fractal_level_floor);
-  duv *= scale;
 
 #if 1
   // Four layers -> coarsest at 0.125, finest at 0.875.
@@ -1122,8 +1122,16 @@ float4 effect(inout v2f i, out float depth)
 #endif  // _FRAME_COUNTER
 
 #if defined(_SURFACE_STABLE_FRACTAL_DITHERING)
-  float ssfd_raw = ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale, _Surface_Stable_Fractal_Dithering_Max_Fwidth, _Surface_Stable_Fractal_Dithering_Noise);
-  albedo.rgb = ssfd_raw > 0.5 ? 1 : 0;
+  {
+    float3 light_dir = getDirectLightDirection(i);
+    float3 light_color = getDirectLightColor();
+    float shadow_attenuation = getShadowAttenuation(i);
+    float ndotl = saturate(dot(i.normal, light_dir) * shadow_attenuation);
+    float light_intensity = ndotl * length(light_color);
+    float ssfd_raw = ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / light_intensity, _Surface_Stable_Fractal_Dithering_Max_Fwidth, _Surface_Stable_Fractal_Dithering_Noise);
+    float ssfd_cutoff = _Surface_Stable_Fractal_Dithering_Cutoff;
+    albedo.rgb = lerp(0, 1, ssfd_raw > 1 - light_intensity);
+  }
 #endif
 
 #if defined(_GIMMICK_GERSTNER_WATER)

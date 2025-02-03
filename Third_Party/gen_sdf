@@ -16,8 +16,10 @@ def compute_sdf(img, scale_factor):
     # Combine the distance fields and scale by factor
     sdf = (dist_transform_fg - dist_transform_bg) / scale_factor
     
-    # Clamp values to [0, 255] range
-    sdf = np.clip(sdf + 128, 0, 255)
+    # Normalize values to [0, 255] range
+    sdf_min = np.min(sdf)
+    sdf_max = np.max(sdf)
+    sdf = ((sdf - sdf_min) * 255 / (sdf_max - sdf_min))
     
     return sdf.astype(np.uint8)
 

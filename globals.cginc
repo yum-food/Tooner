@@ -1153,6 +1153,7 @@ texture3D _Gimmick_Lens_00_SSFD_Noise;
 texture3D _Surface_Stable_Fractal_Dithering_Noise;
 float _Surface_Stable_Fractal_Dithering_Scale;
 float _Surface_Stable_Fractal_Dithering_Max_Fwidth;
+float _Surface_Stable_Fractal_Dithering_Cutoff;
 #endif
 
 
