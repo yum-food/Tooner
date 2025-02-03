@@ -1121,19 +1121,6 @@ float4 effect(inout v2f i, out float depth)
   const float frame = 0;
 #endif  // _FRAME_COUNTER
 
-#if defined(_SURFACE_STABLE_FRACTAL_DITHERING)
-  {
-    float3 light_dir = getDirectLightDirection(i);
-    float3 light_color = getDirectLightColor();
-    float shadow_attenuation = getShadowAttenuation(i);
-    float ndotl = saturate(dot(i.normal, light_dir) * shadow_attenuation);
-    float light_intensity = ndotl * length(light_color);
-    float ssfd_raw = ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / light_intensity, _Surface_Stable_Fractal_Dithering_Max_Fwidth, _Surface_Stable_Fractal_Dithering_Noise);
-    float ssfd_cutoff = _Surface_Stable_Fractal_Dithering_Cutoff;
-    albedo.rgb = lerp(0, 1, ssfd_raw > 1 - light_intensity);
-  }
-#endif
-
 #if defined(_GIMMICK_GERSTNER_WATER)
 #if defined(_EXPLODE)
 
@@ -2359,6 +2346,8 @@ float4 effect(inout v2f i, out float depth)
     //uint2 screen_uv_round = floor(tdata.screen_uv * _ScreenParams.xy * _Gimmick_Lens_00_Scale);
     uint2 glasses_uv_round = floor(i.uv0 * _ScreenParams.xy * _Gimmick_Lens_00_Scale);
     uint2 bayer_idx = (glasses_uv_round % 8);
+    float2 grab_uv = i.grabPos.xy / i.grabPos.w;
+    float3 grab_color = _Tooner_Grabpass.SampleLevel(linear_clamp_s, grab_uv, 0).rgb;
 #if defined(_GIMMICK_LENS_00_BAYER)
     float mask = BayerM8x8[bayer_idx.y * 8 + bayer_idx.x];
     mask = frac(mask + frame * PHI * _Gimmick_Lens_00_Frame_Counter_Speed);
@@ -2366,13 +2355,15 @@ float4 effect(inout v2f i, out float depth)
     float mask = ign(glasses_uv_round);
     mask = frac(mask + frame * PHI * _Gimmick_Lens_00_Frame_Counter_Speed);
 #elif defined(_GIMMICK_LENS_00_SSFD)
-    float mask = ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale, _Gimmick_Lens_00_SSFD_Max_Fwidth, _Gimmick_Lens_00_SSFD_Noise);
-    mask = mask > 0.5 ? 1 : 0;
+    float3 mask = float3(
+      ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.r, _Gimmick_Lens_00_SSFD_Max_Fwidth, _Gimmick_Lens_00_SSFD_Noise),
+      ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.g, _Gimmick_Lens_00_SSFD_Max_Fwidth, _Gimmick_Lens_00_SSFD_Noise),
+      ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.b, _Gimmick_Lens_00_SSFD_Max_Fwidth, _Gimmick_Lens_00_SSFD_Noise)
+    );
+    mask = mask > grab_color ? 1 : 0;
 #endif
-    float2 grab_uv = i.grabPos.xy / i.grabPos.w;
 
     //grab_uv = floor(grab_uv * _ScreenParams.xy * _Gimmick_Lens_00_Scale) / (_ScreenParams.xy * _Gimmick_Lens_00_Scale);
-    float3 grab_color = _Tooner_Grabpass.SampleLevel(linear_clamp_s, grab_uv, 0).rgb;
     grab_color = round(grab_color * _Gimmick_Lens_00_Subdivisions) / _Gimmick_Lens_00_Subdivisions;
     lit.rgb = (grab_color > mask);
     //lit.rgb = mask;
@@ -2480,6 +2471,22 @@ float4 effect(inout v2f i, out float depth)
 #endif
   result.rgb += getOverlayEmission(ov, i) * _Global_Emission_Factor;
   result.rgb += _Global_Emission_Additive_Factor * albedo.rgb;
+
+#if defined(_SURFACE_STABLE_FRACTAL_DITHERING)
+  [branch]
+  if (_Surface_Stable_Fractal_Dithering_Enable_Dynamic) {
+    float3 c = result.rgb * _Surface_Stable_Fractal_Dithering_Brightness_Factor;
+    float3 mask = float3(
+      ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / c.r, _Surface_Stable_Fractal_Dithering_Max_Fwidth, _Surface_Stable_Fractal_Dithering_Noise),
+      ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / c.g, _Surface_Stable_Fractal_Dithering_Max_Fwidth, _Surface_Stable_Fractal_Dithering_Noise),
+      ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / c.b, _Surface_Stable_Fractal_Dithering_Max_Fwidth, _Surface_Stable_Fractal_Dithering_Noise)
+    );
+
+    float3 thresholded = lerp(0, 1, mask > 1 - c * _Surface_Stable_Fractal_Dithering_Size_Factor);
+    result.rgb = lerp(result.rgb, thresholded, thresholded);
+  }
+#endif
+
 
   return result;
 }

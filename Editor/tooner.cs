@@ -3267,14 +3267,23 @@ public class ToonerGUI : ShaderGUI {
 
     EditorGUI.indentLevel += 1;
 
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_Enable_Dynamic");
+    enabled = (bc.floatValue != 0.0);
+    EditorGUI.BeginChangeCheck();
+    enabled = Toggle("Enable (runtime switch)", enabled);
+    EditorGUI.EndChangeCheck();
+    bc.floatValue = enabled ? 1.0f : 0.0f;
+
     bc = FindProperty("_Surface_Stable_Fractal_Dithering_Noise");
     TexturePropertySingleLine(MakeLabel(bc, "Noise"), bc);
     bc = FindProperty("_Surface_Stable_Fractal_Dithering_Scale");
     RangeProperty(bc, "Scale");
     bc = FindProperty("_Surface_Stable_Fractal_Dithering_Max_Fwidth");
     FloatProperty(bc, "Max fwidth");
-    bc = FindProperty("_Surface_Stable_Fractal_Dithering_Cutoff");
-    RangeProperty(bc, "Cutoff");
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_Size_Factor");
+    FloatProperty(bc, "Size factor");
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_Brightness_Factor");
+    FloatProperty(bc, "Brightness factor");
 
     EditorGUI.indentLevel -= 1;
   }

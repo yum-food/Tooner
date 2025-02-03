@@ -1182,12 +1182,16 @@ Shader "yum_food/tooner"
     _Gimmick_Lens_00_SSFD_Noise("Noise", 3D) = "white" {}
 
     _Surface_Stable_Fractal_Dithering_Enable_Static("Enable stable fractal dithering", Float) = 0
+    _Surface_Stable_Fractal_Dithering_Enable_Dynamic("Enable stable fractal dithering (dynamic)", Float) = 0
     _Surface_Stable_Fractal_Dithering_Noise("Noise", 3D) = "white" {}
-    _Surface_Stable_Fractal_Dithering_Scale("Scale", Range(0, 1)) = 1
-    _Surface_Stable_Fractal_Dithering_Max_Fwidth("Max fwidth", Float) = 0.001
-    _Surface_Stable_Fractal_Dithering_Cutoff("Cutoff", Range(0, 1)) = 0.5
+    _Surface_Stable_Fractal_Dithering_Scale("Scale", Range(0, 1)) = .1
+    _Surface_Stable_Fractal_Dithering_Max_Fwidth("Max fwidth", Float) = 0.01
+    _Surface_Stable_Fractal_Dithering_Size_Factor("Size factor", Float) = 0.5
+    _Surface_Stable_Fractal_Dithering_Brightness_Factor("Brightness factor", Float) = 1
   }
   SubShader
+
+
   {
     GrabPass { "_Tooner_Grabpass" }
     Tags {
