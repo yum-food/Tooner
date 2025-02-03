@@ -1179,6 +1179,7 @@ Shader "yum_food/tooner"
     _Gimmick_Lens_00_Scale("Scale", Float) = 1
     _Gimmick_Lens_00_SSFD_Scale("Scale", Float) = 1
     _Gimmick_Lens_00_SSFD_Max_Fwidth("Max fwidth", Float) = 0.001
+    _Gimmick_Lens_00_SSFD_Size_Factor("Size factor", Float) = 1
     _Gimmick_Lens_00_SSFD_Noise("Noise", 3D) = "white" {}
 
     _Surface_Stable_Fractal_Dithering_Enable_Static("Enable stable fractal dithering", Float) = 0

@@ -2360,7 +2360,7 @@ float4 effect(inout v2f i, out float depth)
       ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.g, _Gimmick_Lens_00_SSFD_Max_Fwidth, _Gimmick_Lens_00_SSFD_Noise),
       ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.b, _Gimmick_Lens_00_SSFD_Max_Fwidth, _Gimmick_Lens_00_SSFD_Noise)
     );
-    mask = mask > grab_color ? 1 : 0;
+    mask = mask > grab_color * _Gimmick_Lens_00_SSFD_Size_Factor ? 1 : 0;
 #endif
 
     //grab_uv = floor(grab_uv * _ScreenParams.xy * _Gimmick_Lens_00_Scale) / (_ScreenParams.xy * _Gimmick_Lens_00_Scale);

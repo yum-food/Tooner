@@ -1145,6 +1145,7 @@ float _Gimmick_Lens_00_Frame_Counter_Speed;
 #if defined(_GIMMICK_LENS_00_SSFD)
 float _Gimmick_Lens_00_SSFD_Scale;
 float _Gimmick_Lens_00_SSFD_Max_Fwidth;
+float _Gimmick_Lens_00_SSFD_Size_Factor;
 texture3D _Gimmick_Lens_00_SSFD_Noise;
 #endif
 #endif
@@ -1157,9 +1158,6 @@ float _Surface_Stable_Fractal_Dithering_Max_Fwidth;
 float _Surface_Stable_Fractal_Dithering_Size_Factor;
 float _Surface_Stable_Fractal_Dithering_Brightness_Factor;
 #endif
-
-
-
 
 #endif
 

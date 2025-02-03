@@ -3241,6 +3241,8 @@ public class ToonerGUI : ShaderGUI {
       FloatProperty(bc, "Scale");
       bc = FindProperty("_Gimmick_Lens_00_SSFD_Max_Fwidth");
       FloatProperty(bc, "Max fwidth");
+      bc = FindProperty("_Gimmick_Lens_00_SSFD_Size_Factor");
+      FloatProperty(bc, "Size factor");
       bc = FindProperty("_Gimmick_Lens_00_SSFD_Noise");
       TexturePropertySingleLine(MakeLabel(bc, "Noise"), bc);
       EditorGUI.indentLevel -= 1;

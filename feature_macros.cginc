@@ -1,7 +1,7 @@
 #ifndef __FEATURE_MACROS_INC
 #define __FEATURE_MACROS_INC
 
-#define EXPERIMENT__CUSTOM_DEPTH
+//#define EXPERIMENT__CUSTOM_DEPTH
 
 #pragma shader_feature_local _ _BASECOLOR_MAP
 #pragma shader_feature_local _ _NORMAL_MAP
