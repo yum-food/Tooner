@@ -25,28 +25,29 @@ def compute_sdf(img, scale_factor):
 
 def main():
     parser = argparse.ArgumentParser(description='Generate SDF from black and white image')
-    parser.add_argument('input_image', help='Path to input image')
+    parser.add_argument('input_images', nargs='+', help='Path to input image(s)')
     parser.add_argument('--scale', type=float, default=1.0, 
                         help='Scale factor for distance (in texels)')
     args = parser.parse_args()
     
-    # Get input and output paths
-    input_path = args.input_image
-    filename, ext = os.path.splitext(input_path)
-    output_path = f"{filename}-sdf{ext}"
-    
-    # Read input image
-    img = cv2.imread(input_path, cv2.IMREAD_GRAYSCALE)
-    if img is None:
-        print(f"Error: Could not read image {input_path}")
-        return
-    
-    # Compute SDF with scale factor
-    sdf = compute_sdf(img, args.scale)
-    
-    # Save result
-    cv2.imwrite(output_path, sdf)
-    print(f"SDF generated and saved to {output_path}")
+    # Process each input image
+    for input_path in args.input_images:
+        # Get input and output paths
+        filename, ext = os.path.splitext(input_path)
+        output_path = f"{filename}-sdf{ext}"
+        
+        # Read input image
+        img = cv2.imread(input_path, cv2.IMREAD_GRAYSCALE)
+        if img is None:
+            print(f"Error: Could not read image {input_path}")
+            continue
+        
+        # Compute SDF with scale factor
+        sdf = compute_sdf(img, args.scale)
+        
+        # Save result
+        cv2.imwrite(output_path, sdf)
+        print(f"SDF generated and saved to {output_path}")
 
 if __name__ == "__main__":
     main()

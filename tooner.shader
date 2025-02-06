@@ -1189,6 +1189,9 @@ Shader "yum_food/tooner"
     _Surface_Stable_Fractal_Dithering_Max_Fwidth("Max fwidth", Float) = 0.01
     _Surface_Stable_Fractal_Dithering_Size_Factor("Size factor", Float) = 0.5
     _Surface_Stable_Fractal_Dithering_Brightness_Factor("Brightness factor", Float) = 1
+    _Surface_Stable_Fractal_Dithering_UV_Offset_R("UV offset (r)", Vector) = (0, 0, 0, 0)
+    _Surface_Stable_Fractal_Dithering_UV_Offset_G("UV offset (g)", Vector) = (0, 0, 0, 0)
+    _Surface_Stable_Fractal_Dithering_UV_Offset_B("UV offset (b)", Vector) = (0, 0, 0, 0)
   }
   SubShader
 

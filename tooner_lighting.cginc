@@ -985,13 +985,11 @@ float4 map_color_epilepsy(float4 color) {
 #define FILTER_COLOR(color) color
 #endif
 
-float ssfd(float2 uv, float scale, float max_fwidth, texture3D noise)
+float ssfd(float2 uv, float scale, float max_fwidth, float2 uv_offset, texture3D noise)
 {
-  float2 duv = uv;
-
-  //float duv_fw = fwidth(duv.x) + fwidth(duv.y);
+  //float uv_fw = fwidth(uv.x) + fwidth(uv.y);
   // Original paper uses SVD instead of fwidth.
-  float2x2 M = float2x2(ddx(duv), ddy(duv));
+  float2x2 M = float2x2(ddx(uv), ddy(uv));
   float2x2 MtM = mul(transpose(M), M);
   float trace = MtM[0][0] + MtM[1][1];
   float det = determinant(MtM);
@@ -1003,36 +1001,36 @@ float ssfd(float2 uv, float scale, float max_fwidth, texture3D noise)
   // Logic from original paper: the smaller eigenvalue corresponds to the
   // largest amount of stretching, so we use it to determine when to
   // subdivide.
-  float duv_fw = singular_values.y;
-  duv_fw *= scale;
+  float uv_fw = singular_values.y;
+  uv_fw *= scale;
 
-  // Suppose Max_Fwidth is 1.
-  // duv_fw is 16. That means UV is changing a lot per pixel. That means we want to shrink the scale of the UV.
+  uint width, height, depth;
+  noise.GetDimensions(width, height, depth);
+  float bayer_res = sqrt(depth);
+
+  // Suppose max_fwidth is 1.
+  // uv_fw is 16. That means UV is changing a lot per pixel. That means we want to shrink the scale of the UV.
   // Factor is 16.
   // log_2(factor) is 4.
   // Divide original by 16.
-  float fw_factor = duv_fw / max_fwidth;
-  float fractal_level = log2(fw_factor);
+  float fw_factor = uv_fw / max_fwidth;
+  // log_b(x) = log_a(x) / log_a(b)
+  float fractal_level = log2(fw_factor) / log2(bayer_res);
   float fractal_level_floor = floor(fractal_level);
   float fractal_remainder = fractal_level - fractal_level_floor;
 
-  duv /= pow(2, fractal_level_floor);
+  uv *= pow(bayer_res, -fractal_level_floor);
+  uv += uv_offset * pow(bayer_res, -fractal_level_floor);
 
-#if 1
-  // Four layers -> coarsest at 0.125, finest at 0.875.
-  uint width, height, depth;
-  noise.GetDimensions(width, height, depth);
   float n_layers = depth;
   float not_used_lo = 1/(n_layers*2);
   float not_used_hi = 1 - not_used_lo;
 
   float uvw = (not_used_hi - not_used_lo) * (1 - fractal_remainder) + not_used_lo;
 
-  float3 duv_3d = float3(duv, uvw);
-#else
-  float3 duv_3d = float3(duv, 0);
-#endif
-  float dither = noise.SampleLevel(bilinear_repeat_s, duv_3d, 0);
+  float3 uv_3d = float3(uv, uvw);
+
+  float dither = noise.SampleLevel(bilinear_repeat_s, uv_3d, 0);
 
   return dither;
 }
@@ -1526,7 +1524,7 @@ float4 effect(inout v2f i, out float depth)
   ar = frac(ar + frame * PHI * _Rendering_Cutout_Speed);
   clip(albedo.a - ar);
 #elif defined(_RENDERING_CUTOUT_SSFD)
-  float ar = 1.0 - ssfd(i.uv0, _Rendering_Cutout_SSFD_Scale, _Rendering_Cutout_SSFD_Max_Fwidth, _Rendering_Cutout_SSFD_Noise);
+  float ar = 1.0 - ssfd(i.uv0, _Rendering_Cutout_SSFD_Scale, _Rendering_Cutout_SSFD_Max_Fwidth, 0, _Rendering_Cutout_SSFD_Noise);
   ar = ar > albedo.a ? 1 : 0;
   clip(albedo.a - ar);
 #else
@@ -2356,9 +2354,9 @@ float4 effect(inout v2f i, out float depth)
     mask = frac(mask + frame * PHI * _Gimmick_Lens_00_Frame_Counter_Speed);
 #elif defined(_GIMMICK_LENS_00_SSFD)
     float3 mask = float3(
-      ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.r, _Gimmick_Lens_00_SSFD_Max_Fwidth, _Gimmick_Lens_00_SSFD_Noise),
-      ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.g, _Gimmick_Lens_00_SSFD_Max_Fwidth, _Gimmick_Lens_00_SSFD_Noise),
-      ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.b, _Gimmick_Lens_00_SSFD_Max_Fwidth, _Gimmick_Lens_00_SSFD_Noise)
+      ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.r, _Gimmick_Lens_00_SSFD_Max_Fwidth, 0, _Gimmick_Lens_00_SSFD_Noise),
+      ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.g, _Gimmick_Lens_00_SSFD_Max_Fwidth, 0, _Gimmick_Lens_00_SSFD_Noise),
+      ssfd(i.uv0, _Gimmick_Lens_00_SSFD_Scale / grab_color.b, _Gimmick_Lens_00_SSFD_Max_Fwidth, 0, _Gimmick_Lens_00_SSFD_Noise)
     );
     mask = mask > grab_color * _Gimmick_Lens_00_SSFD_Size_Factor ? 1 : 0;
 #endif
@@ -2476,14 +2474,36 @@ float4 effect(inout v2f i, out float depth)
   [branch]
   if (_Surface_Stable_Fractal_Dithering_Enable_Dynamic) {
     float3 c = result.rgb * _Surface_Stable_Fractal_Dithering_Brightness_Factor;
+    // Let's draw dots at the vertices of an equilateral triangle.
+    // The internal angle is 60 degrees.
+    // sin(60d) = sqrt(3) / 2
+    // cos(60d) = 1 / 2
+#if 1
     float3 mask = float3(
-      ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / c.r, _Surface_Stable_Fractal_Dithering_Max_Fwidth, _Surface_Stable_Fractal_Dithering_Noise),
-      ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / c.g, _Surface_Stable_Fractal_Dithering_Max_Fwidth, _Surface_Stable_Fractal_Dithering_Noise),
-      ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / c.b, _Surface_Stable_Fractal_Dithering_Max_Fwidth, _Surface_Stable_Fractal_Dithering_Noise)
+      ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / c.r,
+          _Surface_Stable_Fractal_Dithering_Max_Fwidth,
+          _Surface_Stable_Fractal_Dithering_UV_Offset_R,
+          _Surface_Stable_Fractal_Dithering_Noise),
+      ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / c.g,
+          _Surface_Stable_Fractal_Dithering_Max_Fwidth,
+          _Surface_Stable_Fractal_Dithering_UV_Offset_G,
+          _Surface_Stable_Fractal_Dithering_Noise),
+      ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / c.b,
+          _Surface_Stable_Fractal_Dithering_Max_Fwidth,
+          _Surface_Stable_Fractal_Dithering_UV_Offset_B,
+          _Surface_Stable_Fractal_Dithering_Noise)
     );
-
     float3 thresholded = lerp(0, 1, mask > 1 - c * _Surface_Stable_Fractal_Dithering_Size_Factor);
-    result.rgb = lerp(result.rgb, thresholded, thresholded);
+#else
+    float cc = length(c) / sqrt(3);
+    float mask = ssfd(i.uv0, _Surface_Stable_Fractal_Dithering_Scale / cc,
+          _Surface_Stable_Fractal_Dithering_Max_Fwidth,
+          0.8,
+          _Surface_Stable_Fractal_Dithering_Noise);
+    float3 thresholded = lerp(0, 1, mask > 1 - cc * _Surface_Stable_Fractal_Dithering_Size_Factor);
+#endif
+
+    result.rgb = thresholded;
   }
 #endif
 

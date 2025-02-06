@@ -3286,6 +3286,12 @@ public class ToonerGUI : ShaderGUI {
     FloatProperty(bc, "Size factor");
     bc = FindProperty("_Surface_Stable_Fractal_Dithering_Brightness_Factor");
     FloatProperty(bc, "Brightness factor");
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_UV_Offset_R");
+    VectorProperty(bc, "UV offset (r)");
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_UV_Offset_G");
+    VectorProperty(bc, "UV offset (g)");
+    bc = FindProperty("_Surface_Stable_Fractal_Dithering_UV_Offset_B");
+    VectorProperty(bc, "UV offset (b)");
 
     EditorGUI.indentLevel -= 1;
   }

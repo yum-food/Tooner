@@ -1,10 +1,11 @@
 using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
+using System.Linq;
 
 public class ImageSequenceToTexture3D : EditorWindow
 {
-    private List<Texture2D> sourceImages = new List<Texture2D>();
+    private string sourcePath = "";
     private string textureName = "Texture3DFromSequence";
     private FilterMode filterMode = FilterMode.Bilinear;
     private TextureWrapMode wrapMode = TextureWrapMode.Repeat;
@@ -18,27 +19,19 @@ public class ImageSequenceToTexture3D : EditorWindow
     private void OnGUI()
     {
         GUILayout.Label("Image Sequence to Texture3D Converter", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox("Add images in the order they should appear in the Z-axis", MessageType.Info);
+        EditorGUILayout.HelpBox("Select a folder containing the image sequence (sorted by filename)", MessageType.Info);
 
-        // Image sequence management
-        EditorGUILayout.LabelField("Source Images", EditorStyles.boldLabel);
-        for (int i = 0; i < sourceImages.Count; i++)
+        EditorGUILayout.BeginHorizontal();
+        sourcePath = EditorGUILayout.TextField("Source Folder", sourcePath);
+        if (GUILayout.Button("Browse", GUILayout.Width(60)))
         {
-            EditorGUILayout.BeginHorizontal();
-            sourceImages[i] = (Texture2D)EditorGUILayout.ObjectField($"Slice {i}", sourceImages[i], typeof(Texture2D), false);
-            if (GUILayout.Button("Remove", GUILayout.Width(60)))
+            string path = EditorUtility.OpenFolderPanel("Select Image Sequence Folder", "", "");
+            if (!string.IsNullOrEmpty(path))
             {
-                sourceImages.RemoveAt(i);
-                GUILayout.EndHorizontal();
-                break;
+                sourcePath = path;
             }
-            EditorGUILayout.EndHorizontal();
         }
-
-        if (GUILayout.Button("Add Image Slot"))
-        {
-            sourceImages.Add(null);
-        }
+        EditorGUILayout.EndHorizontal();
 
         textureName = EditorGUILayout.TextField("Texture Name", textureName);
         filterMode = (FilterMode)EditorGUILayout.EnumPopup("Filter Mode", filterMode);
@@ -55,41 +48,72 @@ public class ImageSequenceToTexture3D : EditorWindow
 
     private bool ValidateInputs()
     {
-        if (sourceImages.Count == 0)
+        if (string.IsNullOrEmpty(sourcePath))
         {
-            EditorUtility.DisplayDialog("Error", "Please add at least one image.", "OK");
+            EditorUtility.DisplayDialog("Error", "Please select a source folder.", "OK");
             return false;
         }
 
-        if (sourceImages.Contains(null))
+        string[] files = GetImageFiles();
+        if (files.Length == 0)
         {
-            EditorUtility.DisplayDialog("Error", "Please assign all image slots.", "OK");
+            EditorUtility.DisplayDialog("Error", "No supported image files found in the selected folder.", "OK");
             return false;
         }
+
+        // Load first image to check dimensions
+        Texture2D firstImage = LoadImage(files[0]);
+        int width = firstImage.width;
+        int height = firstImage.height;
+        DestroyImmediate(firstImage);
 
         // Verify all images have the same dimensions
-        int width = sourceImages[0].width;
-        int height = sourceImages[0].height;
-        
-        for (int i = 1; i < sourceImages.Count; i++)
+        for (int i = 1; i < files.Length; i++)
         {
-            if (sourceImages[i].width != width || sourceImages[i].height != height)
+            Texture2D img = LoadImage(files[i]);
+            if (img.width != width || img.height != height)
             {
-                EditorUtility.DisplayDialog("Error", 
-                    $"All images must have the same dimensions. Expected {width}x{height}, but image {i} is {sourceImages[i].width}x{sourceImages[i].height}", 
+                DestroyImmediate(img);
+                EditorUtility.DisplayDialog("Error",
+                    $"All images must have the same dimensions. Expected {width}x{height}, but image {files[i]} is {img.width}x{img.height}",
                     "OK");
                 return false;
             }
+            DestroyImmediate(img);
         }
 
         return true;
     }
 
+    private string[] GetImageFiles()
+    {
+        string[] files = System.IO.Directory.GetFiles(sourcePath, "*.*")
+            .Where(file => file.ToLower().EndsWith(".png") || 
+                          file.ToLower().EndsWith(".jpg") || 
+                          file.ToLower().EndsWith(".jpeg"))
+            .OrderBy(file => file)
+            .ToArray();
+        return files;
+    }
+
+    private Texture2D LoadImage(string path)
+    {
+        byte[] fileData = System.IO.File.ReadAllBytes(path);
+        Texture2D tex = new Texture2D(2, 2);
+        tex.LoadImage(fileData);
+        return tex;
+    }
+
     private void Generate3DTexture()
     {
-        int width = sourceImages[0].width;
-        int height = sourceImages[0].height;
-        int depth = sourceImages.Count;
+        string[] files = GetImageFiles();
+        if (files.Length == 0) return;
+
+        Texture2D firstImage = LoadImage(files[0]);
+        int width = firstImage.width;
+        int height = firstImage.height;
+        int depth = files.Length;
+        DestroyImmediate(firstImage);
 
         // Create the 3D texture
         Texture3D texture3D = new Texture3D(width, height, depth, TextureFormat.RGBA32, false);
@@ -102,8 +126,11 @@ public class ImageSequenceToTexture3D : EditorWindow
         // Copy the pixel data from each source image
         for (int z = 0; z < depth; z++)
         {
-            Color[] imageColors = sourceImages[z].GetPixels();
+            Debug.Log($"Processing layer {z + 1} of {depth}: {System.IO.Path.GetFileName(files[z])}");
+            Texture2D img = LoadImage(files[z]);
+            Color[] imageColors = img.GetPixels();
             System.Array.Copy(imageColors, 0, colors, z * width * height, width * height);
+            DestroyImmediate(img);
         }
 
         texture3D.SetPixels(colors);

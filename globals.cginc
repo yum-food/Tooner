@@ -1157,6 +1157,9 @@ float _Surface_Stable_Fractal_Dithering_Scale;
 float _Surface_Stable_Fractal_Dithering_Max_Fwidth;
 float _Surface_Stable_Fractal_Dithering_Size_Factor;
 float _Surface_Stable_Fractal_Dithering_Brightness_Factor;
+float2 _Surface_Stable_Fractal_Dithering_UV_Offset_R;
+float2 _Surface_Stable_Fractal_Dithering_UV_Offset_G;
+float2 _Surface_Stable_Fractal_Dithering_UV_Offset_B;
 #endif
 
 #endif
