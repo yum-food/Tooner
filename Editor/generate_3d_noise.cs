@@ -87,7 +87,7 @@ public class WhiteNoiseTextureGenerator : EditorWindow
                 return TextureFormat.RG16;
             case NoiseType.ThreeDimensional:
             case NoiseType.NormalizedThreeDimensional:
-                return TextureFormat.RGB24;
+                return TextureFormat.RGB48;
             case NoiseType.FourDimensional:
                 return TextureFormat.RGBA32;
             default:

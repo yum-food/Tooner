@@ -5,6 +5,9 @@ It's semi optimized and a little scuffed.
 
 ![Bistro demo](Textures/bistro_demo.png)
 
+NOTE: this repo is archived. Development has moved to
+[2ner](https://github.com/yum-food/2ner).
+
 Features (maybe out of date):
 * PBR
 * Emissions
